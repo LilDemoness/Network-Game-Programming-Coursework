@@ -1,0 +1,64 @@
+Player Options
+--------------
+
+At the start of a match, players can customise their mechs within the following categories:
+- Frame Size
+- Legs
+- Weapons (Number determined by Frame Size)
+- Ability
+
+
+Frame Size
+----------
+
+The size of a player's frame determines their base health, speed, and weapon count.
+
+[Small]:
+- Low Health
+- Fast Speed
+
+[Medium]:
+- Medium Health
+- Medium Speed
+
+[Large]:
+- High Health
+- Low Speed
+
+
+Legs
+----
+
+Bipedal:
+- Average Speed
+- Omnidirectional Movement
+
+Quadrapedal:
+- Faster Speed
+- Omnidirectional Movement
+- Worse Accuracy While Aiming?
+
+Treads:
+- Fastest Speed
+- Can only accelerate/decelerate in the direction they're facing. Trying to move in the perpendicular direction instead rotates
+
+
+Weapons
+-------
+
+Machine Gun
+Railgun
+Flamethrower
+Missile Launcher
+Sword?
+
+
+Abilities
+-------
+
+Stealth: 		The player can momentarily turn invisible upon activating it, with the timer decreasing faster the faster they move?
+Mines: 			The player can deploy mines onto the battlefield
+Hack: 			The player can temporarily invert the controls of nearby enemies
+Self Repair: 	The player can slowly heal themselves
+Shield: 		The player can raise or lower a shield. While raised, the player moves slower but takes reduced damage from their facing direction
+Boosters: 		Allows the player to dash a short distance a certain number of times before the ability recharges, letting them dodge or close distances quickly
