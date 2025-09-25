@@ -1,8 +1,8 @@
-﻿using Unity.Collections.LowLevel.Unsafe;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class PlayerCustomisation : MonoBehaviour
 {
+    [Header("Customisation Data")]
     [SerializeField] private FrameData[] _availableFrameData;
     private int m_activeFrameIndex;
     private int _activeFrameIndex
@@ -115,15 +115,75 @@ public class PlayerCustomisation : MonoBehaviour
 
     public void SelectNextFrame() => ++_activeFrameIndex;
     public void SelectPreviousFrame() => --_activeFrameIndex;
+    public bool TrySelectFrame(FrameData frameData)
+    {
+        for(int i = 0; i < _availableFrameData.Length; ++i)
+        {
+            if (_availableFrameData[i] == frameData)
+            {
+                // We've found our desired frame.
+                _activeFrameIndex = i;
+                return true;
+            }
+        }
+
+        // We couldn't find the desired frame.
+        return false;
+    }
 
     public void SelectNextLeg() => ++_activeLegIndex;
     public void SelectPreviousLeg() => --_activeLegIndex;
+    public bool TrySelectLeg(LegsData legData)
+    {
+        for (int i = 0; i < _availableLegData.Length; ++i)
+        {
+            if (_availableLegData[i] == legData)
+            {
+                // We've found our desired leg type.
+                _activeLegIndex = i;
+                return true;
+            }
+        }
+
+        // We couldn't find the desired leg type.
+        return false;
+    }
 
     public void SelectNextWeapon(int weaponSlot) => ChangeActiveWeaponIndex(weaponSlot, positive: true);
     public void SelectPreviousWeapon(int weaponSlot) => ChangeActiveWeaponIndex(weaponSlot, positive: false);
+    public bool TrySelectWeapon(int weaponSlot, WeaponData weaponData)
+    {
+        for (int i = 0; i < _availableWeaponData.Length; ++i)
+        {
+            if (_availableWeaponData[i] == weaponData)
+            {
+                // We've found our desired weapon.
+                SetActiveWeaponIndex(weaponSlot, i);
+                return true;
+            }
+        }
+
+        // We couldn't find the desired weapon.
+        return false;
+    }
 
     public void SelectNextAbility() => ++_activeAbilityIndex;
     public void SelectPreviousAbility() => --_activeAbilityIndex;
+    public bool TrySelectAbility(AbilityData abilityData)
+    {
+        for (int i = 0; i < _availableAbilityData.Length; ++i)
+        {
+            if (_availableAbilityData[i] == abilityData)
+            {
+                // We've found our desired ability.
+                _activeAbilityIndex = i;
+                return true;
+            }
+        }
+
+        // We couldn't find the desired ability.
+        return false;
+    }
 
 
     public void FinaliseCustomisation()
@@ -135,8 +195,5 @@ public class PlayerCustomisation : MonoBehaviour
 
         // Finalise our customisation.
         OnFinalisedCustomisation.Invoke(_availableFrameData[_activeFrameIndex], _availableLegData[_activeLegIndex], activeWeapons, _availableAbilityData[_activeAbilityIndex]);
-
-        // We won't need this script anymore, so delete it.
-        Destroy(this);
     }
 }
