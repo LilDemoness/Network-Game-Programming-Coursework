@@ -80,7 +80,7 @@ namespace Player
         [ServerRpc]
         private void StartFiringServerRpc(int weaponIndex, ulong triggeringClientID)
         {
-            Debug.Log($"Player {triggeringClientID} Started Firing");
+            //Debug.Log($"Player {triggeringClientID} Started Firing");
             StartFiringClientRpc(weaponIndex);
         }
         [ClientRpc]
@@ -92,7 +92,7 @@ namespace Player
         [ServerRpc]
         private void StopFiringServerRpc(int weaponIndex, ulong triggeringClientID)
         {
-            Debug.Log($"Player {triggeringClientID} Stopped Firing");
+            //Debug.Log($"Player {triggeringClientID} Stopped Firing");
             StopFiringClientRpc(weaponIndex);
         }
         [ClientRpc]
@@ -104,7 +104,7 @@ namespace Player
         [ServerRpc]
         private void InterruptFiringServerRpc(ulong triggeringClientID)
         {
-            Debug.Log($"Player {triggeringClientID} Was Interrupted");
+            //Debug.Log($"Player {triggeringClientID} Was Interrupted");
             InterruptFiringClientRpc();
         }
         [ClientRpc]

@@ -217,6 +217,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bb6f830596b64c049808939eef2c172c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+  _optionsDatabase: {fileID: 11400000, guid: 4ac138f60c58a9b469e5e446fdb0223d, type: 2}
   _availableFrameData:
   - {fileID: 11400000, guid: 376402bb2ba87384d95d6694aa9a0d77, type: 2}
   - {fileID: 11400000, guid: af2de16e43f2d714385b77b8fbef258c, type: 2}
