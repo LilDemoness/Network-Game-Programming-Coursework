@@ -1,3 +1,4 @@
+using Gameplay.GameplayObjects.Character;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -7,6 +8,7 @@ namespace UserInput
     ///     Captures inputs for a character on a client and sends them to the server.
     /// </summary>
     // Based on 'https://github.com/Unity-Technologies/com.unity.multiplayer.samples.coop/blob/main/Assets/Scripts/Gameplay/UserInput/ClientInputSender.cs'.
+    [RequireComponent(typeof(ServerCharacter))]
     public class ClientInputSender : NetworkBehaviour
     {
         // Cap our movement input rate to preserve network bandwith, but also keep it responsive.
@@ -16,7 +18,7 @@ namespace UserInput
         private Vector2 _movementInput;
 
 
-        [SerializeField] private Gameplay.GameplayObjects.Character.ServerCharacterMovement _playerMovement;
+        [SerializeField] private ServerCharacter _serverCharacter;
 
 
         private PlayerInputActions _inputActions;
@@ -129,7 +131,7 @@ namespace UserInput
                     _lastSendMoveTime = Time.time;
 
                     Debug.Log($"Processing Client Move: {_movementInput}");
-                    _playerMovement.SetMovementInputServerRpc(_movementInput);
+                    _serverCharacter.SendCharacterMovementInputServerRpc(_movementInput);
                 }
             }
         }
