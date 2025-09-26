@@ -26,90 +26,23 @@ public class PlayerCustomisationUI : MonoBehaviour
 
 
     [Header("Weapon Button References")]
+    [SerializeField] private CanvasGroup _allOptionsGroup;
     [SerializeField] private CanvasGroup[] _weaponButtonGroups;
 
 
-    /*private void Awake()
-    {
-        _playerCustomisation = NetworkManager.Singleton.LocalClient.PlayerObject.GetComponentInChildren<PlayerCustomisation>();
-
-        // Events.
-        _playerCustomisation.OnSelectedFrameChanged     += PlayerCustomisation_OnSelectedFrameChanged;
-        _playerCustomisation.OnSelectedLegChanged       += PlayerCustomisation_OnSelectedLegChanged;
-        _playerCustomisation.OnSelectedWeaponChanged    += PlayerCustomisation_OnSelectedWeaponChanged;
-        _playerCustomisation.OnSelectedAbilityChanged   += PlayerCustomisation_OnSelectedAbilityChanged;
-    }
-    private void OnDestroy()
-    {
-        // Events.
-        _playerCustomisation.OnSelectedFrameChanged     -= PlayerCustomisation_OnSelectedFrameChanged;
-        _playerCustomisation.OnSelectedLegChanged       -= PlayerCustomisation_OnSelectedLegChanged;
-        _playerCustomisation.OnSelectedWeaponChanged    -= PlayerCustomisation_OnSelectedWeaponChanged;
-        _playerCustomisation.OnSelectedAbilityChanged   -= PlayerCustomisation_OnSelectedAbilityChanged;
-    }
-
-
-    private void PlayerCustomisation_OnSelectedFrameChanged(FrameData activeFrameData)
-    {
-        _activeFrameText.text = activeFrameData.Name;
-
-        for(int i = 0; i < _weaponButtonGroups.Length; ++i)
-        {
-            if (i < activeFrameData.WeaponSlotCount)
-            {
-                // Active.
-                _weaponButtonGroups[i].alpha = 1.0f;
-                _weaponButtonGroups[i].interactable = true;
-            }
-            else
-            {
-                // Inactive.
-                _weaponButtonGroups[i].alpha = 0.5f;
-                _weaponButtonGroups[i].interactable = false;
-            }
-        }
-    }
-    private void PlayerCustomisation_OnSelectedLegChanged(LegsData legData) => _activeLegText.text = legData.Name;
-    private void PlayerCustomisation_OnSelectedWeaponChanged(int weaponSlot, WeaponData weaponData)
-    {
-        switch(weaponSlot)
-        {
-            case 0: _activeWeapon1Text.text = weaponData.Name; break;
-            case 1: _activeWeapon2Text.text = weaponData.Name; break;
-            case 2: _activeWeapon3Text.text = weaponData.Name; break;
-        }
-    }
-    private void PlayerCustomisation_OnSelectedAbilityChanged(AbilityData abilityData) => _activeAbilityText.text = abilityData.Name;
-
-
-
-    public void SelectNextFrame() => _playerCustomisation.SelectNextFrame();
-    public void SelectPreviousFrame() => _playerCustomisation.SelectPreviousFrame();
-
-    public void SelectNextLeg() => _playerCustomisation.SelectNextLeg();
-    public void SelectPreviousLeg() => _playerCustomisation.SelectPreviousLeg();
-
-    public void SelectNextWeapon(int weaponSlot) => _playerCustomisation.SelectNextWeapon(weaponSlot);
-    public void SelectPreviousWeapon(int weaponSlot) => _playerCustomisation.SelectPreviousWeapon(weaponSlot);
-
-    public void SelectNextAbility() => _playerCustomisation.SelectNextAbility();
-    public void SelectPreviousAbility() => _playerCustomisation.SelectPreviousAbility();
-
-
-    public void FinaliseCustomisation()
-    {
-        _playerCustomisation.FinaliseCustomisation();
-        Destroy(this.gameObject);
-    }*/
+    [Header("Ready Button References")]
+    [SerializeField] private GameObject _readyButtonCheckmark;
 
 
     private void Awake()
     {
         PlayerCustomisationManager.OnPlayerCustomisationStateChanged += PlayerCustomisationManager_OnPlayerCustomisationStateChanged;
+        PlayerCustomisationManager.OnPlayerCustomisationFinalised += PlayerCustomisationManager_OnPlayerCustomisationFinalised;
     }
     private void OnDestroy()
     {
         PlayerCustomisationManager.OnPlayerCustomisationStateChanged -= PlayerCustomisationManager_OnPlayerCustomisationStateChanged;
+        PlayerCustomisationManager.OnPlayerCustomisationFinalised -= PlayerCustomisationManager_OnPlayerCustomisationFinalised;
     }
     public void Setup(PlayerCustomisationManager localCustomisationManager, ulong clientID, PlayerCustomisationOptionsDatabase customisationOptionsDatabase)
     {
@@ -124,7 +57,10 @@ public class PlayerCustomisationUI : MonoBehaviour
         if (this._clientID != clientID)
             return;
 
+        
         UpdateUIText(ref customisationState);
+        UpdateReadyButton(customisationState.IsReady);
+        SetSelectionLock(customisationState.IsReady);
     }
     private void UpdateUIText(ref PlayerCustomisationState customisationState)
     {
@@ -156,6 +92,39 @@ public class PlayerCustomisationUI : MonoBehaviour
         _activeAbilityText.text = customisationOptionsDatabase.AbilityDatas[customisationState.AbilityIndex].Name;
     }
 
+    private void SetSelectionLock(bool isLocked)
+    {
+        if (isLocked)
+        {
+            // Locked.
+            _allOptionsGroup.alpha = 0.5f;
+            _allOptionsGroup.interactable = false;
+        }
+        else
+        {
+            // Unlocked.
+            _allOptionsGroup.alpha = 1.0f;
+            _allOptionsGroup.interactable = transform;
+        }
+    }
+
+    private void UpdateReadyButton(bool isReady)
+    {
+        _readyButtonCheckmark.SetActive(isReady);
+    }
+
+
+    private void PlayerCustomisationManager_OnPlayerCustomisationFinalised(ulong clientID, PlayerCustomisationState customisationState)
+    {
+        if (this._clientID != clientID)
+            return;
+
+        // We no longer need our UI, so destroy it.
+        Destroy(this.gameObject);
+    }
+
+
+    #region Button Called Functions
 
     public void SelectNextFrame() => _customisationManager.SelectNextFrame();
     public void SelectPreviousFrame() => _customisationManager.SelectPreviousFrame();
@@ -184,4 +153,9 @@ public class PlayerCustomisationUI : MonoBehaviour
 
     public void SelectNextAbility() => _customisationManager.SelectNextAbility();
     public void SelectPreviousAbility() => _customisationManager.SelectPreviousAbility();
+
+
+    public void ReadyButtonPressed() => _customisationManager.ToggleReady();
+
+    #endregion
 }

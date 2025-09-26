@@ -24,7 +24,7 @@ public class PlayerGFX : MonoBehaviour
         _associatedCustomisation.OnSelectedWeaponChanged += PlayerCustomisation_OnSelectedWeaponChanged;
         _associatedCustomisation.OnSelectedAbilityChanged += PlayerCustomisation_OnSelectedAbilityChanged;
 
-        //_associatedCustomisation.OnFinalisedCustomisation += PlayerCustomisation_OnCustomisationFinalised;
+        _associatedCustomisation.OnPlayerCustomisationFinalised += PlayerCustomisation_OnCustomisationFinalised;
     }
     private void OnDestroy()
     {
@@ -33,7 +33,7 @@ public class PlayerGFX : MonoBehaviour
         _associatedCustomisation.OnSelectedWeaponChanged -= PlayerCustomisation_OnSelectedWeaponChanged;
         _associatedCustomisation.OnSelectedAbilityChanged -= PlayerCustomisation_OnSelectedAbilityChanged;
 
-        //_associatedCustomisation.OnFinalisedCustomisation -= PlayerCustomisation_OnCustomisationFinalised;
+        _associatedCustomisation.OnPlayerCustomisationFinalised -= PlayerCustomisation_OnCustomisationFinalised;
     }
 
 

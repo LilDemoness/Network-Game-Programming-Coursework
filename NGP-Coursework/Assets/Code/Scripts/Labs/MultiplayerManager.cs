@@ -30,11 +30,11 @@ public class MultiplayerManager : MonoBehaviour
     private static void ShowStartButtons()
     {
         if (GUILayout.Button("Host"))
-            NetworkManager.Singleton.StartHost();
+            ServerManager.Instance.StartHost();
         if (GUILayout.Button("Client"))
             NetworkManager.Singleton.StartClient();
         if (GUILayout.Button("Server"))
-            NetworkManager.Singleton.StartServer();
+            ServerManager.Instance.StartServer();
     }
     /// <summary>
     ///     Shows the Network Transport Type and whether this game is a Host, Client, or Server.
