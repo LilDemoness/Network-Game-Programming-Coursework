@@ -350,12 +350,12 @@ public class PlayerCustomisationManager : NetworkBehaviour
         foreach (var player in _players)
         {
             BuildData playerBuildData = new BuildData(
-                activeFrame:            _optionsDatabase.FrameDatas[player.FrameIndex],
-                activeLeg:              _optionsDatabase.LegDatas[player.LegIndex],
-                activePrimaryWeapon:    _optionsDatabase.WeaponDatas[player.PrimaryWeaponIndex],
-                activeSecondaryWeapon:  _optionsDatabase.WeaponDatas[player.SecondaryWeaponIndex],
-                activeTertiaryWeapon:   _optionsDatabase.WeaponDatas[player.TertiaryWeaponIndex],
-                activeAbility:          _optionsDatabase.AbilityDatas[player.AbilityIndex]);
+                activeFrame:            player.FrameIndex,
+                activeLeg:              player.LegIndex,
+                activePrimaryWeapon:    player.PrimaryWeaponIndex,
+                activeSecondaryWeapon:  player.SecondaryWeaponIndex,
+                activeTertiaryWeapon:   player.TertiaryWeaponIndex,
+                activeAbility:          player.AbilityIndex);
 
             ServerManager.Instance.SetBuild(player.ClientID, playerBuildData);
         }

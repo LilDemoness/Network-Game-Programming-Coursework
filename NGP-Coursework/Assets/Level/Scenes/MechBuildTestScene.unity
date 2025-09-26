@@ -1625,6 +1625,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4dd9a7fe87599b040ad2e248513da062, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  GameplaySceneAsset: {fileID: 102900000, guid: 27a6a203d2ddf774b9e10ffe6bb3d0cc, type: 3}
+  m_gameplaySceneName: GameplayTestScene
 --- !u!4 &525132389
 Transform:
   m_ObjectHideFlags: 0

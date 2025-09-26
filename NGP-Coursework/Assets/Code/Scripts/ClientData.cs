@@ -12,29 +12,48 @@ public class ClientData
 
 public class BuildData
 {
-    public FrameData ActiveFrame;
-    public LegsData ActiveLeg;
-    public WeaponData ActivePrimaryWeapon;
-    public WeaponData ActiveSecondaryWeapon;
-    public WeaponData ActiveTertiaryWeapon;
-    public AbilityData ActiveAbility;
+    public static PlayerCustomisationOptionsDatabase ActiveOptionsDatabase { get; private set; }
+    private const string DEFAULT_BUILD_OPTIONS_PATH = "PlayerData/AllPlayerCustomisationOptions";
 
 
-    public BuildData(FrameData activeFrame, LegsData activeLeg, WeaponData activePrimaryWeapon, WeaponData activeSecondaryWeapon, WeaponData activeTertiaryWeapon, AbilityData activeAbility)
+    public int ActiveFrameIndex { get; private set; } = -1;
+    public int ActiveLegIndex { get; private set; } = -1;
+    public int ActivePrimaryWeaponIndex { get; private set; } = -1;
+    public int ActiveSecondaryWeaponIndex { get; private set; } = -1;
+    public int ActiveTertiaryWeaponIndex { get; private set; } = -1;
+    public int ActiveAbilityIndex { get; private set; } = -1;
+
+
+    /*public FrameData ActiveFrame            => ActiveOptionsDatabase.GetFrame(ActiveFrameIndex);
+    public LegsData ActiveLeg               => ActiveOptionsDatabase.GetLeg(ActiveLegIndex);
+    public WeaponData ActivePrimaryWeapon   => ActiveOptionsDatabase.GetWeapon(ActivePrimaryWeaponIndex);
+    public WeaponData ActiveSecondaryWeapon => ActiveOptionsDatabase.GetWeapon(ActiveSecondaryWeaponIndex);
+    public WeaponData ActiveTertiaryWeapon  => ActiveOptionsDatabase.GetWeapon(ActiveTertiaryWeaponIndex);
+    public AbilityData ActiveAbility        => ActiveOptionsDatabase.GetAbility(ActiveAbilityIndex);*/
+
+
+    static BuildData()
+    {
+        ActiveOptionsDatabase = UnityEngine.Resources.Load<PlayerCustomisationOptionsDatabase>(DEFAULT_BUILD_OPTIONS_PATH);
+    }
+    public BuildData(int activeFrame, int activeLeg, int activePrimaryWeapon, int activeSecondaryWeapon, int activeTertiaryWeapon, int activeAbility)
     {
         SetBuildData(activeFrame, activeLeg, activePrimaryWeapon, activeSecondaryWeapon, activeTertiaryWeapon, activeAbility);
     }
-    public BuildData SetBuildData(FrameData activeFrame, LegsData activeLeg, WeaponData activePrimaryWeapon, WeaponData activeSecondaryWeapon, WeaponData activeTertiaryWeapon, AbilityData activeAbility)
+    public BuildData SetBuildData(int activeFrame, int activeLeg, int activePrimaryWeapon, int activeSecondaryWeapon, int activeTertiaryWeapon, int activeAbility)
     {
         // Set our build data.
-        this.ActiveFrame = activeFrame;
-        this.ActiveLeg = activeLeg;
-        this.ActivePrimaryWeapon = activePrimaryWeapon;
-        this.ActiveSecondaryWeapon = activeSecondaryWeapon;
-        this.ActiveTertiaryWeapon = activeTertiaryWeapon;
-        this.ActiveAbility = activeAbility;
+        this.ActiveFrameIndex = activeFrame;
+        this.ActiveLegIndex = activeLeg;
+        this.ActivePrimaryWeaponIndex = activePrimaryWeapon;
+        this.ActiveSecondaryWeaponIndex = activeSecondaryWeapon;
+        this.ActiveTertiaryWeaponIndex = activeTertiaryWeapon;
+        this.ActiveAbilityIndex = activeAbility;
 
         // Return for fluent interface.
         return this;
     }
+
+
+    public static void SetAvailableBuildOptions(PlayerCustomisationOptionsDatabase newOptionsDatabase) => ActiveOptionsDatabase = newOptionsDatabase;
 }

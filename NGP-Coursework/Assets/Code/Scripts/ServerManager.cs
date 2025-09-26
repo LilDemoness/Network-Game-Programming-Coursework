@@ -11,6 +11,19 @@ public class ServerManager : MonoBehaviour
     public Dictionary<ulong, ClientData> ClientData { get; private set; }
 
 
+    #if UNITY_EDITOR
+    public UnityEditor.SceneAsset GameplaySceneAsset;
+    private void OnValidate()
+    {
+        if (GameplaySceneAsset != null)
+        {
+            m_gameplaySceneName = GameplaySceneAsset.name;
+        }
+    }
+#endif
+    [SerializeField] private string m_gameplaySceneName;
+
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -90,5 +103,11 @@ public class ServerManager : MonoBehaviour
         this._hasGameStarted = true;
 
         Debug.Log("Starting Game");
+        var status = NetworkManager.Singleton.SceneManager.LoadScene(m_gameplaySceneName, UnityEngine.SceneManagement.LoadSceneMode.Single);
+        if (status != SceneEventProgressStatus.Started)
+        {
+            Debug.LogWarning($"Failed to load {m_gameplaySceneName} " +
+                    $"with a {nameof(SceneEventProgressStatus)}: {status}");
+        }
     }
 }

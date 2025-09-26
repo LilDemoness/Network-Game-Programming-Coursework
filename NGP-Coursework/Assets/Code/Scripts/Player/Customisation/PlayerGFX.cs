@@ -8,7 +8,6 @@ public class PlayerGFX : MonoBehaviour
     // We are having the prefabs contain all options so that we can have custom positions per frame.
 
 
-    [SerializeField] private PlayerCustomisation _associatedCustomisation;
     [SerializeField] private FrameData _associatedFrameData;
 
     [Header("Container References")]
@@ -17,54 +16,45 @@ public class PlayerGFX : MonoBehaviour
     [SerializeField] private AbilityGFXSection[] _abilityDatas;
 
 
-    private void Awake()
-    {
-        _associatedCustomisation.OnSelectedFrameChanged += PlayerCustomisation_OnSelectedFrameChanged;
-        _associatedCustomisation.OnSelectedLegChanged += PlayerCustomisation_OnSelectedLegChanged;
-        _associatedCustomisation.OnSelectedWeaponChanged += PlayerCustomisation_OnSelectedWeaponChanged;
-        _associatedCustomisation.OnSelectedAbilityChanged += PlayerCustomisation_OnSelectedAbilityChanged;
-
-        _associatedCustomisation.OnPlayerCustomisationFinalised += PlayerCustomisation_OnCustomisationFinalised;
-    }
-    private void OnDestroy()
-    {
-        _associatedCustomisation.OnSelectedFrameChanged -= PlayerCustomisation_OnSelectedFrameChanged;
-        _associatedCustomisation.OnSelectedLegChanged -= PlayerCustomisation_OnSelectedLegChanged;
-        _associatedCustomisation.OnSelectedWeaponChanged -= PlayerCustomisation_OnSelectedWeaponChanged;
-        _associatedCustomisation.OnSelectedAbilityChanged -= PlayerCustomisation_OnSelectedAbilityChanged;
-
-        _associatedCustomisation.OnPlayerCustomisationFinalised -= PlayerCustomisation_OnCustomisationFinalised;
-    }
-
-
     
-    private void PlayerCustomisation_OnSelectedFrameChanged(FrameData activeData) => this.gameObject.SetActive(activeData == _associatedFrameData);
-    private void PlayerCustomisation_OnSelectedLegChanged(LegsData activeData)
+    public PlayerGFX OnSelectedFrameChanged(FrameData activeData)
+    {
+        this.gameObject.SetActive(activeData == _associatedFrameData);
+
+        return this;
+    }
+    public PlayerGFX OnSelectedLegChanged(LegsData activeData)
     {
         for (int i = 0; i < _legDatas.Length; ++i)
         {
             _legDatas[i].Toggle(activeData);
         }
+
+        return this;
     }
-    private void PlayerCustomisation_OnSelectedWeaponChanged(int weaponSlot, WeaponData activeData)
+    public PlayerGFX OnSelectedWeaponChanged(int weaponSlot, WeaponData activeData)
     {
         if (weaponSlot >= _weaponsAttachPoints.Length)
         {
             //Debug.LogError("Weapon Slot Index is out of range");
-            return;
+            return this;
         }
 
         _weaponsAttachPoints[weaponSlot].Toggle(activeData);
+
+        return this;
     }
-    private void PlayerCustomisation_OnSelectedAbilityChanged(AbilityData activeData)
+    public PlayerGFX OnSelectedAbilityChanged(AbilityData activeData)
     {
         for (int i = 0; i < _abilityDatas.Length; ++i)
         {
             _abilityDatas[i].Toggle(activeData);
         }
+
+        return this;
     }
 
-    private void PlayerCustomisation_OnCustomisationFinalised(FrameData activeFrame, LegsData activeLeg, WeaponData[] activeWeapons, AbilityData activeAbility)
+    public void OnCustomisationFinalised(FrameData activeFrame, LegsData activeLeg, WeaponData activePrimaryWeapon, WeaponData activeSecondaryWeapon, WeaponData activeTertiaryWeapon, AbilityData activeAbility)
     {
         // Frame.
         if (activeFrame != _associatedFrameData)
@@ -82,15 +72,18 @@ public class PlayerGFX : MonoBehaviour
 
 
         // Weapons.
-        if (activeWeapons.Length != _weaponsAttachPoints.Length)
+        int attachPointsCount = _weaponsAttachPoints.Length;
+        if (attachPointsCount > 0)
         {
-            Debug.LogError("Associated Weapons Length doesn't match Weapon Slots Length");
-            return;
-        }
-
-        for (int i = 0; i < activeWeapons.Length; ++i)
-        {
-            _weaponsAttachPoints[i].Finalise(activeWeapons[i]);
+            _weaponsAttachPoints[0].Finalise(activePrimaryWeapon);
+            if (attachPointsCount > 1)
+            {
+                _weaponsAttachPoints[1].Finalise(activeSecondaryWeapon);
+                if (attachPointsCount > 2)
+                {
+                    _weaponsAttachPoints[2].Finalise(activeTertiaryWeapon);
+                }
+            }
         }
 
 

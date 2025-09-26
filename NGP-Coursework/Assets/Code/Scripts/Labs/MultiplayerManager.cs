@@ -5,7 +5,7 @@ public class MultiplayerManager : MonoBehaviour
 {
     private void OnGUI()
     {
-        if (NetworkManager.Singleton == null)
+        if (NetworkManager.Singleton == null || ServerManager.Instance == null)
             return;
 
         GUILayout.BeginArea(new Rect(10.0f, 10.0f, 300.0f, 300.0f));

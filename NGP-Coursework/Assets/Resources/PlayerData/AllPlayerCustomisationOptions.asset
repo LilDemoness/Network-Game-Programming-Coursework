@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c2365bea19e233f4eb9eeb9443fbaf1d, type: 3}
-  m_Name: PlayerCustomisationOptions
+  m_Name: AllPlayerCustomisationOptions
   m_EditorClassIdentifier: 
   FrameDatas:
   - {fileID: 11400000, guid: 376402bb2ba87384d95d6694aa9a0d77, type: 2}
