@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f5bc6a48bf87404eb3ad8e428bfa797, type: 3}
+  m_Name: AllPlayerCustomisationOptions
+  m_EditorClassIdentifier: 
+  FrameDatas:
+  - {fileID: 11400000, guid: 376402bb2ba87384d95d6694aa9a0d77, type: 2}
+  - {fileID: 11400000, guid: af2de16e43f2d714385b77b8fbef258c, type: 2}
+  - {fileID: 11400000, guid: d1598d07bfd37694c98f5f030e92be38, type: 2}
+  LegDatas:
+  - {fileID: 11400000, guid: 655dffe3a46ae194eaba389293f1ec2b, type: 2}
+  - {fileID: 11400000, guid: b25a19fb8f3b4134f965e7bb2f770209, type: 2}
+  - {fileID: 11400000, guid: 6e597fb286a54e24a890020d07bdd906, type: 2}
+  WeaponDatas:
+  - {fileID: 11400000, guid: 19fcffcb66d8abf4cbae0a4105ce50e3, type: 2}
+  - {fileID: 11400000, guid: 490b4b2473ba06f408b4502d24142112, type: 2}
+  - {fileID: 11400000, guid: ef46446ee510fb54ea3599f68738390e, type: 2}
+  AbilityDatas:
+  - {fileID: 11400000, guid: 1287eba0821b4a44fa802e707fe52e52, type: 2}
+  - {fileID: 11400000, guid: c0d1d30d0eb5dab4c899a90fa71beea6, type: 2}

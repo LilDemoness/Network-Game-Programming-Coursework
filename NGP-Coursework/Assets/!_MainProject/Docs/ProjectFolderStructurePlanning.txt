@@ -1,0 +1,38 @@
+Project Folder Structure Planning
+---------------------------------
+
+Folder Structure (Root Folder is 'Assets'):
+> !_MainProject
+	> Audio - Stores all Audio Files
+		> Music
+		> SoundEffects
+	> Animations - Stores all animations for the project, organised into subfolders by type/model/etc
+	> Art
+		> Materials
+		> Models
+		> Sprites
+		> Textures
+	> Code
+		> Scripts
+			> Characters
+			> Editor		
+			> GameState
+			> Networking
+			> Player
+			> Utils
+		> Shaders
+	> Docs
+	> Level
+		> Prefabs
+		> Scenes
+	> Resources
+		> Fonts
+		> Input
+	> Settings - Stores settings for things like Build Profiles, Network Prefabs, etc
+> [Other Asset Packs (E.g. TextMesh Pro, UI Toolkit, etc]
+
+
+
+Other Notes:
+- Keep All materials, textures, meshes, etc within their folders, not stored together. We can still have sub-folders of the folders under 'Art'
+	(E.g. Art>Models>Player>... & Art>Materials>Player>..., not Art>Models>Player>... & Art>Models>Player>Materials>...)
