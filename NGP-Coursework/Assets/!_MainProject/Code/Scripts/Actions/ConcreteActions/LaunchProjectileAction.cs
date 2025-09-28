@@ -74,7 +74,7 @@ namespace Gameplay.Actions
 
         public override void Cancel(ServerCharacter serverCharacter)
         {
-            Debug.Log("Player Stopped Shooting");
+            Debug.Log("Player Stopped Shooting: " + Data.SlotIdentifier);
 
             if (!string.IsNullOrEmpty(Config.Anim2))
             {

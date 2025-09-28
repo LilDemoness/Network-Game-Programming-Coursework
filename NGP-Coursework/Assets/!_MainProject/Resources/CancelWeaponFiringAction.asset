@@ -36,8 +36,8 @@ MonoBehaviour:
     CancelsOtherActions: 1
     OtherActionsThisCancels:
     - {fileID: 11400000, guid: bd835fefafafbb34aac1b7aacac5b9d9, type: 2}
-    RequireSharedSlotIdentifier: 0
-    BlockingMode: 0
+    RequireSharedSlotIdentifier: 1
+    BlockingMode: 1
     Projectiles: []
     Spawns: []
     IsFriendly: 0

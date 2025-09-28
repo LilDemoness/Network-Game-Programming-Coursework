@@ -1,5 +1,6 @@
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using Gameplay.GameplayObjects.Character;
 using Gameplay.GameplayObjects;
 using Gameplay.Actions;
@@ -22,6 +23,7 @@ namespace UserInput
         {
             public ActionID RequestedActionID;
             public ActionType ActionType;
+            public int SlotIdentifier;
         }
 
         /// <summary>
@@ -56,11 +58,19 @@ namespace UserInput
         private PlayerInputActions _inputActions;
 
 
-        [SerializeField] private Action _testAction;
-        [SerializeField] private ActionState _testActionState;
+        [Header("(Temp) Weapon Actions")]
+        [SerializeField] private Action _primaryWeaponAction;
+        private ActionState _primaryWeaponActionState;
 
+        [SerializeField] private Action _secondaryWeaponAction;
+        private ActionState _scondaryWeaponActionState;
+
+        [SerializeField] private Action _tertiaryWeaponAction;
+        private ActionState _tertiaryWeaponActionState;
+
+        [Space(5)]
         [SerializeField] private Action _testCancelAction;
-        [SerializeField] private ActionState _testCancelActionState;
+        private ActionState _testCancelActionState;
 
 
         public override void OnNetworkSpawn()
@@ -71,7 +81,9 @@ namespace UserInput
                 return;
             }
 
-            _testActionState = new ActionState() { ActionID = _testAction.ActionID };
+            _primaryWeaponActionState = new ActionState() { ActionID = _primaryWeaponAction.ActionID };
+            _scondaryWeaponActionState = new ActionState() { ActionID = _secondaryWeaponAction.ActionID };
+            _tertiaryWeaponActionState = new ActionState() { ActionID = _tertiaryWeaponAction.ActionID };
             _testCancelActionState = new ActionState() { ActionID = _testCancelAction.ActionID };
 
 
@@ -114,14 +126,14 @@ namespace UserInput
 
             #region Combat
 
-            _inputActions.Combat.UsePrimaryWeapon.started += TestWeaponFiring_started;
-            _inputActions.Combat.UsePrimaryWeapon.canceled += TestWeaponFiring_cancelled;
+            _inputActions.Combat.UsePrimaryWeapon.started += UsePrimaryWeapon_started;
+            _inputActions.Combat.UsePrimaryWeapon.canceled += UsePrimaryWeapon_cancelled;
 
-            _inputActions.Combat.UseSecondaryWeapon.started += TestWeaponFiring_started;
-            _inputActions.Combat.UseSecondaryWeapon.canceled += TestWeaponFiring_cancelled;
+            _inputActions.Combat.UseSecondaryWeapon.started += UseSecondaryWeapon_started;
+            _inputActions.Combat.UseSecondaryWeapon.canceled += UseSecondaryWeapon_cancelled;
 
-            _inputActions.Combat.UseTertiaryWeapon.started += TestWeaponFiring_started;
-            _inputActions.Combat.UseTertiaryWeapon.canceled += TestWeaponFiring_cancelled;
+            _inputActions.Combat.UseTertiaryWeapon.started += UseTertiaryWeapon_started;
+            _inputActions.Combat.UseTertiaryWeapon.canceled += UseTertiaryWeapon_cancelled;
 
             #endregion
 
@@ -134,14 +146,14 @@ namespace UserInput
             // Unsubscribe from Input Events.
             //_inputActions.General.Movement.started -= Movement_performed;
 
-            _inputActions.Combat.UsePrimaryWeapon.started -= TestWeaponFiring_started;
-            _inputActions.Combat.UsePrimaryWeapon.canceled -= TestWeaponFiring_cancelled;
+            _inputActions.Combat.UsePrimaryWeapon.started -= UsePrimaryWeapon_started;
+            _inputActions.Combat.UsePrimaryWeapon.canceled -= UsePrimaryWeapon_cancelled;
 
-            _inputActions.Combat.UseSecondaryWeapon.started -= TestWeaponFiring_started;
-            _inputActions.Combat.UseSecondaryWeapon.canceled -= TestWeaponFiring_cancelled;
+            _inputActions.Combat.UseSecondaryWeapon.started -= UseSecondaryWeapon_started;
+            _inputActions.Combat.UseSecondaryWeapon.canceled -= UseSecondaryWeapon_cancelled;
 
-            _inputActions.Combat.UseTertiaryWeapon.started -= TestWeaponFiring_started;
-            _inputActions.Combat.UseTertiaryWeapon.canceled -= TestWeaponFiring_cancelled;
+            _inputActions.Combat.UseTertiaryWeapon.started -= UseTertiaryWeapon_started;
+            _inputActions.Combat.UseTertiaryWeapon.canceled -= UseTertiaryWeapon_cancelled;
 
 
             // Dispose of the Input Actions.
@@ -162,21 +174,6 @@ namespace UserInput
                 _hasMoveRequest = true;
             }
         }
-        private event System.Action _exampleEvent;
-        private void PerformSubscriptionTest()
-        {
-            SubscriptionTest(ref _exampleEvent);
-            _exampleEvent?.Invoke();
-            UnsubscriptionTest(ref _exampleEvent);
-            _exampleEvent?.Invoke();
-        }
-        [ContextMenu(itemName: "Perform Test")]
-        private void PerformTest() => _exampleEvent?.Invoke();
-        private void SubscriptionTest(ref System.Action eventToSubscribeTo) => eventToSubscribeTo += Test;
-        private void UnsubscriptionTest(ref System.Action eventToUnsubscribeFrom) => eventToUnsubscribeFrom -= Test;
-        private void Test() => Debug.Log("Test Called");
-
-
         private void FixedUpdate()
         {
             // Send Non-client Only Input Requests to the Server.
@@ -187,8 +184,6 @@ namespace UserInput
                 switch (_actionRequests[i].ActionType)
                 {
                     case ActionType.StartShooting:
-                        //PerformSubscriptionTest();
-
                         actionPrototype = GameDataSource.Instance.GetActionPrototypeByID(_actionRequests[i].RequestedActionID);
                         if (actionPrototype.Config.ActionInput != null)
                         {
@@ -197,13 +192,11 @@ namespace UserInput
                         }
                         else
                         {
-                            var data = new ActionRequestData();
-
-                            data.ActionID = actionPrototype.ActionID;
+                            var data = ActionRequestData.Create(actionPrototype);
+                            data.SlotIdentifier = _actionRequests[i].SlotIdentifier;
 
                             SendInput(data);
                         }
-                        //_serverCharacter.SendCharacterStartedShootingServerRpc();
                         break;
                     case ActionType.StopShooting:
                         actionPrototype = GameDataSource.Instance.GetActionPrototypeByID(_actionRequests[i].RequestedActionID);
@@ -214,13 +207,11 @@ namespace UserInput
                         }
                         else
                         {
-                            var data = new ActionRequestData();
-
-                            data.ActionID = actionPrototype.ActionID;
+                            var data = ActionRequestData.Create(actionPrototype);
+                            data.SlotIdentifier = _actionRequests[i].SlotIdentifier;
 
                             SendInput(data);
                         }
-                        //_serverCharacter.SendCharacterStoppedShootingServerRpc();
                         break;
                 }
             }
@@ -248,12 +239,13 @@ namespace UserInput
         }
 
 
-        private void RequestAction(ActionType actionType, ActionState actionState)
+        private void RequestAction(ActionType actionType, ActionState actionState, int slotIdentifier = -1)
         {
             if (_actionRequestCount < _actionRequests.Length)
             {
                 _actionRequests[_actionRequestCount].RequestedActionID = actionState.ActionID;
                 _actionRequests[_actionRequestCount].ActionType = actionType;
+                _actionRequests[_actionRequestCount].SlotIdentifier = slotIdentifier;
                 ++_actionRequestCount;
             }
         }
@@ -266,14 +258,16 @@ namespace UserInput
             _hasMoveRequest = true;
             //Debug.Log("Input Received: " + obj.ReadValue<Vector2>());
         }
-        private void TestWeaponFiring_started(UnityEngine.InputSystem.InputAction.CallbackContext obj)
-        {
-            RequestAction(ActionType.StartShooting, _testActionState);
-        }
-        private void TestWeaponFiring_cancelled(UnityEngine.InputSystem.InputAction.CallbackContext obj)
-        {
-            RequestAction(ActionType.StopShooting, _testCancelActionState);
-        }
+        
+
+        private void UsePrimaryWeapon_started(InputAction.CallbackContext obj) => RequestAction(ActionType.StartShooting, _primaryWeaponActionState, 1);
+        private void UsePrimaryWeapon_cancelled(InputAction.CallbackContext obj) => RequestAction(ActionType.StopShooting, _testCancelActionState, 1);
+
+        private void UseSecondaryWeapon_started(InputAction.CallbackContext obj) => RequestAction(ActionType.StartShooting, _scondaryWeaponActionState, 2);
+        private void UseSecondaryWeapon_cancelled(InputAction.CallbackContext obj) => RequestAction(ActionType.StopShooting, _testCancelActionState, 2);
+
+        private void UseTertiaryWeapon_started(InputAction.CallbackContext obj) => RequestAction(ActionType.StartShooting, _tertiaryWeaponActionState, 3);
+        private void UseTertiaryWeapon_cancelled(InputAction.CallbackContext obj) => RequestAction(ActionType.StopShooting, _testCancelActionState, 3);
     }
 
     public class ActionState

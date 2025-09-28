@@ -110,25 +110,6 @@ namespace Gameplay.GameplayObjects.Character
         }
 
 
-        /// <summary>
-        ///     ServerRpc to notify that we've started attacking for this character.
-        /// </summary>
-        [ServerRpc]
-        public void SendCharacterStartedShootingServerRpc(ServerRpcParams serverRpcParams = default)
-        {
-            Debug.Log($"Player {serverRpcParams.Receive.SenderClientId} Started Shooting");
-            Debug.DrawRay(transform.position, transform.up, Color.red, 2.0f);
-        }
-        /// <summary>
-        ///     ServerRpc to notify that we've stopped attacking for this character.
-        /// </summary>
-        [ServerRpc]
-        public void SendCharacterStoppedShootingServerRpc(ServerRpcParams serverRpcParams = default)
-        {
-            Debug.Log($"Player {serverRpcParams.Receive.SenderClientId} Stopped Shooting");
-        }
-
-
         private void Update()
         {
             ActionPlayer.OnUpdate();

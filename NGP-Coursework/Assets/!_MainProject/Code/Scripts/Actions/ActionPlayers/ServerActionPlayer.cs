@@ -19,7 +19,7 @@ namespace Gameplay.Actions
 
 
 
-        private ActionRequestData _pendingSynthesisedAction = new ActionRequestData();  // A synthesised action is an action that was created in order to allow another action to occur (E.g. Charging towards a target in order to perform a melee attack).
+        private ActionRequestData _pendingSynthesisedAction = ActionRequestData.Default;  // A synthesised action is an action that was created in order to allow another action to occur (E.g. Charging towards a target in order to perform a melee attack).
         private bool _hasPendingSynthesisedAction;
 
 
@@ -72,7 +72,7 @@ namespace Gameplay.Actions
             // Check our active Actions to see if any should be cancelled.
             if (_actionQueue.Count > 0)
             {
-                if (action.Config.CanCancelAction(_actionQueue[0].ActionID) /*&& (!action.Config.RequireSharedSlotIdentifier || [Slot Identifier Comparison])*/)
+                if (action.Config.CanCancelAction(_actionQueue[0].ActionID) && (!action.Config.RequireSharedSlotIdentifier || action.Data.SlotIdentifier == _actionQueue[0].Data.SlotIdentifier))
                 {
                     // Cancel this action.
                     _actionQueue[0].Cancel(_serverCharacter);
@@ -83,7 +83,7 @@ namespace Gameplay.Actions
             for(int i = _nonBlockingActions.Count - 1; i >= 0; --i)
             {
                 Action nonBlockingAction = _nonBlockingActions[i];
-                if (action.Config.CanCancelAction(nonBlockingAction.ActionID) /*&& (!action.Config.RequireSharedSlotIdentifier || [Slot Identifier Comparison])*/)
+                if (action.Config.CanCancelAction(nonBlockingAction.ActionID) && (!action.Config.RequireSharedSlotIdentifier || action.Data.SlotIdentifier == nonBlockingAction.Data.SlotIdentifier))
                 {
                     // Cancel this action
                     nonBlockingAction.Cancel(_serverCharacter);
