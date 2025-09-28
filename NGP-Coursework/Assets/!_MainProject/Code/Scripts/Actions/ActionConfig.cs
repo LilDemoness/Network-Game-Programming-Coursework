@@ -9,12 +9,16 @@ namespace Gameplay.Actions
         [Tooltip("ActionLogic that drives this Action. This corresponds to the actual block of code that executes it.")]
         public ActionLogic Logic;
 
+
+        [Header("Settings")]
         [Tooltip("A base, nominal value that will get modified by game logic when the action takes effect. Could be damage, healing, or other things")]
         public int Amount;
 
         [Tooltip("How far the Action performer can be from the Target")]
         public float Range;
 
+
+        [Header("Duration")]
         [Tooltip("Duration in seconds that this Action takes to play")]
         public float DurationSeconds;
 
@@ -27,6 +31,8 @@ namespace Gameplay.Actions
         [Tooltip("After this Action is successfully started, the server will discard any attempts to perform it again until this amount of time has elapsed.")]
         public float ReuseTimeSeconds;
 
+
+        [Header("Animation Triggers")]
         [Tooltip("The Anticipation Animation trigger that gets raised when user starts using this Action, but while the server confirmation hasn't returned")]
         public string AnimAnticipation;
 
@@ -42,6 +48,8 @@ namespace Gameplay.Actions
         [Tooltip("The name of an animator variable used by this action")]
         public string OtherAnimatorVariable;
 
+        
+        [Header("Other Settings")]
         [Tooltip("For Actions that can hit multiple enemies, this determines how much damage is done to non-primary targets")]
         public int SplashDamage;
 
@@ -60,7 +68,8 @@ namespace Gameplay.Actions
         [Tooltip("Prefab to spawn that will manage this action's input")]
         public BaseActionInput ActionInput;
 
-        
+
+        [Header("Valid Interruption Settings")]
         [Tooltip("Is this Action interruptible by other action-plays or by movement? (Implicitly stops movement when action starts.) Generally, actions with short exec times should not be interruptible in this way.")]
         public bool ActionInterruptible;
 
@@ -68,6 +77,7 @@ namespace Gameplay.Actions
         public List<Action> IsInterruptableBy;
 
         
+        [Header("Cancel Others Settings")]
         [Tooltip("Does this action cancel other actions when starting?")]
         public bool CancelsOtherActions;
 
@@ -78,6 +88,7 @@ namespace Gameplay.Actions
         public bool RequireSharedSlotIdentifier;    // E.g. Used for Weapon Cancelling so that if the entity has multiple of the same weapons they can cancel firing one instance but not the others.
 
 
+        [Header("Other Settings")]
         [Tooltip("Indicates how long this action blocks other actions from happening: during the execution stage, or for as long as it runs?")]
         public BlockingModeType BlockingMode;
 
@@ -99,8 +110,10 @@ namespace Gameplay.Actions
         public string DisplayedName;
 
         [Tooltip("If this Action describes a player ability, this is the tooltip description we show for the ability")]
-        [Multiline]
+        [TextArea(minLines:1, maxLines: 5)]
         public string Description;
+
+
 
         public bool CanBeInterruptedBy(ActionID actionActionID)
         {
