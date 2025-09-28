@@ -21,6 +21,7 @@ namespace Gameplay.GameplayObjects.Character
 
 
         [SerializeField] private ServerCharacterMovement _movement; 
+        public ServerCharacterMovement Movement => _movement;
 
 
         private void Awake()
@@ -55,6 +56,24 @@ namespace Gameplay.GameplayObjects.Character
 
 
             _movement.SetMovementInput(movementInput);
+        }
+
+        /// <summary>
+        ///     ServerRpc to notify that we've started attacking for this character.
+        /// </summary>
+        [ServerRpc]
+        public void SendCharacterStartedShootingServerRpc(ServerRpcParams serverRpcParams = default)
+        {
+            Debug.Log($"Player {serverRpcParams.Receive.SenderClientId} Started Shooting");
+            Debug.DrawRay(transform.position, transform.up, Color.red, 2.0f);
+        }
+        /// <summary>
+        ///     ServerRpc to notify that we've stopped attacking for this character.
+        /// </summary>
+        [ServerRpc]
+        public void SendCharacterStoppedShootingServerRpc(ServerRpcParams serverRpcParams = default)
+        {
+            Debug.Log($"Player {serverRpcParams.Receive.SenderClientId} Stopped Shooting");
         }
     }
 }
