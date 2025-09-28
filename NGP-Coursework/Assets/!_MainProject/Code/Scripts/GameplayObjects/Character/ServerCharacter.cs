@@ -1,5 +1,6 @@
 using UnityEngine;
 using Unity.Netcode;
+using Gameplay.Actions;
 
 namespace Gameplay.GameplayObjects.Character
 {
@@ -20,13 +21,20 @@ namespace Gameplay.GameplayObjects.Character
         public NetworkVariable<MovementStatus> MovementStatus { get; } = new NetworkVariable<MovementStatus>();
 
 
+        /// <summary>
+        ///     A
+        /// </summary>
+        public ServerActionPlayer ActionPlayer => m_serverActionPlayer;
+        private ServerActionPlayer m_serverActionPlayer;
+
+
         [SerializeField] private ServerCharacterMovement _movement; 
         public ServerCharacterMovement Movement => _movement;
 
 
         private void Awake()
         {
-            
+            m_serverActionPlayer = new ServerActionPlayer(this);
         }
         public override void OnNetworkSpawn()
         {
@@ -44,6 +52,7 @@ namespace Gameplay.GameplayObjects.Character
         }
 
 
+
         /// <summary>
         ///     ServerRPC to send movement input for this character.
         /// </summary>
@@ -51,12 +60,55 @@ namespace Gameplay.GameplayObjects.Character
         [ServerRpc]
         public void SendCharacterMovementInputServerRpc(Vector2 movementInput)
         {
+            // Check if we're currently experiencing forced movement (E.g. Knockback/Charge).
             if (_movement.IsPerformingForcedMovement())
                 return;
 
+            // Check if our current action prevents movement.
+            if (ActionPlayer.GetActiveActionInfo(out ActionRequestData data))
+            {
+                if (data.PreventMovement)
+                    return;
+            }
+
+            // We can move.
 
             _movement.SetMovementInput(movementInput);
         }
+
+        /// <summary>
+        ///     Client->Server RPC that sends a request to play an action.
+        /// </summary>
+        /// <param name="data"> The Data about which action to play and its associated details.</param>
+        [ServerRpc]
+        public void PlayActionServerRpc(ActionRequestData data)
+        {
+            ActionRequestData data1 = data;
+            if (!GameDataSource.Instance.GetActionPrototypeByID(data1.ActionID).Config.IsFriendly)
+            {
+                // Notify our running actions that we're using a new hostile action.
+                // Called so that things like Stealth can end themselves.
+                ActionPlayer.OnGameplayActivity(Action.GameplayActivity.UsingHostileAction);
+            }
+
+            PlayAction(ref data1);
+        }
+
+
+        /// <summary>
+        ///     Play a sequence of actions.
+        /// </summary>
+        /// <param name="action"></param>
+        public void PlayAction(ref ActionRequestData action)
+        {
+            if (action.PreventMovement)
+            {
+                _movement.CancelMove();
+            }
+
+            ActionPlayer.PlayAction(ref action);
+        }
+
 
         /// <summary>
         ///     ServerRpc to notify that we've started attacking for this character.
@@ -74,6 +126,12 @@ namespace Gameplay.GameplayObjects.Character
         public void SendCharacterStoppedShootingServerRpc(ServerRpcParams serverRpcParams = default)
         {
             Debug.Log($"Player {serverRpcParams.Receive.SenderClientId} Stopped Shooting");
+        }
+
+
+        private void Update()
+        {
+            ActionPlayer.OnUpdate();
         }
     }
 }

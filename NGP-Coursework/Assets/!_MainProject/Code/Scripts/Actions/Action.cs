@@ -1,8 +1,9 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using Gameplay.GameplayObjects;
 using Gameplay.GameplayObjects.Character;
-using NUnit.Framework;
+using VisualEffects;
 
 namespace Gameplay.Actions
 {
@@ -85,20 +86,15 @@ namespace Gameplay.Actions
         public abstract bool OnUpdate(ServerCharacter serverCharacter);
 
         /// <summary>
-        ///     Called each frame (Before OnUpdate()) for the active ("blocking") Action, asking if it sohuld become a background Action.
+        ///     Called each frame (Before OnUpdate()) for the active ("blocking") Action, asking if it should become a background Action.
         /// </summary>
         /// <returns> True to become a non-blocking Action. False to remain as a blocking Action.</returns>
-        public virtual bool ShouldBecomeNonBlocking()
-        {
-            throw new System.NotImplementedException();
-        }
+        public virtual bool ShouldBecomeNonBlocking() => Config.BlockingMode == BlockingModeType.OnlyDuringExecutionTime ? TimeRunning >= Config.ExecuteTimeSeconds : false;
 
         /// <summary>
         ///     Called when the Action ends naturally.
         /// </summary>
-        /// <remarks>
-        ///     The default implementation just calls Cancel.
-        /// </remarks>
+        /// <remarks> The default implementation just calls Cancel. </remarks>
         public virtual void End(ServerCharacter serverCharacter)
         {
             Cancel(serverCharacter);
@@ -120,6 +116,60 @@ namespace Gameplay.Actions
         // Note: This is not called on prematurely cancelled Action, only on ones that have their End() called.
         public virtual bool ChainIntoNewAction(ref ActionRequestData newAction) { return false; }
 
+
+        /// <summary>
+        ///     Called on the active ("Blocking") Action when this character collides with another.
+        /// </summary>
+        public virtual void CollisionEntered(ServerCharacter serverCharacter, Collision collision) { }
+
+
+        #region Buffs
+
+        public enum BuffableValue
+        {
+            PercentHealingReceived, // Unbuffed Value is 1.0f. Reducing to 0 means "no healing", while 2 is "double healing".
+            PercentDamageReceived,  // Unbuffed Value is 1.0f. Reducing to 0 means "no damage", while 2 is "double damage".
+            ChanceToStunTramplers,  // Unbuffed Value is 0. If > 0, is the 0-1 percentage chance that someone trampling this character becomes stunned.
+        }
+
+        /// <summary>
+        ///     A
+        /// </summary>
+        /// <param name="buffType"> A.</param>
+        /// <param name="newBuffedValue"> A.</param>
+        public virtual void BuffValue(BuffableValue buffType, ref float newBuffedValue) { }
+
+        public static float GetUnbuffedValue(BuffableValue buffType) => buffType switch
+            {
+                BuffableValue.PercentHealingReceived => 1.0f,
+                BuffableValue.PercentDamageReceived => 1.0f,
+                BuffableValue.ChanceToStunTramplers => 0.0f,
+                _ => throw new System.Exception($"Unknown buff type {buffType.ToString()}")
+            };
+
+        #endregion
+
+
+        #region Gameplay Activities
+
+        public enum GameplayActivity
+        {
+            AttackedByEnemy,
+            Healed,
+            StoppedChargingUp,
+            UsingHostileAction, // Called immediately before using any hostile actions.
+        }
+
+        /// <summary>
+        ///     Called on active Actions to let them know when a notable gameplay event happens.
+        /// </summary>
+        /// <remarks> When a GameplayActivity of AttackedByEnemy or Healed happens, OnGameplayAction() is called BEFORE BuffValue() is called.</remarks>
+        public virtual void OnGameplayActivity(ServerCharacter serverCharacter, GameplayActivity activityType) { }
+
+        #endregion
+
+
+        #region Client-Side Functions
 
         /// <returns>
         ///     True if this ActionFX began running immediately, prior to getting a confirmation from the server.
@@ -193,7 +243,7 @@ namespace Gameplay.Actions
         /// </summary>
         protected List<SpecialFXGraphic> InstantiateSpecialFXGraphics(Transform origin, bool parentToOrigin)
         {
-            var returnList = new List<SpecialFXGraphics>();
+            var returnList = new List<SpecialFXGraphic>();
             foreach(var prefab in Config.Spawns)
             {
                 if (!prefab) { continue; } // Skip blank entries in our prefab list.
@@ -216,6 +266,25 @@ namespace Gameplay.Actions
             return graphicsGO.GetComponent<SpecialFXGraphic>();
         }
 
+        /// <summary>
+        ///     Called when the action is being "anticipated" on the client.
+        ///     For example, if you are the owner of a character and you start swinging a slow weapon, you will get this call immediately on the client, before the server round-trip.
+        /// </summary>
+        /// <remarks>
+        ///     Overriders should always call 'base.AnticipateActionClient' in their implementation.
+        /// </remarks>
+        /// <param name="clientCharacter"></param>
         public virtual void AnticipateActionClient(ClientCharacter clientCharacter)
+        {
+            AnticipatedClient = true;
+            TimeStarted = UnityEngine.Time.time;
+
+            /*if (!string.IsNullOrEmpty(Config.AnimAnticipation))
+            {
+                clientCharacter.ourAnimator.SetTrigger(Config.AnimAnticipation);
+            }*/
+        }
+
+        #endregion
     }
 }

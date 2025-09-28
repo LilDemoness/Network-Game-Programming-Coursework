@@ -18,7 +18,7 @@ namespace Gameplay.Actions
         public float Amount;        // Means different things based on the action. (E.g. For a charge, this would be the target range;)
         public bool ShouldQueue;    // If true, the action should queue. If false, it clears all other actions and plays immediately
         public bool ShouldClose;    // If true, the server should synthesise a ChaseAction to reach the target before playing the Action (Used for AI entities)
-        public bool CancelMovement; // If true, movement is cancelled before playing this action, and isn't allowed during it's runtime.
+        public bool PreventMovement;// If true, movement is cancelled before playing this action, and isn't allowed during it's runtime.
 
 
         // [What does this do exactly? Compress the data sent over the network in NetworkSerialise, along with making that function more readable?]
@@ -33,7 +33,7 @@ namespace Gameplay.Actions
             HasAmount       = 1 << 3,
             ShouldQueue     = 1 << 4,
             ShouldClose     = 1 << 5,
-            CancelMovement  = 1 << 6,
+            PreventMovement = 1 << 6,
         }
 
 
@@ -72,7 +72,7 @@ namespace Gameplay.Actions
             if (Amount != 0)                { flags |= PackFlags.HasAmount; }
             if (ShouldQueue)                { flags |= PackFlags.ShouldQueue; }
             if (ShouldClose)                { flags |= PackFlags.ShouldClose; }
-            if (CancelMovement)             { flags |= PackFlags.CancelMovement; }
+            if (PreventMovement)            { flags |= PackFlags.PreventMovement; }
 
             return flags;
         }
@@ -92,7 +92,7 @@ namespace Gameplay.Actions
             {
                 // A.
                 ShouldQueue =       flags.HasFlag(PackFlags.ShouldQueue);
-                CancelMovement =    flags.HasFlag(PackFlags.CancelMovement);
+                PreventMovement =   flags.HasFlag(PackFlags.PreventMovement);
                 ShouldClose =       flags.HasFlag(PackFlags.ShouldClose);
             }
 

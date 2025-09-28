@@ -1,6 +1,8 @@
-using Gameplay.GameplayObjects.Character;
 using Unity.Netcode;
 using UnityEngine;
+using Gameplay.GameplayObjects.Character;
+using Gameplay.GameplayObjects;
+using Gameplay.Actions;
 
 namespace UserInput
 {
@@ -18,6 +20,7 @@ namespace UserInput
         }
         private struct ActionRequest
         {
+            public ActionID RequestedActionID;
             public ActionType ActionType;
         }
 
@@ -41,10 +44,23 @@ namespace UserInput
         private Vector2 _movementInput;
 
 
+        /// <summary>
+        ///     This event fires at the time when an action event is sent to the server.
+        /// </summary>
+        public event System.Action<ActionRequestData> ActionInputEvent;
+
+
         [SerializeField] private ServerCharacter _serverCharacter;
 
 
         private PlayerInputActions _inputActions;
+
+
+        [SerializeField] private Action _testAction;
+        [SerializeField] private ActionState _testActionState;
+
+        [SerializeField] private Action _testCancelAction;
+        [SerializeField] private ActionState _testCancelActionState;
 
 
         public override void OnNetworkSpawn()
@@ -54,6 +70,9 @@ namespace UserInput
                 this.enabled = false;
                 return;
             }
+
+            _testActionState = new ActionState() { ActionID = _testAction.ActionID };
+            _testCancelActionState = new ActionState() { ActionID = _testCancelAction.ActionID };
 
 
             // Setup our InputActionMap.
@@ -143,19 +162,65 @@ namespace UserInput
                 _hasMoveRequest = true;
             }
         }
+        private event System.Action _exampleEvent;
+        private void PerformSubscriptionTest()
+        {
+            SubscriptionTest(ref _exampleEvent);
+            _exampleEvent?.Invoke();
+            UnsubscriptionTest(ref _exampleEvent);
+            _exampleEvent?.Invoke();
+        }
+        [ContextMenu(itemName: "Perform Test")]
+        private void PerformTest() => _exampleEvent?.Invoke();
+        private void SubscriptionTest(ref System.Action eventToSubscribeTo) => eventToSubscribeTo += Test;
+        private void UnsubscriptionTest(ref System.Action eventToUnsubscribeFrom) => eventToUnsubscribeFrom -= Test;
+        private void Test() => Debug.Log("Test Called");
+
+
         private void FixedUpdate()
         {
             // Send Non-client Only Input Requests to the Server.
             // Play All ActionRequests (In FIFO order).
             for(int i = 0; i < _actionRequestCount; ++i)
             {
+                Action actionPrototype;
                 switch (_actionRequests[i].ActionType)
                 {
                     case ActionType.StartShooting:
-                        _serverCharacter.SendCharacterStartedShootingServerRpc();
+                        //PerformSubscriptionTest();
+
+                        actionPrototype = GameDataSource.Instance.GetActionPrototypeByID(_actionRequests[i].RequestedActionID);
+                        if (actionPrototype.Config.ActionInput != null)
+                        {
+                            var skillPlayer = Instantiate(actionPrototype.Config.ActionInput);
+                            skillPlayer.Initialise(_serverCharacter, transform.position, actionPrototype.ActionID, SendInput, null);
+                        }
+                        else
+                        {
+                            var data = new ActionRequestData();
+
+                            data.ActionID = actionPrototype.ActionID;
+
+                            SendInput(data);
+                        }
+                        //_serverCharacter.SendCharacterStartedShootingServerRpc();
                         break;
                     case ActionType.StopShooting:
-                        _serverCharacter.SendCharacterStoppedShootingServerRpc();
+                        actionPrototype = GameDataSource.Instance.GetActionPrototypeByID(_actionRequests[i].RequestedActionID);
+                        if (actionPrototype.Config.ActionInput != null)
+                        {
+                            var skillPlayer = Instantiate(actionPrototype.Config.ActionInput);
+                            skillPlayer.Initialise(_serverCharacter, transform.position, actionPrototype.ActionID, SendInput, null);
+                        }
+                        else
+                        {
+                            var data = new ActionRequestData();
+
+                            data.ActionID = actionPrototype.ActionID;
+
+                            SendInput(data);
+                        }
+                        //_serverCharacter.SendCharacterStoppedShootingServerRpc();
                         break;
                 }
             }
@@ -176,11 +241,18 @@ namespace UserInput
             }
         }
 
+        private void SendInput(ActionRequestData action)
+        {
+            ActionInputEvent?.Invoke(action);
+            _serverCharacter.PlayActionServerRpc(action);
+        }
 
-        private void RequestAction(ActionType actionType)
+
+        private void RequestAction(ActionType actionType, ActionState actionState)
         {
             if (_actionRequestCount < _actionRequests.Length)
             {
+                _actionRequests[_actionRequestCount].RequestedActionID = actionState.ActionID;
                 _actionRequests[_actionRequestCount].ActionType = actionType;
                 ++_actionRequestCount;
             }
@@ -196,11 +268,21 @@ namespace UserInput
         }
         private void TestWeaponFiring_started(UnityEngine.InputSystem.InputAction.CallbackContext obj)
         {
-            RequestAction(ActionType.StartShooting);
+            RequestAction(ActionType.StartShooting, _testActionState);
         }
         private void TestWeaponFiring_cancelled(UnityEngine.InputSystem.InputAction.CallbackContext obj)
         {
-            RequestAction(ActionType.StopShooting);
+            RequestAction(ActionType.StopShooting, _testCancelActionState);
+        }
+    }
+
+    public class ActionState
+    {
+        public ActionID ActionID { get; internal set; }
+
+        internal void SetActionState(ActionID newActionID)
+        {
+            this.ActionID = newActionID;
         }
     }
 }
