@@ -24,10 +24,10 @@ namespace Gameplay.Actions
         public abstract float RetriggerDelay { get; }
 
 
-        public abstract bool OnStart(ServerCharacter owner);
-        public abstract bool OnUpdate(ServerCharacter owner);
-        public abstract void OnEnd(ServerCharacter owner);
-        public abstract void OnCancel(ServerCharacter owner);
+        public abstract bool OnStart(ServerCharacter owner, Vector3 origin, Vector3 direction);
+        public abstract bool OnUpdate(ServerCharacter owner, Vector3 origin, Vector3 direction);
+        public abstract void OnEnd(ServerCharacter owner, Vector3 origin, Vector3 direction);
+        public abstract void OnCancel(ServerCharacter owner, Vector3 origin, Vector3 direction);
 
 
         public abstract bool CancelsOtherActions { get; }

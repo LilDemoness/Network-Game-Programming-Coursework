@@ -37,10 +37,10 @@ namespace Gameplay.Actions
         public override float RetriggerDelay => 1.0f; // Note: Not 0.0f just in case we accidentally get this into an update loop (If it was 0.0 it may run eternally).
 
 
-        public override bool OnStart(ServerCharacter owner) => false;
-        public override bool OnUpdate(ServerCharacter owner) => false;
-        public override void OnEnd(ServerCharacter owner) { }
-        public override void OnCancel(ServerCharacter owner) { }
+        public override bool OnStart(ServerCharacter owner, Vector3 origin, Vector3 direction) => false;
+        public override bool OnUpdate(ServerCharacter owner, Vector3 origin, Vector3 direction) => false;
+        public override void OnEnd(ServerCharacter owner, Vector3 origin, Vector3 direction) { }
+        public override void OnCancel(ServerCharacter owner, Vector3 origin, Vector3 direction) { }
 
 
         public override bool ShouldBecomeNonBlocking(float timeRunning) => true;

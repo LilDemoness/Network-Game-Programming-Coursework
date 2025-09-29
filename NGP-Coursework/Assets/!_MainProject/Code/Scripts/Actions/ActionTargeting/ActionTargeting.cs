@@ -13,15 +13,7 @@ namespace Gameplay.Actions.Targeting
     [System.Serializable]
     public abstract class ActionTargeting
     {
-        //[SerializeField] protected TargetableTypes TargetableEntityTypes = TargetableTypes.AllOthers;
-
-
         // Can apply from an origin position rather than a character so that we can have things like AoEs spawn from a projectile's hit position.
-        public abstract ulong[] GetTargets(ServerCharacter owner, Vector3 origin, Vector3 direction);
-        protected bool IsValidType(NetworkObject targetObject)
-        {
-            Debug.LogWarning("Not Implemented");
-            return true;
-        }
+        public abstract void GetTargets(ServerCharacter owner, Vector3 origin, Vector3 direction, System.Action<ServerCharacter, ulong[]> onCompleteCallback);
     }
 }

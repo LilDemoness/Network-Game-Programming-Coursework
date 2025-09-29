@@ -11,7 +11,7 @@ namespace Gameplay.Actions
     public class DefaultActionDefinition : ActionDefinition
     {
         // Targeting (Change so that Action Effects determine their own targeting?).
-        [SerializeReference, SubclassSelector] public ActionTargeting ActionTargeting = new SelfTargeting();
+        [SerializeReference, SubclassSelector] public ActionTargeting PrimaryTargetingType = new SelfTargeting();
 
 
         [Header("Assorted Action Stuff")]
@@ -42,9 +42,19 @@ namespace Gameplay.Actions
 
 
         [Header("Action Effects")]
+        [SerializeField] private bool _hasInitialEffects;
         [SerializeReference, SubclassSelector] public List<ActionEffect> ImmediateEffects;
+        
+        [Space(5)]
+        [SerializeField] private bool _hasExecutionEffects;
         [SerializeReference, SubclassSelector] public List<ActionEffect> ExecutionEffects;
+
+        [Space(5)]
+        [SerializeField] private bool _hasEndEffects;
         [SerializeReference, SubclassSelector] public List<ActionEffect> EndEffects;
+
+        [Space(5)]
+        [SerializeField] private bool _hasCancelledEffects;
         [SerializeReference, SubclassSelector] public List<ActionEffect> CancelledEffects;
 
 
@@ -70,7 +80,6 @@ namespace Gameplay.Actions
 
         [Space(5)]
         public Action FollowingAction;  // An action that occurs when this action ends, at the endpoint of its targeting (E.g. Projectile Hit Position).
-
 
 
         public bool CanBeInterruptedBy(ActionID actionActionID)
@@ -102,34 +111,61 @@ namespace Gameplay.Actions
 
 
 
-        public override bool OnStart(ServerCharacter owner)
-        {
-            ulong[] targetIDs = ActionTargeting.GetTargets(owner, owner.transform.position, owner.transform.up);
-            foreach(ActionEffect immediateEffect in ImmediateEffects)
-                immediateEffect.Apply(owner, targetIDs);
+        #if UNITY_EDITOR
 
+        [ContextMenu("Clear Missing References")]
+        private void ClearMissingReferences() => UnityEditor.SerializationUtility.ClearAllManagedReferencesWithMissingTypes(this);
+
+        #endif
+
+
+
+        public override bool OnStart(ServerCharacter owner, Vector3 origin, Vector3 direction)
+        {
+            if (_hasInitialEffects)
+                PrimaryTargetingType.GetTargets(owner, origin, direction, HandleImmediateEffects);
             return true;
         }
-        public override bool OnUpdate(ServerCharacter owner)
+        private void HandleImmediateEffects(ServerCharacter owner, ulong[] targetIDs)
         {
-            ulong[] targetIDs = ActionTargeting.GetTargets(owner, owner.transform.position, owner.transform.up);
+            foreach (ActionEffect immediateEffect in ImmediateEffects)
+                immediateEffect.Apply(owner, targetIDs);
+        }
+
+        public override bool OnUpdate(ServerCharacter owner, Vector3 origin, Vector3 direction)
+        {
+            if (_hasExecutionEffects)
+            PrimaryTargetingType.GetTargets(owner, origin, direction, HandleExecutionEffects);
+            return true;
+        }
+        private void HandleExecutionEffects(ServerCharacter owner, ulong[] targetIDs)
+        {
             foreach (ActionEffect actionEffect in ExecutionEffects)
                 actionEffect.Apply(owner, targetIDs);
-
-            return true;
         }
-        public override void OnEnd(ServerCharacter owner)
+
+        public override void OnEnd(ServerCharacter owner, Vector3 origin, Vector3 direction)
         {
-            ulong[] targetIDs = ActionTargeting.GetTargets(owner, owner.transform.position, owner.transform.up);
+            if (_hasEndEffects)
+                PrimaryTargetingType.GetTargets(owner, origin, direction, HandleEndEffects);
+        }
+        private void HandleEndEffects(ServerCharacter owner, ulong[] targetIDs)
+        {
             foreach (ActionEffect effect in EndEffects)
                 effect.Apply(owner, targetIDs);
         }
-        public override void OnCancel(ServerCharacter owner)
+
+        public override void OnCancel(ServerCharacter owner, Vector3 origin, Vector3 direction)
         {
-            ulong[] targetIDs = ActionTargeting.GetTargets(owner, owner.transform.position, owner.transform.up);
+            if (_hasCancelledEffects)
+                PrimaryTargetingType.GetTargets(owner, origin, direction, HandleCancellationEffects);
+        }
+        private void HandleCancellationEffects(ServerCharacter owner, ulong[] targetIDs)
+        {
             foreach (ActionEffect effect in CancelledEffects)
                 effect.Apply(owner, targetIDs);
         }
+
 
         public override bool ShouldBecomeNonBlocking(float timeRunning) => timeRunning >= ExecutionDelay /*BlockingMode == BlockingModeType.OnlyDuringExecutionTime ? timeRunning >= ExecutionDelay : false*/;
 

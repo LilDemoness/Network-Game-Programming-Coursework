@@ -79,9 +79,15 @@ namespace Gameplay.Actions
         {
             NextUpdateTime = TimeStarted + Config.ExecutionDelay;
 
+            // Initialise Data Parameters (If they aren't already set-up).
+            if (Data.Direction == Vector3.zero)
+                Data.Direction = serverCharacter.transform.forward;
+            if (Data.Position == Vector3.zero)
+                Data.Position = serverCharacter.transform.position;
+
             // Play Immediate Effects.
             DebugForAction("Start", serverCharacter);
-            return Config.OnStart(serverCharacter);
+            return Config.OnStart(serverCharacter, Data.Position, Data.Direction);
         }
 
         /// <summary>
@@ -97,7 +103,7 @@ namespace Gameplay.Actions
                     // Trigger OnUpdate() once.
                     NextUpdateTime = -1;
                     DebugForAction("Update", serverCharacter);
-                    return Config.OnUpdate(serverCharacter);
+                    return Config.OnUpdate(serverCharacter, Data.Position, Data.Direction);
                 }
             }
             else
@@ -105,9 +111,9 @@ namespace Gameplay.Actions
                 while (NextUpdateTime < Time.time)
                 {
                     // Play Execution Effects.
-                    if (Config.OnUpdate(serverCharacter) == false)
-                        return false;
                     DebugForAction("Update", serverCharacter);
+                    if (Config.OnUpdate(serverCharacter, Data.Position, Data.Direction) == false)
+                        return false;
 
                     NextUpdateTime += Config.RetriggerDelay;
                 }
@@ -128,7 +134,7 @@ namespace Gameplay.Actions
         public virtual void End(ServerCharacter serverCharacter)
         {
             // Play End Effects.
-            Config.OnEnd(serverCharacter);
+            Config.OnEnd(serverCharacter, Data.Position, Data.Direction);
             DebugForAction("End", serverCharacter);
 
             Cleanup(serverCharacter);
@@ -140,7 +146,7 @@ namespace Gameplay.Actions
         public virtual void Cancel(ServerCharacter serverCharacter)
         {
             // Play Cancel Effects.
-            Config.OnCancel(serverCharacter);
+            Config.OnCancel(serverCharacter, Data.Position, Data.Direction);
             DebugForAction("Cancel", serverCharacter);
 
             Cleanup(serverCharacter);
