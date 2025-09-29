@@ -23,14 +23,10 @@ MonoBehaviour:
   ExecuteIfNotFullAtCharge: 0
   MaxActiveDuration: 0
   m_retriggerDelay: 0
-  _hasInitialEffects: 0
   ImmediateEffects: []
-  _hasExecutionEffects: 1
   ExecutionEffects:
   - rid: 8059534151770964076
-  _hasEndEffects: 0
   EndEffects: []
-  _hasCancelledEffects: 0
   CancelledEffects: []
   ActionInterruptible: 0
   IsInterruptableBy: []
@@ -42,6 +38,7 @@ MonoBehaviour:
     - rid: 8059534151770964071
       type: {class: RaycastTargeting, ns: Gameplay.Actions.Targeting, asm: Assembly-CSharp}
       data:
+        TargetableEntityTypes: -2
         _maxRange: 10
         _validLayers:
           serializedVersion: 2

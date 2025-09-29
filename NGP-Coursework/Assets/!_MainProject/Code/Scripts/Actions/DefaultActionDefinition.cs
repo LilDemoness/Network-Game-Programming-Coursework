@@ -42,20 +42,20 @@ namespace Gameplay.Actions
 
 
         [Header("Action Effects")]
-        [SerializeField] private bool _hasInitialEffects;
         [SerializeReference, SubclassSelector] public List<ActionEffect> ImmediateEffects;
+        private bool _hasInitialEffects;
         
         [Space(5)]
-        [SerializeField] private bool _hasExecutionEffects;
         [SerializeReference, SubclassSelector] public List<ActionEffect> ExecutionEffects;
+        private bool _hasExecutionEffects;
 
         [Space(5)]
-        [SerializeField] private bool _hasEndEffects;
         [SerializeReference, SubclassSelector] public List<ActionEffect> EndEffects;
+        private bool _hasEndEffects;
 
         [Space(5)]
-        [SerializeField] private bool _hasCancelledEffects;
         [SerializeReference, SubclassSelector] public List<ActionEffect> CancelledEffects;
+        private bool _hasCancelledEffects;
 
 
         [Header("Interruption")]
@@ -80,6 +80,19 @@ namespace Gameplay.Actions
 
         [Space(5)]
         public Action FollowingAction;  // An action that occurs when this action ends, at the endpoint of its targeting (E.g. Projectile Hit Position).
+
+
+#if UNITY_EDITOR
+
+        private void OnValidate()
+        {
+            _hasInitialEffects      = ImmediateEffects.Count > 0;
+            _hasExecutionEffects    = ExecutionEffects.Count > 0;
+            _hasEndEffects          = EndEffects.Count > 0;
+            _hasCancelledEffects    = CancelledEffects.Count > 0;
+        }
+
+#endif
 
 
         public bool CanBeInterruptedBy(ActionID actionActionID)
