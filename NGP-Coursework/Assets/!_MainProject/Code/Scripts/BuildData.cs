@@ -46,5 +46,13 @@ public class BuildData
     }
 
 
+    public FrameData GetFrameData() => ActiveOptionsDatabase.GetFrame(ActiveFrameIndex);
+    public LegData GetLegData() => ActiveOptionsDatabase.GetLeg(ActiveLegIndex);
+    public WeaponData GetPrimaryWeaponData() => ActiveOptionsDatabase.GetWeapon(ActivePrimaryWeaponIndex);
+    public WeaponData GetSecondaryWeaponData() => ActiveOptionsDatabase.GetWeapon(ActiveSecondaryWeaponIndex);
+    public WeaponData GetTertiaryWeaponData() => ActiveOptionsDatabase.GetWeapon(ActiveTertiaryWeaponIndex);
+    public AbilityData GetAbilityData() => ActiveOptionsDatabase.GetAbility(ActiveAbilityIndex);
+
+
     public static void SetAvailableBuildOptions(CustomisationOptionsDatabase newOptionsDatabase) => ActiveOptionsDatabase = newOptionsDatabase;
 }

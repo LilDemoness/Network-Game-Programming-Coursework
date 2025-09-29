@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using Gameplay.Actions;
 
 namespace Gameplay.GameplayObjects.Character.Customisation.Data
 {
@@ -6,5 +7,7 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Data
     public class WeaponData : ScriptableObject
     {
         [field: SerializeField] public string Name { get; private set; }
+
+        [field: SerializeField] public ActionDefinition AssociatedAction { get; private set; }
     }
 }

@@ -1,3 +1,4 @@
+using System.Collections;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -23,6 +24,9 @@ namespace UserInput
         {
             public ActionID RequestedActionID;
             public ActionType ActionType;
+
+            public Vector3 Origin;
+            public Vector3 Direction;
             public int SlotIdentifier;
         }
 
@@ -59,18 +63,12 @@ namespace UserInput
 
 
         [Header("(Temp) Weapon Actions")]
-        [SerializeField] private ActionDefinition _primaryWeaponAction;
-        private ActionState _primaryWeaponActionState;
-
-        [SerializeField] private ActionDefinition _secondaryWeaponAction;
-        private ActionState _scondaryWeaponActionState;
-
-        [SerializeField] private ActionDefinition _tertiaryWeaponAction;
-        private ActionState _tertiaryWeaponActionState;
+        [SerializeField] private Weapon _primaryWeapon;
+        [SerializeField] private Weapon _secondaryWeapon;
+        [SerializeField] private Weapon _tertiaryWeapon;
 
         [Space(5)]
         [SerializeField] private ActionDefinition _testCancelAction;
-        private ActionState _testCancelActionState;
 
 
         public override void OnNetworkSpawn()
@@ -81,14 +79,10 @@ namespace UserInput
                 return;
             }
 
-            _primaryWeaponActionState = new ActionState() { ActionID = _primaryWeaponAction.ActionID };
-            _scondaryWeaponActionState = new ActionState() { ActionID = _secondaryWeaponAction.ActionID };
-            _tertiaryWeaponActionState = new ActionState() { ActionID = _tertiaryWeaponAction.ActionID };
-            _testCancelActionState = new ActionState() { ActionID = _testCancelAction.ActionID };
-
 
             // Setup our InputActionMap.
             CreateInputActions();
+            StartCoroutine(InitialiseWeapons());
         }
         public override void OnNetworkDespawn()
         {
@@ -164,6 +158,23 @@ namespace UserInput
         }
 
 
+        // Move to a 'WeaponsManager' class?
+        public IEnumerator InitialiseWeapons()
+        {
+            yield return null;
+            foreach (var weaponAttachmentSlot in GetComponentsInChildren<Gameplay.GameplayObjects.Character.Customisation.Sections.WeaponAttachmentSlot>())
+            {
+                Debug.Log(weaponAttachmentSlot.name + " " + weaponAttachmentSlot.SlotIndex + " " + weaponAttachmentSlot.GetComponentInChildren<Weapon>());
+                switch (weaponAttachmentSlot.SlotIndex)
+                {
+                    case 1: _primaryWeapon = weaponAttachmentSlot.GetComponentInChildren<Weapon>(); break;
+                    case 2: _secondaryWeapon = weaponAttachmentSlot.GetComponentInChildren<Weapon>(); break;
+                    case 3: _tertiaryWeapon = weaponAttachmentSlot.GetComponentInChildren<Weapon>(); break;
+                }
+            }
+        }
+
+
         private void Update()
         {
             // Get Framewise Input.
@@ -180,38 +191,22 @@ namespace UserInput
             // Play All ActionRequests (In FIFO order).
             for(int i = 0; i < _actionRequestCount; ++i)
             {
-                ActionDefinition actionDefinition;
+                
                 switch (_actionRequests[i].ActionType)
                 {
                     case ActionType.StartShooting:
-                        actionDefinition = GameDataSource.Instance.GetActionDefinitionByID(_actionRequests[i].RequestedActionID);
-                        /*if (actionPrototype.Config.ActionInput != null)
-                        {
-                            var skillPlayer = Instantiate(actionPrototype.Config.ActionInput);
-                            skillPlayer.Initialise(_serverCharacter, transform.position, actionPrototype.ActionID, SendInput, null);
-                        }
-                        else
-                        {*/
-                            var data = ActionRequestData.Create(actionDefinition);
-                            data.SlotIdentifier = _actionRequests[i].SlotIdentifier;
-
-                            SendInput(data);
-                        //}
-                        break;
                     case ActionType.StopShooting:
-                        actionDefinition = GameDataSource.Instance.GetActionDefinitionByID(_actionRequests[i].RequestedActionID);
-                        /*if (actionPrototype.Config.ActionInput != null)
-                        {
-                            var skillPlayer = Instantiate(actionPrototype.Config.ActionInput);
-                            skillPlayer.Initialise(_serverCharacter, transform.position, actionPrototype.ActionID, SendInput, null);
-                        }
-                        else
-                        {*/
-                            data = ActionRequestData.Create(actionDefinition);
-                            data.SlotIdentifier = _actionRequests[i].SlotIdentifier;
+                        // Get our Action Definition.
+                        ActionDefinition actionDefinition = GameDataSource.Instance.GetActionDefinitionByID(_actionRequests[i].RequestedActionID);
 
-                            SendInput(data);
-                        //}
+                        // Create our Data.
+                        ActionRequestData data = ActionRequestData.Create(actionDefinition);
+                        data.Position = _actionRequests[i].Origin;
+                        data.Direction = _actionRequests[i].Direction;
+                        data.SlotIdentifier = _actionRequests[i].SlotIdentifier;
+
+                        // Send our Input.
+                        SendInput(data);
                         break;
                 }
             }
@@ -239,44 +234,29 @@ namespace UserInput
         }
 
 
-        private void RequestAction(ActionType actionType, ActionState actionState, int slotIdentifier = -1)
+        private void RequestAction(ActionType actionType, ActionDefinition actionState, Vector3 origin = default, Vector3 direction = default, int slotIdentifier = -1)
         {
             if (_actionRequestCount < _actionRequests.Length)
             {
                 _actionRequests[_actionRequestCount].RequestedActionID = actionState.ActionID;
                 _actionRequests[_actionRequestCount].ActionType = actionType;
+
+                _actionRequests[_actionRequestCount].Origin = origin;
+                _actionRequests[_actionRequestCount].Direction = direction;
                 _actionRequests[_actionRequestCount].SlotIdentifier = slotIdentifier;
                 ++_actionRequestCount;
             }
         }
-
-
-        // For Value & Pass-Through Actions (Such as our movement), 'performed' is triggered whenever they are changed (Which is what we desire).
-        private void Movement_performed(UnityEngine.InputSystem.InputAction.CallbackContext obj)
-        {
-            _movementInput = obj.ReadValue<Vector2>();
-            _hasMoveRequest = true;
-            //Debug.Log("Input Received: " + obj.ReadValue<Vector2>());
-        }
+        private void RequestActionForWeapon(Weapon weapon, int slot) => RequestAction(ActionType.StartShooting, weapon.WeaponData.AssociatedAction, weapon.GetAttackOrigin(), weapon.GetAttackDirection(), slot); 
         
 
-        private void UsePrimaryWeapon_started(InputAction.CallbackContext obj) => RequestAction(ActionType.StartShooting, _primaryWeaponActionState, 1);
-        private void UsePrimaryWeapon_cancelled(InputAction.CallbackContext obj) => RequestAction(ActionType.StopShooting, _testCancelActionState, 1);
+        private void UsePrimaryWeapon_started(InputAction.CallbackContext obj) { if (_primaryWeapon != null) {RequestActionForWeapon(_primaryWeapon, 1); } }
+        private void UsePrimaryWeapon_cancelled(InputAction.CallbackContext obj) { if (_primaryWeapon != null) { RequestAction(ActionType.StopShooting, _testCancelAction, slotIdentifier: 1); } }
 
-        private void UseSecondaryWeapon_started(InputAction.CallbackContext obj) => RequestAction(ActionType.StartShooting, _scondaryWeaponActionState, 2);
-        private void UseSecondaryWeapon_cancelled(InputAction.CallbackContext obj) => RequestAction(ActionType.StopShooting, _testCancelActionState, 2);
+        private void UseSecondaryWeapon_started(InputAction.CallbackContext obj) { if (_secondaryWeapon != null) { RequestActionForWeapon(_secondaryWeapon, 2); } }
+        private void UseSecondaryWeapon_cancelled(InputAction.CallbackContext obj) { if (_secondaryWeapon != null) { RequestAction(ActionType.StopShooting, _testCancelAction, slotIdentifier: 2); } }
 
-        private void UseTertiaryWeapon_started(InputAction.CallbackContext obj) => RequestAction(ActionType.StartShooting, _tertiaryWeaponActionState, 3);
-        private void UseTertiaryWeapon_cancelled(InputAction.CallbackContext obj) => RequestAction(ActionType.StopShooting, _testCancelActionState, 3);
-    }
-
-    public class ActionState
-    {
-        public ActionID ActionID { get; internal set; }
-
-        internal void SetActionState(ActionID newActionID)
-        {
-            this.ActionID = newActionID;
-        }
+        private void UseTertiaryWeapon_started(InputAction.CallbackContext obj) { if (_tertiaryWeapon != null) { RequestActionForWeapon(_tertiaryWeapon, 3); } }
+        private void UseTertiaryWeapon_cancelled(InputAction.CallbackContext obj) { if (_tertiaryWeapon != null) { RequestAction(ActionType.StopShooting, _testCancelAction, slotIdentifier: 3); } }
     }
 }

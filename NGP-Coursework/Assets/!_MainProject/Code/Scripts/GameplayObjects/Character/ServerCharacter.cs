@@ -15,6 +15,8 @@ namespace Gameplay.GameplayObjects.Character
 
 
         // Build Data?
+        private BuildData m_buildData;
+        public BuildData BuildData => m_buildData;
 
 
         /// <summary> Indicates how the character's movement should be depicted. </summary>
@@ -45,8 +47,6 @@ namespace Gameplay.GameplayObjects.Character
                 this.enabled = false;
                 return;
             }
-
-
         }
         public override void OnNetworkDespawn()
         {

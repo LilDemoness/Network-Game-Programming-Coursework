@@ -15,7 +15,6 @@ GameObject:
   - component: {fileID: 5193017226030722943}
   - component: {fileID: 6339476480414985111}
   - component: {fileID: 3943280201037405906}
-  - component: {fileID: 2724236786199247272}
   - component: {fileID: 3329371058562629056}
   m_Layer: 3
   m_Name: Player
@@ -94,11 +93,11 @@ MonoBehaviour:
   TickSyncChildren: 0
   UseUnreliableDeltas: 0
   SyncPositionX: 1
-  SyncPositionY: 1
-  SyncPositionZ: 0
+  SyncPositionY: 0
+  SyncPositionZ: 1
   SyncRotAngleX: 0
-  SyncRotAngleY: 0
-  SyncRotAngleZ: 1
+  SyncRotAngleY: 1
+  SyncRotAngleZ: 0
   SyncScaleX: 0
   SyncScaleY: 0
   SyncScaleZ: 0
@@ -127,6 +126,7 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   m_clientCharacter: {fileID: 6339476480414985111}
   _movement: {fileID: 3943280201037405906}
+  TeamID: 0
 --- !u!114 &5193017226030722943
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -141,9 +141,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
   _serverCharacter: {fileID: 8374713656994953261}
-  _primaryWeaponAction: {fileID: 11400000, guid: 67bbb0a585863fb4791ede74f6d2cccc, type: 2}
-  _secondaryWeaponAction: {fileID: 11400000, guid: 67bbb0a585863fb4791ede74f6d2cccc, type: 2}
-  _tertiaryWeaponAction: {fileID: 11400000, guid: 67bbb0a585863fb4791ede74f6d2cccc, type: 2}
+  _primaryWeapon: {fileID: 0}
+  _secondaryWeapon: {fileID: 0}
+  _tertiaryWeapon: {fileID: 0}
   _testCancelAction: {fileID: 11400000, guid: d87a1fe8634a6b24b9b1e68fcec9e1a1, type: 2}
 --- !u!114 &6339476480414985111
 MonoBehaviour:
@@ -172,23 +172,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
   _characterLogic: {fileID: 8374713656994953261}
---- !u!114 &2724236786199247272
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4284907619315406047}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a671ebf0884db8f4f9a33f6174f3c8b2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ShowTopMostFoldoutHeaderGroup: 1
-  _weapons:
-  - _weaponData: {fileID: 11400000, guid: 19fcffcb66d8abf4cbae0a4105ce50e3, type: 2}
-  - _weaponData: {fileID: 11400000, guid: 490b4b2473ba06f408b4502d24142112, type: 2}
-  - _weaponData: {fileID: 11400000, guid: ef46446ee510fb54ea3599f68738390e, type: 2}
 --- !u!114 &3329371058562629056
 MonoBehaviour:
   m_ObjectHideFlags: 0

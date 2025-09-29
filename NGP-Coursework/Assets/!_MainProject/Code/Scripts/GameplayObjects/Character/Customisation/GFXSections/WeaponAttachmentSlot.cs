@@ -5,6 +5,11 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Sections
 {
     public class WeaponAttachmentSlot : MonoBehaviour
     {
+        [SerializeField] private int _slotIndex;
+        public int SlotIndex => _slotIndex;
+
+
+        [Header("GFX")]
         [SerializeField] private WeaponGFXSection[] _weaponGFXs;
 
 

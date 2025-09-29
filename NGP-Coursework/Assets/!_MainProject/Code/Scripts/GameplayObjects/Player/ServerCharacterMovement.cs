@@ -80,7 +80,7 @@ namespace Gameplay.GameplayObjects.Character
             else if (_movementState == MovementState.DirectInput)
             {
                 // Input-based movement.
-                movementVector = transform.right * _movementInput.x + transform.up * _movementInput.y;
+                movementVector = transform.right * _movementInput.x + transform.forward * _movementInput.y;
                 movementVector *= GetBaseMovementSpeed() * Time.fixedDeltaTime;
             }
 

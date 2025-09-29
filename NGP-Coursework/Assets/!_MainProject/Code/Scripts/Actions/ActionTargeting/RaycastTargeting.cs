@@ -16,6 +16,7 @@ namespace Gameplay.Actions.Targeting
 
         public override void GetTargets(ServerCharacter owner, Vector3 origin, Vector3 direction, System.Action<ServerCharacter, ulong[]> onCompleteCallback)
         {
+            Debug.DrawRay(origin, direction * _maxRange, Color.red, 0.25f);
             if (!Physics.Raycast(origin, direction, out RaycastHit hitInfo, _maxRange, _validLayers))
                 return; // Nothing was hit.
 
