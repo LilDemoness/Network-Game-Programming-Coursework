@@ -185,33 +185,33 @@ namespace UserInput
                 {
                     case ActionType.StartShooting:
                         actionPrototype = GameDataSource.Instance.GetActionPrototypeByID(_actionRequests[i].RequestedActionID);
-                        if (actionPrototype.Config.ActionInput != null)
+                        /*if (actionPrototype.Config.ActionInput != null)
                         {
                             var skillPlayer = Instantiate(actionPrototype.Config.ActionInput);
                             skillPlayer.Initialise(_serverCharacter, transform.position, actionPrototype.ActionID, SendInput, null);
                         }
                         else
-                        {
+                        {*/
                             var data = ActionRequestData.Create(actionPrototype);
                             data.SlotIdentifier = _actionRequests[i].SlotIdentifier;
 
                             SendInput(data);
-                        }
+                        //}
                         break;
                     case ActionType.StopShooting:
                         actionPrototype = GameDataSource.Instance.GetActionPrototypeByID(_actionRequests[i].RequestedActionID);
-                        if (actionPrototype.Config.ActionInput != null)
+                        /*if (actionPrototype.Config.ActionInput != null)
                         {
                             var skillPlayer = Instantiate(actionPrototype.Config.ActionInput);
                             skillPlayer.Initialise(_serverCharacter, transform.position, actionPrototype.ActionID, SendInput, null);
                         }
                         else
-                        {
-                            var data = ActionRequestData.Create(actionPrototype);
+                        {*/
+                            data = ActionRequestData.Create(actionPrototype);
                             data.SlotIdentifier = _actionRequests[i].SlotIdentifier;
 
                             SendInput(data);
-                        }
+                        //}
                         break;
                 }
             }

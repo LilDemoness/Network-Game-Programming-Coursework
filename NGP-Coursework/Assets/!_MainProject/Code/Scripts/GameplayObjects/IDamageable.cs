@@ -1,9 +1,18 @@
-using UnityEngine;
+﻿using UnityEngine;
+using Gameplay.GameplayObjects.Character;
 
-/// <summary>
-///     A generic interface for damageable objects and characters in the game.
-/// </summary>
-public interface IDamageable
+namespace Gameplay.GameplayObjects
 {
+    public interface IDamageable
+    {
+        void ReceiveHitPoints(ServerCharacter influencer, int hitPointsChange);
 
+        int GetTotalDamage();
+
+        ulong NetworkObjectID { get; }
+
+        Transform transform { get; }
+
+        bool IsDamageable();
+    }
 }

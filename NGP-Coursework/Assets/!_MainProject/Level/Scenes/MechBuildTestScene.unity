@@ -2345,11 +2345,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9197c9c1e343398438e44d218c68f527, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_generalChaseActionPrototype: {fileID: 11400000, guid: bd835fefafafbb34aac1b7aacac5b9d9, type: 2}
-  m_generalTargetActionPrototype: {fileID: 11400000, guid: bd835fefafafbb34aac1b7aacac5b9d9, type: 2}
-  m_stunnedActionPrototype: {fileID: 11400000, guid: bd835fefafafbb34aac1b7aacac5b9d9, type: 2}
+  m_generalChaseActionPrototype: {fileID: 11400000, guid: 0ac5b9d999a213843a1756ed53810de4, type: 2}
+  m_generalTargetActionPrototype: {fileID: 11400000, guid: 0ac5b9d999a213843a1756ed53810de4, type: 2}
+  m_stunnedActionPrototype: {fileID: 11400000, guid: 0ac5b9d999a213843a1756ed53810de4, type: 2}
   _actionPrototypes:
-  - {fileID: 11400000, guid: bd835fefafafbb34aac1b7aacac5b9d9, type: 2}
+  - {fileID: 11400000, guid: 0ac5b9d999a213843a1756ed53810de4, type: 2}
   - {fileID: 11400000, guid: d87a1fe8634a6b24b9b1e68fcec9e1a1, type: 2}
 --- !u!4 &799053776
 Transform:

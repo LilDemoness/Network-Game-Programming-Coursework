@@ -9,38 +9,18 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 81297911cc3477f41a3e88e78c50c947, type: 3}
+  m_Script: {fileID: 11500000, guid: 2ce4366d5cf8b754eb0fae126582f927, type: 3}
   m_Name: CancelWeaponFiringAction
   m_EditorClassIdentifier: 
-  Config:
-    Logic: 1
-    Amount: 0
-    Range: 0
-    DurationSeconds: 0
-    ExecuteTimeSeconds: 0
-    EffectDurationSeconds: 0
-    ReuseTimeSeconds: 0
-    AnimAnticipation: 
-    Anim: 
-    Anim2: 
-    ReactAnim: 
-    OtherAnimatorVariable: 
-    SplashDamage: 0
-    MoveSpeed: 0
-    KnockbackSpeed: 0
-    KnockbackDuration: 0
-    Radius: 0
-    ActionInput: {fileID: 0}
-    ActionInterruptible: 0
-    IsInterruptableBy: []
-    CancelsOtherActions: 1
-    OtherActionsThisCancels:
-    - {fileID: 11400000, guid: bd835fefafafbb34aac1b7aacac5b9d9, type: 2}
-    RequireSharedSlotIdentifier: 1
-    BlockingMode: 1
-    Projectiles: []
-    Spawns: []
-    IsFriendly: 0
-    Icon: {fileID: 0}
-    DisplayedName: 
-    Description: 
+  <Config>k__BackingField:
+    rid: 8059534148358897751
+  references:
+    version: 2
+    RefIds:
+    - rid: 8059534148358897751
+      type: {class: CancellingActionDefinition, ns: Gameplay.Actions, asm: Assembly-CSharp}
+      data:
+        IsHostileAction: 0
+        OtherActionsThisCancels:
+        - {fileID: 11400000, guid: 0ac5b9d999a213843a1756ed53810de4, type: 2}
+        RequireSharedSlotIdentifier: 1

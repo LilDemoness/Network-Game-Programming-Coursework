@@ -7,7 +7,8 @@ using VisualEffects;
 
 namespace Gameplay.Actions
 {
-    public abstract class Action : ScriptableObject
+    [CreateAssetMenu(menuName = "Actions/Action")]
+    public class Action : ScriptableObject
     {
         /// <summary>
         ///     An index into the GameDataSource array of action prototypes.
@@ -38,12 +39,13 @@ namespace Gameplay.Actions
         ///     RequestData we were instantiated with. Value should be reated as readonly.
         /// </summary>
         public ref ActionRequestData Data => ref m_data;
+        protected float NextUpdateTime;
         
 
         /// <summary>
         ///     Data description for this action.
         /// </summary>
-        public ActionConfig Config;
+        [field: SerializeReference, SubclassSelector] public ActionDefinition Config { get; private set; }
 
 
         public bool IsChaseAction => ActionID == GameDataSource.Instance.GeneralChaseActionPrototype.ActionID;
@@ -70,6 +72,7 @@ namespace Gameplay.Actions
             this.m_data = default;
             this.ActionID = default;
             this.TimeStarted = 0;
+            this.NextUpdateTime = 0;
         }
 
 
@@ -77,34 +80,85 @@ namespace Gameplay.Actions
         ///     Called when the Action starts actually playing (Which may be after it is created, due to queueing).
         /// </summary>
         /// <returns> False if the action decided it doesn't want to run. True otherwise.</returns>
-        public abstract bool OnStart(ServerCharacter serverCharacter);
+        public virtual bool OnStart(ServerCharacter serverCharacter)
+        {
+            NextUpdateTime = TimeStarted + Config.ExecutionDelay;
+
+            // Play Immediate Effects.
+            DebugForAction("Start", serverCharacter);
+            return Config.OnStart(serverCharacter);
+        }
 
         /// <summary>
         ///     Called each frame the action is running.
         /// </summary>
         /// <returns> True to keep running, false to stop. The action will stop by default when its duration expires, if it has one set.</returns>
-        public abstract bool OnUpdate(ServerCharacter serverCharacter);
+        public virtual bool OnUpdate(ServerCharacter serverCharacter)
+        {
+            if (Config.RetriggerDelay <= 0)
+            {
+                if (NextUpdateTime != -1)
+                {
+                    // Trigger OnUpdate() once.
+                    NextUpdateTime = -1;
+                    DebugForAction("Update", serverCharacter);
+                    return Config.OnUpdate(serverCharacter);
+                }
+            }
+            else
+            {
+                while (NextUpdateTime < Time.time)
+                {
+                    // Play Execution Effects.
+                    if (Config.OnUpdate(serverCharacter) == false)
+                        return false;
+                    DebugForAction("Update", serverCharacter);
+
+                    NextUpdateTime += Config.RetriggerDelay;
+                }
+            }
+
+            return true;
+        }
 
         /// <summary>
         ///     Called each frame (Before OnUpdate()) for the active ("blocking") Action, asking if it should become a background Action.
         /// </summary>
         /// <returns> True to become a non-blocking Action. False to remain as a blocking Action.</returns>
-        public virtual bool ShouldBecomeNonBlocking() => Config.BlockingMode == BlockingModeType.OnlyDuringExecutionTime ? TimeRunning >= Config.ExecuteTimeSeconds : false;
+        public virtual bool ShouldBecomeNonBlocking() => Config.ShouldBecomeNonBlocking(TimeRunning);
 
         /// <summary>
         ///     Called when the Action ends naturally.
         /// </summary>
-        /// <remarks> The default implementation just calls Cancel. </remarks>
         public virtual void End(ServerCharacter serverCharacter)
         {
-            Cancel(serverCharacter);
+            // Play End Effects.
+            Config.OnEnd(serverCharacter);
+            DebugForAction("End", serverCharacter);
+
+            Cleanup(serverCharacter);
         }
 
         /// <summary>
         ///     Called when the Action gets cancelled.
-        ///     Should clean up any ongoing effects at this point.
         /// </summary>
-        public virtual void Cancel(ServerCharacter serverCharacter) { }
+        public virtual void Cancel(ServerCharacter serverCharacter)
+        {
+            // Play Cancel Effects.
+            Config.OnCancel(serverCharacter);
+            DebugForAction("Cancel", serverCharacter);
+
+            Cleanup(serverCharacter);
+        }
+
+        private void DebugForAction(string actionType, ServerCharacter serverCharacter) => Debug.Log($"{this.name} {(Data.SlotIdentifier != 0 ? $"in slot {Data.SlotIdentifier}" : "")} {actionType} for {serverCharacter.name} (Client {serverCharacter.OwnerClientId})");
+
+
+        /// <summary>
+        ///     Cleans up any ongoing effects.
+        /// </summary>
+        public virtual void Cleanup(ServerCharacter serverCharacter) { }
+
 
         /// <summary>
         ///     Called <b>AFTER</b> End(). At this point, the Action has ended, meaning its Update() etc. functions will never be called again.
@@ -243,13 +297,14 @@ namespace Gameplay.Actions
         /// </summary>
         protected List<SpecialFXGraphic> InstantiateSpecialFXGraphics(Transform origin, bool parentToOrigin)
         {
-            var returnList = new List<SpecialFXGraphic>();
+            throw new System.NotImplementedException();
+            /*var returnList = new List<SpecialFXGraphic>();
             foreach(var prefab in Config.Spawns)
             {
                 if (!prefab) { continue; } // Skip blank entries in our prefab list.
                 returnList.Add(InstantiateSpecialFXGraphic(prefab, origin, parentToOrigin));
             }
-            return returnList;
+            return returnList;*/
         }
         /// <summary>
         ///     Utility function that instantiates one of the graphics from the Spawns list. <br></br>
