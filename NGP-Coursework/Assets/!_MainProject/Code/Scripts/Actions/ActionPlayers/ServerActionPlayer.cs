@@ -15,7 +15,21 @@ namespace Gameplay.Actions
 
         private List<Action> _actionQueue;
         private List<Action> _nonBlockingActions;
-        private Dictionary<ActionID, float> _actionLastUsedTimestamps;  // Stores when the Action with the associated ActionID was last used.
+
+        private struct ActionIDSlotIdentifierWrapper : IEquatable<ActionIDSlotIdentifierWrapper>
+        {
+            public ActionID ActionID;
+            public int SlotIdentifier;
+
+            public void SetValues(ActionID id, int slotIndentifier)
+            {
+                this.ActionID = id;
+                this.SlotIdentifier = slotIndentifier;
+            }
+            public bool Equals(ActionIDSlotIdentifierWrapper other) => ActionID == other.ActionID && SlotIdentifier == other.SlotIdentifier;
+        }
+        private Dictionary<ActionIDSlotIdentifierWrapper, float> _actionLastUsedTimestamps;  // Stores when the Action with the associated ActionID & Slot Identifier was last used.
+        private ActionIDSlotIdentifierWrapper _timestampComparison;
 
 
 
@@ -30,7 +44,7 @@ namespace Gameplay.Actions
 
             _actionQueue = new List<Action>();
             _nonBlockingActions = new List<Action>();
-            _actionLastUsedTimestamps = new Dictionary<ActionID, float>();
+            _actionLastUsedTimestamps = new Dictionary<ActionIDSlotIdentifierWrapper, float>();
             _hasPendingSynthesisedAction = false;
         }
 
@@ -101,7 +115,19 @@ namespace Gameplay.Actions
         ///     This only refers to the blocking action.
         ///     Multiple non-blocking actions can be running in the background, and this would still return false.
         /// </remarks>
-        public bool GetActiveActionInfo(out ActionRequestData data) => throw new System.NotImplementedException();
+        public bool GetActiveActionInfo(out ActionRequestData data)
+        {
+            if (_actionQueue.Count > 0)
+            {
+                data = _actionQueue[0].Data;
+                return true;
+            }
+            else
+            {
+                data = new ActionRequestData();
+                return false;
+            }
+        }
 
 
         /// <summary>
@@ -121,12 +147,15 @@ namespace Gameplay.Actions
         /// <summary>
         ///     Starts the action at the head of the queue, if any.
         /// </summary>
-        private void StartAction() 
+        private void StartAction()
         {
             if (_actionQueue.Count <= 0)
                 return;
 
-            if (_actionQueue[0].Config.HasCooldown() && _actionLastUsedTimestamps.TryGetValue(_actionQueue[0].ActionID, out float lastTimeUsed) && _actionQueue[0].Config.HasCooldownCompleted(lastTimeUsed))
+            _timestampComparison.SetValues(_actionQueue[0].Config.ActionID, _actionQueue[0].Data.SlotIdentifier);
+            if (_actionQueue[0].Config.HasCooldown()
+                && _actionLastUsedTimestamps.TryGetValue(_timestampComparison, out float lastTimeUsed)
+                && !_actionQueue[0].Config.HasCooldownCompleted(lastTimeUsed))
             {
                 // We've used this action too recently.
                 AdvanceQueue(false);    // Note: This calls 'StartAction()' recursively if there is more stuff in the queue.
@@ -149,7 +178,8 @@ namespace Gameplay.Actions
                 return;
             }
 
-            _actionLastUsedTimestamps[_actionQueue[0].ActionID] = Time.time;
+            _timestampComparison.SetValues(_actionQueue[0].Config.ActionID, _actionQueue[0].Data.SlotIdentifier);
+            _actionLastUsedTimestamps[_timestampComparison] = Time.time;
 
             if (_actionQueue[0].Config.ShouldBecomeNonBlocking(0.0f))
             {

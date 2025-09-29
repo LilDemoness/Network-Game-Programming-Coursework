@@ -59,17 +59,17 @@ namespace UserInput
 
 
         [Header("(Temp) Weapon Actions")]
-        [SerializeField] private Action _primaryWeaponAction;
+        [SerializeField] private ActionDefinition _primaryWeaponAction;
         private ActionState _primaryWeaponActionState;
 
-        [SerializeField] private Action _secondaryWeaponAction;
+        [SerializeField] private ActionDefinition _secondaryWeaponAction;
         private ActionState _scondaryWeaponActionState;
 
-        [SerializeField] private Action _tertiaryWeaponAction;
+        [SerializeField] private ActionDefinition _tertiaryWeaponAction;
         private ActionState _tertiaryWeaponActionState;
 
         [Space(5)]
-        [SerializeField] private Action _testCancelAction;
+        [SerializeField] private ActionDefinition _testCancelAction;
         private ActionState _testCancelActionState;
 
 
@@ -180,11 +180,11 @@ namespace UserInput
             // Play All ActionRequests (In FIFO order).
             for(int i = 0; i < _actionRequestCount; ++i)
             {
-                Action actionPrototype;
+                ActionDefinition actionDefinition;
                 switch (_actionRequests[i].ActionType)
                 {
                     case ActionType.StartShooting:
-                        actionPrototype = GameDataSource.Instance.GetActionPrototypeByID(_actionRequests[i].RequestedActionID);
+                        actionDefinition = GameDataSource.Instance.GetActionDefinitionByID(_actionRequests[i].RequestedActionID);
                         /*if (actionPrototype.Config.ActionInput != null)
                         {
                             var skillPlayer = Instantiate(actionPrototype.Config.ActionInput);
@@ -192,14 +192,14 @@ namespace UserInput
                         }
                         else
                         {*/
-                            var data = ActionRequestData.Create(actionPrototype);
+                            var data = ActionRequestData.Create(actionDefinition);
                             data.SlotIdentifier = _actionRequests[i].SlotIdentifier;
 
                             SendInput(data);
                         //}
                         break;
                     case ActionType.StopShooting:
-                        actionPrototype = GameDataSource.Instance.GetActionPrototypeByID(_actionRequests[i].RequestedActionID);
+                        actionDefinition = GameDataSource.Instance.GetActionDefinitionByID(_actionRequests[i].RequestedActionID);
                         /*if (actionPrototype.Config.ActionInput != null)
                         {
                             var skillPlayer = Instantiate(actionPrototype.Config.ActionInput);
@@ -207,7 +207,7 @@ namespace UserInput
                         }
                         else
                         {*/
-                            data = ActionRequestData.Create(actionPrototype);
+                            data = ActionRequestData.Create(actionDefinition);
                             data.SlotIdentifier = _actionRequests[i].SlotIdentifier;
 
                             SendInput(data);

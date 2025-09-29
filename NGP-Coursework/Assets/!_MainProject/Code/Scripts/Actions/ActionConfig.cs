@@ -74,7 +74,7 @@ namespace Gameplay.Actions
         public bool ActionInterruptible;
 
         [Tooltip("This action is interrupted if any of the following actions is requested")]
-        public List<Action> IsInterruptableBy;
+        public List<ActionDefinition> IsInterruptableBy;
 
         
         [Header("Cancel Others Settings")]
@@ -82,7 +82,7 @@ namespace Gameplay.Actions
         public bool CancelsOtherActions;
 
         [Tooltip("The actions that this Action automatically interrupts (Used for 'ActionLogic.Cancelling' type actions).")]
-        public List<Action> OtherActionsThisCancels;
+        public List<ActionDefinition> OtherActionsThisCancels;
 
         [Tooltip("Can this Action only interrupt other Actions if they share the same Slot Identifier?")]
         public bool RequireSharedSlotIdentifier;    // E.g. Used for Weapon Cancelling so that if the entity has multiple of the same weapons they can cancel firing one instance but not the others.

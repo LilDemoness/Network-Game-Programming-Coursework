@@ -5,12 +5,13 @@ using Gameplay.GameplayObjects.Character;
 namespace Gameplay.Actions
 {
     [System.Serializable]
+    [CreateAssetMenu(menuName = "Actions/New Cancelling Action")]
     public class CancellingActionDefinition : ActionDefinition
     {
         public override bool CancelsOtherActions => true;
 
         [Tooltip("The actions that this Action automatically interrupts (Used for 'ActionLogic.Cancelling' type actions).")]
-        public List<Action> OtherActionsThisCancels;
+        public List<ActionDefinition> OtherActionsThisCancels;
 
         [Tooltip("Can this Action only interrupt other Actions if they share the same Slot Identifier?")]
         public bool RequireSharedSlotIdentifier;    // E.g. Used for Weapon Cancelling so that if the entity has multiple of the same weapons they can cancel firing one instance but not the others.

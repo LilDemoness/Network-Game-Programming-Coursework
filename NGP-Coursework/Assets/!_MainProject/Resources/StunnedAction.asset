@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1a85ce2965f3124bbffe78ca3992afd, type: 3}
+  m_Name: StunnedAction
+  m_EditorClassIdentifier: 
+  IsHostileAction: 0
+  ActionTargeting:
+    rid: 8059534151190315089
+  Cost: 0
+  m_executionDelay: 0
+  ActionCooldown: 0
+  CanChargeAction: 0
+  MaxChargeTime: 0
+  ExecuteIfNotFullAtCharge: 0
+  MaxActiveDuration: 0
+  m_retriggerDelay: 0
+  ImmediateEffects: []
+  ExecutionEffects: []
+  EndEffects: []
+  CancelledEffects: []
+  ActionInterruptible: 0
+  IsInterruptableBy: []
+  OtherActionsThisCancels: []
+  RequireSharedSlotIdentifier: 0
+  references:
+    version: 2
+    RefIds:
+    - rid: 8059534151190315089
+      type: {class: SelfTargeting, ns: Gameplay.Actions.Targeting, asm: Assembly-CSharp}
+      data: 

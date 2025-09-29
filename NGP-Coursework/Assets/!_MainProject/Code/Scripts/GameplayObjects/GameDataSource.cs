@@ -9,20 +9,20 @@ namespace Gameplay.GameplayObjects
         public static GameDataSource Instance { get; private set; }
 
 
-        [SerializeField] private Action m_generalChaseActionPrototype;
-        [SerializeField] private Action m_generalTargetActionPrototype;
-        [SerializeField] private Action m_stunnedActionPrototype;
+        [SerializeField] private ActionDefinition m_generalChaseActionDefinition;
+        [SerializeField] private ActionDefinition m_generalTargetActionDefinition;
+        [SerializeField] private ActionDefinition m_stunnedActionDefinition;
 
 
         [Tooltip("All Action Prototype Scriptable Objects")]
-        [SerializeField] private Action[] _actionPrototypes;
+        [SerializeField] private ActionDefinition[] _actionDefinitions;
 
 
-        public Action GeneralChaseActionPrototype => m_generalChaseActionPrototype;
-        public Action GeneralTargetActionPrototype => m_generalTargetActionPrototype;
-        public Action StunnedActionPrototype => m_stunnedActionPrototype;
+        public ActionDefinition GeneralChaseActionDefinition => m_generalChaseActionDefinition;
+        public ActionDefinition GeneralTargetActionDefinition => m_generalTargetActionDefinition;
+        public ActionDefinition StunnedActionDefinition => m_stunnedActionDefinition;
 
-        private List<Action> _allActions;
+        private List<ActionDefinition> _allActions;
 
 
         private void Awake()
@@ -39,32 +39,32 @@ namespace Gameplay.GameplayObjects
         }
         private void BuildActionIDs()
         {
-            HashSet<Action> uniqueActions = new HashSet<Action>(_actionPrototypes);
+            HashSet<ActionDefinition> uniqueActions = new HashSet<ActionDefinition>(_actionDefinitions);
 
             // Add our General Action Prototypes.
-            uniqueActions.Add(GeneralChaseActionPrototype);
-            uniqueActions.Add(GeneralTargetActionPrototype);
-            uniqueActions.Add(StunnedActionPrototype);
+            uniqueActions.Add(m_generalChaseActionDefinition);
+            uniqueActions.Add(m_generalTargetActionDefinition);
+            uniqueActions.Add(m_stunnedActionDefinition);
 
-            _allActions = new List<Action>(uniqueActions.Count);
+            _allActions = new List<ActionDefinition>(uniqueActions.Count);
 
 
             // Add all our unique actions to '_allActions' and set their IDs to match.
             int i = 0;
-            foreach(Action uniqueAction in uniqueActions)
+            foreach(ActionDefinition uniqueAction in uniqueActions)
             {
-                uniqueAction.ActionID = new ActionID { ID = i };
+                uniqueAction.SetActionID(i);
                 _allActions.Add(uniqueAction);
                 ++i;
             }
         }
 
 
-        public Action GetActionPrototypeByID(ActionID index)
+        public ActionDefinition GetActionDefinitionByID(ActionID index)
         {
             return _allActions[index.ID];
         }
-        public bool TryGetActionPrototypeById(ActionID index, out Action action)
+        public bool TryGetActionDefinitionById(ActionID index, out ActionDefinition action)
         {
             for(int i = 0; i < _allActions.Count; ++i)
             {

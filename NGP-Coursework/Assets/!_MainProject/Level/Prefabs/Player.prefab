@@ -141,9 +141,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
   _serverCharacter: {fileID: 8374713656994953261}
-  _primaryWeaponAction: {fileID: 11400000, guid: 0ac5b9d999a213843a1756ed53810de4, type: 2}
-  _secondaryWeaponAction: {fileID: 11400000, guid: 0ac5b9d999a213843a1756ed53810de4, type: 2}
-  _tertiaryWeaponAction: {fileID: 11400000, guid: 0ac5b9d999a213843a1756ed53810de4, type: 2}
+  _primaryWeaponAction: {fileID: 11400000, guid: 67bbb0a585863fb4791ede74f6d2cccc, type: 2}
+  _secondaryWeaponAction: {fileID: 11400000, guid: 67bbb0a585863fb4791ede74f6d2cccc, type: 2}
+  _tertiaryWeaponAction: {fileID: 11400000, guid: 67bbb0a585863fb4791ede74f6d2cccc, type: 2}
   _testCancelAction: {fileID: 11400000, guid: d87a1fe8634a6b24b9b1e68fcec9e1a1, type: 2}
 --- !u!114 &6339476480414985111
 MonoBehaviour:

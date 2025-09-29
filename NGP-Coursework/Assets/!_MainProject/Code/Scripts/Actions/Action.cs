@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Gameplay.GameplayObjects;
@@ -7,18 +6,8 @@ using VisualEffects;
 
 namespace Gameplay.Actions
 {
-    [CreateAssetMenu(menuName = "Actions/Action")]
-    public class Action : ScriptableObject
+    public class Action
     {
-        /// <summary>
-        ///     An index into the GameDataSource array of action prototypes.
-        ///     Set at runtime by GameDataSource class.
-        ///     If the action is not itself a prototype, it will contain the ActionID of the prototype reference.
-        ///     <br></br>This field is used to identify actions in a way that can be sent over the network.
-        /// </summary>
-        [NonSerialized] public ActionID ActionID;
-
-
         public const string DEFAULT_HIT_REACT_ANIMATION_STRING = "";
 
 
@@ -45,13 +34,18 @@ namespace Gameplay.Actions
         /// <summary>
         ///     Data description for this action.
         /// </summary>
-        [field: SerializeReference, SubclassSelector] public ActionDefinition Config { get; private set; }
+        public ActionDefinition Config { get; private set; }
 
 
-        public bool IsChaseAction => ActionID == GameDataSource.Instance.GeneralChaseActionPrototype.ActionID;
-        public bool IsStunAction => ActionID == GameDataSource.Instance.StunnedActionPrototype.ActionID;
-        public bool IsGeneralTargetAction => ActionID == GameDataSource.Instance.GeneralTargetActionPrototype.ActionID;
+        public bool IsChaseAction => Config.ActionID == GameDataSource.Instance.GeneralChaseActionDefinition.ActionID;
+        public bool IsStunAction => Config.ActionID == GameDataSource.Instance.StunnedActionDefinition.ActionID;
+        public bool IsGeneralTargetAction => Config.ActionID == GameDataSource.Instance.GeneralTargetActionDefinition.ActionID;
 
+
+        public Action(ActionDefinition definition)
+        {
+            this.Config = definition;
+        }
 
         /// <summary>
         ///     Used as a Constructor.
@@ -60,8 +54,10 @@ namespace Gameplay.Actions
         /// </summary>
         public void Initialise(ref ActionRequestData data)
         {
+            if (data.ActionID != Config.ActionID)
+                throw new System.ArgumentException($"Action IDs don't match between Config ({Config.ActionID}) and ActionRequestData ({data.ActionID})");
+
             this.m_data = data;
-            this.ActionID = data.ActionID;
         }
 
         /// <summary>
@@ -70,7 +66,6 @@ namespace Gameplay.Actions
         public virtual void Reset()
         {
             this.m_data = default;
-            this.ActionID = default;
             this.TimeStarted = 0;
             this.NextUpdateTime = 0;
         }
@@ -151,7 +146,7 @@ namespace Gameplay.Actions
             Cleanup(serverCharacter);
         }
 
-        private void DebugForAction(string actionType, ServerCharacter serverCharacter) => Debug.Log($"{this.name} {(Data.SlotIdentifier != 0 ? $"in slot {Data.SlotIdentifier}" : "")} {actionType} for {serverCharacter.name} (Client {serverCharacter.OwnerClientId})");
+        private void DebugForAction(string actionType, ServerCharacter serverCharacter) => Debug.Log($"{this.Config.name} {(Data.SlotIdentifier != 0 ? $"in slot {Data.SlotIdentifier}" : "")} {actionType} for {serverCharacter.name} (Client {serverCharacter.OwnerClientId})");
 
 
         /// <summary>
@@ -315,7 +310,7 @@ namespace Gameplay.Actions
         {
             if (prefab.GetComponent<SpecialFXGraphic>() == null)
             {
-                throw new System.Exception($"One of the Spawns on the action {this.name} does not have a SpecialFXGraphic component and can't be instantiated");
+                throw new System.Exception($"One of the Spawns on the action {this.Config.name} does not have a SpecialFXGraphic component and can't be instantiated");
             }
             GameObject graphicsGO = GameObject.Instantiate(prefab, origin.transform.position, origin.transform.rotation, (parentToOrigin ? origin.transform : null));
             return graphicsGO.GetComponent<SpecialFXGraphic>();
