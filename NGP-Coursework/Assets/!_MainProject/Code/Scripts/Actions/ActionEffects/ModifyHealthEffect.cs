@@ -13,7 +13,7 @@ namespace Gameplay.Actions.Effects
 
         protected override void ApplyToTarget(ServerCharacter owner, NetworkObject targetObject)
         {
-            if (targetObject.TryGetComponent<IDamageable>(out IDamageable damageable) && damageable.IsDamageable())
+            if (targetObject.TryGetComponentThroughParents<IDamageable>(out IDamageable damageable) && damageable.IsDamageable())
             {
                 damageable.ReceiveHitPoints(owner, _healthChange);
             }

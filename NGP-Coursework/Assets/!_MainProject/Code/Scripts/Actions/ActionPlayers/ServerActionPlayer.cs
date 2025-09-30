@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Pool;
 using Gameplay.GameplayObjects.Character;
 using System;
 
@@ -72,7 +73,38 @@ namespace Gameplay.Actions
             if(_actionQueue.Count == 1) { StartAction(); }
         }
 
-        public void ClearActions(bool cancelNonBlocking) => throw new System.NotImplementedException();
+        public void ClearActions(bool cancelNonBlocking)
+        {
+            // Clear the active Action in the Action Queue.
+            if (_actionQueue.Count > 0)
+            {
+                _actionQueue[0].Cancel(_serverCharacter);
+            }
+
+            Action actionToBeCancelled; // So we don't repeatedly allocate space.
+
+            // Clear the non-active Actions in the Action Queue.
+            for (int i = _actionQueue.Count - 1; i >= 0; --i)
+            {
+                actionToBeCancelled = _actionQueue[i];
+                _actionQueue.RemoveAt(i);
+                TryReturnAction(actionToBeCancelled);
+            }
+            _actionQueue.Clear();
+
+
+            if (cancelNonBlocking)
+            {
+                for (int i = _nonBlockingActions.Count - 1; i >= 0; --i)
+                {
+                    actionToBeCancelled = _nonBlockingActions[i];
+                    actionToBeCancelled.Cancel(_serverCharacter);
+                    _nonBlockingActions.RemoveAt(i);
+                    TryReturnAction(actionToBeCancelled);
+                }
+                _nonBlockingActions.Clear();
+            }
+        }
 
 
         /// <summary>

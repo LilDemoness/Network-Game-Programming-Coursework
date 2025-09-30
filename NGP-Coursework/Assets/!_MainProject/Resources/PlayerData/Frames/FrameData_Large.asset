@@ -14,3 +14,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   <Name>k__BackingField: Large Chassis
   <WeaponSlotCount>k__BackingField: 3
+  <MaxHealth>k__BackingField: 12

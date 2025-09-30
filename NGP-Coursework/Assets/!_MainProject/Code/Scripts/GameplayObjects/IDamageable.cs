@@ -7,11 +7,7 @@ namespace Gameplay.GameplayObjects
     {
         void ReceiveHitPoints(ServerCharacter influencer, int hitPointsChange);
 
-        int GetTotalDamage();
-
-        ulong NetworkObjectID { get; }
-
-        Transform transform { get; }
+        int GetMissingHealth();
 
         bool IsDamageable();
     }

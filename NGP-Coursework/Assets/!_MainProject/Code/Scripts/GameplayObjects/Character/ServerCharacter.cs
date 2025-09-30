@@ -1,6 +1,7 @@
 using UnityEngine;
 using Unity.Netcode;
 using Gameplay.Actions;
+using Gameplay.GameplayObjects.Health;
 
 namespace Gameplay.GameplayObjects.Character
 {
@@ -8,6 +9,7 @@ namespace Gameplay.GameplayObjects.Character
     ///     Contains all NetworkVariables, RPCs, and Server-Side Logic of a Character.
     ///     Separated from the Client Logic so that it is always known whether a section of code is running on the server or the client.
     /// </summary>
+    [RequireComponent(typeof(NetworkLifeState), typeof(NetworkHealthState))]
     public class ServerCharacter : NetworkBehaviour
     {
         [SerializeField] private ClientCharacter m_clientCharacter;
@@ -16,18 +18,50 @@ namespace Gameplay.GameplayObjects.Character
 
         // Build Data?
         private BuildData m_buildData;
-        public BuildData BuildData => m_buildData;
-
-
-        /// <summary> Indicates how the character's movement should be depicted. </summary>
-        public NetworkVariable<MovementStatus> MovementStatus { get; } = new NetworkVariable<MovementStatus>();
+        public BuildData BuildData
+        {
+            get => m_buildData;
+            set => m_buildData = value;
+        }
 
 
         /// <summary>
-        ///     A
+        ///     Indicates how the character's movement should be depicted.
+        /// </summary>
+        public NetworkVariable<MovementStatus> MovementStatus { get; } = new NetworkVariable<MovementStatus>();
+
+        /// <summary>
+        ///     Indicates whether this character is in "stealth" (Invisible to AI agents and other players).
+        /// </summary>
+        public NetworkVariable<bool> IsInStealth { get; } = new NetworkVariable<bool>();
+
+
+        // Health & Life.
+        public NetworkHealthState NetHealthState { get; private set; }
+        public NetworkLifeState NetLifeState { get; private set; }
+
+        [SerializeField] private DamageReceiver _damageReceiver;
+
+        public int CurrentHealth
+        {
+            get => NetHealthState.CurrentHealth.Value;
+            private set => NetHealthState.CurrentHealth.Value = value;
+        }
+        public int MaxHealth => BuildData.GetFrameData()?.MaxHealth ?? 0;
+        public bool IsDead
+        {
+            get => NetLifeState.IsDead.Value;
+            private set => NetLifeState.IsDead.Value = value;
+        }
+
+
+        /// <summary>
+        ///     This Character's ActionPlayer, exposed for use by ActionEffects.
         /// </summary>
         public ServerActionPlayer ActionPlayer => m_serverActionPlayer;
         private ServerActionPlayer m_serverActionPlayer;
+
+        public bool CanPerformActions => !IsDead;
 
 
         [SerializeField] private ServerCharacterMovement _movement; 
@@ -39,6 +73,8 @@ namespace Gameplay.GameplayObjects.Character
         private void Awake()
         {
             m_serverActionPlayer = new ServerActionPlayer(this);
+            NetLifeState = GetComponent<NetworkLifeState>();
+            NetHealthState = GetComponent<NetworkHealthState>();
         }
         public override void OnNetworkSpawn()
         {
@@ -47,10 +83,23 @@ namespace Gameplay.GameplayObjects.Character
                 this.enabled = false;
                 return;
             }
+
+            // Subscribe to Health/Life Events.
+            NetLifeState.IsDead.OnValueChanged += OnLifeStateChanged;
+            _damageReceiver.OnDamageReceived += ReceiveHealthChange;
+            _damageReceiver.GetMissingHealthFunc += GetMissingHealth;
+
+            InitialiseHealth();
         }
         public override void OnNetworkDespawn()
         {
-            
+            // Unsubscribe from Health/Life Events.
+            NetLifeState.IsDead.OnValueChanged -= OnLifeStateChanged;
+            if (_damageReceiver != null)
+            {
+                _damageReceiver.OnDamageReceived -= ReceiveHealthChange;
+                _damageReceiver.GetMissingHealthFunc -= GetMissingHealth;
+            }
         }
 
 
@@ -62,8 +111,8 @@ namespace Gameplay.GameplayObjects.Character
         [ServerRpc]
         public void SendCharacterMovementInputServerRpc(Vector2 movementInput)
         {
-            // Check if we're currently experiencing forced movement (E.g. Knockback/Charge).
-            if (_movement.IsPerformingForcedMovement())
+            // Check that we're not dead or currently experiencing forced movement (E.g. Knockback/Charge).
+            if (IsDead || _movement.IsPerformingForcedMovement())
                 return;
 
             // Check if our current action prevents movement.
@@ -123,5 +172,57 @@ namespace Gameplay.GameplayObjects.Character
         {
             ActionPlayer.OnUpdate();
         }
+
+
+
+        #region Health & Life
+
+        private void InitialiseHealth()
+        {
+            CurrentHealth = MaxHealth;
+        }
+
+        private void ReceiveHealthChange(ServerCharacter inflicter, int healthChange)
+        {
+            if (healthChange > 0)
+            {
+                // Healing.
+                m_serverActionPlayer.OnGameplayActivity(Action.GameplayActivity.Healed);
+                float healingModifier = m_serverActionPlayer.GetBuffedValue(Action.BuffableValue.PercentHealingReceived);
+                healthChange = Mathf.CeilToInt(healthChange * healingModifier);
+            }
+            else
+            {
+                // Damage.
+                m_serverActionPlayer.OnGameplayActivity(Action.GameplayActivity.AttackedByEnemy);
+                float damageModifier = m_serverActionPlayer.GetBuffedValue(Action.BuffableValue.PercentDamageReceived);
+                healthChange = Mathf.CeilToInt(healthChange * damageModifier);
+
+                // Take Damage Animation.
+            }
+
+            CurrentHealth = Mathf.Clamp(CurrentHealth + healthChange, 0, MaxHealth);
+            Debug.Log($"New Health: {CurrentHealth}");
+
+            if (CurrentHealth <= 0)
+            {
+                // We've died.
+                IsDead = true;
+                //m_serverActionPlayer.ClearActions(false);
+            }
+        }
+        private int GetMissingHealth() => Mathf.Max(0, MaxHealth - CurrentHealth);
+
+        private void OnLifeStateChanged(bool previousValue, bool newValue)
+        {
+            if (newValue == true)
+            {
+                // We have died. Cancel active actions.
+                m_serverActionPlayer.ClearActions(true);
+                _movement.CancelMove();
+            }
+        }
+
+        #endregion
     }
 }
