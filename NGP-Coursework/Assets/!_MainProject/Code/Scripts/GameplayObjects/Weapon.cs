@@ -11,7 +11,8 @@ namespace Gameplay.GameplayObjects
         [SerializeField] private Transform _firingOrigin;
 
 
-        public Vector3 GetAttackOrigin() => _firingOrigin.position;
-        public Vector3 GetAttackDirection() => _firingOrigin.forward;
+        public Transform GetAttackOriginTransform() => _firingOrigin;
+        public Vector3 GetAttackLocalOffset() => Vector3.zero;
+        public Vector3 GetAttackLocalDirection() => Vector3.forward;
     }
 }

@@ -12,6 +12,7 @@ namespace Gameplay.Actions
     public struct ActionRequestData : INetworkSerializeByMemcpy
     {
         public ActionID ActionID;   // The index of the action in the list of all actions in the game (Used to recover the reference to the instance at runtime).
+        public Transform OriginTransform; // Transform where this skill originates (NOT SERIALIZED OVER THE NETWORK). (If set, Position and Direction become local to this transform).
         public Vector3 Position;    // Centre position of the skill (E.g. The source of an explosion). May Remove
         public Vector3 Direction;   // Direction of a skill, if not inferrable from the character's facing direction.
         public ulong[] TargetIDs;   // NetworkObjectIds of the targets (E.g. A homing attack), or null if it is untargeted (E.g. A standard projectile)
@@ -56,7 +57,7 @@ namespace Gameplay.Actions
         /// </summary>
         public bool Compare(ref ActionRequestData rhs)
         {
-            bool areScalarParamsEqual = (ActionID, Position, Direction, Amount, SlotIdentifier) == (rhs.ActionID, rhs.Position, rhs.Direction, rhs.Amount, rhs.SlotIdentifier);
+            bool areScalarParamsEqual = (ActionID, OriginTransform, Position, Direction, Amount, SlotIdentifier) == (rhs.ActionID, rhs.OriginTransform, rhs.Position, rhs.Direction, rhs.Amount, rhs.SlotIdentifier);
             if (!areScalarParamsEqual) { return false; }
 
             if (TargetIDs == rhs.TargetIDs) { return true; }    // Also covers the case of both being null.
@@ -98,7 +99,7 @@ namespace Gameplay.Actions
 
             if (serializer.IsReader)
             {
-                // A.
+                // Serialize Bool Values.
                 ShouldQueue =       flags.HasFlag(PackFlags.ShouldQueue);
                 PreventMovement =   flags.HasFlag(PackFlags.PreventMovement);
                 ShouldClose =       flags.HasFlag(PackFlags.ShouldClose);
@@ -109,6 +110,13 @@ namespace Gameplay.Actions
             if (flags.HasFlag(PackFlags.HasTargetIds))      { serializer.SerializeValue(ref TargetIDs); }
             if (flags.HasFlag(PackFlags.HasAmount))         { serializer.SerializeValue(ref Amount); }
             if (flags.HasFlag(PackFlags.HasSlotIdentifier)) { serializer.SerializeValue(ref SlotIdentifier); }
+
+
+            // Remove when we're doing our final builds.
+            if (OriginTransform != null)
+            {
+                Debug.LogWarning("OriginTransform is not synchronised over the network, but you're sending a ActionRequestData over the network with an OriginTransform set.");
+            }
         }
     }
 }

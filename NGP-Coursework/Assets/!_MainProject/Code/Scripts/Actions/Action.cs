@@ -71,6 +71,31 @@ namespace Gameplay.Actions
         }
 
 
+        private Vector3 GetTargetingOrigin() => Data.OriginTransform != null ? Data.OriginTransform.TransformPoint(Data.Position) : Data.Position;
+        private Vector3 GetTargetingDirection() => Data.OriginTransform != null ? Data.OriginTransform.TransformDirection(Data.Direction) : Data.Direction;
+
+
+        /// <summary>
+        ///     Initialise our Data's required Parameters (If they aren't already set-up).
+        /// </summary>
+        private void InitialiseDataParametersIfEmpty(ServerCharacter serverCharacter)
+        {
+            if (Data.OriginTransform != null)
+            {
+                if (Data.Direction == Vector3.zero)
+                    Data.Direction = Vector3.forward;
+            }
+            else
+            {
+                if (Data.Direction == Vector3.zero)
+                    Data.Direction = serverCharacter.transform.forward;
+                if (Data.Position == Vector3.zero)
+                    Data.Position = serverCharacter.transform.position;
+            }
+        }
+
+
+
         /// <summary>
         ///     Called when the Action starts actually playing (Which may be after it is created, due to queueing).
         /// </summary>
@@ -79,16 +104,14 @@ namespace Gameplay.Actions
         {
             NextUpdateTime = TimeStarted + Config.ExecutionDelay;
 
-            // Initialise Data Parameters (If they aren't already set-up).
-            if (Data.Direction == Vector3.zero)
-                Data.Direction = serverCharacter.transform.forward;
-            if (Data.Position == Vector3.zero)
-                Data.Position = serverCharacter.transform.position;
+            // Ensure our Data's perameters are set up.
+            InitialiseDataParametersIfEmpty(serverCharacter);
 
             // Play Immediate Effects.
             DebugForAction("Start", serverCharacter);
-            return Config.OnStart(serverCharacter, Data.Position, Data.Direction);
+            return Config.OnStart(serverCharacter, GetTargetingOrigin(), GetTargetingDirection());
         }
+
 
         /// <summary>
         ///     Called each frame the action is running.
@@ -103,7 +126,7 @@ namespace Gameplay.Actions
                     // Trigger OnUpdate() once.
                     NextUpdateTime = -1;
                     DebugForAction("Update", serverCharacter);
-                    return Config.OnUpdate(serverCharacter, Data.Position, Data.Direction);
+                    return Config.OnUpdate(serverCharacter, GetTargetingOrigin(), GetTargetingDirection());
                 }
             }
             else
@@ -112,7 +135,7 @@ namespace Gameplay.Actions
                 {
                     // Play Execution Effects.
                     DebugForAction("Update", serverCharacter);
-                    if (Config.OnUpdate(serverCharacter, Data.Position, Data.Direction) == false)
+                    if (Config.OnUpdate(serverCharacter, GetTargetingOrigin(), GetTargetingDirection()) == false)
                         return false;
 
                     NextUpdateTime += Config.RetriggerDelay;
@@ -134,7 +157,7 @@ namespace Gameplay.Actions
         public virtual void End(ServerCharacter serverCharacter)
         {
             // Play End Effects.
-            Config.OnEnd(serverCharacter, Data.Position, Data.Direction);
+            Config.OnEnd(serverCharacter, GetTargetingOrigin(), GetTargetingDirection());
             DebugForAction("End", serverCharacter);
 
             Cleanup(serverCharacter);
@@ -146,7 +169,7 @@ namespace Gameplay.Actions
         public virtual void Cancel(ServerCharacter serverCharacter)
         {
             // Play Cancel Effects.
-            Config.OnCancel(serverCharacter, Data.Position, Data.Direction);
+            Config.OnCancel(serverCharacter, GetTargetingOrigin(), GetTargetingDirection());
             DebugForAction("Cancel", serverCharacter);
 
             Cleanup(serverCharacter);

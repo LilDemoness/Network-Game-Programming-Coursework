@@ -137,6 +137,7 @@ namespace Gameplay.Actions
         {
             if (_hasInitialEffects)
                 PrimaryTargetingType.GetTargets(owner, origin, direction, HandleImmediateEffects);
+            
             return true;
         }
         private void HandleImmediateEffects(ServerCharacter owner, ulong[] targetIDs)

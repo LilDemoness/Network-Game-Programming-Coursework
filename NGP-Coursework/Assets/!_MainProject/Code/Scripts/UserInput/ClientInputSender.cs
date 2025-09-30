@@ -50,27 +50,15 @@ namespace UserInput
         private Vector2 _movementInput;
 
 
-        /// <summary>
-        ///     This event fires at the time when an action event is sent to the server.
-        /// </summary>
-        public event System.Action<ActionRequestData> ActionInputEvent;
-
-
         [SerializeField] private ServerCharacter _serverCharacter;
 
 
         private PlayerInputActions _inputActions;
 
 
-        [Header("(Temp) Weapon Actions")]
-        [SerializeField] private Weapon _primaryWeapon;
-        [SerializeField] private Weapon _secondaryWeapon;
-        [SerializeField] private Weapon _tertiaryWeapon;
+        [SerializeField] private ServerWeaponController _serverWeaponController;
 
-        [Space(5)]
-        [SerializeField] private ActionDefinition _testCancelAction;
-
-
+        
         public override void OnNetworkSpawn()
         {
             if (!IsClient || !IsOwner)
@@ -82,7 +70,6 @@ namespace UserInput
 
             // Setup our InputActionMap.
             CreateInputActions();
-            StartCoroutine(InitialiseWeapons());
         }
         public override void OnNetworkDespawn()
         {
@@ -158,23 +145,6 @@ namespace UserInput
         }
 
 
-        // Move to a 'WeaponsManager' class?
-        public IEnumerator InitialiseWeapons()
-        {
-            yield return null;
-            foreach (var weaponAttachmentSlot in GetComponentsInChildren<Gameplay.GameplayObjects.Character.Customisation.Sections.WeaponAttachmentSlot>())
-            {
-                Debug.Log(weaponAttachmentSlot.name + " " + weaponAttachmentSlot.SlotIndex + " " + weaponAttachmentSlot.GetComponentInChildren<Weapon>());
-                switch (weaponAttachmentSlot.SlotIndex)
-                {
-                    case 1: _primaryWeapon = weaponAttachmentSlot.GetComponentInChildren<Weapon>(); break;
-                    case 2: _secondaryWeapon = weaponAttachmentSlot.GetComponentInChildren<Weapon>(); break;
-                    case 3: _tertiaryWeapon = weaponAttachmentSlot.GetComponentInChildren<Weapon>(); break;
-                }
-            }
-        }
-
-
         private void Update()
         {
             // Get Framewise Input.
@@ -227,11 +197,8 @@ namespace UserInput
             }
         }
 
-        private void SendInput(ActionRequestData action)
-        {
-            ActionInputEvent?.Invoke(action);
-            _serverCharacter.PlayActionServerRpc(action);
-        }
+        private void SendInput(ActionRequestData action) => _serverCharacter.PlayActionServerRpc(action);
+        
 
 
         private void RequestAction(ActionType actionType, ActionDefinition actionState, Vector3 origin = default, Vector3 direction = default, int slotIdentifier = -1)
@@ -247,16 +214,15 @@ namespace UserInput
                 ++_actionRequestCount;
             }
         }
-        private void RequestActionForWeapon(Weapon weapon, int slot) => RequestAction(ActionType.StartShooting, weapon.WeaponData.AssociatedAction, weapon.GetAttackOrigin(), weapon.GetAttackDirection(), slot); 
-        
 
-        private void UsePrimaryWeapon_started(InputAction.CallbackContext obj) { if (_primaryWeapon != null) {RequestActionForWeapon(_primaryWeapon, 1); } }
-        private void UsePrimaryWeapon_cancelled(InputAction.CallbackContext obj) { if (_primaryWeapon != null) { RequestAction(ActionType.StopShooting, _testCancelAction, slotIdentifier: 1); } }
 
-        private void UseSecondaryWeapon_started(InputAction.CallbackContext obj) { if (_secondaryWeapon != null) { RequestActionForWeapon(_secondaryWeapon, 2); } }
-        private void UseSecondaryWeapon_cancelled(InputAction.CallbackContext obj) { if (_secondaryWeapon != null) { RequestAction(ActionType.StopShooting, _testCancelAction, slotIdentifier: 2); } }
+        private void UsePrimaryWeapon_started(InputAction.CallbackContext obj) => _serverWeaponController.StartFiringPrimaryWeaponServerRpc();
+        private void UsePrimaryWeapon_cancelled(InputAction.CallbackContext obj) => _serverWeaponController.StopFiringPrimaryWeaponServerRpc();
 
-        private void UseTertiaryWeapon_started(InputAction.CallbackContext obj) { if (_tertiaryWeapon != null) { RequestActionForWeapon(_tertiaryWeapon, 3); } }
-        private void UseTertiaryWeapon_cancelled(InputAction.CallbackContext obj) { if (_tertiaryWeapon != null) { RequestAction(ActionType.StopShooting, _testCancelAction, slotIdentifier: 3); } }
+        private void UseSecondaryWeapon_started(InputAction.CallbackContext obj) => _serverWeaponController.StartFiringSecondaryWeaponServerRpc();
+        private void UseSecondaryWeapon_cancelled(InputAction.CallbackContext obj) => _serverWeaponController.StopFiringSecondaryWeaponServerRpc();
+
+        private void UseTertiaryWeapon_started(InputAction.CallbackContext obj) => _serverWeaponController.StartFiringTertiaryWeaponServerRpc();
+        private void UseTertiaryWeapon_cancelled(InputAction.CallbackContext obj) => _serverWeaponController.StopFiringTertiaryWeaponServerRpc();
     }
 }

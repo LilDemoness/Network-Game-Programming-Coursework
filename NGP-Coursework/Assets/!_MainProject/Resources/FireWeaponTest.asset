@@ -17,12 +17,12 @@ MonoBehaviour:
     rid: 8059534151770964071
   Cost: 0
   m_executionDelay: 0
-  ActionCooldown: 5
+  ActionCooldown: 0
   CanChargeAction: 0
   MaxChargeTime: 0
   ExecuteIfNotFullAtCharge: 0
   MaxActiveDuration: 0
-  m_retriggerDelay: 0
+  m_retriggerDelay: 0.2
   ImmediateEffects: []
   ExecutionEffects:
   - rid: 8059534151770964076

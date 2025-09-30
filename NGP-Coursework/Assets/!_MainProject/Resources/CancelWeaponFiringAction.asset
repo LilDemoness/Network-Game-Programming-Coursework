@@ -15,4 +15,4 @@ MonoBehaviour:
   IsHostileAction: 0
   OtherActionsThisCancels:
   - {fileID: 11400000, guid: 67bbb0a585863fb4791ede74f6d2cccc, type: 2}
-  RequireSharedSlotIdentifier: 0
+  RequireSharedSlotIdentifier: 1

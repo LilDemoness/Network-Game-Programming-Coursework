@@ -83,7 +83,14 @@ namespace Gameplay.GameplayObjects.Character
         /// </summary>
         /// <param name="data"> The Data about which action to play and its associated details.</param>
         [ServerRpc]
-        public void PlayActionServerRpc(ActionRequestData data)
+        public void PlayActionServerRpc(ActionRequestData data) => PlayActionLocalCallRpc(data);
+        /// <summary>
+        ///     Non-Authoritative request to play an action on the Server.
+        ///     Should only be called by scripts on the server.
+        /// </summary>
+        /// <param name="data"> The Data about which action to play and its associated details.</param>
+        [Rpc(SendTo.Me)]
+        public void PlayActionLocalCallRpc(ActionRequestData data)
         {
             ActionRequestData data1 = data;
             if (GameDataSource.Instance.GetActionDefinitionByID(data1.ActionID).IsHostileAction)
