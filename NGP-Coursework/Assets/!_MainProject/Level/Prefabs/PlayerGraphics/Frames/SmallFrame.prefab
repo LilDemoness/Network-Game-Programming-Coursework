@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3303633571905138024}
   - component: {fileID: 5149124185239914688}
+  - component: {fileID: 405284079944803368}
   m_Layer: 3
   m_Name: SmallFrame
   m_TagString: Untagged
@@ -53,12 +54,33 @@ MonoBehaviour:
   - {fileID: 7131005131184123870}
   - {fileID: 7839997519089048298}
   - {fileID: 762667209433889736}
-  _weaponsAttachPoints:
-  - {fileID: 2493666264448377047}
   _abilityDatas:
   - {fileID: 1898558584078067776}
   - {fileID: 3335836465487448967}
   - {fileID: 6851383039167505973}
+  m_weaponAttachmentSlotArray:
+  - {fileID: 2493666264448377047}
+--- !u!65 &405284079944803368
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1694395037143345048}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &2774149199453002353
 GameObject:
   m_ObjectHideFlags: 0

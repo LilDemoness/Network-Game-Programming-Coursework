@@ -155,7 +155,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 569e4d623ab2c964bbd757167a181468, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _slotIndex: 2
+  _weaponSlotIndex: 2
   _weaponGFXs:
   - {fileID: 2460190629753868793}
   - {fileID: 7047435537401537864}
@@ -308,7 +308,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 569e4d623ab2c964bbd757167a181468, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _slotIndex: 3
+  _weaponSlotIndex: 3
   _weaponGFXs:
   - {fileID: 7613937681746707789}
   - {fileID: 1001746118039780034}
@@ -360,7 +360,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 569e4d623ab2c964bbd757167a181468, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _slotIndex: 1
+  _weaponSlotIndex: 1
   _weaponGFXs:
   - {fileID: 2771108318060204418}
   - {fileID: 6694876043352221897}
@@ -408,6 +408,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3119439144098005406}
   - component: {fileID: 4731248214987268504}
+  - component: {fileID: 4683916623211921462}
   m_Layer: 3
   m_Name: LargeFrame
   m_TagString: Untagged
@@ -451,14 +452,35 @@ MonoBehaviour:
   - {fileID: 4307273802363211803}
   - {fileID: 6847137045212582292}
   - {fileID: 3295394718423239694}
-  _weaponsAttachPoints:
-  - {fileID: 4143401524329493544}
-  - {fileID: 2358873318091098767}
-  - {fileID: 5278518807001707543}
   _abilityDatas:
   - {fileID: 2511944860251884849}
   - {fileID: 2734210925768423268}
   - {fileID: 5665943577438039478}
+  m_weaponAttachmentSlotArray:
+  - {fileID: 4143401524329493544}
+  - {fileID: 2358873318091098767}
+  - {fileID: 5278518807001707543}
+--- !u!65 &4683916623211921462
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8458849858624576105}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1001 &436596697899977613
 PrefabInstance:
   m_ObjectHideFlags: 0

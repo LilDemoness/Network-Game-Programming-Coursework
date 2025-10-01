@@ -43,6 +43,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3061436440808749937}
   - component: {fileID: 4806704998033749167}
+  - component: {fileID: 5502279146680585024}
   m_Layer: 3
   m_Name: MediumFrame
   m_TagString: Untagged
@@ -86,13 +87,34 @@ MonoBehaviour:
   - {fileID: 7850884464851945665}
   - {fileID: 634522602937524575}
   - {fileID: 6628604422667480496}
-  _weaponsAttachPoints:
-  - {fileID: 8817335291640702085}
-  - {fileID: 9135672480192770833}
   _abilityDatas:
   - {fileID: 1564949465580125634}
   - {fileID: 4318153581402902130}
   - {fileID: 5654793206799010723}
+  m_weaponAttachmentSlotArray:
+  - {fileID: 8817335291640702085}
+  - {fileID: 9135672480192770833}
+--- !u!65 &5502279146680585024
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2422268012539576141}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &4475233291854775982
 GameObject:
   m_ObjectHideFlags: 0
@@ -140,7 +162,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 569e4d623ab2c964bbd757167a181468, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _slotIndex: 2
+  _weaponSlotIndex: 2
   _weaponGFXs:
   - {fileID: 400238390225174696}
   - {fileID: 5282678763320542901}
@@ -400,7 +422,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 569e4d623ab2c964bbd757167a181468, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _slotIndex: 1
+  _weaponSlotIndex: 1
   _weaponGFXs:
   - {fileID: 8481869320546910976}
   - {fileID: 2249055051120862904}

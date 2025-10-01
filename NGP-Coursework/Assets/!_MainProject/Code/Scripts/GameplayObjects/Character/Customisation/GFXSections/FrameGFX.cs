@@ -13,10 +13,13 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Sections
     {
         [SerializeField] private FrameData _associatedFrameData;
 
-        [Header("Container References")]
         [SerializeField] private LegGFXSection[] _legDatas;
-        [SerializeField] private WeaponAttachmentSlot[] _weaponsAttachPoints;
         [SerializeField] private AbilityGFXSection[] _abilityDatas;
+
+        [SerializeField] private WeaponAttachmentSlot[] m_weaponAttachmentSlotArray;
+        private Dictionary<int, WeaponAttachmentSlot> _weaponsAttachPoints = new Dictionary<int, WeaponAttachmentSlot>();
+        
+        public bool TryGetAttachmentSlot(int slotIndex, out WeaponAttachmentSlot weaponAttachmentSlot) => _weaponsAttachPoints.TryGetValue(slotIndex, out weaponAttachmentSlot);
 
 
         #if UNITY_EDITOR
@@ -24,14 +27,28 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Sections
         [ContextMenu(itemName: "Setup/Auto Setup Container References")]
         private void Editor_AutoSetupContainerReferences()
         {
+            // Ensure Changes are Recorded.
+            UnityEditor.Undo.RecordObject(this, "Setup FrameGFX Container References");
+
             _legDatas = GetComponentsInChildren<LegGFXSection>();
-            _weaponsAttachPoints = GetComponentsInChildren<WeaponAttachmentSlot>();
             _abilityDatas = GetComponentsInChildren<AbilityGFXSection>();
+            m_weaponAttachmentSlotArray = GetComponentsInChildren<WeaponAttachmentSlot>();
+
+            // Ensure Changes are Recorded.
+            UnityEditor.EditorUtility.SetDirty(this);
+            UnityEditor.PrefabUtility.RecordPrefabInstancePropertyModifications(this);
         }
 
-        #endif
+#endif
 
-    
+        private void Awake()
+        {
+            _weaponsAttachPoints = new Dictionary<int, WeaponAttachmentSlot>(m_weaponAttachmentSlotArray.Length);
+            foreach(WeaponAttachmentSlot weaponAttachmentSlot in m_weaponAttachmentSlotArray)
+                _weaponsAttachPoints.Add(weaponAttachmentSlot.SlotIndex, weaponAttachmentSlot);
+        }
+
+
         public FrameGFX OnSelectedFrameChanged(FrameData activeData)
         {
             this.gameObject.SetActive(activeData == _associatedFrameData);
@@ -49,14 +66,10 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Sections
         }
         public FrameGFX OnSelectedWeaponChanged(int weaponSlot, WeaponData activeData)
         {
-            if (weaponSlot >= _weaponsAttachPoints.Length)
+            if (_weaponsAttachPoints.TryGetValue(weaponSlot, out WeaponAttachmentSlot weaponAttachmentSlot))
             {
-                //Debug.LogError("Weapon Slot Index is out of range");
-                return this;
+                weaponAttachmentSlot.Toggle(activeData);
             }
-
-            _weaponsAttachPoints[weaponSlot].Toggle(activeData);
-
             return this;
         }
         public FrameGFX OnSelectedAbilityChanged(AbilityData activeData)
@@ -87,16 +100,18 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Sections
 
 
             // Weapons.
-            int attachPointsCount = _weaponsAttachPoints.Length;
-            if (attachPointsCount > 0)
+            WeaponAttachmentSlot weaponAttachmentSlot = null;
+            if (_weaponsAttachPoints.TryGetValue((int)WeaponSlotIndex.Primary, out weaponAttachmentSlot))
             {
-                _weaponsAttachPoints[0].Finalise(activePrimaryWeapon);
-                if (attachPointsCount > 1)
+                weaponAttachmentSlot.Finalise(activePrimaryWeapon);
+                
+                if (_weaponsAttachPoints.TryGetValue((int)WeaponSlotIndex.Secondary, out weaponAttachmentSlot))
                 {
-                    _weaponsAttachPoints[1].Finalise(activeSecondaryWeapon);
-                    if (attachPointsCount > 2)
+                    weaponAttachmentSlot.Finalise(activeSecondaryWeapon);
+                    
+                    if (_weaponsAttachPoints.TryGetValue((int)WeaponSlotIndex.Tertiary, out weaponAttachmentSlot))
                     {
-                        _weaponsAttachPoints[2].Finalise(activeTertiaryWeapon);
+                        weaponAttachmentSlot.Finalise(activeTertiaryWeapon);
                     }
                 }
             }
