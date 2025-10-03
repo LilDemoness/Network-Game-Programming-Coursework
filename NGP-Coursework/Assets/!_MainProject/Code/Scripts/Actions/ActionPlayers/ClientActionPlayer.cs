@@ -82,12 +82,12 @@ namespace Gameplay.Actions
         }
 
 
-        public void PlayAction(ref ActionRequestData data)
+        public void PlayAction(ref ActionRequestData data, float serverTimeStarted)
         {
             int anticipatedActionIndex = FindAction(data.ActionID, true);
 
             Action actionFX = anticipatedActionIndex>= 0 ? _playingActions[anticipatedActionIndex] : ActionFactory.CreateActionFromData(ref data);
-            if (actionFX.OnStartClient(ClientCharacter))
+            if (actionFX.OnStartClient(ClientCharacter, serverTimeStarted))
             {
                 if (anticipatedActionIndex < 0)
                 {

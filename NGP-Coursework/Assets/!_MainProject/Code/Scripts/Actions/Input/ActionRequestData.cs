@@ -12,7 +12,7 @@ namespace Gameplay.Actions
     public struct ActionRequestData : INetworkSerializeByMemcpy
     {
         public ActionID ActionID;   // The index of the action in the list of all actions in the game (Used to recover the reference to the instance at runtime).
-        public Transform OriginTransform; // Transform where this skill originates (NOT SERIALIZED OVER THE NETWORK). (If set, Position and Direction become local to this transform).
+        public ulong OriginTransformID; // NetworkObjectID of the transform where this skill originates. (If set, Position and Direction become local to this transform).
         public Vector3 Position;    // Centre position of the skill (E.g. The source of an explosion). May Remove
         public Vector3 Direction;   // Direction of a skill, if not inferrable from the character's facing direction.
         public ulong[] TargetIDs;   // NetworkObjectIds of the targets (E.g. A homing attack), or null if it is untargeted (E.g. A standard projectile)
@@ -39,14 +39,15 @@ namespace Gameplay.Actions
         private enum PackFlags
         {
             None = 0,
-            HasPosition         = 1 << 0,
-            HasDirection        = 1 << 1,
-            HasTargetIds        = 1 << 2,
-            HasAmount           = 1 << 3,
-            HasSlotIdentifier   = 1 << 4,
-            ShouldQueue         = 1 << 5,
-            ShouldClose         = 1 << 6,
-            PreventMovement     = 1 << 7,
+            HasOriginTransform  = 1 << 1,
+            HasPosition         = 1 << 2,
+            HasDirection        = 1 << 3,
+            HasTargetIds        = 1 << 4,
+            HasAmount           = 1 << 5,
+            HasSlotIdentifier   = 1 << 6,
+            ShouldQueue         = 1 << 7,
+            ShouldClose         = 1 << 8,
+            PreventMovement     = 1 << 9,
         }
 
 
@@ -57,7 +58,7 @@ namespace Gameplay.Actions
         /// </summary>
         public bool Compare(ref ActionRequestData rhs)
         {
-            bool areScalarParamsEqual = (ActionID, OriginTransform, Position, Direction, Amount, SlotIdentifier) == (rhs.ActionID, rhs.OriginTransform, rhs.Position, rhs.Direction, rhs.Amount, rhs.SlotIdentifier);
+            bool areScalarParamsEqual = (ActionID, OriginTransformID, Position, Direction, Amount, SlotIdentifier) == (rhs.ActionID, rhs.OriginTransformID, rhs.Position, rhs.Direction, rhs.Amount, rhs.SlotIdentifier);
             if (!areScalarParamsEqual) { return false; }
 
             if (TargetIDs == rhs.TargetIDs) { return true; }    // Also covers the case of both being null.
@@ -74,6 +75,7 @@ namespace Gameplay.Actions
         private PackFlags GetPackFlags()
         {
             PackFlags flags = PackFlags.None;
+            if (OriginTransformID != 0)     { flags |= PackFlags.HasOriginTransform; }
             if (Position != Vector3.zero)   { flags |= PackFlags.HasPosition; }
             if (Direction != Vector3.zero)  { flags |= PackFlags.HasDirection; }
             if (TargetIDs != null)          { flags |= PackFlags.HasTargetIds; }
@@ -105,18 +107,12 @@ namespace Gameplay.Actions
                 ShouldClose =       flags.HasFlag(PackFlags.ShouldClose);
             }
 
+            if (flags.HasFlag(PackFlags.HasOriginTransform)){ serializer.SerializeValue(ref OriginTransformID); }
             if (flags.HasFlag(PackFlags.HasPosition))       { serializer.SerializeValue(ref Position); }
             if (flags.HasFlag(PackFlags.HasDirection))      { serializer.SerializeValue(ref Direction); }
             if (flags.HasFlag(PackFlags.HasTargetIds))      { serializer.SerializeValue(ref TargetIDs); }
             if (flags.HasFlag(PackFlags.HasAmount))         { serializer.SerializeValue(ref Amount); }
             if (flags.HasFlag(PackFlags.HasSlotIdentifier)) { serializer.SerializeValue(ref SlotIdentifier); }
-
-
-            // Remove when we're doing our final builds.
-            if (OriginTransform != null)
-            {
-                Debug.LogWarning("OriginTransform is not synchronised over the network, but you're sending a ActionRequestData over the network with an OriginTransform set.");
-            }
         }
     }
 }

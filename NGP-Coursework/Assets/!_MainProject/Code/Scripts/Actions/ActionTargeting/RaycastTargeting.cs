@@ -16,8 +16,11 @@ namespace Gameplay.Actions.Targeting
 
         public override void GetTargets(ServerCharacter owner, Vector3 origin, Vector3 direction, System.Action<ServerCharacter, ActionHitInfo[]> onCompleteCallback)
         {
-            DebugTester.Instance.DrawRay(origin, direction, Color.yellow, 0.25f);
-            //Debug.DrawRay(origin, direction, Color.red, 0.25f);
+            if (Application.isEditor)
+                Debug.DrawRay(origin, direction, Color.red, 0.25f);
+            else
+                DebugTester.Instance.DrawRay(origin, direction, Color.red, 0.25f);
+            
             if (!Physics.Raycast(origin, direction, out RaycastHit hitInfo, _maxRange, _validLayers))
                 return; // Nothing was hit.
 
@@ -39,8 +42,10 @@ namespace Gameplay.Actions.Targeting
             if (!Physics.Raycast(origin, direction, out RaycastHit hitInfo, _maxRange, _validLayers))
                 return;
 
-            DebugTester.Instance.DrawRay(hitInfo.point, hitInfo.normal, Color.yellow, 0.25f);
-            //Debug.DrawRay(hitInfo.point, hitInfo.normal, Color.yellow, 0.25f);
+            if (Application.isEditor)
+                Debug.DrawRay(hitInfo.point, hitInfo.normal, Color.yellow, 0.25f);
+            else
+                DebugTester.Instance.DrawRay(hitInfo.point, hitInfo.normal, Color.yellow, 0.25f);
         }
     }
 }

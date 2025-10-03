@@ -26,8 +26,6 @@ namespace Gameplay.GameplayObjects.Character
                 return;
             }
 
-            Debug.Log(this.OwnerClientId);
-
             // Initialise our Weapons (To-do: Improve this pls).
             StartCoroutine(InitialiseWeaponsAfterFrame());
         }
@@ -101,7 +99,7 @@ namespace Gameplay.GameplayObjects.Character
             ActionRequestData actionRequestData = ActionRequestData.Create(weapon.WeaponData.AssociatedAction);
 
             // Setup the ActionRequestData.
-            actionRequestData.OriginTransform = weapon.GetAttackOriginTransform();
+            actionRequestData.OriginTransformID = weapon.GetAttackOriginTransformID();
             actionRequestData.Position = weapon.GetAttackLocalOffset();
             actionRequestData.Direction = weapon.GetAttackLocalDirection();
             actionRequestData.SlotIdentifier = slotIdentifier;

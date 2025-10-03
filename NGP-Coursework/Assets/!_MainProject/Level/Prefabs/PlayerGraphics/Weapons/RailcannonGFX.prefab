@@ -60,7 +60,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_weaponData: {fileID: 11400000, guid: ef46446ee510fb54ea3599f68738390e, type: 2}
-  _firingOrigin: {fileID: 4949632326426587182}
+  _firingPosition: {x: 0, y: 0, z: -0.5}
+  _firingDirection: {x: 0, y: 0, z: 1}
 --- !u!1 &4335531973131498743
 GameObject:
   m_ObjectHideFlags: 0

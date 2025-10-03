@@ -170,4 +170,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_weaponData: {fileID: 11400000, guid: 19fcffcb66d8abf4cbae0a4105ce50e3, type: 2}
-  _firingOrigin: {fileID: 8330398972626283626}
+  _firingPosition: {x: 0, y: 0, z: 0.5}
+  _firingDirection: {x: 0, y: 0, z: 1}

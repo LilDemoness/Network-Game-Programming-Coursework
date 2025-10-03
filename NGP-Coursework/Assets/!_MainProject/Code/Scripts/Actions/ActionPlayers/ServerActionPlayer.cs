@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Unity.Netcode;
 using UnityEngine.Pool;
 using Gameplay.GameplayObjects.Character;
 using System;
@@ -201,7 +202,7 @@ namespace Gameplay.Actions
             // Cancel any actions that this action should cancel when being played.
             CancelInterruptedActions(_actionQueue[0]);
 
-            _actionQueue[0].TimeStarted = Time.time;
+            _actionQueue[0].TimeStarted = NetworkManager.Singleton.ServerTime.TimeAsFloat;
             bool play = _actionQueue[0].OnStart(_serverCharacter);
             if (!play)
             {

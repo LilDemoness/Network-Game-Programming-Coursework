@@ -23,7 +23,7 @@ namespace Gameplay.Actions
         /// <summary>
         ///     How long the Action has been running (Since it's Start was called). Measured in seconds via Time.time.
         /// </summary>
-        public float TimeRunning => Time.time - TimeStarted;
+        public float TimeRunning => NetworkManager.Singleton.ServerTime.TimeAsFloat - TimeStarted;
 
         /// <summary>
         ///     RequestData we were instantiated with. Value should be reated as readonly.
@@ -72,8 +72,8 @@ namespace Gameplay.Actions
         }
 
 
-        private Vector3 GetTargetingOrigin() => Data.OriginTransform != null ? Data.OriginTransform.TransformPoint(Data.Position) : Data.Position;
-        private Vector3 GetTargetingDirection() => Data.OriginTransform != null ? Data.OriginTransform.TransformDirection(Data.Direction) : Data.Direction;
+        private Vector3 GetTargetingOrigin() => Data.OriginTransformID != 0 ? NetworkManager.Singleton.SpawnManager.SpawnedObjects[Data.OriginTransformID].transform.TransformPoint(Data.Position) : Data.Position;
+        private Vector3 GetTargetingDirection() => Data.OriginTransformID != 0 ? NetworkManager.Singleton.SpawnManager.SpawnedObjects[Data.OriginTransformID].transform.TransformDirection(Data.Direction) : Data.Direction;
 
 
         /// <summary>
@@ -81,7 +81,7 @@ namespace Gameplay.Actions
         /// </summary>
         private void InitialiseDataParametersIfEmpty(ServerCharacter serverCharacter)
         {
-            if (Data.OriginTransform != null)
+            if (Data.OriginTransformID != 0)
             {
                 if (Data.Direction == Vector3.zero)
                     Data.Direction = Vector3.forward;
@@ -104,12 +104,13 @@ namespace Gameplay.Actions
         public virtual bool OnStart(ServerCharacter serverCharacter)
         {
             NextUpdateTime = TimeStarted + Config.ExecutionDelay;
+            Debug.Log("Server Started: " + TimeStarted);
 
             // Ensure our Data's perameters are set up.
             InitialiseDataParametersIfEmpty(serverCharacter);
 
             if (Config.ShouldNotifyClient())
-                serverCharacter.ClientCharacter.PlayActionClientRpc(this.Data);
+                serverCharacter.ClientCharacter.PlayActionClientRpc(this.Data, TimeStarted);
 
             // Play Immediate Effects.
             DebugForAction("Start", serverCharacter);
@@ -127,6 +128,8 @@ namespace Gameplay.Actions
             {
                 if (NextUpdateTime != -1)
                 {
+                    Debug.Log("Server Update: " + TimeRunning);
+
                     // Trigger OnUpdate() once.
                     NextUpdateTime = -1;
                     DebugForAction("Update", serverCharacter);
@@ -135,8 +138,10 @@ namespace Gameplay.Actions
             }
             else
             {
-                while (NextUpdateTime < Time.time)
+                while (NextUpdateTime < NetworkManager.Singleton.ServerTime.TimeAsFloat)
                 {
+                    Debug.Log("Server Update: " + TimeRunning);
+
                     // Play Execution Effects.
                     DebugForAction("Update", serverCharacter);
                     if (Config.OnUpdate(serverCharacter, GetTargetingOrigin(), GetTargetingDirection()) == false)
@@ -266,10 +271,12 @@ namespace Gameplay.Actions
         ///     Derived classes should be sure to call base.OnStart() in their implementation, but do not that this resets "AnticipatedClient" to false.
         /// </remarks>
         /// <returns> True to play, false to be immediately cleaned up.</returns>
-        public virtual bool OnStartClient(ClientCharacter clientCharacter)
+        public virtual bool OnStartClient(ClientCharacter clientCharacter, float serverTimeStarted)
         {
             AnticipatedClient = false;  // Once we start our ActionFX we are no longer an anticipated action.
-            TimeStarted = UnityEngine.Time.time;
+            TimeStarted = serverTimeStarted;
+            NextUpdateTime = TimeStarted + Config.ExecutionDelay;
+            Debug.Log("Client Started: " + TimeStarted);
 
             return Config.OnStartClient(clientCharacter, GetTargetingOrigin(), GetTargetingDirection());
         }
@@ -280,6 +287,8 @@ namespace Gameplay.Actions
             {
                 if (NextUpdateTime != -1)
                 {
+                    Debug.Log("Client Update: " + TimeRunning);
+
                     // Trigger OnUpdateClient() once.
                     NextUpdateTime = -1;
                     return Config.OnUpdateClient(clientCharacter, GetTargetingOrigin(), GetTargetingDirection());
@@ -287,8 +296,10 @@ namespace Gameplay.Actions
             }
             else
             {
-                while (NextUpdateTime < Time.time)
+                while (NextUpdateTime < NetworkManager.Singleton.ServerTime.TimeAsFloat)
                 {
+                    Debug.Log("Client Update: " + TimeRunning);
+
                     if (Config.OnUpdateClient(clientCharacter, GetTargetingOrigin(), GetTargetingDirection()) == false)
                         return false;
 

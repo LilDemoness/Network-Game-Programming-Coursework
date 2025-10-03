@@ -29,10 +29,10 @@ namespace Gameplay.GameplayObjects.Character
         ///     RPC to start playing an Action's FX on all clients.
         /// </summary>
         [ClientRpc]
-        public void PlayActionClientRpc(ActionRequestData data)
+        public void PlayActionClientRpc(ActionRequestData data, float serverTimeStarted)
         {
             ActionRequestData data1 = data;
-            _clientActionPlayer.PlayAction(ref data1);
+            _clientActionPlayer.PlayAction(ref data1, serverTimeStarted);
         }
 
         /// <summary>
