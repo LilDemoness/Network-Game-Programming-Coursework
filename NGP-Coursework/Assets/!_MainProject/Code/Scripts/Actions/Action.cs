@@ -3,6 +3,7 @@ using UnityEngine;
 using Gameplay.GameplayObjects;
 using Gameplay.GameplayObjects.Character;
 using VisualEffects;
+using Unity.Netcode;
 
 namespace Gameplay.Actions
 {
@@ -106,6 +107,9 @@ namespace Gameplay.Actions
 
             // Ensure our Data's perameters are set up.
             InitialiseDataParametersIfEmpty(serverCharacter);
+
+            if (Config.ShouldNotifyClient())
+                serverCharacter.ClientCharacter.PlayActionClientRpc(this.Data);
 
             // Play Immediate Effects.
             DebugForAction("Start", serverCharacter);
@@ -266,31 +270,49 @@ namespace Gameplay.Actions
         {
             AnticipatedClient = false;  // Once we start our ActionFX we are no longer an anticipated action.
             TimeStarted = UnityEngine.Time.time;
-            return true;
+
+            return Config.OnStartClient(clientCharacter, GetTargetingOrigin(), GetTargetingDirection());
         }
 
         public virtual bool OnUpdateClient(ClientCharacter clientCharacter)
         {
-            return ActionConclusion.Continue;
+            if (Config.RetriggerDelay <= 0)
+            {
+                if (NextUpdateTime != -1)
+                {
+                    // Trigger OnUpdateClient() once.
+                    NextUpdateTime = -1;
+                    return Config.OnUpdateClient(clientCharacter, GetTargetingOrigin(), GetTargetingDirection());
+                }
+            }
+            else
+            {
+                while (NextUpdateTime < Time.time)
+                {
+                    if (Config.OnUpdateClient(clientCharacter, GetTargetingOrigin(), GetTargetingDirection()) == false)
+                        return false;
+
+                    NextUpdateTime += Config.RetriggerDelay;
+                }
+            }
+
+            return true;
         }
+        
 
         /// <summary>
         ///     End is always called when the ActionFX finishes playing.
         ///     This is a good place for derived classes top put wrap-up logic.
         ///     Derived classes should (But aren't required to) call base.End().
-        ///     By default, this method just calls 'ClientCancel' to handle the common case where Cancel and End so the same thing.
         /// </summary>
-        public virtual void EndClient(ClientCharacter clientCharacter)
-        {
-            CancelClient(clientCharacter);
-        }
+        public virtual void EndClient(ClientCharacter clientCharacter) => Config.OnEndClient(clientCharacter, GetTargetingOrigin(), GetTargetingDirection());
 
         /// <summary>
         ///     Cancel is called when an ActionFX is interrupted prematurely.
         ///     It is kept logically distincy from end to allow for the possibility that an Action might want to pay something different if it is interrupted, rather than completing.
         ///     For example, a "ChargeShot" action might want to emit a projectile object in its end method, but instead play a "Stagger" effect in its Cancel method.
         /// </summary>
-        public virtual void CancelClient(ClientCharacter clientCharacter) { }
+        public virtual void CancelClient(ClientCharacter clientCharacter) => Config.OnCancelClient(clientCharacter, GetTargetingOrigin(), GetTargetingDirection());
 
         /// <summary>
         ///     Should this ActionFX be created anticipativelyt on the owning client?
@@ -298,9 +320,28 @@ namespace Gameplay.Actions
         /// <param name="clientCharacter"> The ActionVisualisation that would be playing this ActionFX.</param>
         /// <param name="data"> The request being sent to the server.</param>
         /// <returns> True if the ActionVisualisation should pre-emptively create the ActionFX on the owning client before hearing back from the server.</returns>
-        public virtual bool ShouldClientAnticipate(ClientCharacter clientCharacter, ref ActionRequestData data)
+        public static bool ShouldClientAnticipate(ClientCharacter clientCharacter, ref ActionRequestData data)
         {
-            throw new System.NotImplementedException();
+            if (!clientCharacter.CanPerformActions)
+                return false;
+
+            /*var actionDefinition = GameDataSource.Instance.GetActionDefinitionByID(data.ActionID);
+
+            // For actions with 'ShouldClose' set, we need to check our range loocally.
+            // If we are out of range, we shouldn't anticipate, as we will still need to execute a ChaseAction (Will be synthesised on the server) prior to actually playing the action.
+            bool isTargetEligible = true;
+            if (data.ShouldClose)
+            {
+                ulong targetID = (data.TargetIDs != null && data.TargetIDs.Length > 0) ? data.TargetIDs[0] : 0;
+                if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(targetID, out NetworkObject networkObject))
+                {
+                    float sqrRange = actionDefinition.Range * actionDefinition.Range;
+                    isTargetEligible = (networkObject.transform.position - clientCharacter.transform.position).sqrMagnitude < sqrRange;
+                }
+            }*/
+
+            // Currently, all actions should anticipate.
+            return true;
         }
 
         /// <summary>

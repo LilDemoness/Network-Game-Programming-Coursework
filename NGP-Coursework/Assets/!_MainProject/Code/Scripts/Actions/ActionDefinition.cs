@@ -29,6 +29,14 @@ namespace Gameplay.Actions
         public abstract void OnEnd(ServerCharacter owner, Vector3 origin, Vector3 direction);
         public abstract void OnCancel(ServerCharacter owner, Vector3 origin, Vector3 direction);
 
+        public abstract bool OnStartClient(ClientCharacter clientCharacter, Vector3 origin, Vector3 direction);
+        public abstract bool OnUpdateClient(ClientCharacter clientCharacter, Vector3 origin, Vector3 direction);
+        public abstract void OnEndClient(ClientCharacter clientCharacter, Vector3 origin, Vector3 direction);
+        public abstract void OnCancelClient(ClientCharacter clientCharacter, Vector3 origin, Vector3 direction);
+
+
+
+        public abstract bool ShouldNotifyClient();
 
         public abstract bool CancelsOtherActions { get; }
         public abstract bool ShouldCancelAction(ref ActionRequestData thisData, ref ActionRequestData otherData);

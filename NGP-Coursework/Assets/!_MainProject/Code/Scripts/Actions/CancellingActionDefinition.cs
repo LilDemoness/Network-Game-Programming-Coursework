@@ -37,11 +37,24 @@ namespace Gameplay.Actions
         public override float RetriggerDelay => 1.0f; // Note: Not 0.0f just in case we accidentally get this into an update loop (If it was 0.0 it may run eternally).
 
 
-        public override bool OnStart(ServerCharacter owner, Vector3 origin, Vector3 direction) => false;
+        public override bool OnStart(ServerCharacter owner, Vector3 origin, Vector3 direction)
+        {
+            foreach(ActionDefinition actionDefinition in OtherActionsThisCancels)
+                owner.ClientCharacter.CancelAllActionsByActionIDClientRpc(actionDefinition.ActionID);
+
+            return false;
+        }
         public override bool OnUpdate(ServerCharacter owner, Vector3 origin, Vector3 direction) => false;
         public override void OnEnd(ServerCharacter owner, Vector3 origin, Vector3 direction) { }
         public override void OnCancel(ServerCharacter owner, Vector3 origin, Vector3 direction) { }
 
+        public override bool OnStartClient(ClientCharacter clientCharacter, Vector3 origin, Vector3 direction) => false;
+        public override bool OnUpdateClient(ClientCharacter clientCharacter, Vector3 origin, Vector3 direction) => false;
+        public override void OnEndClient(ClientCharacter clientCharacter, Vector3 origin, Vector3 direction) { }
+        public override void OnCancelClient(ClientCharacter clientCharacter, Vector3 origin, Vector3 direction) { }
+
+
+        public override bool ShouldNotifyClient() => false;
 
         public override bool ShouldBecomeNonBlocking(float timeRunning) => true;
         public override bool HasExpired(float startTime) => true;

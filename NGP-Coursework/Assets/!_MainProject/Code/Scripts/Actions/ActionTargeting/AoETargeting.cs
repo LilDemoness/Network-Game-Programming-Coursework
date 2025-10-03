@@ -14,9 +14,9 @@ namespace Gameplay.Actions.Targeting
         [SerializeField] private float _radius;
         [SerializeField] private bool _throughObstructions;
 
-        public override void GetTargets(ServerCharacter owner, Vector3 origin, Vector3 direction, System.Action<ServerCharacter, ulong[]> onCompleteCallback)
+        public override void GetTargets(ServerCharacter owner, Vector3 origin, Vector3 direction, System.Action<ServerCharacter, ActionHitInfo[]> onCompleteCallback)
         {
-            List<ulong> targetsList = new List<ulong>();
+            List<ActionHitInfo> hitInfoList = new List<ActionHitInfo>();
             foreach(Collider potentialTarget in Physics.OverlapSphere(origin, _radius))
             {
                 // Obstruction Check (If required).
@@ -25,11 +25,15 @@ namespace Gameplay.Actions.Targeting
 
                 if (potentialTarget.TryGetComponent<NetworkObject>(out NetworkObject targetNetworkObject) && TargetableEntityTypes.IsValidTarget(owner, targetNetworkObject))
                 {
-                    targetsList.Add(targetNetworkObject.NetworkObjectId);
+                    // Valid target.
+                    hitInfoList.Add(new ActionHitInfo(targetNetworkObject.transform));
                 }
             }
 
-            onCompleteCallback?.Invoke(owner, targetsList.ToArray());
+            onCompleteCallback?.Invoke(owner, hitInfoList.ToArray());
         }
+
+
+        public override bool CanTriggerOnClient() => false;
     }
 }

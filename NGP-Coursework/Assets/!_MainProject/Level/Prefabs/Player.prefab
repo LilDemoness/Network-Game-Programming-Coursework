@@ -160,6 +160,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
+  _serverCharacter: {fileID: 8374713656994953261}
+  _clientInputSender: {fileID: 5193017226030722943}
+  m_animator: {fileID: 0}
 --- !u!114 &3943280201037405906
 MonoBehaviour:
   m_ObjectHideFlags: 0

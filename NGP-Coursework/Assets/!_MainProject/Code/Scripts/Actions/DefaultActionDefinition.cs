@@ -55,7 +55,7 @@ namespace Gameplay.Actions
 
         [Space(5)]
         [SerializeReference, SubclassSelector] public List<ActionEffect> CancelledEffects;
-        private bool _hasCancelledEffects;
+        private bool _hasCancelEffects;
 
 
         [Header("Interruption")]
@@ -89,7 +89,7 @@ namespace Gameplay.Actions
             _hasInitialEffects      = ImmediateEffects.Count > 0;
             _hasExecutionEffects    = ExecutionEffects.Count > 0;
             _hasEndEffects          = EndEffects.Count > 0;
-            _hasCancelledEffects    = CancelledEffects.Count > 0;
+            _hasCancelEffects    = CancelledEffects.Count > 0;
         }
 
 #endif
@@ -123,6 +123,9 @@ namespace Gameplay.Actions
         }
 
 
+        public override bool ShouldNotifyClient() => /*[Has Effects] &&*/ PrimaryTargetingType.CanTriggerOnClient();
+
+
 
         #if UNITY_EDITOR
 
@@ -140,22 +143,22 @@ namespace Gameplay.Actions
             
             return true;
         }
-        private void HandleImmediateEffects(ServerCharacter owner, ulong[] targetIDs)
+        private void HandleImmediateEffects(ServerCharacter owner, ActionHitInfo[] hitInfoArray)
         {
             foreach (ActionEffect immediateEffect in ImmediateEffects)
-                immediateEffect.Apply(owner, targetIDs);
+                immediateEffect.Apply(owner, ref hitInfoArray);
         }
 
         public override bool OnUpdate(ServerCharacter owner, Vector3 origin, Vector3 direction)
         {
             if (_hasExecutionEffects)
-            PrimaryTargetingType.GetTargets(owner, origin, direction, HandleExecutionEffects);
+                PrimaryTargetingType.GetTargets(owner, origin, direction, HandleExecutionEffects);
             return true;
         }
-        private void HandleExecutionEffects(ServerCharacter owner, ulong[] targetIDs)
+        private void HandleExecutionEffects(ServerCharacter owner, ActionHitInfo[] hitInfoArray)
         {
             foreach (ActionEffect actionEffect in ExecutionEffects)
-                actionEffect.Apply(owner, targetIDs);
+                actionEffect.Apply(owner, ref hitInfoArray);
         }
 
         public override void OnEnd(ServerCharacter owner, Vector3 origin, Vector3 direction)
@@ -163,21 +166,49 @@ namespace Gameplay.Actions
             if (_hasEndEffects)
                 PrimaryTargetingType.GetTargets(owner, origin, direction, HandleEndEffects);
         }
-        private void HandleEndEffects(ServerCharacter owner, ulong[] targetIDs)
+        private void HandleEndEffects(ServerCharacter owner, ActionHitInfo[] hitInfoArray)
         {
             foreach (ActionEffect effect in EndEffects)
-                effect.Apply(owner, targetIDs);
+                effect.Apply(owner, ref hitInfoArray);
         }
 
         public override void OnCancel(ServerCharacter owner, Vector3 origin, Vector3 direction)
         {
-            if (_hasCancelledEffects)
+            if (_hasCancelEffects)
                 PrimaryTargetingType.GetTargets(owner, origin, direction, HandleCancellationEffects);
         }
-        private void HandleCancellationEffects(ServerCharacter owner, ulong[] targetIDs)
+        private void HandleCancellationEffects(ServerCharacter owner, ActionHitInfo[] hitInfoArray)
         {
             foreach (ActionEffect effect in CancelledEffects)
-                effect.Apply(owner, targetIDs);
+                effect.Apply(owner, ref hitInfoArray);
+        }
+
+
+
+
+        public override bool OnStartClient(ClientCharacter clientCharacter, Vector3 origin, Vector3 direction) 
+        {
+            if (_hasInitialEffects)
+                PrimaryTargetingType.TriggerOnClient(clientCharacter, origin, direction);
+
+            return true;
+        }
+        public override bool OnUpdateClient(ClientCharacter clientCharacter, Vector3 origin, Vector3 direction)
+        {
+            if (_hasExecutionEffects)
+                PrimaryTargetingType.TriggerOnClient(clientCharacter, origin, direction);
+
+            return true;
+        }
+        public override void OnEndClient(ClientCharacter clientCharacter, Vector3 origin, Vector3 direction)
+        {
+            if (_hasEndEffects)
+                PrimaryTargetingType.TriggerOnClient(clientCharacter, origin, direction);
+        }
+        public override void OnCancelClient(ClientCharacter clientCharacter, Vector3 origin, Vector3 direction)
+        {
+            if (_hasCancelEffects)
+                PrimaryTargetingType.TriggerOnClient(clientCharacter, origin, direction);
         }
 
 

@@ -11,24 +11,29 @@ namespace Gameplay.Actions.Effects
         public TargetableTypes AffectedTypes = TargetableTypes.AllOthers;
         public bool AutoTargetSelf = false;
 
-        public virtual void Apply(ServerCharacter owner, ulong[] targetIDs)
+        public virtual void Apply(ServerCharacter owner, ref ActionHitInfo[] hitInfoArray)
         {
             bool hasTargetedSelf = false;
-            for (int i = 0; i < targetIDs.Length; ++i)
+            for (int i = 0; i < hitInfoArray.Length; ++i)
             {
-                NetworkObject targetObject = NetworkManager.Singleton.SpawnManager.SpawnedObjects[targetIDs[i]];
-                if (!hasTargetedSelf && AutoTargetSelf && targetIDs[i] == owner.NetworkObjectId)
+                if (!hitInfoArray[i].HitTransform.TryGetComponent<NetworkObject>(out NetworkObject targetObject))
+                    continue;
+
+                if (!hasTargetedSelf && AutoTargetSelf && hitInfoArray[i].HitTransform != owner.transform)
                     hasTargetedSelf = true;
 
                 if (AffectedTypes.IsValidTarget(owner, targetObject))
                 {
-                    ApplyToTarget(owner, targetObject);
+                    ApplyToTarget(owner, ref hitInfoArray[i]);
                 }
             }
 
             if (!hasTargetedSelf && AutoTargetSelf && AffectedTypes.HasFlag(TargetableTypes.Self))
-                ApplyToTarget(owner, owner.NetworkObject);
+            {
+                ActionHitInfo ownerHitInfo = new ActionHitInfo(owner.transform);
+                ApplyToTarget(owner, ref ownerHitInfo);
+            }
         }
-        protected abstract void ApplyToTarget(ServerCharacter owner, NetworkObject targetObject);
+        protected abstract void ApplyToTarget(ServerCharacter owner, ref ActionHitInfo hitInfo);
     }
 }
