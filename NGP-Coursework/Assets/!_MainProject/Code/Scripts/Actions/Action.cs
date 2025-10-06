@@ -38,6 +38,9 @@ namespace Gameplay.Actions
         public ActionDefinition Config { get; private set; }
 
 
+        private List<(SpecialFXGraphic Graphic, ActionFXCancelCondition EndCondition)> _activeFXGraphics;
+
+
         public bool IsChaseAction => Config.ActionID == GameDataSource.Instance.GeneralChaseActionDefinition.ActionID;
         public bool IsStunAction => Config.ActionID == GameDataSource.Instance.StunnedActionDefinition.ActionID;
         public bool IsGeneralTargetAction => Config.ActionID == GameDataSource.Instance.GeneralTargetActionDefinition.ActionID;
@@ -316,14 +319,22 @@ namespace Gameplay.Actions
         ///     This is a good place for derived classes top put wrap-up logic.
         ///     Derived classes should (But aren't required to) call base.End().
         /// </summary>
-        public virtual void EndClient(ClientCharacter clientCharacter) => Config.OnEndClient(clientCharacter, GetTargetingOrigin(), GetTargetingDirection());
+        public virtual void EndClient(ClientCharacter clientCharacter)
+        {
+            Config.OnEndClient(clientCharacter, GetTargetingOrigin(), GetTargetingDirection());
+            CancelSpecialFX(ActionFXCancelCondition.ActionEnded);
+        }
 
         /// <summary>
         ///     Cancel is called when an ActionFX is interrupted prematurely.
         ///     It is kept logically distincy from end to allow for the possibility that an Action might want to pay something different if it is interrupted, rather than completing.
         ///     For example, a "ChargeShot" action might want to emit a projectile object in its end method, but instead play a "Stagger" effect in its Cancel method.
         /// </summary>
-        public virtual void CancelClient(ClientCharacter clientCharacter) => Config.OnCancelClient(clientCharacter, GetTargetingOrigin(), GetTargetingDirection());
+        public virtual void CancelClient(ClientCharacter clientCharacter)
+        {
+            Config.OnCancelClient(clientCharacter, GetTargetingOrigin(), GetTargetingDirection());
+            CancelSpecialFX(ActionFXCancelCondition.ActionCancelled);
+        }
 
         /// <summary>
         ///     Should this ActionFX be created anticipativelyt on the owning client?
@@ -366,6 +377,16 @@ namespace Gameplay.Actions
         /// </summary>
         public virtual void StoppedChargingUpClient(ClientCharacter clientCharacter, float finalChargeUpPercentage) { }
 
+
+        public void CreateSpecialFXGraphics(SpecialFXGraphic graphic, ActionFXCancelCondition endCondition, Vector3 position, Vector3 forward)
+        {
+            SpecialFXGraphic graphicInstance = InstantiateSpecialFXGraphic(graphic, position, forward);
+
+            if (endCondition == ActionFXCancelCondition.None)
+                return;
+
+            _activeFXGraphics.Add((graphicInstance, endCondition));
+        }
         /// <summary>
         ///     Utility function that instantiates all graphics in the Spawns list. <br></br>
         ///     If parentToOrigin is true, the new graphics will be parented to the origin Transform.
@@ -387,14 +408,25 @@ namespace Gameplay.Actions
         ///     If parentToOrigin is true, the new graphics will be parented to the origin Transform.
         ///     If false, they are positioned/oriented the same way as the origin but aren't parented.
         /// </summary>
-        protected SpecialFXGraphic InstantiateSpecialFXGraphic(GameObject prefab, Transform origin, bool parentToOrigin)
+        protected SpecialFXGraphic InstantiateSpecialFXGraphic(SpecialFXGraphic prefab, Vector3 position, Vector3 forward)
         {
-            if (prefab.GetComponent<SpecialFXGraphic>() == null)
+            /*if (prefab.GetComponent<SpecialFXGraphic>() == null)
             {
                 throw new System.Exception($"One of the Spawns on the action {this.Config.name} does not have a SpecialFXGraphic component and can't be instantiated");
+            }*/
+
+            SpecialFXGraphic graphicsInstance = GameObject.Instantiate<SpecialFXGraphic>(prefab, position, Quaternion.LookRotation(forward));
+            return graphicsInstance;
+        }
+        private void CancelSpecialFX(ActionFXCancelCondition condition)
+        {
+            for (int i = 0; i < _activeFXGraphics.Count; ++i)
+            {
+                if (_activeFXGraphics[i].EndCondition.HasFlag(condition))
+                {
+                    _activeFXGraphics[i].Graphic.Shutdown();
+                }
             }
-            GameObject graphicsGO = GameObject.Instantiate(prefab, origin.transform.position, origin.transform.rotation, (parentToOrigin ? origin.transform : null));
-            return graphicsGO.GetComponent<SpecialFXGraphic>();
         }
 
         /// <summary>
