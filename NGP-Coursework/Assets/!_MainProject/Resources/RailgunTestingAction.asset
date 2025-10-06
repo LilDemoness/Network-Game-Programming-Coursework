@@ -9,10 +9,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 697e9d059adf52c4f87f8ae37b9375b9, type: 3}
-  m_Name: CancelWeaponFiringAction
+  m_Script: {fileID: 11500000, guid: 368f3f95cb773d64c9ab553cd8048f56, type: 3}
+  m_Name: RailgunTestingAction
   m_EditorClassIdentifier: 
   IsHostileAction: 0
-  OtherActionsThisCancels:
-  - {fileID: 11400000, guid: 67bbb0a585863fb4791ede74f6d2cccc, type: 2}
-  RequireSharedSlotIdentifier: 1
+  Cost: 0
+  ExecutionDelay: 0
+  ActionCooldown: 0
+  MaxActiveDuration: 0
+  BlockingMode: 1
+  _weaponName: Railgun

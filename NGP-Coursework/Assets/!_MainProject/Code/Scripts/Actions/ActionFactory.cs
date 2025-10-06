@@ -15,8 +15,9 @@ namespace Gameplay.Actions
             {
                 // We don't yet have a pool for this action type. Create one.
                 actionPool = new ObjectPool<Action>(
-                    createFunc: () => new Action(GameDataSource.Instance.GetActionDefinitionByID(actionID)),
-                    actionOnRelease: action => action.Reset());
+                    createFunc: () => Object.Instantiate<Action>(GameDataSource.Instance.GetActionPrototypeByID(actionID)),
+                    actionOnRelease: action => action.Reset(),
+                    actionOnDestroy: Object.Destroy);
 
                 s_actionPools.Add(actionID, actionPool);
             }
@@ -38,7 +39,7 @@ namespace Gameplay.Actions
         }
 
 
-        public static void ReturnAction(Action action) => GetActionPool(action.Config.ActionID).Release(action);
+        public static void ReturnAction(Action action) => GetActionPool(action.ActionID).Release(action);
         public static void PurgePooledActions()
         {
             foreach(var actionPool in s_actionPools.Values)

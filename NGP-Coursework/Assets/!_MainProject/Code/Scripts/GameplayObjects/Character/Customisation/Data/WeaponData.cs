@@ -8,6 +8,6 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Data
     {
         [field: SerializeField] public string Name { get; private set; }
 
-        [field: SerializeField] public ActionDefinition AssociatedAction { get; private set; }
+        [field: SerializeField] public Action AssociatedAction { get; private set; }
     }
 }

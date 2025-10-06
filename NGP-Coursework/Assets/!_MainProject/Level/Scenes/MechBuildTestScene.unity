@@ -2371,12 +2371,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9197c9c1e343398438e44d218c68f527, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_generalChaseActionDefinition: {fileID: 11400000, guid: 67bbb0a585863fb4791ede74f6d2cccc, type: 2}
-  m_generalTargetActionDefinition: {fileID: 11400000, guid: 67bbb0a585863fb4791ede74f6d2cccc, type: 2}
-  m_stunnedActionDefinition: {fileID: 11400000, guid: 435dec24e0c30ca4081b1b10b1b9f88a, type: 2}
+  m_generalChaseActionDefinition: {fileID: 11400000, guid: b398a0a11ddff86448a7e1383b6468ec, type: 2}
+  m_generalTargetActionDefinition: {fileID: 11400000, guid: b398a0a11ddff86448a7e1383b6468ec, type: 2}
+  m_stunnedActionDefinition: {fileID: 11400000, guid: b398a0a11ddff86448a7e1383b6468ec, type: 2}
   _actionDefinitions:
-  - {fileID: 11400000, guid: d87a1fe8634a6b24b9b1e68fcec9e1a1, type: 2}
-  - {fileID: 11400000, guid: 67bbb0a585863fb4791ede74f6d2cccc, type: 2}
+  - {fileID: 11400000, guid: b398a0a11ddff86448a7e1383b6468ec, type: 2}
+  - {fileID: 11400000, guid: dee9848ed8c93c64fb0b1c6c9290124d, type: 2}
+  - {fileID: 11400000, guid: 213365d87dd10f149b5eece6440a9a88, type: 2}
+  - {fileID: 11400000, guid: 35808b1b43154a643b04dde8b861b331, type: 2}
+  - {fileID: 11400000, guid: 28e2dfcdfd00ded4d98e17400980b326, type: 2}
 --- !u!4 &799053776
 Transform:
   m_ObjectHideFlags: 0

@@ -7,10 +7,22 @@ using Unity.Netcode;
 
 namespace Gameplay.Actions
 {
-    public class Action
+    public abstract class Action : ScriptableObject
     {
+        /// <summary>
+        ///     The default string for hit reaction animation triggers.
+        /// </summary>
         public const string DEFAULT_HIT_REACT_ANIMATION_STRING = "";
 
+
+        /// <summary>
+        ///     An index into the GameDataSource array of action prototypes.
+        ///     Set at runtime by GameDataSource class.
+        ///     If the action is not itself a prototype, it will contain the ActionID of the prototype reference.
+        ///     <br></br>This field is used to identify actions in a way that can be sent over the network.
+        /// </summary>
+        /// <remarks> Non-serialized, so it doesn't get saved between editor sessions.</remarks>
+        [field: System.NonSerialized] public ActionID ActionID { get; set; }
 
         protected ActionRequestData m_data;
 
@@ -29,27 +41,45 @@ namespace Gameplay.Actions
         ///     RequestData we were instantiated with. Value should be reated as readonly.
         /// </summary>
         public ref ActionRequestData Data => ref m_data;
-        protected float NextUpdateTime;
-        
-
-        /// <summary>
-        ///     Data description for this action.
-        /// </summary>
-        public ActionDefinition Config { get; private set; }
 
 
-        private List<(SpecialFXGraphic Graphic, ActionFXCancelCondition EndCondition)> _activeFXGraphics;
+        #region Action Settings
+
+        [Tooltip("Does this count as a hostile Action? (Should it: Break Stealth, Dropp Shields, etc?)")]
+        public bool IsHostileAction;
+
+        [Tooltip("How much energy/ammo/etc this Action costs.")]
+        public float Cost;
 
 
-        public bool IsChaseAction => Config.ActionID == GameDataSource.Instance.GeneralChaseActionDefinition.ActionID;
-        public bool IsStunAction => Config.ActionID == GameDataSource.Instance.StunnedActionDefinition.ActionID;
-        public bool IsGeneralTargetAction => Config.ActionID == GameDataSource.Instance.GeneralTargetActionDefinition.ActionID;
+        [Tooltip("The time in seconds between starting this action and its effects triggering")]
+        public float ExecutionDelay;
+        public float ActionCooldown;
+        public float MaxActiveDuration;
+        public BlockingModeType BlockingMode = BlockingModeType.OnlyDuringExecutionTime;
+
+        #endregion
 
 
-        public Action(ActionDefinition definition)
+        public virtual bool HasCooldown => ActionCooldown > 0.0f;
+        public virtual bool HasCooldownCompleted(float lastActivatedTime) => (NetworkManager.Singleton.ServerTime.TimeAsFloat - lastActivatedTime) >= ActionCooldown;
+        public virtual bool HasExpired 
         {
-            this.Config = definition;
+            get
+            {
+                bool isExpirable = MaxActiveDuration > 0.0f;  // Non-positive values indicate that the duration is infinite.
+                float timeElapsed = NetworkManager.Singleton.ServerTime.TimeAsFloat - TimeStarted;
+                return isExpirable && timeElapsed >= MaxActiveDuration;
+            }
         }
+
+        public virtual bool CancelsOtherActions => false;
+
+
+        public bool IsChaseAction => ActionID == GameDataSource.Instance.GeneralChaseActionDefinition.ActionID;
+        public bool IsStunAction => ActionID == GameDataSource.Instance.StunnedActionDefinition.ActionID;
+        public bool IsGeneralTargetAction => ActionID == GameDataSource.Instance.GeneralTargetActionDefinition.ActionID;
+
 
         /// <summary>
         ///     Used as a Constructor.
@@ -58,10 +88,8 @@ namespace Gameplay.Actions
         /// </summary>
         public void Initialise(ref ActionRequestData data)
         {
-            if (data.ActionID != Config.ActionID)
-                throw new System.ArgumentException($"Action IDs don't match between Config ({Config.ActionID}) and ActionRequestData ({data.ActionID})");
-
             this.m_data = data;
+            this.ActionID = data.ActionID;
         }
 
         /// <summary>
@@ -70,8 +98,8 @@ namespace Gameplay.Actions
         public virtual void Reset()
         {
             this.m_data = default;
+            this.ActionID = default;
             this.TimeStarted = 0;
-            this.NextUpdateTime = 0;
         }
 
 
@@ -79,24 +107,7 @@ namespace Gameplay.Actions
         private Vector3 GetTargetingDirection() => Data.OriginTransformID != 0 ? NetworkManager.Singleton.SpawnManager.SpawnedObjects[Data.OriginTransformID].transform.TransformDirection(Data.Direction) : Data.Direction;
 
 
-        /// <summary>
-        ///     Initialise our Data's required Parameters (If they aren't already set-up).
-        /// </summary>
-        private void InitialiseDataParametersIfEmpty(ServerCharacter serverCharacter)
-        {
-            if (Data.OriginTransformID != 0)
-            {
-                if (Data.Direction == Vector3.zero)
-                    Data.Direction = Vector3.forward;
-            }
-            else
-            {
-                if (Data.Direction == Vector3.zero)
-                    Data.Direction = serverCharacter.transform.forward;
-                if (Data.Position == Vector3.zero)
-                    Data.Position = serverCharacter.transform.position;
-            }
-        }
+        
 
 
 
@@ -104,96 +115,40 @@ namespace Gameplay.Actions
         ///     Called when the Action starts actually playing (Which may be after it is created, due to queueing).
         /// </summary>
         /// <returns> False if the action decided it doesn't want to run. True otherwise.</returns>
-        public virtual bool OnStart(ServerCharacter serverCharacter)
-        {
-            NextUpdateTime = TimeStarted + Config.ExecutionDelay;
-            Debug.Log("Server Started: " + TimeStarted);
-
-            // Ensure our Data's perameters are set up.
-            InitialiseDataParametersIfEmpty(serverCharacter);
-
-            if (Config.ShouldNotifyClient())
-                serverCharacter.ClientCharacter.PlayActionClientRpc(this.Data, TimeStarted);
-
-            // Play Immediate Effects.
-            DebugForAction("Start", serverCharacter);
-            return Config.OnStart(serverCharacter, GetTargetingOrigin(), GetTargetingDirection());
-        }
+        public abstract bool OnStart(ServerCharacter owner);
 
 
         /// <summary>
         ///     Called each frame the action is running.
         /// </summary>
         /// <returns> True to keep running, false to stop. The action will stop by default when its duration expires, if it has one set.</returns>
-        public virtual bool OnUpdate(ServerCharacter serverCharacter)
-        {
-            if (Config.RetriggerDelay <= 0)
-            {
-                if (NextUpdateTime != -1)
-                {
-                    Debug.Log("Server Update: " + TimeRunning);
-
-                    // Trigger OnUpdate() once.
-                    NextUpdateTime = -1;
-                    DebugForAction("Update", serverCharacter);
-                    return Config.OnUpdate(serverCharacter, GetTargetingOrigin(), GetTargetingDirection());
-                }
-            }
-            else
-            {
-                while (NextUpdateTime < NetworkManager.Singleton.ServerTime.TimeAsFloat)
-                {
-                    Debug.Log("Server Update: " + TimeRunning);
-
-                    // Play Execution Effects.
-                    DebugForAction("Update", serverCharacter);
-                    if (Config.OnUpdate(serverCharacter, GetTargetingOrigin(), GetTargetingDirection()) == false)
-                        return false;
-
-                    NextUpdateTime += Config.RetriggerDelay;
-                }
-            }
-
-            return true;
-        }
+        public abstract bool OnUpdate(ServerCharacter owner);
 
         /// <summary>
         ///     Called each frame (Before OnUpdate()) for the active ("blocking") Action, asking if it should become a background Action.
         /// </summary>
         /// <returns> True to become a non-blocking Action. False to remain as a blocking Action.</returns>
-        public virtual bool ShouldBecomeNonBlocking() => Config.ShouldBecomeNonBlocking(TimeRunning);
+        public virtual bool ShouldBecomeNonBlocking() => BlockingMode == BlockingModeType.OnlyDuringExecutionTime ? TimeRunning >= ExecutionDelay : false;
 
         /// <summary>
         ///     Called when the Action ends naturally.
         /// </summary>
-        public virtual void End(ServerCharacter serverCharacter)
-        {
-            // Play End Effects.
-            Config.OnEnd(serverCharacter, GetTargetingOrigin(), GetTargetingDirection());
-            DebugForAction("End", serverCharacter);
-
-            Cleanup(serverCharacter);
-        }
+        public virtual void End(ServerCharacter owner) => Cleanup(owner);
+        
 
         /// <summary>
         ///     Called when the Action gets cancelled.
         /// </summary>
-        public virtual void Cancel(ServerCharacter serverCharacter)
-        {
-            // Play Cancel Effects.
-            Config.OnCancel(serverCharacter, GetTargetingOrigin(), GetTargetingDirection());
-            DebugForAction("Cancel", serverCharacter);
+        public virtual void Cancel(ServerCharacter owner) => Cleanup(owner);
+        
 
-            Cleanup(serverCharacter);
-        }
-
-        private void DebugForAction(string actionType, ServerCharacter serverCharacter) => Debug.Log($"{this.Config.name} {(Data.SlotIdentifier != 0 ? $"in slot {Data.SlotIdentifier}" : "")} {actionType} for {serverCharacter.name} (Client {serverCharacter.OwnerClientId})");
+        protected void DebugForAction(string actionType, ServerCharacter owner) => Debug.Log($"{this.name} {(Data.SlotIdentifier != 0 ? $"in slot {Data.SlotIdentifier}" : "")} {actionType} for {owner.name} (Client {owner.OwnerClientId})");
 
 
         /// <summary>
         ///     Cleans up any ongoing effects.
         /// </summary>
-        public virtual void Cleanup(ServerCharacter serverCharacter) { }
+        public virtual void Cleanup(ServerCharacter owner) { }
 
 
         /// <summary>
@@ -210,7 +165,11 @@ namespace Gameplay.Actions
         /// <summary>
         ///     Called on the active ("Blocking") Action when this character collides with another.
         /// </summary>
-        public virtual void CollisionEntered(ServerCharacter serverCharacter, Collision collision) { }
+        public virtual void CollisionEntered(ServerCharacter owner, Collision collision) { }
+
+
+        public virtual bool CanBeInterruptedBy(ActionID otherActionID) => false;
+        public virtual bool ShouldCancelAction(ref ActionRequestData thisData, ref ActionRequestData otherData) => false;
 
 
         #region Buffs
@@ -254,7 +213,7 @@ namespace Gameplay.Actions
         ///     Called on active Actions to let them know when a notable gameplay event happens.
         /// </summary>
         /// <remarks> When a GameplayActivity of AttackedByEnemy or Healed happens, OnGameplayAction() is called BEFORE BuffValue() is called.</remarks>
-        public virtual void OnGameplayActivity(ServerCharacter serverCharacter, GameplayActivity activityType) { }
+        public virtual void OnGameplayActivity(ServerCharacter owner, GameplayActivity activityType) { }
 
         #endregion
 
@@ -278,40 +237,12 @@ namespace Gameplay.Actions
         {
             AnticipatedClient = false;  // Once we start our ActionFX we are no longer an anticipated action.
             TimeStarted = serverTimeStarted;
-            NextUpdateTime = TimeStarted + Config.ExecutionDelay;
-            Debug.Log("Client Started: " + TimeStarted);
 
-            return Config.OnStartClient(clientCharacter, GetTargetingOrigin(), GetTargetingDirection());
+            return ActionConclusion.Continue;
         }
 
-        public virtual bool OnUpdateClient(ClientCharacter clientCharacter)
-        {
-            if (Config.RetriggerDelay <= 0)
-            {
-                if (NextUpdateTime != -1)
-                {
-                    Debug.Log("Client Update: " + TimeRunning);
-
-                    // Trigger OnUpdateClient() once.
-                    NextUpdateTime = -1;
-                    return Config.OnUpdateClient(clientCharacter, GetTargetingOrigin(), GetTargetingDirection());
-                }
-            }
-            else
-            {
-                while (NextUpdateTime < NetworkManager.Singleton.ServerTime.TimeAsFloat)
-                {
-                    Debug.Log("Client Update: " + TimeRunning);
-
-                    if (Config.OnUpdateClient(clientCharacter, GetTargetingOrigin(), GetTargetingDirection()) == false)
-                        return false;
-
-                    NextUpdateTime += Config.RetriggerDelay;
-                }
-            }
-
-            return true;
-        }
+        public virtual bool OnUpdateClient(ClientCharacter clientCharacter) => ActionConclusion.Continue;
+        
         
 
         /// <summary>
@@ -319,22 +250,18 @@ namespace Gameplay.Actions
         ///     This is a good place for derived classes top put wrap-up logic.
         ///     Derived classes should (But aren't required to) call base.End().
         /// </summary>
-        public virtual void EndClient(ClientCharacter clientCharacter)
-        {
-            Config.OnEndClient(clientCharacter, GetTargetingOrigin(), GetTargetingDirection());
-            CancelSpecialFX(ActionFXCancelCondition.ActionEnded);
-        }
+        public virtual void EndClient(ClientCharacter clientCharacter) => CleanupClient(clientCharacter);
 
         /// <summary>
         ///     Cancel is called when an ActionFX is interrupted prematurely.
         ///     It is kept logically distincy from end to allow for the possibility that an Action might want to pay something different if it is interrupted, rather than completing.
         ///     For example, a "ChargeShot" action might want to emit a projectile object in its end method, but instead play a "Stagger" effect in its Cancel method.
         /// </summary>
-        public virtual void CancelClient(ClientCharacter clientCharacter)
-        {
-            Config.OnCancelClient(clientCharacter, GetTargetingOrigin(), GetTargetingDirection());
-            CancelSpecialFX(ActionFXCancelCondition.ActionCancelled);
-        }
+        public virtual void CancelClient(ClientCharacter clientCharacter) => CleanupClient(clientCharacter);
+
+
+        public virtual void CleanupClient(ClientCharacter clientCharacter) { }
+
 
         /// <summary>
         ///     Should this ActionFX be created anticipativelyt on the owning client?
@@ -378,15 +305,6 @@ namespace Gameplay.Actions
         public virtual void StoppedChargingUpClient(ClientCharacter clientCharacter, float finalChargeUpPercentage) { }
 
 
-        public void CreateSpecialFXGraphics(SpecialFXGraphic graphic, ActionFXCancelCondition endCondition, Vector3 position, Vector3 forward)
-        {
-            SpecialFXGraphic graphicInstance = InstantiateSpecialFXGraphic(graphic, position, forward);
-
-            if (endCondition == ActionFXCancelCondition.None)
-                return;
-
-            _activeFXGraphics.Add((graphicInstance, endCondition));
-        }
         /// <summary>
         ///     Utility function that instantiates all graphics in the Spawns list. <br></br>
         ///     If parentToOrigin is true, the new graphics will be parented to the origin Transform.
@@ -417,16 +335,6 @@ namespace Gameplay.Actions
 
             SpecialFXGraphic graphicsInstance = GameObject.Instantiate<SpecialFXGraphic>(prefab, position, Quaternion.LookRotation(forward));
             return graphicsInstance;
-        }
-        private void CancelSpecialFX(ActionFXCancelCondition condition)
-        {
-            for (int i = 0; i < _activeFXGraphics.Count; ++i)
-            {
-                if (_activeFXGraphics[i].EndCondition.HasFlag(condition))
-                {
-                    _activeFXGraphics[i].Graphic.Shutdown();
-                }
-            }
         }
 
         /// <summary>

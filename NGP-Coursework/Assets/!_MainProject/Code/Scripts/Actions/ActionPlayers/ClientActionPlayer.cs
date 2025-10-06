@@ -33,7 +33,8 @@ namespace Gameplay.Actions
                 // Calculate values for Ending the Action FX.
                 bool keepGoing = action.AnticipatedClient || action.OnUpdateClient(ClientCharacter);    // Only update the action if we are past anticipation.
 
-                float actionMaxDuration = (action.Config as DefaultActionDefinition).MaxActiveDuration;
+                Debug.LogWarning("Not Implemented");
+                float actionMaxDuration = 0;//(action.Config as DefaultActionDefinition).MaxActiveDuration;
                 bool hasExpired = actionMaxDuration > 0 && action.TimeRunning >= actionMaxDuration;
                 bool hasTimedOut = action.AnticipatedClient && action.TimeRunning >= ANTICIPATION_TIMEOUT_SECONDS;
 
@@ -55,7 +56,7 @@ namespace Gameplay.Actions
         }
 
         /// <summary> A helper wrapper for a FindIndex call on _playingActions.</summary>
-        private int FindAction(ActionID actionID, bool anticipatedOnly) => _playingActions.FindIndex(a => a.Config.ActionID == actionID && (!anticipatedOnly || a.AnticipatedClient));
+        private int FindAction(ActionID actionID, bool anticipatedOnly) => _playingActions.FindIndex(a => a.ActionID == actionID && (!anticipatedOnly || a.AnticipatedClient));
         
         public void OnAnimEvent(string id)
         {
@@ -115,7 +116,7 @@ namespace Gameplay.Actions
         {
             for(int i = _playingActions.Count - 1; i >= 0; --i)
             {
-                if (_playingActions[i].Config.ActionID == actionID)
+                if (_playingActions[i].ActionID == actionID)
                 {
                     Action action = _playingActions[i];
                     action.CancelClient(ClientCharacter);

@@ -24,7 +24,7 @@ namespace Gameplay.Actions
         
 
         public static ActionRequestData Default => Create(actionID: default);
-        public static ActionRequestData Create(ActionDefinition action) => Create(actionID: action.ActionID);
+        public static ActionRequestData Create(Action action) => Create(actionID: action.ActionID);
         private static ActionRequestData Create(ActionID actionID) => new ActionRequestData()
             {
                 ActionID = actionID

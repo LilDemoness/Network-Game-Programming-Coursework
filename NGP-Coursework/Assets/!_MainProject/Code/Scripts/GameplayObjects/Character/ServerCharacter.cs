@@ -142,7 +142,7 @@ namespace Gameplay.GameplayObjects.Character
         public void PlayActionLocalCallRpc(ActionRequestData data)
         {
             ActionRequestData data1 = data;
-            if (GameDataSource.Instance.GetActionDefinitionByID(data1.ActionID).IsHostileAction)
+            if (GameDataSource.Instance.GetActionPrototypeByID(data1.ActionID).IsHostileAction)
             {
                 // Notify our running actions that we're using a new hostile action.
                 // Called so that things like Stealth can end themselves.

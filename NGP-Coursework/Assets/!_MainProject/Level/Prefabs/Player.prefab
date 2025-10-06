@@ -204,7 +204,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
   _serverCharacter: {fileID: 8374713656994953261}
-  _cancelFiringActionDefinition: {fileID: 11400000, guid: d87a1fe8634a6b24b9b1e68fcec9e1a1, type: 2}
+  _cancelFiringAction: {fileID: 11400000, guid: dee9848ed8c93c64fb0b1c6c9290124d, type: 2}
 --- !u!114 &5475418768958158863
 MonoBehaviour:
   m_ObjectHideFlags: 0

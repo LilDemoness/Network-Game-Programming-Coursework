@@ -57,7 +57,7 @@ namespace Gameplay.Actions
         public void PlayAction(ref ActionRequestData action)
         {
             // Check if we should interrupt the active action.
-            if (!action.ShouldQueue && _actionQueue.Count > 0)// && (_actionQueue[0].Config.ActionInterruptible || _actionQueue[0].Config.CanBeInterruptedBy(action.ActionID)))
+            if (!action.ShouldQueue && _actionQueue.Count > 0 && (/*_actionQueue[0].ActionInterruptible || */_actionQueue[0].CanBeInterruptedBy(action.ActionID)))
             {
                 ClearActions(false);
             }
@@ -113,26 +113,29 @@ namespace Gameplay.Actions
         /// </summary>
         private void CancelInterruptedActions(Action action)
         {
-            if (!action.Config.CancelsOtherActions)
+            if (!action.CancelsOtherActions)
                 return;
+
 
             // Check our active Actions to see if any should be cancelled.
             if (_actionQueue.Count > 0)
             {
-                if (action.Config.ShouldCancelAction(ref action.Data, ref _actionQueue[0].Data))
+                if (action.ShouldCancelAction(ref action.Data, ref _actionQueue[0].Data))
                 {
                     // Cancel this action.
+                    //Debug.Log($"Cancelling Action: {_actionQueue[0].name} (Slot: {_actionQueue[0].Data.SlotIdentifier})");
                     _actionQueue[0].Cancel(_serverCharacter);
-                    AdvanceQueue(false);
+                    AdvanceQueue(false);    // Advance the queue to the next action and remove the current head.
                 }
             }
 
             for(int i = _nonBlockingActions.Count - 1; i >= 0; --i)
             {
                 Action nonBlockingAction = _nonBlockingActions[i];
-                if (action.Config.ShouldCancelAction(ref action.Data, ref nonBlockingAction.Data))
+                if (action.ShouldCancelAction(ref action.Data, ref nonBlockingAction.Data))
                 {
                     // Cancel this action
+                    //Debug.Log($"Cancelling Action: {nonBlockingAction.name} (Slot: {nonBlockingAction.Data.SlotIdentifier})");
                     nonBlockingAction.Cancel(_serverCharacter);
                     _nonBlockingActions.RemoveAt(i);
                     TryReturnAction(nonBlockingAction);
@@ -185,12 +188,13 @@ namespace Gameplay.Actions
             if (_actionQueue.Count <= 0)
                 return;
 
-            _timestampComparison.SetValues(_actionQueue[0].Config.ActionID, _actionQueue[0].Data.SlotIdentifier);
-            if (_actionQueue[0].Config.HasCooldown()
+            _timestampComparison.SetValues(_actionQueue[0].ActionID, _actionQueue[0].Data.SlotIdentifier);
+            if (_actionQueue[0].HasCooldown
                 && _actionLastUsedTimestamps.TryGetValue(_timestampComparison, out float lastTimeUsed)
-                && !_actionQueue[0].Config.HasCooldownCompleted(lastTimeUsed))
+                && !_actionQueue[0].HasCooldownCompleted(lastTimeUsed))
             {
                 // We've used this action too recently.
+                Debug.Log("Action on Cooldown");
                 AdvanceQueue(false);    // Note: This calls 'StartAction()' recursively if there is more stuff in the queue.
                 return;
             }
@@ -211,10 +215,10 @@ namespace Gameplay.Actions
                 return;
             }
 
-            _timestampComparison.SetValues(_actionQueue[0].Config.ActionID, _actionQueue[0].Data.SlotIdentifier);
+            _timestampComparison.SetValues(_actionQueue[0].ActionID, _actionQueue[0].Data.SlotIdentifier);
             _actionLastUsedTimestamps[_timestampComparison] = Time.time;
 
-            if (_actionQueue[0].Config.ShouldBecomeNonBlocking(0.0f))
+            if (_actionQueue[0].ShouldBecomeNonBlocking())
             {
                 // This is a non-blocking action with no execute time. It should never have be at the front of the queue because a new action coming in could cause it to be cleared.
                 _nonBlockingActions.Add(_actionQueue[0]);
@@ -329,7 +333,7 @@ namespace Gameplay.Actions
         {
             bool shouldKeepGoing = action.OnUpdate(_serverCharacter);
 
-            return shouldKeepGoing && !action.Config.HasExpired(action.TimeStarted);
+            return shouldKeepGoing && !action.HasExpired;
         }
 
         /// <summary>

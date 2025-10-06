@@ -9,8 +9,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3b894a54c3af62740bea49b35434ef9c, type: 3}
-  m_Name: WeaponData_Railgun
+  m_Script: {fileID: 11500000, guid: 368f3f95cb773d64c9ab553cd8048f56, type: 3}
+  m_Name: MachineGunTestingAction
   m_EditorClassIdentifier: 
-  <Name>k__BackingField: Railgun
-  <AssociatedAction>k__BackingField: {fileID: 11400000, guid: 28e2dfcdfd00ded4d98e17400980b326, type: 2}
+  IsHostileAction: 0
+  Cost: 0
+  ExecutionDelay: 0
+  ActionCooldown: 0
+  MaxActiveDuration: 0
+  BlockingMode: 1
+  _weaponName: Machine Gun

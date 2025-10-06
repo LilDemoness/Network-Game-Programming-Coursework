@@ -15,7 +15,7 @@ namespace Gameplay.GameplayObjects.Character
         private Weapon _tertiaryWeapon;
 
 
-        [SerializeField] private ActionDefinition _cancelFiringActionDefinition;
+        [SerializeField] private CancelAction _cancelFiringAction;
 
 
         public override void OnNetworkSpawn()
@@ -61,7 +61,7 @@ namespace Gameplay.GameplayObjects.Character
         [ServerRpc]
         public void StopFiringPrimaryWeaponServerRpc(ServerRpcParams serverRpcParams = default)
         {
-            if (serverRpcParams.Receive.SenderClientId == this.OwnerClientId)
+            if (serverRpcParams.Receive.SenderClientId == this.OwnerClientId && this._primaryWeapon != null)
                 StopFiringWeapon((int)WeaponSlotIndex.Primary);
         }
         [ServerRpc]
@@ -75,7 +75,7 @@ namespace Gameplay.GameplayObjects.Character
         [ServerRpc]
         public void StopFiringSecondaryWeaponServerRpc(ServerRpcParams serverRpcParams = default)
         {
-            if (serverRpcParams.Receive.SenderClientId == this.OwnerClientId)
+            if (serverRpcParams.Receive.SenderClientId == this.OwnerClientId && this._secondaryWeapon != null)
                 StopFiringWeapon((int)WeaponSlotIndex.Secondary);
         }
         [ServerRpc]
@@ -89,7 +89,7 @@ namespace Gameplay.GameplayObjects.Character
         [ServerRpc]
         public void StopFiringTertiaryWeaponServerRpc(ServerRpcParams serverRpcParams = default)
         {
-            if (serverRpcParams.Receive.SenderClientId == this.OwnerClientId)
+            if (serverRpcParams.Receive.SenderClientId == this.OwnerClientId && this._tertiaryWeapon != null)
                 StopFiringWeapon((int)WeaponSlotIndex.Tertiary);
         }
 
@@ -110,7 +110,7 @@ namespace Gameplay.GameplayObjects.Character
         private void StopFiringWeapon(int slotIdentifier)
         {
             // Create and Setup the ActionRequestData.
-            ActionRequestData actionRequestData = ActionRequestData.Create(_cancelFiringActionDefinition);
+            ActionRequestData actionRequestData = ActionRequestData.Create(_cancelFiringAction);
             actionRequestData.SlotIdentifier = slotIdentifier;
 
             // Request to play our action.
