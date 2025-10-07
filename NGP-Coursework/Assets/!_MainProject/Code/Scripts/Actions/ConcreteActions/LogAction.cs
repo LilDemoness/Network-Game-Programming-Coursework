@@ -8,13 +8,13 @@ namespace Gameplay.Actions
     {
         [SerializeField] private string _debugMessage;
 
-        public override bool OnStart(ServerCharacter owner)
+        protected override bool HandleStart(ServerCharacter owner)
         {
             Debug.Log($"{this.name} {(Data.SlotIdentifier != 0 ? $"in slot {Data.SlotIdentifier}" : "")} says: {_debugMessage}");
             return ActionConclusion.Stop;
         }
 
-        public override bool OnUpdate(ServerCharacter owner)
+        protected override bool HandleUpdate(ServerCharacter owner)
         {
             throw new System.Exception("A LogAction has made it to a point where it's 'OnUpdate' method has been called.");
         }

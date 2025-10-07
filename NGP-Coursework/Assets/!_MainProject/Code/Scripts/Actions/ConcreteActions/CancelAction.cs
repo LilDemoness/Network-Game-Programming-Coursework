@@ -14,7 +14,7 @@ namespace Gameplay.Actions
         [SerializeField] private bool _requireSharedSlotIdentifier = false;
 
 
-        public override bool OnStart(ServerCharacter owner)
+        protected override bool HandleStart(ServerCharacter owner)
         {
             //foreach (ActionDefinition actionDefinition in OtherActionsThisCancels)
             //    owner.ClientCharacter.CancelAllActionsByActionIDClientRpc(actionDefinition.ActionID);
@@ -22,7 +22,7 @@ namespace Gameplay.Actions
             return ActionConclusion.Stop;
         }
 
-        public override bool OnUpdate(ServerCharacter owner)
+        protected override bool HandleUpdate(ServerCharacter owner)
         {
             throw new System.Exception("A CancelAction has made it to a point where it's 'OnUpdate' method has been called.");
         }

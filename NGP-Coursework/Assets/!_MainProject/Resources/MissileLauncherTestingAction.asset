@@ -16,6 +16,17 @@ MonoBehaviour:
   Cost: 0
   ExecutionDelay: 0
   ActionCooldown: 0
-  MaxActiveDuration: 0
   BlockingMode: 1
+  CanCharge: 0
+  MaxChargeTime: 0
+  ExecuteIfNotAtFullCharge: 0
+  MaxActiveDuration: 0
+  _triggerType: 1
+  _cancelOnLastTrigger: 1
+  _retriggerDelay: 0
+  _bursts: 3
+  _burstDelay: 0.1
+  IsInterruptable: 0
   _weaponName: Missile Launcher
+  _displayEndLog: 1
+  _displayCancelLog: 1

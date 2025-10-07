@@ -88,26 +88,28 @@ namespace Gameplay.Actions
         }
 
 
-        private Vector3 GetTargetingOrigin() => Data.OriginTransformID != 0 ? NetworkManager.Singleton.SpawnManager.SpawnedObjects[Data.OriginTransformID].transform.TransformPoint(Data.Position) : Data.Position;
-        private Vector3 GetTargetingDirection() => Data.OriginTransformID != 0 ? NetworkManager.Singleton.SpawnManager.SpawnedObjects[Data.OriginTransformID].transform.TransformDirection(Data.Direction) : Data.Direction;
-
-
-        
-
-
-
         /// <summary>
         ///     Called when the Action starts actually playing (Which may be after it is created, due to queueing).
         /// </summary>
-        /// <returns> False if the action decided it doesn't want to run. True otherwise.</returns>
-        public abstract bool OnStart(ServerCharacter owner);
+        /// <returns> False if the Action decided it doesn't want to run. True otherwise.</returns>
+        public virtual bool OnStart(ServerCharacter owner) => HandleStart(owner);
+        /// <summary>
+        ///     Called when the Action starts actually playing (Which may be after it is created, due to queueing).
+        /// </summary>
+        /// <returns> False if the Action decided it doesn't want to run. True otherwise.</returns>
+        protected abstract bool HandleStart(ServerCharacter owner);
 
 
         /// <summary>
-        ///     Called each frame the action is running.
+        ///     Called each frame the Action is running.
         /// </summary>
         /// <returns> True to keep running, false to stop. The action will stop by default when its duration expires, if it has one set.</returns>
-        public abstract bool OnUpdate(ServerCharacter owner);
+        public virtual bool OnUpdate(ServerCharacter owner) => HandleUpdate(owner);
+        /// <summary>
+        ///     Called when the Action wishes to Update itself.
+        /// </summary>
+        /// <returns> True to keep running, false to stop. The Action will stop by default when its duration expires, if it has one set.</returns>
+        protected abstract bool HandleUpdate(ServerCharacter owner);
 
         /// <summary>
         ///     Called each frame (Before OnUpdate()) for the active ("blocking") Action, asking if it should become a background Action.

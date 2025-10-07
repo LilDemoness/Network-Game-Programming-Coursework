@@ -16,6 +16,17 @@ MonoBehaviour:
   Cost: 0
   ExecutionDelay: 0
   ActionCooldown: 0
-  MaxActiveDuration: 0
   BlockingMode: 1
+  CanCharge: 0
+  MaxChargeTime: 0
+  ExecuteIfNotAtFullCharge: 0
+  MaxActiveDuration: 0
+  _triggerType: 0
+  _cancelOnLastTrigger: 1
+  _retriggerDelay: 0
+  _bursts: 0
+  _burstDelay: 0
+  IsInterruptable: 0
   _weaponName: Railgun
+  _displayEndLog: 1
+  _displayCancelLog: 1
