@@ -43,8 +43,6 @@ namespace Gameplay.Actions
         public ref ActionRequestData Data => ref m_data;
 
 
-        #region Action Settings
-
         [Tooltip("Does this count as a hostile Action? (Should it: Break Stealth, Dropp Shields, etc?)")]
         public bool IsHostileAction;
 
@@ -52,28 +50,15 @@ namespace Gameplay.Actions
         public float Cost;
 
 
-        [Tooltip("The time in seconds between starting this action and its effects triggering")]
-        public float ExecutionDelay;
-        public float ActionCooldown;
-        public float MaxActiveDuration;
-        public BlockingModeType BlockingMode = BlockingModeType.OnlyDuringExecutionTime;
-
-        #endregion
-
-
-        public virtual bool HasCooldown => ActionCooldown > 0.0f;
-        public virtual bool HasCooldownCompleted(float lastActivatedTime) => (NetworkManager.Singleton.ServerTime.TimeAsFloat - lastActivatedTime) >= ActionCooldown;
-        public virtual bool HasExpired 
-        {
-            get
-            {
-                bool isExpirable = MaxActiveDuration > 0.0f;  // Non-positive values indicate that the duration is infinite.
-                float timeElapsed = NetworkManager.Singleton.ServerTime.TimeAsFloat - TimeStarted;
-                return isExpirable && timeElapsed >= MaxActiveDuration;
-            }
-        }
+        public abstract bool HasCooldown { get; }
+        public abstract bool HasCooldownCompleted(float lastActivatedTime);
+        public abstract bool HasExpired { get; }
 
         public virtual bool CancelsOtherActions => false;
+
+
+        public virtual bool CanBeInterruptedBy(ActionID otherActionID) => false;
+        public virtual bool ShouldCancelAction(ref ActionRequestData thisData, ref ActionRequestData otherData) => false;
 
 
         public bool IsChaseAction => ActionID == GameDataSource.Instance.GeneralChaseActionDefinition.ActionID;
@@ -128,7 +113,7 @@ namespace Gameplay.Actions
         ///     Called each frame (Before OnUpdate()) for the active ("blocking") Action, asking if it should become a background Action.
         /// </summary>
         /// <returns> True to become a non-blocking Action. False to remain as a blocking Action.</returns>
-        public virtual bool ShouldBecomeNonBlocking() => BlockingMode == BlockingModeType.OnlyDuringExecutionTime ? TimeRunning >= ExecutionDelay : false;
+        public abstract bool ShouldBecomeNonBlocking();
 
         /// <summary>
         ///     Called when the Action ends naturally.
@@ -141,8 +126,6 @@ namespace Gameplay.Actions
         /// </summary>
         public virtual void Cancel(ServerCharacter owner) => Cleanup(owner);
         
-
-        protected void DebugForAction(string actionType, ServerCharacter owner) => Debug.Log($"{this.name} {(Data.SlotIdentifier != 0 ? $"in slot {Data.SlotIdentifier}" : "")} {actionType} for {owner.name} (Client {owner.OwnerClientId})");
 
 
         /// <summary>
@@ -167,9 +150,6 @@ namespace Gameplay.Actions
         /// </summary>
         public virtual void CollisionEntered(ServerCharacter owner, Collision collision) { }
 
-
-        public virtual bool CanBeInterruptedBy(ActionID otherActionID) => false;
-        public virtual bool ShouldCancelAction(ref ActionRequestData thisData, ref ActionRequestData otherData) => false;
 
 
         #region Buffs

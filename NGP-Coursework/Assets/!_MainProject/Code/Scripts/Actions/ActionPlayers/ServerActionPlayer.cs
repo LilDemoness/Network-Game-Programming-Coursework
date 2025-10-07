@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
-using UnityEngine.Pool;
 using Gameplay.GameplayObjects.Character;
 using System;
 
@@ -396,6 +395,50 @@ namespace Gameplay.Actions
         }
 
 
-        //public bool CancelRunningActionsByLogic(ActionLogic logic, bool cancelAll, Action exceptThis = null) => throw new System.NotImplementedException();
+        public void CancelRunningActionsByID(ActionID actionID, int slotIdentifier = 0, bool cancelNonBlocking = true, Action exceptThis = null)
+        {
+            bool ShouldCancelFunc(Action action) => action.ActionID == actionID && action != exceptThis && (slotIdentifier == 0 || action.Data.SlotIdentifier == slotIdentifier);
+            CancelActiveActions(ShouldCancelFunc, cancelNonBlocking);
+        }
+        public void CancelRunningActionsBySlotID(int slotIdentifier, bool cancelNonBlocking)
+        {
+            if (slotIdentifier <= 0)
+                throw new System.ArgumentException($"You are trying to cancel actions with an invalid SlotIdentifier ({slotIdentifier}). Use a value >= 1.");
+
+            bool ShouldCancelFunc(Action action) => action.Data.SlotIdentifier == slotIdentifier;
+            CancelActiveActions(ShouldCancelFunc, cancelNonBlocking);
+        }
+
+        private void CancelActiveActions(Func<Action, bool> cancelCondition, bool cancelNonBlocking)
+        {
+            // Blocking Actions.
+            if (_actionQueue.Count > 0)
+            {
+                Action action = _actionQueue[0];
+                if (cancelCondition(action))
+                {
+                    // The active blocking action should be removed.
+                    _actionQueue[0].Cancel(_serverCharacter);
+
+                    // Advance the queue (Removes the now cancelled Action '0').
+                    AdvanceQueue(false);
+                }
+            }
+
+            if (cancelNonBlocking)
+            {
+                // Cancel all matching Non-Blocking Actions.
+                for (int i = _nonBlockingActions.Count - 1; i >= 0; --i)
+                {
+                    Action action = _nonBlockingActions[i];
+                    if (!cancelCondition(action))
+                        continue;
+
+                    action.Cancel(_serverCharacter);
+                    _nonBlockingActions.RemoveAt(i);
+                    TryReturnAction(action);
+                }
+            }
+        }
     }
 }

@@ -105,16 +105,8 @@ namespace Gameplay.GameplayObjects.Character
             actionRequestData.SlotIdentifier = slotIdentifier;
 
             // Request to play our action.
-            _serverCharacter.PlayActionLocalCallRpc(actionRequestData);
+            _serverCharacter.PlayActionServerRpc(actionRequestData);
         }
-        private void StopFiringWeapon(int slotIdentifier)
-        {
-            // Create and Setup the ActionRequestData.
-            ActionRequestData actionRequestData = ActionRequestData.Create(_cancelFiringAction);
-            actionRequestData.SlotIdentifier = slotIdentifier;
-
-            // Request to play our action.
-            _serverCharacter.PlayActionLocalCallRpc(actionRequestData);
-        }
+        private void StopFiringWeapon(int slotIdentifier) => _serverCharacter.CancelActionBySlotServerRpc(slotIdentifier);
     }
 }

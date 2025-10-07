@@ -18,5 +18,12 @@ namespace Gameplay.Actions
         {
             throw new System.Exception("A LogAction has made it to a point where it's 'OnUpdate' method has been called.");
         }
+
+
+
+        public override bool HasCooldown => false;
+        public override bool HasCooldownCompleted(float lastActivatedTime) => true;
+        public override bool HasExpired => true;
+        public override bool ShouldBecomeNonBlocking() => true;
     }
 }

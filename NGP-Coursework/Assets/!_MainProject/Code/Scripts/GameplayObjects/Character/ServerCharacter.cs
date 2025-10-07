@@ -127,19 +127,13 @@ namespace Gameplay.GameplayObjects.Character
             _movement.SetMovementInput(movementInput);
         }
 
+
         /// <summary>
         ///     Client->Server RPC that sends a request to play an action.
         /// </summary>
         /// <param name="data"> The Data about which action to play and its associated details.</param>
-        [ServerRpc]
-        public void PlayActionServerRpc(ActionRequestData data) => PlayActionLocalCallRpc(data);
-        /// <summary>
-        ///     Non-Authoritative request to play an action on the Server.
-        ///     Should only be called by scripts on the server.
-        /// </summary>
-        /// <param name="data"> The Data about which action to play and its associated details.</param>
-        [Rpc(SendTo.Me)]
-        public void PlayActionLocalCallRpc(ActionRequestData data)
+        [Rpc(SendTo.Server)]
+        public void PlayActionServerRpc(ActionRequestData data)
         {
             ActionRequestData data1 = data;
             if (GameDataSource.Instance.GetActionPrototypeByID(data1.ActionID).IsHostileAction)
@@ -151,6 +145,12 @@ namespace Gameplay.GameplayObjects.Character
 
             PlayAction(ref data1);
         }
+
+        [Rpc(SendTo.Server)]
+        public void CancelActionByIDServerRpc(ActionID actionID, int slotIdentifier = 0) => CancelAction(actionID, slotIdentifier);
+
+        [Rpc(SendTo.Server)]
+        public void CancelActionBySlotServerRpc(int slotIdentifier) => CancelAction(slotIdentifier);
 
 
         /// <summary>
@@ -166,6 +166,9 @@ namespace Gameplay.GameplayObjects.Character
 
             ActionPlayer.PlayAction(ref action);
         }
+        private void CancelAction(ActionID actionID, int slotIndentifier = 0) => ActionPlayer.CancelRunningActionsByID(actionID, slotIndentifier, true);
+        private void CancelAction(int slotIndentifier) => ActionPlayer.CancelRunningActionsBySlotID(slotIndentifier, true);
+        
 
 
         private void Update()

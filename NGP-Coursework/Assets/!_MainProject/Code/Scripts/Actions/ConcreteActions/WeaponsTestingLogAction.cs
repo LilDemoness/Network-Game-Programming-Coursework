@@ -4,7 +4,7 @@ using UnityEngine;
 namespace Gameplay.Actions
 {
     [CreateAssetMenu(menuName = "Actions/New Weapons Testing Action")]
-    public class WeaponsTestingLogAction : Action
+    public class WeaponsTestingLogAction : DefaultAction
     {
         [SerializeField] private string _weaponName;
 

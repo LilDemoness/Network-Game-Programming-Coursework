@@ -13,6 +13,13 @@ namespace Gameplay.Actions
         //protected abstract bool ShouldNotifyClient { get; }
 
 
+        [Header("Timings")]
+        [Tooltip("The time in seconds between starting this action and its effects triggering")]
+        public float ExecutionDelay;
+        public float ActionCooldown;
+        public BlockingModeType BlockingMode = BlockingModeType.OnlyDuringExecutionTime;
+
+
         [Header("Charging Settings")]
         public bool CanCharge;
         public float MaxChargeTime;
@@ -20,6 +27,7 @@ namespace Gameplay.Actions
 
 
         [Header("Active Timings")]
+        public float MaxActiveDuration;
         public float RetriggerDelay;
         [System.NonSerialized] protected float NextUpdateTime;
 
@@ -38,60 +46,24 @@ namespace Gameplay.Actions
         }
 
 
-        public override bool OnStart(ServerCharacter owner)
+        public override bool HasCooldown => ActionCooldown > 0.0f;
+        public override bool HasCooldownCompleted(float lastActivatedTime) => (NetworkManager.Singleton.ServerTime.TimeAsFloat - lastActivatedTime) >= ActionCooldown;
+        public override bool HasExpired
         {
-            NextUpdateTime = TimeStarted + ExecutionDelay;
-
-            // Ensure our Data's perameters are set up.
-            InitialiseDataParametersIfEmpty(owner);
-
-            /*
-            if (ShouldNotifyClient)
-                serverCharacter.ClientCharacter.PlayActionClientRpc(this.Data, TimeStarted);
-             */
-
-            DebugForAction("Start", owner);
-
-            return HandleStart(owner);
-        }
-        public override bool OnUpdate(ServerCharacter owner)
-        {
-            if (RetriggerDelay <= 0)
+            get
             {
-                if (NextUpdateTime != -1)
-                {
-                    Debug.Log("Server Update: " + TimeRunning);
-
-                    // Trigger OnUpdate() once.
-                    NextUpdateTime = -1;
-                    DebugForAction("Update", owner);
-                    return HandleUpdate(owner);
-                }
+                bool isExpirable = MaxActiveDuration > 0.0f;  // Non-positive values indicate that the duration is infinite.
+                float timeElapsed = NetworkManager.Singleton.ServerTime.TimeAsFloat - TimeStarted;
+                return isExpirable && timeElapsed >= MaxActiveDuration;
             }
-            else
-            {
-                while (NextUpdateTime < NetworkManager.Singleton.ServerTime.TimeAsFloat)
-                {
-                    Debug.Log("Server Update: " + TimeRunning);
-
-                    // Play Execution Effects.
-                    DebugForAction("Update", owner);
-                    if (HandleUpdate(owner) == false)
-                        return false;
-
-                    NextUpdateTime += RetriggerDelay;
-                }
-            }
-
-            return true;
         }
 
+        public override bool ShouldBecomeNonBlocking() => BlockingMode == BlockingModeType.OnlyDuringExecutionTime ? TimeRunning >= ExecutionDelay : false;
 
-        protected abstract bool HandleStart(ServerCharacter owner);
-        protected abstract bool HandleUpdate(ServerCharacter owner);
-        protected abstract bool HandleEnd(ServerCharacter owner);
-        protected abstract bool HandleCancel(ServerCharacter owner);
-
+        public override bool CanBeInterruptedBy(ActionID otherActionID)
+        {
+            return base.CanBeInterruptedBy(otherActionID);
+        }
 
 
         /// <summary>

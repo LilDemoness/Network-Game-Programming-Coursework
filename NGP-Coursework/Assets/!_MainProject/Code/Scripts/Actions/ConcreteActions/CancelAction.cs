@@ -44,5 +44,11 @@ namespace Gameplay.Actions
 
             return false;
         }
+
+        public override bool HasCooldown => false;
+        public override bool HasCooldownCompleted(float lastActivatedTime) => true;
+        public override bool HasExpired => true;
+
+        public override bool ShouldBecomeNonBlocking() => true;
     }
 }
