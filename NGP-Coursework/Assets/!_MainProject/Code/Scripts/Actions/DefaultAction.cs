@@ -28,7 +28,8 @@ namespace Gameplay.Actions
 
         [Header("Active Timings")]
         public float MaxActiveDuration;
-        [System.NonSerialized] protected float NextUpdateTime;
+        [System.NonSerialized]
+        protected float NextUpdateTime;
 
 
         [Header("Retriggering")]
@@ -101,7 +102,14 @@ namespace Gameplay.Actions
             }
         }
 
-        public override bool ShouldBecomeNonBlocking() => BlockingMode == BlockingModeType.OnlyDuringExecutionTime ? TimeRunning >= ExecutionDelay : false;
+        public override bool ShouldBecomeNonBlocking()
+            => BlockingMode switch
+            {
+                BlockingModeType.OnlyDuringExecutionTime => TimeRunning >= ExecutionDelay,
+                BlockingModeType.Never => true,
+                _ => false,
+            };
+        
 
         public override bool CanBeInterruptedBy(ActionID otherActionID)
         {
@@ -114,6 +122,7 @@ namespace Gameplay.Actions
         {
             NextUpdateTime = TimeStarted + ExecutionDelay;
             _burstsRemaining = _bursts;
+            InitialiseDataParametersIfEmpty(owner);
             return HandleStart(owner);
         }
 

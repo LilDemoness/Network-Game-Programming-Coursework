@@ -7,5 +7,6 @@ namespace Gameplay.Actions
     {
         EntireDuration,
         OnlyDuringExecutionTime,
+        Never,
     }
 }

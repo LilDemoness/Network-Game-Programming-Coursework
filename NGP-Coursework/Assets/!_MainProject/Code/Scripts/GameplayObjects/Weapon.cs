@@ -12,7 +12,6 @@ namespace Gameplay.GameplayObjects
 
         [SerializeField] private Transform _firingOrigin;
         private NetworkObject _parentNetworkObject;
-        private Matrix4x4 conversionMatrix;
 
 
         private void Awake()
@@ -24,14 +23,12 @@ namespace Gameplay.GameplayObjects
                 this.enabled = false;
                 return;
             }
-
-            conversionMatrix = _parentNetworkObject.transform.worldToLocalMatrix * transform.localToWorldMatrix;
         }
 
 
         public ulong GetAttackOriginTransformID() => _parentNetworkObject.NetworkObjectId;
-        public Vector3 GetAttackLocalOffset() => conversionMatrix.MultiplyPoint(_firingOrigin.localPosition);
-        public Vector3 GetAttackLocalDirection() => conversionMatrix.MultiplyPoint(_firingOrigin.localRotation * Vector3.forward).normalized;
+        public Vector3 GetAttackLocalOffset() => _parentNetworkObject.transform.InverseTransformPoint(_firingOrigin.position);
+        public Vector3 GetAttackLocalDirection() => _parentNetworkObject.transform.InverseTransformDirection(_firingOrigin.forward);
 
 
         #if UNITY_EDITOR
@@ -57,8 +54,17 @@ namespace Gameplay.GameplayObjects
                 return;
 
             Gizmos.color = Color.red;
-            Gizmos.DrawSphere(transform.TransformPoint(_firingOrigin.localPosition), 0.05f);
-            Gizmos.DrawRay(transform.TransformPoint(_firingOrigin.localPosition), transform.TransformDirection(_firingOrigin.localRotation * Vector3.forward));
+
+            if (_parentNetworkObject == null)
+            {
+                Gizmos.DrawSphere(transform.TransformPoint(_firingOrigin.localPosition), 0.05f);
+                Gizmos.DrawRay(transform.TransformPoint(_firingOrigin.localPosition), transform.TransformDirection(_firingOrigin.forward));
+            }
+            else
+            {
+                Gizmos.DrawSphere(GetAttackLocalOffset(), 0.05f);
+                Gizmos.DrawRay(GetAttackLocalOffset(), GetAttackLocalDirection());
+            }
         }
         #endif
     }
