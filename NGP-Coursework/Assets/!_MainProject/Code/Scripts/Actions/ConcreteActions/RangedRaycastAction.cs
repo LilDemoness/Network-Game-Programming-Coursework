@@ -3,6 +3,7 @@ using System.Linq;
 using UnityEngine;
 using Unity.Netcode;
 using Gameplay.GameplayObjects.Character;
+using Gameplay.Actions.Effects;
 
 namespace Gameplay.Actions
 {
@@ -22,7 +23,7 @@ namespace Gameplay.Actions
 
 
         [Header("Effects")]
-        [SerializeField] private int _temp;
+        [SerializeReference] [SubclassSelector] private ActionEffect[] _actionEffects;
 
 
 
@@ -40,37 +41,47 @@ namespace Gameplay.Actions
         private Vector3 GetRaycastDirection() => (Data.OriginTransformID != 0 ? NetworkManager.Singleton.SpawnManager.SpawnedObjects[Data.OriginTransformID].transform.TransformDirection(Data.Direction) : Data.Direction).normalized;
         private void PerformRaycast(ServerCharacter owner)
         {
-            Debug.DrawRay(GetRaycastOrigin(), GetRaycastDirection() * _maxRange, Color.red, 0.5f);
+            Vector3 rayOrigin = GetRaycastOrigin();
+            Vector3 rayDirection = GetRaycastDirection();
+            Debug.DrawRay(rayOrigin, rayDirection * _maxRange, Color.red, 0.5f);
 
             if (_canPierce)
             {
                 // Get all valid targets.
-                Vector3 originPos = GetRaycastOrigin();
-                RaycastHit[] colliders = Physics.RaycastAll(originPos, GetRaycastDirection(), _maxRange, _validLayers, QueryTriggerInteraction.Ignore);
+                RaycastHit[] colliders = Physics.RaycastAll(rayOrigin, rayDirection, _maxRange, _validLayers, QueryTriggerInteraction.Ignore);
 
                 // Order our targets in ascending order, taking only the number we wish to pierce.
-                IEnumerable<RaycastHit> orderedValidTargets = colliders.OrderBy(t => (t.point - originPos).sqrMagnitude).Take(_pierces + 1);
+                IEnumerable<RaycastHit> orderedValidTargets = colliders.OrderBy(t => (t.point - rayOrigin).sqrMagnitude).Take(_pierces + 1);
 
                 // Loop through and process all valid targets.
                 IEnumerator<RaycastHit> enumerator = orderedValidTargets.GetEnumerator();
                 while(enumerator.MoveNext())
                 {
-                    ProcessTarget(enumerator.Current.transform, enumerator.Current.point, enumerator.Current.normal);
+                    ActionHitInformation actionHitInfo = new ActionHitInformation(enumerator.Current.transform, enumerator.Current.point, enumerator.Current.normal, GetHitForward(enumerator.Current.normal));
+                    ProcessTarget(owner, actionHitInfo);
                 }
             }
             else
             {
-                if (Physics.Raycast(GetRaycastOrigin(), GetRaycastDirection(), out RaycastHit hitInfo, _maxRange, _validLayers, QueryTriggerInteraction.Ignore))
+                if (Physics.Raycast(rayOrigin, rayDirection, out RaycastHit hitInfo, _maxRange, _validLayers, QueryTriggerInteraction.Ignore))
                 {
-                    ProcessTarget(hitInfo.transform, hitInfo.point, hitInfo.normal);
+                    ActionHitInformation actionHitInfo = new ActionHitInformation(hitInfo.transform, hitInfo.point, hitInfo.normal, GetHitForward(hitInfo.normal));
+                    ProcessTarget(owner, actionHitInfo);
                 }
             }
+
+            Vector3 GetHitForward(Vector3 hitNormal) => Mathf.Abs(Vector3.Dot(hitNormal, rayDirection)) != 1.0f ? Vector3.Cross(hitNormal, rayDirection) : Vector3.Cross(hitNormal, -owner.transform.right);
         }
 
-        private void ProcessTarget(Transform transform, Vector3 hitPoint, Vector3 hitNormal)
+        private void ProcessTarget(ServerCharacter owner, in ActionHitInformation hitInfo)
         {
-            Debug.Log($"{transform.name} was hit!");
-            Debug.DrawRay(hitPoint, hitNormal, Color.yellow, 0.5f);
+            Debug.Log($"{hitInfo.Target.name} was hit!");
+            //Debug.DrawRay(hitInfo.HitPoint, hitInfo.HitNormal, Color.yellow, 0.5f);
+
+            for(int i = 0; i < _actionEffects.Length; ++i)
+            {
+                _actionEffects[i].ApplyEffect(owner, hitInfo);
+            }
         }
     }
 }

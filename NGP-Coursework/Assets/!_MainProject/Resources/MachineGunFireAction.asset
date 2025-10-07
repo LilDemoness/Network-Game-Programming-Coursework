@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   IsHostileAction: 0
   Cost: 0
-  ExecutionDelay: 0.2
+  ExecutionDelay: 0
   ActionCooldown: 0
   BlockingMode: 2
   CanCharge: 0
@@ -32,4 +32,20 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 73
   _pierces: 0
-  _temp: 0
+  _actionEffects:
+  - rid: 9030112155397783658
+  references:
+    version: 2
+    RefIds:
+    - rid: 9030112155397783658
+      type: {class: SpawnObjectEffect, ns: Gameplay.Actions.Effects, asm: Assembly-CSharp}
+      data:
+        _spawnType:
+          rid: 9030112155397783659
+        _prefab: {fileID: 0}
+    - rid: 9030112155397783659
+      type: {class: FixedSpread, ns: Gameplay.Actions.Effects, asm: Assembly-CSharp}
+      data:
+        _spawnCount: 3
+        _spawnRadius: 1
+        _defaultVectorRandomnessAngle: 0
