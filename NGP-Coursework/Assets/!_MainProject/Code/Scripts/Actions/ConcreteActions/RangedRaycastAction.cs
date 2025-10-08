@@ -70,7 +70,7 @@ namespace Gameplay.Actions
                 }
             }
 
-            Vector3 GetHitForward(Vector3 hitNormal) => Mathf.Abs(Vector3.Dot(hitNormal, rayDirection)) != 1.0f ? Vector3.Cross(hitNormal, rayDirection) : Vector3.Cross(hitNormal, -owner.transform.right);
+            Vector3 GetHitForward(Vector3 hitNormal) => Mathf.Approximately(Mathf.Abs(Vector3.Dot(hitNormal, rayDirection)), 1.0f) ? Vector3.Cross(hitNormal, -owner.transform.right) : Vector3.Cross(hitNormal, rayDirection);
         }
 
         private void ProcessTarget(ServerCharacter owner, in ActionHitInformation hitInfo)

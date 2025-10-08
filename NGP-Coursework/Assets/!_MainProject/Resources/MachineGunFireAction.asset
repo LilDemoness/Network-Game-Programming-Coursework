@@ -42,10 +42,13 @@ MonoBehaviour:
       data:
         _spawnType:
           rid: 9030112155397783659
-        _prefab: {fileID: 0}
+        _prefab: {fileID: 2566303382376736775, guid: 758cb40804652f244a4f0657fadd9ff7, type: 3}
+        _maxCount: 3
+        _lifetime: 2
     - rid: 9030112155397783659
       type: {class: FixedSpread, ns: Gameplay.Actions.Effects, asm: Assembly-CSharp}
       data:
         _spawnCount: 3
         _spawnRadius: 1
-        _defaultVectorRandomnessAngle: 0
+        _randomisationAngle: 0
+        _randomiseOnlyDefaultVector: 1
