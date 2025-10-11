@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Pool;
 using Unity.Netcode;
 using Gameplay.GameplayObjects.Character;
+using VisualEffects;
 
 namespace Gameplay.Actions.Effects
 {
@@ -11,18 +13,20 @@ namespace Gameplay.Actions.Effects
     {
         [SerializeReference, SubclassSelector] private ObjectSpawnType _spawnType;
         [SerializeField] private NetworkObject _prefab;
+        [SerializeField] private SpecialFXGraphic _destroyFX;
+        private ObjectPool<SpecialFXGraphic> _destroyFXPool;
 
         [Space(5)]
         [SerializeField] private int _maxCount = 10;        // How many groups of spawns can this effect have active at once.
         [SerializeField] private float _lifetime = 0.0f;    // The default lifetime of the spawned object (Not including if it destroys itself). <= 0.0 means unlimited lifetime.
-        private ObjectPool<NetworkObject> _objectPool;
+        private RecyclingPool<NetworkObject> _objectPool;
 
 
         #region Object Pool Setup
 
-        private ObjectPool<NetworkObject> CreateNetworkObjectPool()
+        private RecyclingPool<NetworkObject> CreateNetworkObjectPool()
         {
-            return new ObjectPool<NetworkObject>(
+            return new RecyclingPool<NetworkObject>(
                 createFunc: SpawnNetworkObject,
                 actionOnGet: GetNetworkObject,
                 actionOnRelease: ReleaseNetworkObject,
@@ -38,10 +42,33 @@ namespace Gameplay.Actions.Effects
         private void GetNetworkObject(NetworkObject networkObject) => networkObject.gameObject.SetActive(true);
         private void ReleaseNetworkObject(NetworkObject networkObject)
         {
+            SpecialFXGraphic destroyFXInstance = _destroyFXPool.Get();
+            destroyFXInstance.transform.position = networkObject.transform.position;
+            destroyFXInstance.transform.up = networkObject.transform.up;
+            destroyFXInstance.Start();
+
             networkObject.StopAllCoroutines();
             networkObject.gameObject.SetActive(false);
         }
         private void DestroyNetworkObject(NetworkObject networkObject) => networkObject.Despawn(true);
+        
+
+        private ObjectPool<SpecialFXGraphic> CreateDestroyFXPool()
+        {
+            return new ObjectPool<SpecialFXGraphic>(
+                createFunc: SpawnDestroyFX,
+                actionOnGet: GetDestroyFX,
+                actionOnRelease: ReleaseDestroyFX,
+                maxSize: _spawnType.ObjectsSpawnedPerCall);
+        }
+        private SpecialFXGraphic SpawnDestroyFX()
+        {
+            SpecialFXGraphic destroyFXInstance = GameObject.Instantiate<SpecialFXGraphic>(_destroyFX);
+            destroyFXInstance.OnShutdownComplete += _destroyFXPool.Release;
+            return destroyFXInstance;
+        }
+        private void GetDestroyFX(SpecialFXGraphic ps) => ps.gameObject.SetActive(true);
+        private void ReleaseDestroyFX(SpecialFXGraphic ps) => ps.gameObject.SetActive(false);
 
         #endregion
 
@@ -49,6 +76,7 @@ namespace Gameplay.Actions.Effects
         public override void ApplyEffect(ServerCharacter owner, in ActionHitInformation hitInfo)
         {
             _objectPool ??= CreateNetworkObjectPool();  // Move to an init function?
+            _destroyFXPool ??= CreateDestroyFXPool();
 
             // (Testing) Display the spawn positions and normals of our objects.
             Vector3[] spawnPositions = _spawnType.GetSpawnPositions(hitInfo.HitPoint, hitInfo.HitNormal, hitInfo.HitForward);
@@ -84,9 +112,9 @@ namespace Gameplay.Actions.Effects
     public abstract class ObjectSpawnType
     {
         public abstract Vector3[] GetSpawnPositions(Vector3 spawnCentre, Vector3 spawnNormal, Vector3 spawnForward);
-        public abstract NetworkObject[] SpawnObject(ObjectPool<NetworkObject> prefabPool, Vector3 spawnCentre, Vector3 spawnNormal, Vector3 spawnForward);
+        public abstract NetworkObject[] SpawnObject(IObjectPool<NetworkObject> prefabPool, Vector3 spawnCentre, Vector3 spawnNormal, Vector3 spawnForward);
 
-        protected NetworkObject SpawnObjectAtPosition(ObjectPool<NetworkObject> objectPrefabPool, in Vector3 spawnPosition, in Quaternion spawnRotation)
+        protected NetworkObject SpawnObjectAtPosition(IObjectPool<NetworkObject> objectPrefabPool, in Vector3 spawnPosition, in Quaternion spawnRotation)
         {
             NetworkObject objectInstance = objectPrefabPool.Get();
             objectInstance.transform.position = spawnPosition;
@@ -129,7 +157,7 @@ namespace Gameplay.Actions.Effects
             return spawnPositions;
         }
 
-        public override NetworkObject[] SpawnObject(ObjectPool<NetworkObject> prefabPool, Vector3 spawnCentre, Vector3 spawnNormal, Vector3 spawnForward)
+        public override NetworkObject[] SpawnObject(IObjectPool<NetworkObject> prefabPool, Vector3 spawnCentre, Vector3 spawnNormal, Vector3 spawnForward)
         {
             Vector3[] spawnPositions = GetSpawnPositions(spawnCentre, spawnNormal, spawnForward);
             NetworkObject[] spawnedObjects = new NetworkObject[_spawnCount];
@@ -173,7 +201,7 @@ namespace Gameplay.Actions.Effects
             return spawnPositions;
         }
 
-        public override NetworkObject[] SpawnObject(ObjectPool<NetworkObject> prefabPool, Vector3 spawnCentre, Vector3 spawnNormal, Vector3 spawnForward)
+        public override NetworkObject[] SpawnObject(IObjectPool<NetworkObject> prefabPool, Vector3 spawnCentre, Vector3 spawnNormal, Vector3 spawnForward)
         {
             Vector3[] spawnPositions = GetSpawnPositions(spawnCentre, spawnNormal, spawnForward);
             NetworkObject[] spawnedObjects = new NetworkObject[_spawnCount];
@@ -194,7 +222,7 @@ namespace Gameplay.Actions.Effects
     public class RaycastPlaced : ObjectSpawnType
     {
         public override Vector3[] GetSpawnPositions(Vector3 spawnCentre, Vector3 spawnNormal, Vector3 spawnForward) => new Vector3[1] { spawnCentre };
-        public override NetworkObject[] SpawnObject(ObjectPool<NetworkObject> prefabPool, Vector3 spawnCentre, Vector3 spawnNormal, Vector3 spawnForward)
+        public override NetworkObject[] SpawnObject(IObjectPool<NetworkObject> prefabPool, Vector3 spawnCentre, Vector3 spawnNormal, Vector3 spawnForward)
             => new NetworkObject[1] { SpawnObjectAtPosition(prefabPool, spawnCentre, Quaternion.LookRotation(Vector3.forward, spawnNormal)) };
     }
     [System.Serializable]
@@ -208,7 +236,7 @@ namespace Gameplay.Actions.Effects
         {
             throw new System.NotImplementedException();
         }
-        public override NetworkObject[] SpawnObject(ObjectPool<NetworkObject> prefabPool, Vector3 spawnCentre, Vector3 spawnNormal, Vector3 spawnForward)
+        public override NetworkObject[] SpawnObject(IObjectPool<NetworkObject> prefabPool, Vector3 spawnCentre, Vector3 spawnNormal, Vector3 spawnForward)
         {
             throw new System.NotImplementedException();
         }
