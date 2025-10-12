@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: WeaponData_MissileLauncher
   m_EditorClassIdentifier: 
   <Name>k__BackingField: Missile Launcher
-  <AssociatedAction>k__BackingField: {fileID: 11400000, guid: 35808b1b43154a643b04dde8b861b331, type: 2}
+  <AssociatedAction>k__BackingField: {fileID: 11400000, guid: 16abfbda20a092149b77fe220e345fe3, type: 2}

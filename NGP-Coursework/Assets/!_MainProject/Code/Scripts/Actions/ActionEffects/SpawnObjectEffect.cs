@@ -45,7 +45,7 @@ namespace Gameplay.Actions.Effects
             SpecialFXGraphic destroyFXInstance = _destroyFXPool.Get();
             destroyFXInstance.transform.position = networkObject.transform.position;
             destroyFXInstance.transform.up = networkObject.transform.up;
-            destroyFXInstance.Start();
+            destroyFXInstance.Play();
 
             networkObject.StopAllCoroutines();
             networkObject.gameObject.SetActive(false);

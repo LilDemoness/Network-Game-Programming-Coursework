@@ -16,7 +16,7 @@ namespace VisualEffects
         private bool _isInShutdown = false;
 
 
-        public void Start()
+        public void Play()
         {
             _isInShutdown = false;
 

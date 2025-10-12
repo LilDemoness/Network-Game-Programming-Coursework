@@ -1,23 +1,33 @@
 using UnityEngine;
 
-namespace Gameplay.Actions
+namespace Gameplay.GameplayObjects.Projectiles
 {
     [System.Serializable]
     public struct ProjectileInfo
     {
         [Tooltip("Prefab used for the projectile.")]
-        public GameObject ProjectilePrefab;
+        public Projectile ProjectilePrefab;
 
         [Tooltip("Projectile's speed (In meters/second).")]
         public float Speed;
         
-        [Tooltip("Maximum range of the Projectile.")]
-        public float Range;
-        
-        [Tooltip("Damage of the Projectile on hit.")]
-        public int Damage;
-        
-        [Tooltip("Max number of enemies this projectile can hit before disappearing.")]
-        public int MaxVictims;
+
+        [Header("Auto Destruction")]
+        [Tooltip("Maximum range of the Projectile. '0.0' for Infinite Range.")]
+        [Min(0.0f)] public float MaxRange;
+
+        [Tooltip("Maximum lifetime of the Projectile. '0.0' for Infinite Lifetime.")]
+        [Min(0.0f)] public float MaxLifetime;
+
+        [Tooltip("Maximum number of additional targets the Projectile can hit (Either piercing or bouncing). 0 for only a single target.")]
+        [Min(0)] public int MaxHits;
+
+
+        [Header("Seeking")]
+        [Tooltip("Should this projectile seek after a set target (Won't seek if there is no target)?")]
+        public bool PerformSeeking;
+
+        [Tooltip("Projectile's rotation speed to face its target (In Degrees/Second).")]
+        public float SeekingSpeed;
     }
 }

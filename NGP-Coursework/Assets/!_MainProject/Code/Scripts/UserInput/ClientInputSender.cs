@@ -201,7 +201,7 @@ namespace UserInput
         
 
 
-        private void RequestAction(ActionType actionType, ActionDefinition actionState, Vector3 origin = default, Vector3 direction = default, int slotIdentifier = -1)
+        /*private void RequestAction(ActionType actionType, ActionDefinition actionState, Vector3 origin = default, Vector3 direction = default, int slotIdentifier = -1)
         {
             if (_actionRequestCount < _actionRequests.Length)
             {
@@ -213,7 +213,7 @@ namespace UserInput
                 _actionRequests[_actionRequestCount].SlotIdentifier = slotIdentifier;
                 ++_actionRequestCount;
             }
-        }
+        }*/
 
 
         private void UsePrimaryWeapon_started(InputAction.CallbackContext obj) => _serverWeaponController.StartFiringPrimaryWeaponServerRpc();

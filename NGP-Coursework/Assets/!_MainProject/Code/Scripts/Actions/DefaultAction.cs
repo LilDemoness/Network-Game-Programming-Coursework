@@ -209,5 +209,9 @@ namespace Gameplay.Actions
 
             return true;
         }
+
+
+        protected Vector3 GetActionOrigin() => Data.OriginTransformID != 0 ? NetworkManager.Singleton.SpawnManager.SpawnedObjects[Data.OriginTransformID].transform.TransformPoint(Data.Position) : Data.Position;
+        protected Vector3 GetActionDirection() => (Data.OriginTransformID != 0 ? NetworkManager.Singleton.SpawnManager.SpawnedObjects[Data.OriginTransformID].transform.TransformDirection(Data.Direction) : Data.Direction).normalized;
     }
 }

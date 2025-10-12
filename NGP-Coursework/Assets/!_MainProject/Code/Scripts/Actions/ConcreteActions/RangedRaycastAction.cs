@@ -37,12 +37,10 @@ namespace Gameplay.Actions
         }
 
 
-        private Vector3 GetRaycastOrigin() => Data.OriginTransformID != 0 ? NetworkManager.Singleton.SpawnManager.SpawnedObjects[Data.OriginTransformID].transform.TransformPoint(Data.Position) : Data.Position;
-        private Vector3 GetRaycastDirection() => (Data.OriginTransformID != 0 ? NetworkManager.Singleton.SpawnManager.SpawnedObjects[Data.OriginTransformID].transform.TransformDirection(Data.Direction) : Data.Direction).normalized;
         private void PerformRaycast(ServerCharacter owner)
         {
-            Vector3 rayOrigin = GetRaycastOrigin();
-            Vector3 rayDirection = GetRaycastDirection();
+            Vector3 rayOrigin = GetActionOrigin();
+            Vector3 rayDirection = GetActionDirection();
             Debug.DrawRay(rayOrigin, rayDirection * _maxRange, Color.red, 0.5f);
 
             if (_canPierce)
