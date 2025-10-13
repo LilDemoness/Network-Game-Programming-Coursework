@@ -55,7 +55,7 @@ namespace Gameplay.Actions
                     Transform originTransform = owner.transform;
                     Vector3 origin = Vector3.zero, direction = Vector3.forward;
 
-                    return raycastSeekingFunction.Setup(originTransform, origin, direction);
+                    return raycastSeekingFunction.Setup(_projectileInfo, originTransform, origin, direction);
                 case FixedTargetSeekingFunction:
                     FixedTargetSeekingFunction fixedTargetSeekingFunction = new FixedTargetSeekingFunction(_seekingFunction as FixedTargetSeekingFunction);
                     throw new System.NotImplementedException("Not Implemented Target Aquisiton");

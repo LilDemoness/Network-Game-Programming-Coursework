@@ -96,10 +96,10 @@ namespace Gameplay.GameplayObjects.Projectiles
             // Perform Seeking.
             if (_seekingFunction != null && _seekingStartTime <= Time.time)
             {
-                if (_seekingFunction.TryGetTargetPosition(out Vector3 targetPosition))
+                if (_seekingFunction.TryGetTargetDirection(transform.position, out Vector3 targetDirection))
                 {
                     // Update target direction.
-                    _targetMovementDirection = (targetPosition - transform.position).normalized;
+                    _targetMovementDirection = targetDirection;
 
                     // Rotate towards the target direction.
                     transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(_targetMovementDirection), _projectileInfo.SeekingSpeed * Time.fixedDeltaTime);

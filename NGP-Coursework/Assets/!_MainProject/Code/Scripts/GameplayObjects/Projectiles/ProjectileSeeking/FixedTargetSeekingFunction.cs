@@ -5,27 +5,27 @@ namespace Gameplay.GameplayObjects.Projectiles
     [System.Serializable]
     public class FixedTargetSeekingFunction : SeekingFunction
     {
-        private Transform _target;
+        private Transform m_target;
 
 
         public FixedTargetSeekingFunction(FixedTargetSeekingFunction other) { }
         public FixedTargetSeekingFunction Setup(Transform target)
         {
-            this._target = target;
+            this.m_target = target;
 
             return this;
         }
 
-        public override bool TryGetTargetPosition(out Vector3 targetPosition)
+        public override bool TryGetTargetDirection(Vector3 currentPosition, out Vector3 seekingDirection)
         {
-            if (_target == null)
+            if (m_target == null)
             {
-                targetPosition = Vector3.zero;
+                seekingDirection = Vector3.zero;
                 return false;
             }
             else
             {
-                targetPosition = _target.position;
+                seekingDirection = (m_target.position - currentPosition).normalized;
                 return true;
             }
         }

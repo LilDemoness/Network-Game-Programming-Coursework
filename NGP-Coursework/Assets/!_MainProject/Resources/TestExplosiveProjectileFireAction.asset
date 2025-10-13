@@ -33,7 +33,6 @@ MonoBehaviour:
     MaxRange: 0
     MaxLifetime: 30
     MaxHits: 0
-    PerformSeeking: 0
     SeekingSpeed: 720
     SeekingInitialDelay: 0.1
   _seekingFunction:
@@ -50,7 +49,8 @@ MonoBehaviour:
     - rid: 9030112281907691672
       type: {class: RaycastSeekingFunction, ns: Gameplay.GameplayObjects.Projectiles, asm: Assembly-CSharp}
       data:
-        MaxDistance: 10
-        TargetableLayers:
+        _maxDistance: 10
+        _targetableLayers:
           serializedVersion: 2
-          m_Bits: 9
+          m_Bits: 73
+        _returnSuccessForNoRayHit: 1
