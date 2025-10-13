@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   IsHostileAction: 0
   Cost: 0
+  m_shouldNotifyClient: 1
   ExecutionDelay: 0
   ActionCooldown: 0
   BlockingMode: 1
@@ -21,11 +22,13 @@ MonoBehaviour:
   MaxChargeTime: 0
   ExecuteIfNotAtFullCharge: 0
   MaxActiveDuration: 0
-  _triggerType: 0
-  _cancelOnLastTrigger: 1
-  _retriggerDelay: 0
+  _triggerType: 2
+  _cancelOnLastTrigger: 0
+  _retriggerDelay: 0.1
   _bursts: 0
   _burstDelay: 0
+  _actionVisual:
+    rid: 9030112290471936148
   IsInterruptable: 0
   _projectileInfo:
     ProjectilePrefab: {fileID: 6798116693762154231, guid: 103ca3e0e5cbab64ab06ebe302f9d110, type: 3}
@@ -33,12 +36,23 @@ MonoBehaviour:
     MaxRange: 0
     MaxLifetime: 1
     MaxHits: 0
+    SeekingSpeed: 0
+    SeekingInitialDelay: 0
+  _seekingFunction:
+    rid: -2
   _actionEffects:
   - rid: 9030112259367764120
   references:
     version: 2
     RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
     - rid: 9030112259367764120
       type: {class: HealthChangeEffect, ns: Gameplay.Actions.Effects, asm: Assembly-CSharp}
       data:
         _healthChange: -5
+    - rid: 9030112290471936148
+      type: {class: SpecialFXActionGraphic, ns: Gameplay.Actions.Visuals, asm: Assembly-CSharp}
+      data:
+        _triggerTimes: 2
+        _specialFXGraphic: {fileID: 4037183185398935712, guid: de6513b59a0ab6e45827e1457b43a2b3, type: 3}

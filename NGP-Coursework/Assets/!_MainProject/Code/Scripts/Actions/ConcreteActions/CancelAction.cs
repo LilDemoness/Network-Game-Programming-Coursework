@@ -10,6 +10,7 @@ namespace Gameplay.Actions
     [CreateAssetMenu(menuName = "Actions/New Cancel Action")]
     public class CancelAction : Action
     {
+        public override bool ShouldNotifyClient => false;   // Maybe?
         [SerializeField] private List<Action> _actionsThisCancels = new List<Action>();
         [SerializeField] private bool _requireSharedSlotIdentifier = false;
 

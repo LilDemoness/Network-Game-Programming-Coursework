@@ -31,14 +31,12 @@ namespace Gameplay.Actions
                 Action action = _playingActions[i];
 
                 // Calculate values for Ending the Action FX.
-                bool keepGoing = action.AnticipatedClient || action.OnUpdateClient(ClientCharacter);    // Only update the action if we are past anticipation.
-
-                Debug.LogWarning("Not Implemented");
-                float actionMaxDuration = 0;//(action.Config as DefaultActionDefinition).MaxActiveDuration;
-                bool hasExpired = actionMaxDuration > 0 && action.TimeRunning >= actionMaxDuration;
+                bool shouldKeepGoing = action.AnticipatedClient || action.OnUpdateClient(ClientCharacter);    // Only update the action if we are past anticipation.
+                bool hasExpired = action.HasExpired;
                 bool hasTimedOut = action.AnticipatedClient && action.TimeRunning >= ANTICIPATION_TIMEOUT_SECONDS;
 
-                if (!keepGoing || hasExpired || hasTimedOut)
+
+                if (!shouldKeepGoing || hasExpired || hasTimedOut)
                 {
                     // End the action.
                     if (hasTimedOut)
@@ -112,17 +110,32 @@ namespace Gameplay.Actions
             }
             _playingActions.Clear();
         }
-        public void CancelAllActionsByActionID(ActionID actionID)
+
+        public void CancelRunningActionsByID(ActionID actionID, int slotIdentifier = 0, Action exceptThis = null)
         {
-            for(int i = _playingActions.Count - 1; i >= 0; --i)
+            bool ShouldCancelFunc(Action action) => action.ActionID == actionID && action != exceptThis && (slotIdentifier == 0 || action.Data.SlotIdentifier == slotIdentifier);
+            CancelActiveActions(ShouldCancelFunc);
+        }
+        public void CancelRunningActionsBySlotID(int slotIdentifier)
+        {
+            if (slotIdentifier <= 0)
+                throw new System.ArgumentException($"You are trying to cancel actions with an invalid SlotIdentifier ({slotIdentifier}). Use a value >= 1.");
+
+            bool ShouldCancelFunc(Action action) => action.Data.SlotIdentifier == slotIdentifier;
+            CancelActiveActions(ShouldCancelFunc);
+        }
+
+        private void CancelActiveActions(System.Func<Action, bool> cancelCondition)
+        {
+            for (int i = _playingActions.Count - 1; i >= 0; --i)
             {
-                if (_playingActions[i].ActionID == actionID)
-                {
-                    Action action = _playingActions[i];
-                    action.CancelClient(ClientCharacter);
-                    _playingActions.RemoveAt(i);
-                    ActionFactory.ReturnAction(action);
-                }
+                Action action = _playingActions[i];
+                if (!cancelCondition(action))
+                    continue;
+
+                action.CancelClient(ClientCharacter);
+                _playingActions.RemoveAt(i);
+                ActionFactory.ReturnAction(action);
             }
         }
     }

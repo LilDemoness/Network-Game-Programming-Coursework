@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   IsHostileAction: 0
   Cost: 0
+  SpecialFXGraphic: {fileID: 4037183185398935712, guid: de6513b59a0ab6e45827e1457b43a2b3, type: 3}
   ExecutionDelay: 0
   ActionCooldown: 0
   BlockingMode: 2
@@ -26,6 +27,8 @@ MonoBehaviour:
   _retriggerDelay: 0.2
   _bursts: 0
   _burstDelay: 0
+  _actionVisual:
+    rid: 9030112290471936149
   IsInterruptable: 0
   _maxRange: 10
   _validLayers:
@@ -53,3 +56,8 @@ MonoBehaviour:
         _spawnRadius: 1
         _randomisationAngle: 0
         _randomiseOnlyDefaultVector: 1
+    - rid: 9030112290471936149
+      type: {class: SpecialFXActionGraphic, ns: Gameplay.Actions.Visuals, asm: Assembly-CSharp}
+      data:
+        _triggerTimes: 2
+        _specialFXGraphic: {fileID: 4037183185398935712, guid: de6513b59a0ab6e45827e1457b43a2b3, type: 3}

@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
 using Gameplay.GameplayObjects.Character;
-using System;
 
 namespace Gameplay.Actions
 {
@@ -17,7 +16,7 @@ namespace Gameplay.Actions
         private List<Action> _actionQueue;
         private List<Action> _nonBlockingActions;
 
-        private struct ActionIDSlotIdentifierWrapper : IEquatable<ActionIDSlotIdentifierWrapper>
+        private struct ActionIDSlotIdentifierWrapper : System.IEquatable<ActionIDSlotIdentifierWrapper>
         {
             public ActionID ActionID;
             public int SlotIdentifier;
@@ -409,7 +408,7 @@ namespace Gameplay.Actions
             CancelActiveActions(ShouldCancelFunc, cancelNonBlocking);
         }
 
-        private void CancelActiveActions(Func<Action, bool> cancelCondition, bool cancelNonBlocking)
+        private void CancelActiveActions(System.Func<Action, bool> cancelCondition, bool cancelNonBlocking)
         {
             // Blocking Actions.
             if (_actionQueue.Count > 0)

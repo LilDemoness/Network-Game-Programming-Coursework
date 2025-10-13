@@ -67,8 +67,6 @@ namespace VisualEffects
                 particleSystem.Stop();
             }
 
-            Debug.Log("Shutdown Started", this);
-
             if (_postShutdownDelay >= 0.0f)
             {
                 StartCoroutine(NotifyShutdownAfterFixedTime());
@@ -83,7 +81,6 @@ namespace VisualEffects
         private IEnumerator NotifyShutdownAfterFixedTime()
         {
             yield return new WaitForSeconds(_postShutdownDelay);
-            Debug.Log("Shutdown Complete", this);
             OnShutdownComplete?.Invoke(this);
         }
         private IEnumerator WaitForParticlesToEnd()
@@ -102,7 +99,6 @@ namespace VisualEffects
                 }
             } while (foundAliveParticles);
 
-            Debug.Log("Shutdown Complete", this);
             OnShutdownComplete?.Invoke(this);
         }
     }

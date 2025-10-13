@@ -1,4 +1,5 @@
 using Gameplay.GameplayObjects.Character;
+using Gameplay.Actions.Visuals;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -10,7 +11,9 @@ namespace Gameplay.Actions
     /// </summary>
     public abstract class DefaultAction : Action
     {
-        //protected abstract bool ShouldNotifyClient { get; }
+        // Change to be based on the Action Type?
+        [SerializeField] private bool m_shouldNotifyClient = true;
+        public override bool ShouldNotifyClient => m_shouldNotifyClient;
 
 
         [Header("Timings")]
@@ -50,6 +53,10 @@ namespace Gameplay.Actions
 
 
         [Header("Animation Triggers")]
+
+
+        [Header("Client Visuals")]
+        [SerializeReference, SubclassSelector] private ActionVisual _actionVisual;
 
 
         [Header("Interruption")]
@@ -134,6 +141,8 @@ namespace Gameplay.Actions
             if (NetworkManager.Singleton.ServerTime.TimeAsFloat < NextUpdateTime)
                 return ActionConclusion.Continue;
 
+            //ActivateSpecialFXGraphic();
+
             if (HandleUpdate(owner) == false)
                 return ActionConclusion.Stop;
 
@@ -207,11 +216,45 @@ namespace Gameplay.Actions
             base.OnStartClient(clientCharacter, serverTimeStarted);
             NextUpdateTime = TimeStarted + ExecutionDelay;
 
+            if (_actionVisual != null)
+                _actionVisual.OnClientStart(clientCharacter, GetActionOrigin(), GetActionDirection());
+
             return true;
         }
+        public override bool OnUpdateClient(ClientCharacter clientCharacter)
+        {
+            base.OnUpdateClient(clientCharacter);
 
+            if (_hasPerformedLastTrigger)
+                return !_cancelOnLastTrigger;
 
-        protected Vector3 GetActionOrigin() => Data.OriginTransformID != 0 ? NetworkManager.Singleton.SpawnManager.SpawnedObjects[Data.OriginTransformID].transform.TransformPoint(Data.Position) : Data.Position;
-        protected Vector3 GetActionDirection() => (Data.OriginTransformID != 0 ? NetworkManager.Singleton.SpawnManager.SpawnedObjects[Data.OriginTransformID].transform.TransformDirection(Data.Direction) : Data.Direction).normalized;
+            if (NetworkManager.Singleton.ServerTime.TimeAsFloat < NextUpdateTime)
+                return ActionConclusion.Continue;
+
+            if (_actionVisual != null)
+                _actionVisual.OnClientUpdate(clientCharacter, GetActionOrigin(), GetActionDirection());
+
+            //if (HandleClientUpdate(clientCharacter) == false)
+            //    return ActionConclusion.Stop;
+
+            _hasPerformedLastTrigger = !CalculateNextUpdateTime();
+
+            if (_cancelOnLastTrigger && _hasPerformedLastTrigger)
+                return ActionConclusion.Stop;
+            else
+                return ActionConclusion.Continue;
+        }
+        public override void EndClient(ClientCharacter clientCharacter)
+        {
+            if (_actionVisual != null)
+                _actionVisual.OnClientEnd(clientCharacter, GetActionOrigin(), GetActionDirection());
+            base.EndClient(clientCharacter);
+        }
+        public override void CancelClient(ClientCharacter clientCharacter)
+        {
+            if (_actionVisual != null)
+                _actionVisual.OnClientCancel(clientCharacter, GetActionOrigin(), GetActionDirection());
+            base.CancelClient(clientCharacter);
+        }
     }
 }

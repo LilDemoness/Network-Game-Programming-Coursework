@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   IsHostileAction: 0
   Cost: 0
+  SpecialFXGraphic: {fileID: 4037183185398935712, guid: de6513b59a0ab6e45827e1457b43a2b3, type: 3}
   ExecutionDelay: 0
   ActionCooldown: 0
   BlockingMode: 1
@@ -21,17 +22,19 @@ MonoBehaviour:
   MaxChargeTime: 0
   ExecuteIfNotAtFullCharge: 0
   MaxActiveDuration: 0
-  _triggerType: 0
+  _triggerType: 2
   _cancelOnLastTrigger: 0
-  _retriggerDelay: 0
+  _retriggerDelay: 0.2
   _bursts: 0
   _burstDelay: 0
+  _actionVisual:
+    rid: 9030112290471936146
   IsInterruptable: 0
   _projectileInfo:
     ProjectilePrefab: {fileID: 5177341952338766353, guid: 741492a3145316f46b46d7ee5febb43c, type: 3}
     Speed: 15
     MaxRange: 0
-    MaxLifetime: 30
+    MaxLifetime: 10
     MaxHits: 0
     SeekingSpeed: 720
     SeekingInitialDelay: 0.1
@@ -49,8 +52,11 @@ MonoBehaviour:
     - rid: 9030112281907691672
       type: {class: RaycastSeekingFunction, ns: Gameplay.GameplayObjects.Projectiles, asm: Assembly-CSharp}
       data:
-        _maxDistance: 10
         _targetableLayers:
           serializedVersion: 2
           m_Bits: 73
-        _returnSuccessForNoRayHit: 1
+    - rid: 9030112290471936146
+      type: {class: SpecialFXActionGraphic, ns: Gameplay.Actions.Visuals, asm: Assembly-CSharp}
+      data:
+        _triggerTimes: 2
+        _specialFXGraphic: {fileID: 4037183185398935712, guid: de6513b59a0ab6e45827e1457b43a2b3, type: 3}

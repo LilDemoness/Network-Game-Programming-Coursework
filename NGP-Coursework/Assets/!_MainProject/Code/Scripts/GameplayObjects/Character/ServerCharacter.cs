@@ -143,6 +143,9 @@ namespace Gameplay.GameplayObjects.Character
                 ActionPlayer.OnGameplayActivity(Action.GameplayActivity.UsingHostileAction);
             }
 
+            if (GameDataSource.Instance.GetActionPrototypeByID(data1.ActionID).ShouldNotifyClient)
+                m_clientCharacter.PlayActionClientRpc(data, NetworkManager.Singleton.ServerTime.TimeAsFloat);
+
             PlayAction(ref data1);
         }
 
@@ -166,8 +169,18 @@ namespace Gameplay.GameplayObjects.Character
 
             ActionPlayer.PlayAction(ref action);
         }
-        private void CancelAction(ActionID actionID, int slotIndentifier = 0) => ActionPlayer.CancelRunningActionsByID(actionID, slotIndentifier, true);
-        private void CancelAction(int slotIndentifier) => ActionPlayer.CancelRunningActionsBySlotID(slotIndentifier, true);
+        private void CancelAction(ActionID actionID, int slotIndentifier = 0)
+        {
+            if (GameDataSource.Instance.GetActionPrototypeByID(actionID).ShouldNotifyClient)
+                m_clientCharacter.CancelRunningActionsByIDClientRpc(actionID, slotIndentifier);
+
+            ActionPlayer.CancelRunningActionsByID(actionID, slotIndentifier, true);
+        }
+        private void CancelAction(int slotIndentifier)
+        {
+            m_clientCharacter.CancelRunningActionsBySlotIDClientRpc(slotIndentifier);
+            ActionPlayer.CancelRunningActionsBySlotID(slotIndentifier, true);
+        }
         
 
 

@@ -14,6 +14,8 @@ namespace Gameplay.Actions
         /// </summary>
         public const string DEFAULT_HIT_REACT_ANIMATION_STRING = "";
 
+        public abstract bool ShouldNotifyClient { get; }
+
 
         /// <summary>
         ///     An index into the GameDataSource array of action prototypes.
@@ -105,6 +107,7 @@ namespace Gameplay.Actions
         /// </summary>
         /// <returns> True to keep running, false to stop. The action will stop by default when its duration expires, if it has one set.</returns>
         public virtual bool OnUpdate(ServerCharacter owner) => HandleUpdate(owner);
+        
         /// <summary>
         ///     Called when the Action wishes to Update itself.
         /// </summary>
@@ -134,6 +137,11 @@ namespace Gameplay.Actions
         ///     Cleans up any ongoing effects.
         /// </summary>
         public virtual void Cleanup(ServerCharacter owner) { }
+
+
+        protected Vector3 GetActionOrigin() => Data.OriginTransformID != 0 ? NetworkManager.Singleton.SpawnManager.SpawnedObjects[Data.OriginTransformID].transform.TransformPoint(Data.Position) : Data.Position;
+        protected Vector3 GetActionDirection() => (Data.OriginTransformID != 0 ? NetworkManager.Singleton.SpawnManager.SpawnedObjects[Data.OriginTransformID].transform.TransformDirection(Data.Direction) : Data.Direction).normalized;
+
 
 
         /// <summary>

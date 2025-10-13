@@ -1338,7 +1338,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 98d9db9626104da59357651088226725, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_PresetAsset: {fileID: 11400000, guid: 2520b5fc35692bc4f93498b3aa4ac507, type: 2}
+  m_PresetAsset: {fileID: 0}
   m_PresetReference:
     rid: -2
   m_Scenario:

@@ -6,6 +6,7 @@ namespace Gameplay.Actions
     [CreateAssetMenu(menuName = "Actions/New Log Action")]
     public class LogAction : Action
     {
+        public override bool ShouldNotifyClient => false;
         [SerializeField] private string _debugMessage;
 
         protected override bool HandleStart(ServerCharacter owner)
