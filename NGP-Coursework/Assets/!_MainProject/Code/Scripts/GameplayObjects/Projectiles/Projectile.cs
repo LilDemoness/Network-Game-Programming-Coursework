@@ -21,7 +21,6 @@ namespace Gameplay.GameplayObjects.Projectiles
         private System.Action<ActionHitInformation> _onHitCallback;
 
 
-        // Seeking/Homing.
         [Header("Projectile Movement")]
         [SerializeField] private float _gravityStrength = 9.81f;
         [SerializeField] private bool _continuousForce;
@@ -31,14 +30,21 @@ namespace Gameplay.GameplayObjects.Projectiles
         private Vector3 _currentVelocity;
 
 
+        [Header("Projectile Seeking")]
+        [SerializeReference] private SeekingFunction _seekingFunction;
+        [SerializeField] private bool _continueSeekingWhenNotUpdated = true;    // Should we continue steering towards the seeking direction even if our attempt to update it failed.
+        private float _seekingStartTime;
+
+
         [SerializeField] private SphereCollider _collider;
         public float GetAdditionalSpawnDistance() => _collider.radius;
 
 
-        public void Initialise(ulong ownerNetworkID, in ProjectileInfo projectileInfo, System.Action<ActionHitInformation> onHitCallback)
+        public void Initialise(ulong ownerNetworkID, in ProjectileInfo projectileInfo, SeekingFunction seekingFunction, System.Action<ActionHitInformation> onHitCallback)
         {
             this._ownerNetworkID = ownerNetworkID;
             this._projectileInfo = projectileInfo;
+            this._seekingFunction = seekingFunction;
             this._onHitCallback = onHitCallback;
 
             _targetMovementDirection = transform.forward;
@@ -56,6 +62,7 @@ namespace Gameplay.GameplayObjects.Projectiles
                 _remainingLifetime = _projectileInfo.MaxLifetime;
                 _remainingHits = _projectileInfo.MaxHits;
 
+                _seekingStartTime = Time.time + _projectileInfo.SeekingInitialDelay;
                 _currentVelocity = _targetMovementDirection * _projectileInfo.Speed + Vector3.up * 0.25f;
             }
 
@@ -78,7 +85,6 @@ namespace Gameplay.GameplayObjects.Projectiles
         }
 
 
-        private Vector3 _targetPreviousPosition;
         private void FixedUpdate()
         {
             if (!IsServer)
@@ -88,39 +94,33 @@ namespace Gameplay.GameplayObjects.Projectiles
 
             
             // Perform Seeking.
-            /*if (_getTargetPositionFunc != null)
+            if (_seekingFunction != null && _seekingStartTime <= Time.time)
             {
-                Vector3 newTargetPos = _getTargetPositionFunc();
-                if(newTargetPos != default)
-                    _targetPosition = newTargetPos;
+                if (_seekingFunction.TryGetTargetPosition(out Vector3 targetPosition))
+                {
+                    // Update target direction.
+                    _targetMovementDirection = (targetPosition - transform.position).normalized;
+
+                    // Rotate towards the target direction.
+                    transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(_targetMovementDirection), _projectileInfo.SeekingSpeed * Time.fixedDeltaTime);
+                }
+                else if (_continueSeekingWhenNotUpdated)
+                {
+                    // Continue Rotation towards '_targetMovementDirection'.
+                    transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(_targetMovementDirection), _projectileInfo.SeekingSpeed * Time.fixedDeltaTime);
+                }
             }
-
-            if (_targetPosition != default)
-            {
-                Vector3 directionToTarget;
-                if (_targetPosition == _targetPreviousPosition)
-                {
-                    directionToTarget = (_targetPosition - transform.position).normalized;
-                }
-                else
-                {
-                    Vector3 targetVelocity = (_targetPreviousPosition - _targetPosition);
-                    if (!Interception.CalculateInterceptionDirection(_targetPosition, targetVelocity, transform.position, _projectileInfo.Speed, out directionToTarget))
-                        directionToTarget = transform.forward;
-                }
-                transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(directionToTarget.normalized), _projectileInfo.SeekingSpeed * Time.fixedDeltaTime);
-
-                _targetPreviousPosition = _targetPosition;
-            }*/
             
-            transform.position += transform.forward * _projectileInfo.Speed * Time.fixedDeltaTime;
+            // Perform Movement
+            Vector3 displacement = transform.forward * _projectileInfo.Speed * Time.fixedDeltaTime;
+            transform.position += displacement;
 
 
 
             if (_remainingSqrDistance > 0.0f)
             {
                 // Remaining Distance.
-                //_remainingSqrDistance -= displacement.sqrMagnitude; // Not quite distance, but close enough for now.
+                _remainingSqrDistance -= displacement.sqrMagnitude; // Not quite distance, but close enough for now.
                 if (_remainingSqrDistance <= 0.0f)
                     EndProjectile();
             }

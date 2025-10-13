@@ -13,10 +13,10 @@ namespace Gameplay.GameplayObjects.Projectiles
         
 
         [Header("Auto Destruction")]
-        [Tooltip("Maximum range of the Projectile. '0.0' for Infinite Range.")]
+        [Tooltip("Maximum range of the Projectile (In Seconds). '0.0' for Infinite Range.")]
         [Min(0.0f)] public float MaxRange;
 
-        [Tooltip("Maximum lifetime of the Projectile. '0.0' for Infinite Lifetime.")]
+        [Tooltip("Maximum lifetime of the Projectile (In Seconds). '0.0' for Infinite Lifetime.")]
         [Min(0.0f)] public float MaxLifetime;
 
         [Tooltip("Maximum number of additional targets the Projectile can hit (Either piercing or bouncing). 0 for only a single target.")]
@@ -24,10 +24,13 @@ namespace Gameplay.GameplayObjects.Projectiles
 
 
         [Header("Seeking")]
-        [Tooltip("Should this projectile seek after a set target (Won't seek if there is no target)?")]
-        public bool PerformSeeking;
+        //[Tooltip("Should this projectile seek after a set target (Won't seek if there is no target)?")]
+        //public bool PerformSeeking;
 
         [Tooltip("Projectile's rotation speed to face its target (In Degrees/Second).")]
         public float SeekingSpeed;
+
+        [Tooltip("Delay between the spawning of a projectile and its seeking activating (In Seconds).")]
+        public float SeekingInitialDelay;
     }
 }

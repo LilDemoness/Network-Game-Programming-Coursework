@@ -15,7 +15,7 @@ namespace Gameplay.Actions
     {
         [Header("Projectile Settings")]
         [SerializeField] private ProjectileInfo _projectileInfo;
-        private Vector3 _targetPosition;
+        [SerializeReference, SubclassSelector] private SeekingFunction _seekingFunction;
 
 
         [Header("Effects")]
@@ -23,13 +23,6 @@ namespace Gameplay.Actions
 
 
         protected override bool HandleStart(ServerCharacter owner) => ActionConclusion.Continue;
-        public override bool OnUpdate(ServerCharacter owner)
-        {
-            Vector3 spawnPosition = GetActionOrigin();
-            _targetPosition = Physics.Raycast(spawnPosition, owner.transform.forward, out RaycastHit hitInfo, 15.0f, LayerMask.GetMask("Default", "Player", "Ground"), QueryTriggerInteraction.Ignore) ? hitInfo.point : spawnPosition + owner.transform.forward * 50.0f;
-
-            return base.OnUpdate(owner);
-        }
         protected override bool HandleUpdate(ServerCharacter owner)
         {
             SpawnProjectile(owner);
@@ -45,9 +38,34 @@ namespace Gameplay.Actions
             spawnPosition += spawnDirection * _projectileInfo.ProjectilePrefab.GetAdditionalSpawnDistance();
 
             Projectile projectileInstance = GameObject.Instantiate<Projectile>(_projectileInfo.ProjectilePrefab, spawnPosition, Quaternion.LookRotation(spawnDirection));
-            projectileInstance.Initialise(owner.NetworkObjectId, _projectileInfo, (ActionHitInformation info) => OnProjectileHit(owner, info));
+            SeekingFunction seekingFunction = _seekingFunction != null ? SetupSeekingFunction(owner, projectileInstance) : null;
+            projectileInstance.Initialise(owner.NetworkObjectId, _projectileInfo, seekingFunction, (ActionHitInformation info) => OnProjectileHit(owner, info));
             projectileInstance.GetComponent<NetworkObject>().Spawn(true);
         }
+        private SeekingFunction SetupSeekingFunction(ServerCharacter owner, Projectile projectileInstance)
+        {
+            switch (_seekingFunction)
+            {
+                case RaycastSeekingFunction:
+                    RaycastSeekingFunction raycastSeekingFunction = new RaycastSeekingFunction(_seekingFunction as RaycastSeekingFunction);
+
+                    /*Transform originTransform = Data.OriginTransformID != 0 ? NetworkManager.Singleton.SpawnManager.SpawnedObjects[Data.OriginTransformID].transform : null;
+                    Vector3 origin = m_data.Position;
+                    Vector3 direction = m_data.Direction;*/
+                    Transform originTransform = owner.transform;
+                    Vector3 origin = Vector3.zero, direction = Vector3.forward;
+
+                    return raycastSeekingFunction.Setup(originTransform, origin, direction);
+                case FixedTargetSeekingFunction:
+                    FixedTargetSeekingFunction fixedTargetSeekingFunction = new FixedTargetSeekingFunction(_seekingFunction as FixedTargetSeekingFunction);
+                    throw new System.NotImplementedException("Not Implemented Target Aquisiton");
+                case NearestTargetSeekingFunction:
+                    NearestTargetSeekingFunction nearestTargetSeekingFunction = new NearestTargetSeekingFunction(_seekingFunction as NearestTargetSeekingFunction);
+                    return nearestTargetSeekingFunction.Setup(owner.transform, projectileInstance);
+                default: throw new System.NotImplementedException();
+            }
+        }
+
         private void OnProjectileHit(ServerCharacter owner, in ActionHitInformation hitInfo)
         {
             Debug.Log($"{hitInfo.Target.name} was hit!");

@@ -34,7 +34,10 @@ MonoBehaviour:
     MaxLifetime: 30
     MaxHits: 0
     PerformSeeking: 0
-    SeekingSpeed: 120
+    SeekingSpeed: 720
+    SeekingInitialDelay: 0.1
+  _seekingFunction:
+    rid: 9030112281907691672
   _actionEffects:
   - rid: 9030112259367764120
   references:
@@ -44,3 +47,10 @@ MonoBehaviour:
       type: {class: HealthChangeEffect, ns: Gameplay.Actions.Effects, asm: Assembly-CSharp}
       data:
         _healthChange: -5
+    - rid: 9030112281907691672
+      type: {class: RaycastSeekingFunction, ns: Gameplay.GameplayObjects.Projectiles, asm: Assembly-CSharp}
+      data:
+        MaxDistance: 10
+        TargetableLayers:
+          serializedVersion: 2
+          m_Bits: 9

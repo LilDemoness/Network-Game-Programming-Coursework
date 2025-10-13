@@ -13,4 +13,16 @@ public static class ComponentExtensions
 
         return activeComponent.transform.parent.TryGetComponentThroughParents<T>(out component);
     }
+
+
+    public static bool HasParent(this Component activeComponent, Transform parentToCheck)
+    {
+        if (activeComponent.transform == parentToCheck)
+            return true;
+
+        if (activeComponent.transform.parent == null)
+            return false;
+
+        return activeComponent.transform.parent.HasParent(parentToCheck);
+    }
 }

@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 3840923558888015533}
   - component: {fileID: 7503983263593672059}
   - component: {fileID: 7093812865955327418}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Sphere
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -97,7 +97,7 @@ GameObject:
   - component: {fileID: 690254654382039893}
   - component: {fileID: 1402058974324300776}
   - component: {fileID: 4987713575705981482}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Capsule
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -186,7 +186,7 @@ GameObject:
   - component: {fileID: 5177341952338766353}
   - component: {fileID: 4781804895085096242}
   - component: {fileID: 3839564380277007175}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: TestExplosiveProjectile
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -305,12 +305,20 @@ MonoBehaviour:
   _gravityStrength: 9.81
   _continuousForce: 1
   _acceleration: 15
+  _seekingFunction:
+    rid: -2
+  _continueSeekingWhenNotUpdated: 1
   _collider: {fileID: 3839564380277007175}
   _explosionTriggers: -1
   _explosionRadius: 3
   _explosionLayers:
     serializedVersion: 2
     m_Bits: 73
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
 --- !u!54 &4781804895085096242
 Rigidbody:
   m_ObjectHideFlags: 0
