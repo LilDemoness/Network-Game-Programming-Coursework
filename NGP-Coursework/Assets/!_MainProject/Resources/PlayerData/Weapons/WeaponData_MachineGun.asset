@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: WeaponData_MachineGun
   m_EditorClassIdentifier: 
   <Name>k__BackingField: Machine Gun
-  <AssociatedAction>k__BackingField: {fileID: 11400000, guid: 0bf1ce558cb09ac47805be6551b1fa7e, type: 2}
+  <AssociatedAction>k__BackingField: {fileID: 11400000, guid: 765667d3fe30b0d42aebc3648fa8d3c4, type: 2}

@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   IsHostileAction: 0
   Cost: 0
-  SpecialFXGraphic: {fileID: 4037183185398935712, guid: de6513b59a0ab6e45827e1457b43a2b3, type: 3}
+  m_shouldNotifyClient: 1
   ExecutionDelay: 0
   ActionCooldown: 0
   BlockingMode: 2
@@ -22,7 +22,7 @@ MonoBehaviour:
   MaxChargeTime: 0
   ExecuteIfNotAtFullCharge: 0
   MaxActiveDuration: 0
-  _triggerType: 2
+  _triggerType: 0
   _cancelOnLastTrigger: 0
   _retriggerDelay: 0.2
   _bursts: 0
@@ -40,6 +40,8 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
     - rid: 9030112155397783658
       type: {class: SpawnObjectEffect, ns: Gameplay.Actions.Effects, asm: Assembly-CSharp}
       data:

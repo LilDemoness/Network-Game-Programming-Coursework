@@ -14,7 +14,6 @@ namespace Gameplay.Actions.Effects
         [SerializeReference, SubclassSelector] private ObjectSpawnType _spawnType;
         [SerializeField] private NetworkObject _prefab;
         [SerializeField] private SpecialFXGraphic _destroyFX;
-        private ObjectPool<SpecialFXGraphic> _destroyFXPool;
 
         [Space(5)]
         [SerializeField] private int _maxCount = 10;        // How many groups of spawns can this effect have active at once.
@@ -42,7 +41,8 @@ namespace Gameplay.Actions.Effects
         private void GetNetworkObject(NetworkObject networkObject) => networkObject.gameObject.SetActive(true);
         private void ReleaseNetworkObject(NetworkObject networkObject)
         {
-            SpecialFXGraphic destroyFXInstance = _destroyFXPool.Get();
+            SpecialFXGraphic destroyFXInstance = SpecialFXPoolManager.GetFromPrefab(_destroyFX);
+            destroyFXInstance.OnShutdownComplete += SpecialFXGraphic_OnShutdownComplete;
             destroyFXInstance.transform.position = networkObject.transform.position;
             destroyFXInstance.transform.up = networkObject.transform.up;
             destroyFXInstance.Play();
@@ -51,32 +51,21 @@ namespace Gameplay.Actions.Effects
             networkObject.gameObject.SetActive(false);
         }
         private void DestroyNetworkObject(NetworkObject networkObject) => networkObject.Despawn(true);
-        
-
-        private ObjectPool<SpecialFXGraphic> CreateDestroyFXPool()
-        {
-            return new ObjectPool<SpecialFXGraphic>(
-                createFunc: SpawnDestroyFX,
-                actionOnGet: GetDestroyFX,
-                actionOnRelease: ReleaseDestroyFX,
-                maxSize: _spawnType.ObjectsSpawnedPerCall);
-        }
-        private SpecialFXGraphic SpawnDestroyFX()
-        {
-            SpecialFXGraphic destroyFXInstance = GameObject.Instantiate<SpecialFXGraphic>(_destroyFX);
-            destroyFXInstance.OnShutdownComplete += _destroyFXPool.Release;
-            return destroyFXInstance;
-        }
-        private void GetDestroyFX(SpecialFXGraphic ps) => ps.gameObject.SetActive(true);
-        private void ReleaseDestroyFX(SpecialFXGraphic ps) => ps.gameObject.SetActive(false);
 
         #endregion
+
+
+        private void SpecialFXGraphic_OnShutdownComplete(SpecialFXGraphic graphicInstance)
+        {
+            graphicInstance.OnShutdownComplete -= SpecialFXGraphic_OnShutdownComplete;
+            SpecialFXPoolManager.ReturnFromPrefab(_destroyFX, graphicInstance);
+        }
+
 
 
         public override void ApplyEffect(ServerCharacter owner, in ActionHitInformation hitInfo)
         {
             _objectPool ??= CreateNetworkObjectPool();  // Move to an init function?
-            _destroyFXPool ??= CreateDestroyFXPool();
 
             // (Testing) Display the spawn positions and normals of our objects.
             Vector3[] spawnPositions = _spawnType.GetSpawnPositions(hitInfo.HitPoint, hitInfo.HitNormal, hitInfo.HitForward);

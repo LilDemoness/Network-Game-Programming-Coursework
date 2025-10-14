@@ -31,15 +31,15 @@ MonoBehaviour:
     rid: -2
   IsInterruptable: 0
   _targetingMethod:
-    rid: 9030112307888259205
+    rid: 9030112307888259210
   _actionEffects: []
   references:
     version: 2
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
-    - rid: 9030112307888259205
-      type: {class: AoETargetingAction/ConeAoETargeting, ns: Gameplay.Actions, asm: Assembly-CSharp}
+    - rid: 9030112307888259210
+      type: {class: AoETargetingAction/SphereAoETargeting, ns: Gameplay.Actions, asm: Assembly-CSharp}
       data:
         CanTargetOwner: 0
         RequireLineOfSight: 1
@@ -49,5 +49,4 @@ MonoBehaviour:
         ValidLayers:
           serializedVersion: 2
           m_Bits: 9
-        _coneLength: 10
-        _coneAngle: 90
+        _sphereRadius: 0
