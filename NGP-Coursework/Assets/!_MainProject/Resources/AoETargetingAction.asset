@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1b0f7afe3ea01da4d9c9345378de4cb2, type: 3}
+  m_Name: AoETargetingAction
+  m_EditorClassIdentifier: 
+  IsHostileAction: 0
+  Cost: 0
+  m_shouldNotifyClient: 1
+  ExecutionDelay: 0
+  ActionCooldown: 0
+  BlockingMode: 1
+  CanCharge: 0
+  MaxChargeTime: 0
+  ExecuteIfNotAtFullCharge: 0
+  MaxActiveDuration: 0
+  _triggerType: 0
+  _cancelOnLastTrigger: 1
+  _retriggerDelay: 0
+  _bursts: 0
+  _burstDelay: 0
+  _actionVisual:
+    rid: -2
+  IsInterruptable: 0
+  _targetingMethod:
+    rid: 2899041951492079686
+  _actionEffects: []
+  references:
+    version: 2
+    RefIds:
+    - rid: -2
+      type: {class: , ns: , asm: }
+    - rid: 2899041951492079686
+      type: {class: AoETargetingAction/SphereAoETargeting, ns: Gameplay.Actions, asm: Assembly-CSharp}
+      data:
+        CanTargetOwner: 0
+        ValidLayers:
+          serializedVersion: 2
+          m_Bits: 9
+        _radius: 3
