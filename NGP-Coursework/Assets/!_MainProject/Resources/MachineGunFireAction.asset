@@ -50,7 +50,7 @@ MonoBehaviour:
         _parentToHitTransform: 1
         _prefab: {fileID: 5289677091862470283, guid: 758cb40804652f244a4f0657fadd9ff7, type: 3}
         _maxCount: 3
-        _lifetime: 3
+        _lifetime: 6
         _destroyFX: {fileID: 4037183185398935712, guid: 07dedc6d9d8e8ab468b454fc9f0fdf49, type: 3}
     - rid: 9030112155397783659
       type: {class: FixedSpread, ns: Gameplay.Actions.Effects, asm: Assembly-CSharp}

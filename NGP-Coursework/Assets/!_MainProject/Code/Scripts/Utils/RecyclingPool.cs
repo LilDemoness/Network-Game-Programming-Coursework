@@ -113,6 +113,7 @@ public class RecyclingPool<T> : IDisposable, IObjectPool<T> where T : class
     /// <param name="element">Object to release.</param>
     public void Release(T element)
     {
+        Debug.Log("Release: " + (element as MonoBehaviour).name, element as MonoBehaviour);
         if (m_collectionCheck && m_inactiveStack.Count > 0)
         {
             if (m_inactiveStack.Contains(element))

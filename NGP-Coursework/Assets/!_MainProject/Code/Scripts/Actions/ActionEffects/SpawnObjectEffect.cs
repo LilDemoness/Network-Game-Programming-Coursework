@@ -35,15 +35,15 @@ namespace Gameplay.Actions.Effects
 
         #region Object Pool Setup
 
-        private RecyclingPool<SpawnableObject> SetupNetworkObjectPoolForPrefab(ServerCharacter owner, SpawnableObject prefab, int maxSize)
+        private RecyclingPool<SpawnableObject> SetupNetworkObjectPool(ServerCharacter owner, int maxSize)
         {
-            s_characterAndPrefabToObjectPool.TryAdd((owner, prefab), CreateNetworkObjectPool(prefab, maxSize));
-            return s_characterAndPrefabToObjectPool[(owner, prefab)];
+            s_characterAndPrefabToObjectPool.TryAdd((owner, _prefab), CreateNetworkObjectPool(maxSize));
+            return s_characterAndPrefabToObjectPool[(owner, _prefab)];
         }
-        private bool TryGetPoolForPrefab(ServerCharacter owner, SpawnableObject prefab, out RecyclingPool<SpawnableObject> instancePool) => s_characterAndPrefabToObjectPool.TryGetValue((owner, prefab), out instancePool);
+        private bool TryGetPool(ServerCharacter owner, out RecyclingPool<SpawnableObject> instancePool) => s_characterAndPrefabToObjectPool.TryGetValue((owner, _prefab), out instancePool);
         
 
-        private RecyclingPool<SpawnableObject> CreateNetworkObjectPool(SpawnableObject prefab, int maxSize)
+        private RecyclingPool<SpawnableObject> CreateNetworkObjectPool(int maxSize)
         {
             return new RecyclingPool<SpawnableObject>(
                 createFunc: SpawnNetworkObject,
@@ -68,6 +68,9 @@ namespace Gameplay.Actions.Effects
             destroyFXInstance.transform.up = spawnableObject.transform.up;
             destroyFXInstance.Play();
 
+            UnsubscribeFromInstanceCallbacks(spawnableObject);
+            spawnableObject.ReturnedToPool();
+
             spawnableObject.StopAllCoroutines();
             spawnableObject.gameObject.SetActive(false);
         }
@@ -84,10 +87,10 @@ namespace Gameplay.Actions.Effects
 
         private RecyclingPool<SpawnableObject> GetPool(ServerCharacter owner)
         {
-            if (TryGetPoolForPrefab(owner, _prefab, out var pool))
+            if (TryGetPool(owner, out var pool))
                 return pool;
             else
-                return SetupNetworkObjectPoolForPrefab(owner, _prefab, _spawnType.ObjectsSpawnedPerCall * _maxCount);
+                return SetupNetworkObjectPool(owner, _spawnType.ObjectsSpawnedPerCall * _maxCount);
         }
 
 
@@ -109,28 +112,30 @@ namespace Gameplay.Actions.Effects
             SpawnableObject[] spawnedObjects = _spawnType.SpawnObject(GetPool(owner), hitInfo.HitPoint, hitInfo.HitNormal, hitInfo.HitForward);
             foreach (var spawnedObject in spawnedObjects)
             {
+                spawnedObject.Setup(owner, _lifetime);
+                spawnedObject.OnShouldReturnToPool += ReturnToPool;
+                Debug.Log("Subscribe", spawnedObject);
+
                 if (_parentToHitTransform)
                 {
                     spawnedObject.AttachToTransform(hitInfo.Target);
                 }
-
-                if (_lifetime > 0.0f)
-                {
-                    // Our objects have limited lifetimes. Start their lifetimes ticking down.
-                    ReturnToPoolAfterLifetime(owner, spawnedObject);
-                }
             }
-        }
+        }        
 
         public override void Cleanup() => _spawnType.Cleanup();
 
-        private void ReturnToPoolAfterLifetime(ServerCharacter owner, SpawnableObject spawnableObject) => spawnableObject.StartCoroutine(ReturnToPoolAfterDelay(owner, spawnableObject));
-        private System.Collections.IEnumerator ReturnToPoolAfterDelay(ServerCharacter owner, SpawnableObject spawnableObject)
+        private void ReturnToPool(ServerCharacter owner, SpawnableObject instance)
         {
-            yield return new WaitForSeconds(_lifetime);
-            ReturnToPool(owner, spawnableObject);
+            //UnsubscribeFromInstanceCallbacks(instance);
+            instance.ReturnedToPool();
+            GetPool(owner).Release(instance);
         }
-        private void ReturnToPool(ServerCharacter owner, SpawnableObject spawnableObject) => GetPool(owner).Release(spawnableObject);
+        private void UnsubscribeFromInstanceCallbacks(SpawnableObject instance)
+        {
+            Debug.Log("Unsubscribe", instance);
+            instance.OnShouldReturnToPool -= ReturnToPool;
+        }
     }
 
     public abstract class ObjectSpawnType
@@ -243,7 +248,7 @@ namespace Gameplay.Actions.Effects
     ///     Spawn an object at the desired position.
     /// </summary>
     [System.Serializable]
-    public class RaycastPlaced : ObjectSpawnType
+    public class Placed : ObjectSpawnType
     {
         public override Vector3[] GetSpawnPositions(Vector3 spawnCentre, Vector3 spawnNormal, Vector3 spawnForward) => new Vector3[1] { spawnCentre };
         public override SpawnableObject[] SpawnObject(IObjectPool<SpawnableObject> prefabPool, Vector3 spawnCentre, Vector3 spawnNormal, Vector3 spawnForward)
