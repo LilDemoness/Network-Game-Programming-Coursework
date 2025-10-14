@@ -5,13 +5,18 @@ using Gameplay.GameplayObjects.Character;
 
 namespace Gameplay.Actions.Effects
 {
-    public class SpawnableObject : NetworkBehaviour
+    // Server Logic of a SpawnableObject.
+    [RequireComponent(typeof(SpawnableObject_Client))]
+    public class SpawnableObject_Server : NetworkBehaviour
     {
         private ServerCharacter _owner;
+        private SpawnableObject_Client _clientScript;
 
-        // Attaching to Objects.
+
+        // Attachment.
         private Transform _attachedTransform;
         private bool _hasAttachedTransform;
+
         private Vector3 _localPosition;
         private Vector3 _localUp;
         private Vector3 _localForward;
@@ -21,10 +26,22 @@ namespace Gameplay.Actions.Effects
         private Coroutine _handleLifetimeCoroutine;
 
 
-        public event System.Action<ServerCharacter, SpawnableObject> OnShouldReturnToPool;
-        public event System.Action<SpawnableObject> OnReturnedToPool;
+        public event System.Action<ServerCharacter, SpawnableObject_Server> OnShouldReturnToPool;
+        public event System.Action<SpawnableObject_Server> OnReturnedToPool;
 
 
+        private void Awake()
+        {
+            _clientScript = this.GetComponent<SpawnableObject_Client>();
+        }
+        public override void OnNetworkSpawn()
+        {
+            if (!IsServer)
+            {
+                this.enabled = false;
+                return;
+            }
+        }
         public void Setup(ServerCharacter owner, float lifetime = 0.0f)
         {
             this._owner = owner;
@@ -36,6 +53,8 @@ namespace Gameplay.Actions.Effects
             {
                 _handleLifetimeCoroutine = StartCoroutine(HandleLifetime(lifetime));
             }
+
+            this._clientScript.SpawnRpc();
         }
         public void ReturnedToPool()
         {
@@ -48,6 +67,10 @@ namespace Gameplay.Actions.Effects
 
             if (_handleLifetimeCoroutine != null)
                 StopCoroutine(_handleLifetimeCoroutine);
+
+
+            // Notify client-only visuals script.
+            _clientScript.ReturnedToPoolRpc();
         }
 
 
@@ -55,11 +78,11 @@ namespace Gameplay.Actions.Effects
         ///     Attach this spawnable object to a transform.
         ///     Similar to parenting them, but done this way to prevent NetworkObject parenting issues.
         /// </summary>
-        public void AttachToTransform(Transform parent)
+        public void AttachToTransform(NetworkObject parentObject)
         {
-            this._attachedTransform = parent;
+            this._attachedTransform = parentObject.transform;
             this._hasAttachedTransform = true;
-            if (parent.TryGetComponentThroughParents<SpawnableObject>(out SpawnableObject parentSpawnableObject))
+            if (_attachedTransform.TryGetComponentThroughParents<SpawnableObject_Server>(out SpawnableObject_Server parentSpawnableObject))
             {
                 if (!parentSpawnableObject.gameObject.activeSelf)
                 {
@@ -74,12 +97,16 @@ namespace Gameplay.Actions.Effects
             }
             
 
-            this._localPosition = parent.InverseTransformPoint(transform.position);
-            this._localUp = parent.InverseTransformDirection(transform.up);
-            this._localForward = parent.InverseTransformDirection(transform.forward);
+            this._localPosition = _attachedTransform.InverseTransformPoint(transform.position);
+            this._localForward = _attachedTransform.InverseTransformDirection(transform.forward);
+            this._localUp = _attachedTransform.InverseTransformDirection(transform.up);
+
+
+            // Notify client-only visuals script.
+            this._clientScript.AttachToTransformRpc(parentObject.NetworkObjectId, _localPosition, _localForward, _localUp);
         }
 
-        private void ParentSpawnableObject_OnReturnedToPool(SpawnableObject parentInstance)
+        private void ParentSpawnableObject_OnReturnedToPool(SpawnableObject_Server parentInstance)
         {
             parentInstance.OnReturnedToPool -= ParentSpawnableObject_OnReturnedToPool;
             this.OnShouldReturnToPool?.Invoke(_owner, this);

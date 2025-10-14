@@ -10,7 +10,8 @@ GameObject:
   m_Component:
   - component: {fileID: 4317291297136895557}
   - component: {fileID: 2566303382376736775}
-  - component: {fileID: 5289677091862470283}
+  - component: {fileID: 7804639849082737395}
+  - component: {fileID: 6636132701635344505}
   m_Layer: 0
   m_Name: TestSpawnableObject
   m_TagString: Untagged
@@ -59,7 +60,20 @@ MonoBehaviour:
   AutoObjectParentSync: 1
   SyncOwnerTransformWhenParented: 1
   AllowOwnerToParent: 0
---- !u!114 &5289677091862470283
+--- !u!114 &7804639849082737395
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2342383147158875027}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7af27d1fc64a52b4da39025a20cf738f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+--- !u!114 &6636132701635344505
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

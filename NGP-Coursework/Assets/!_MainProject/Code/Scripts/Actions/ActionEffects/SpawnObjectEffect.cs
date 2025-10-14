@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Unity.Netcode;
 using UnityEngine.Pool;
 using Gameplay.GameplayObjects.Character;
 using VisualEffects;
@@ -14,9 +15,8 @@ namespace Gameplay.Actions.Effects
         [SerializeField] private bool _parentToHitTransform = false;
 
         [Space(5)]
-        [SerializeField] private SpawnableObject _prefab;
-        private static Dictionary<(ServerCharacter, SpawnableObject), RecyclingPool<SpawnableObject>> s_characterAndPrefabToObjectPool;
-        private bool _hasSetUpPool = false;
+        [SerializeField] private SpawnableObject_Server _prefab;
+        private static Dictionary<(ServerCharacter, SpawnableObject_Server), RecyclingPool<SpawnableObject_Server>> s_characterAndPrefabToObjectPool;
         private static Transform s_defaultObjectParent;
 
         [Space(5)]
@@ -29,38 +29,39 @@ namespace Gameplay.Actions.Effects
 
         static SpawnObjectEffect()
         {
-            s_characterAndPrefabToObjectPool = new Dictionary<(ServerCharacter, SpawnableObject), RecyclingPool<SpawnableObject>>();
+            Debug.LogWarning("Spawnable objects are not yet finished for Client-Side visuals");
+            s_characterAndPrefabToObjectPool = new Dictionary<(ServerCharacter, SpawnableObject_Server), RecyclingPool<SpawnableObject_Server>>();
         }
 
 
         #region Object Pool Setup
 
-        private RecyclingPool<SpawnableObject> SetupNetworkObjectPool(ServerCharacter owner, int maxSize)
+        private RecyclingPool<SpawnableObject_Server> SetupNetworkObjectPool(ServerCharacter owner, int maxSize)
         {
             s_characterAndPrefabToObjectPool.TryAdd((owner, _prefab), CreateNetworkObjectPool(maxSize));
             return s_characterAndPrefabToObjectPool[(owner, _prefab)];
         }
-        private bool TryGetPool(ServerCharacter owner, out RecyclingPool<SpawnableObject> instancePool) => s_characterAndPrefabToObjectPool.TryGetValue((owner, _prefab), out instancePool);
+        private bool TryGetPool(ServerCharacter owner, out RecyclingPool<SpawnableObject_Server> instancePool) => s_characterAndPrefabToObjectPool.TryGetValue((owner, _prefab), out instancePool);
         
 
-        private RecyclingPool<SpawnableObject> CreateNetworkObjectPool(int maxSize)
+        private RecyclingPool<SpawnableObject_Server> CreateNetworkObjectPool(int maxSize)
         {
-            return new RecyclingPool<SpawnableObject>(
+            return new RecyclingPool<SpawnableObject_Server>(
                 createFunc: SpawnNetworkObject,
                 actionOnGet: OnGetSpawnableObject,
                 actionOnRelease: OnReleaseSpawnableObject,
                 actionOnDestroy: OnDestroySpawnableObject,
                 maxSize: maxSize);
         }
-        private SpawnableObject SpawnNetworkObject()
+        private SpawnableObject_Server SpawnNetworkObject()
         {
             s_defaultObjectParent ??= new GameObject("SpawnObjectEffectPool").transform;
-            SpawnableObject objectInstance = GameObject.Instantiate<SpawnableObject>(_prefab, s_defaultObjectParent);
+            SpawnableObject_Server objectInstance = GameObject.Instantiate<SpawnableObject_Server>(_prefab, s_defaultObjectParent);
             objectInstance.NetworkObject.Spawn();
             return objectInstance;
         }
-        private void OnGetSpawnableObject(SpawnableObject spawnableObject) => spawnableObject.gameObject.SetActive(true);
-        private void OnReleaseSpawnableObject(SpawnableObject spawnableObject)
+        private void OnGetSpawnableObject(SpawnableObject_Server spawnableObject) => spawnableObject.gameObject.SetActive(true);
+        private void OnReleaseSpawnableObject(SpawnableObject_Server spawnableObject)
         {
             SpecialFXGraphic destroyFXInstance = SpecialFXPoolManager.GetFromPrefab(_destroyFX);
             destroyFXInstance.OnShutdownComplete += SpecialFXGraphic_OnShutdownComplete;
@@ -74,7 +75,7 @@ namespace Gameplay.Actions.Effects
             spawnableObject.StopAllCoroutines();
             spawnableObject.gameObject.SetActive(false);
         }
-        private void OnDestroySpawnableObject(SpawnableObject spawnableObject) => spawnableObject.NetworkObject.Despawn(true);
+        private void OnDestroySpawnableObject(SpawnableObject_Server spawnableObject) => spawnableObject.NetworkObject.Despawn(true);
 
         private void SpecialFXGraphic_OnShutdownComplete(SpecialFXGraphic graphicInstance)
         {
@@ -85,7 +86,7 @@ namespace Gameplay.Actions.Effects
         #endregion
 
 
-        private RecyclingPool<SpawnableObject> GetPool(ServerCharacter owner)
+        private RecyclingPool<SpawnableObject_Server> GetPool(ServerCharacter owner)
         {
             if (TryGetPool(owner, out var pool))
                 return pool;
@@ -96,9 +97,10 @@ namespace Gameplay.Actions.Effects
 
         public override void ApplyEffect(ServerCharacter owner, in ActionHitInformation hitInfo)
         {
-            if (!_hasSetUpPool)
+            NetworkObject parentTargetNetworkObject = null;
+            if (_parentToHitTransform && !hitInfo.Target.TryGetComponentThroughParents<NetworkObject>(out parentTargetNetworkObject))
             {
-                _hasSetUpPool = true;
+                throw new System.Exception($"You are trying to parent a spawned object to a non-NetworkObject object.");
             }
 
             // (Testing) Display the spawn positions and normals of our objects.
@@ -109,7 +111,7 @@ namespace Gameplay.Actions.Effects
             }
 
             // Spawn all our objects.
-            SpawnableObject[] spawnedObjects = _spawnType.SpawnObject(GetPool(owner), hitInfo.HitPoint, hitInfo.HitNormal, hitInfo.HitForward);
+            SpawnableObject_Server[] spawnedObjects = _spawnType.SpawnObject(GetPool(owner), hitInfo.HitPoint, hitInfo.HitNormal, hitInfo.HitForward);
             foreach (var spawnedObject in spawnedObjects)
             {
                 spawnedObject.Setup(owner, _lifetime);
@@ -118,20 +120,20 @@ namespace Gameplay.Actions.Effects
 
                 if (_parentToHitTransform)
                 {
-                    spawnedObject.AttachToTransform(hitInfo.Target);
+                    spawnedObject.AttachToTransform(parentTargetNetworkObject);
                 }
             }
         }        
 
         public override void Cleanup() => _spawnType.Cleanup();
 
-        private void ReturnToPool(ServerCharacter owner, SpawnableObject instance)
+        private void ReturnToPool(ServerCharacter owner, SpawnableObject_Server instance)
         {
             //UnsubscribeFromInstanceCallbacks(instance);
             instance.ReturnedToPool();
             GetPool(owner).Release(instance);
         }
-        private void UnsubscribeFromInstanceCallbacks(SpawnableObject instance)
+        private void UnsubscribeFromInstanceCallbacks(SpawnableObject_Server instance)
         {
             Debug.Log("Unsubscribe", instance);
             instance.OnShouldReturnToPool -= ReturnToPool;
@@ -141,11 +143,11 @@ namespace Gameplay.Actions.Effects
     public abstract class ObjectSpawnType
     {
         public abstract Vector3[] GetSpawnPositions(Vector3 spawnCentre, Vector3 spawnNormal, Vector3 spawnForward);
-        public abstract SpawnableObject[] SpawnObject(IObjectPool<SpawnableObject> prefabPool, Vector3 spawnCentre, Vector3 spawnNormal, Vector3 spawnForward);
+        public abstract SpawnableObject_Server[] SpawnObject(IObjectPool<SpawnableObject_Server> prefabPool, Vector3 spawnCentre, Vector3 spawnNormal, Vector3 spawnForward);
 
-        protected SpawnableObject SpawnObjectAtPosition(IObjectPool<SpawnableObject> objectPrefabPool, in Vector3 spawnPosition, in Quaternion spawnRotation)
+        protected SpawnableObject_Server SpawnObjectAtPosition(IObjectPool<SpawnableObject_Server> objectPrefabPool, in Vector3 spawnPosition, in Quaternion spawnRotation)
         {
-            SpawnableObject objectInstance = objectPrefabPool.Get();
+            SpawnableObject_Server objectInstance = objectPrefabPool.Get();
             objectInstance.transform.position = spawnPosition;
             objectInstance.transform.rotation = spawnRotation;
             return objectInstance;
@@ -186,10 +188,10 @@ namespace Gameplay.Actions.Effects
             return spawnPositions;
         }
 
-        public override SpawnableObject[] SpawnObject(IObjectPool<SpawnableObject> prefabPool, Vector3 spawnCentre, Vector3 spawnNormal, Vector3 spawnForward)
+        public override SpawnableObject_Server[] SpawnObject(IObjectPool<SpawnableObject_Server> prefabPool, Vector3 spawnCentre, Vector3 spawnNormal, Vector3 spawnForward)
         {
             Vector3[] spawnPositions = GetSpawnPositions(spawnCentre, spawnNormal, spawnForward);
-            SpawnableObject[] spawnedObjects = new SpawnableObject[_spawnCount];
+            SpawnableObject_Server[] spawnedObjects = new SpawnableObject_Server[_spawnCount];
             for (int i = 0; i < _spawnCount; ++i)
             {
                 spawnedObjects[i] = SpawnObjectAtPosition(prefabPool, spawnPositions[i], Quaternion.LookRotation(spawnForward, spawnNormal));
@@ -230,10 +232,10 @@ namespace Gameplay.Actions.Effects
             return spawnPositions;
         }
 
-        public override SpawnableObject[] SpawnObject(IObjectPool<SpawnableObject> prefabPool, Vector3 spawnCentre, Vector3 spawnNormal, Vector3 spawnForward)
+        public override SpawnableObject_Server[] SpawnObject(IObjectPool<SpawnableObject_Server> prefabPool, Vector3 spawnCentre, Vector3 spawnNormal, Vector3 spawnForward)
         {
             Vector3[] spawnPositions = GetSpawnPositions(spawnCentre, spawnNormal, spawnForward);
-            SpawnableObject[] spawnedObjects = new SpawnableObject[_spawnCount];
+            SpawnableObject_Server[] spawnedObjects = new SpawnableObject_Server[_spawnCount];
             for (int i = 0; i < _spawnCount; ++i)
             {
                 spawnedObjects[i] = SpawnObjectAtPosition(prefabPool, spawnPositions[i], Quaternion.LookRotation(spawnForward, spawnNormal));
@@ -251,8 +253,8 @@ namespace Gameplay.Actions.Effects
     public class Placed : ObjectSpawnType
     {
         public override Vector3[] GetSpawnPositions(Vector3 spawnCentre, Vector3 spawnNormal, Vector3 spawnForward) => new Vector3[1] { spawnCentre };
-        public override SpawnableObject[] SpawnObject(IObjectPool<SpawnableObject> prefabPool, Vector3 spawnCentre, Vector3 spawnNormal, Vector3 spawnForward)
-            => new SpawnableObject[1] { SpawnObjectAtPosition(prefabPool, spawnCentre, Quaternion.LookRotation(Vector3.forward, spawnNormal)) };
+        public override SpawnableObject_Server[] SpawnObject(IObjectPool<SpawnableObject_Server> prefabPool, Vector3 spawnCentre, Vector3 spawnNormal, Vector3 spawnForward)
+            => new SpawnableObject_Server[1] { SpawnObjectAtPosition(prefabPool, spawnCentre, Quaternion.LookRotation(Vector3.forward, spawnNormal)) };
     }
     [System.Serializable]
     public class Thrown : ObjectSpawnType
@@ -266,7 +268,7 @@ namespace Gameplay.Actions.Effects
         {
             throw new System.NotImplementedException();
         }
-        public override SpawnableObject[] SpawnObject(IObjectPool<SpawnableObject> prefabPool, Vector3 spawnCentre, Vector3 spawnNormal, Vector3 spawnForward)
+        public override SpawnableObject_Server[] SpawnObject(IObjectPool<SpawnableObject_Server> prefabPool, Vector3 spawnCentre, Vector3 spawnNormal, Vector3 spawnForward)
         {
             throw new System.NotImplementedException();
         }
