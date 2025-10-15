@@ -1,8 +1,8 @@
+using UnityEngine;
+using Unity.Netcode;
+using Gameplay.GameplayObjects.Character;
 using Gameplay.Actions.Effects;
 using Gameplay.Actions.Visuals;
-using Gameplay.GameplayObjects.Character;
-using Unity.Netcode;
-using UnityEngine;
 
 namespace Gameplay.Actions.Definitions
 {
@@ -20,7 +20,7 @@ namespace Gameplay.Actions.Definitions
 
         #region Action Settings
 
-        [Header("Action Settings")]
+        [field: Header("Action Settings")]
         [Tooltip("Does this count as a hostile Action? (Should it: Break Stealth, Dropp Shields, etc?)")]
         public bool IsHostileAction;
 
@@ -31,7 +31,7 @@ namespace Gameplay.Actions.Definitions
         [field: SerializeField] public bool ShouldNotifyClient { get; private set; } = true;
 
 
-        [Header("Timing Settings")]
+        [field: Header("Timing Settings")]
         [Tooltip("The time in seconds between starting this action and its effects triggering")]
         [field:SerializeField] public float ExecutionDelay { get; private set; }
         [field: SerializeField] public float ActionCooldown { get; private set; }
@@ -39,13 +39,13 @@ namespace Gameplay.Actions.Definitions
         [field: SerializeField] public float MaxActiveDuration { get; private set; }
 
 
-        [Header("Charging Settings")]
+        [field: Header("Charging Settings")]
         [field: SerializeField] public bool CanCharge { get; private set; }
         [field: SerializeField] public float MaxChargeTime { get; private set; }
-        [field: SerializeField] public bool ExecuteIfNotAtFullCharge { get; private set; }
+        [field: SerializeField] [field: Range(0.0f, 1.0f)] public float MinChargeActivationPercentage { get; private set; } = 1.0f;
 
 
-        [Header("Retrigger Settings")]
+        [field: Header("Retrigger Settings")]
         [field: SerializeField] public ActionTriggerType TriggerType { get; private set; }
         [field: SerializeField] public bool CancelOnLastTrigger { get; private set; } = true;
 
@@ -58,7 +58,7 @@ namespace Gameplay.Actions.Definitions
         [field: SerializeField] public float BurstDelay { get; private set; }
 
 
-        [Header("Action Interruption Settings")]
+        [field: Header("Action Interruption Settings")]
         [field: SerializeField] public bool IsInterruptable { get; private set; }
         // What can interrupt this?
         // What this interrupts?
@@ -66,13 +66,13 @@ namespace Gameplay.Actions.Definitions
 
 
         // Server Only Settings.
-        [Header("Server-Only Settings")]
+        [field: Header("Server-Only Settings")]
         [SerializeReference][SubclassSelector] public ActionEffect[] ActionEffects;
 
 
 
         // Client Only Settings.
-        [Header("Client Settings")]
+        [field: Header("Client Settings")]
         [SerializeReference, SubclassSelector] public ActionVisual[] TriggeringVisuals;
 
         [Space(5)]

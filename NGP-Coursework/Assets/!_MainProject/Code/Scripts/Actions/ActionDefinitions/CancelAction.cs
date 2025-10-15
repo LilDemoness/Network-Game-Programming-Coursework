@@ -7,7 +7,7 @@ namespace Gameplay.Actions.Definitions
     /// <summary>
     ///     An Action that cancels other Actions when started.
     /// </summary>
-    [CreateAssetMenu(menuName = "Actions/New Cancel Action")]
+    [CreateAssetMenu(menuName = "Actions/Cancel Action", order = 0)]
     public class CancelAction : ActionDefinition
     {
         [SerializeField] private List<Action> _actionsThisCancels = new List<Action>();

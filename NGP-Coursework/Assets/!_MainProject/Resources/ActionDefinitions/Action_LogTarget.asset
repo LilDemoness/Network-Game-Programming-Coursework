@@ -9,8 +9,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 67be874d7b7220a48860d93d2458ae04, type: 3}
-  m_Name: MachineGunFireAction
+  m_Script: {fileID: 11500000, guid: 93f7492b542d72946a0349ef9f0e31dd, type: 3}
+  m_Name: Action_LogTarget
   m_EditorClassIdentifier: 
   IsHostileAction: 0
   Cost: 0
@@ -22,27 +22,16 @@ MonoBehaviour:
   <CanCharge>k__BackingField: 0
   <MaxChargeTime>k__BackingField: 0
   <ExecuteIfNotAtFullCharge>k__BackingField: 0
-  <TriggerType>k__BackingField: 2
+  <TriggerType>k__BackingField: 0
   <CancelOnLastTrigger>k__BackingField: 1
-  <RetriggerDelay>k__BackingField: 0.3
+  <RetriggerDelay>k__BackingField: 0
   <Bursts>k__BackingField: 0
   <BurstDelay>k__BackingField: 0
   <IsInterruptable>k__BackingField: 0
   ActionEffects: []
-  TriggeringVisuals:
-  - rid: 9030112325067079760
+  TriggeringVisuals: []
   HitVisuals: []
-  _maxRange: 10
-  _validLayers:
-    serializedVersion: 2
-    m_Bits: 73
-  _pierces: 0
-  _actionEffects: []
+  _debugMessage: Target Set
   references:
     version: 2
-    RefIds:
-    - rid: 9030112325067079760
-      type: {class: SpecialFXActionVisual, ns: Gameplay.Actions.Visuals, asm: Assembly-CSharp}
-      data:
-        _triggerTimes: 2
-        _specialFXGraphic: {fileID: 4037183185398935712, guid: de6513b59a0ab6e45827e1457b43a2b3, type: 3}
+    RefIds: []

@@ -11,16 +11,12 @@ namespace Gameplay.Actions.Definitions
     /// <summary>
     ///     An action that uses a raycast to trigger effects on targets from a range.
     /// </summary>
-    [CreateAssetMenu(menuName = "Actions/New Ranged Projectile Action")]
+    [CreateAssetMenu(menuName = "Actions/Projectile Action", order = 2)]
     public class RangedProjectileAction : ActionDefinition
     {
         [Header("Projectile Settings")]
         [SerializeField] private ProjectileInfo _projectileInfo;
         [SerializeReference, SubclassSelector] private SeekingFunction _seekingFunction;
-
-
-        [Header("Effects")]
-        [SerializeReference][SubclassSelector] private ActionEffect[] _actionEffects;
 
 
         public override bool OnStart(ServerCharacter owner, ref ActionRequestData data) => ActionConclusion.Continue;
@@ -71,9 +67,9 @@ namespace Gameplay.Actions.Definitions
         {
             Debug.Log($"{hitInfo.Target.name} was hit!");
 
-            for (int i = 0; i < _actionEffects.Length; ++i)
+            for (int i = 0; i < ActionEffects.Length; ++i)
             {
-                _actionEffects[i].ApplyEffect(owner, hitInfo);
+                ActionEffects[i].ApplyEffect(owner, hitInfo);
             }
         }
     }

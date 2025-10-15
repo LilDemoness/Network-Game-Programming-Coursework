@@ -1340,7 +1340,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_PresetAsset: {fileID: 0}
   m_PresetReference:
-    rid: -2
+    rid: 6632896607793709165
   m_Scenario:
     rid: -2
   m_IsScenarioSettingsFolded: 0
@@ -1350,6 +1350,15 @@ MonoBehaviour:
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
+    - rid: 6632896607793709165
+      type: {class: NetworkSimulatorPreset, ns: Unity.Multiplayer.Tools.NetworkSimulator.Runtime, asm: Unity.Multiplayer.Tools.NetworkSimulator.Runtime}
+      data:
+        <Name>k__BackingField: None
+        <Description>k__BackingField: 
+        <PacketDelayMs>k__BackingField: 0
+        <PacketJitterMs>k__BackingField: 0
+        <PacketLossInterval>k__BackingField: 0
+        <PacketLossPercent>k__BackingField: 0
 --- !u!1 &512033821
 GameObject:
   m_ObjectHideFlags: 0
@@ -2371,19 +2380,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9197c9c1e343398438e44d218c68f527, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_generalChaseActionDefinition: {fileID: 11400000, guid: b398a0a11ddff86448a7e1383b6468ec, type: 2}
-  m_generalTargetActionDefinition: {fileID: 11400000, guid: b398a0a11ddff86448a7e1383b6468ec, type: 2}
-  m_stunnedActionDefinition: {fileID: 11400000, guid: b398a0a11ddff86448a7e1383b6468ec, type: 2}
+  m_generalChaseActionDefinition: {fileID: 11400000, guid: 790aff09baa275a41a474786517981f4, type: 2}
+  m_generalTargetActionDefinition: {fileID: 11400000, guid: a4953145727676e43bf558403a831116, type: 2}
+  m_stunnedActionDefinition: {fileID: 11400000, guid: 9004329d20ce0024a8acf5587efeeac5, type: 2}
   _actionDefinitions:
-  - {fileID: 11400000, guid: b398a0a11ddff86448a7e1383b6468ec, type: 2}
-  - {fileID: 11400000, guid: dee9848ed8c93c64fb0b1c6c9290124d, type: 2}
-  - {fileID: 11400000, guid: 213365d87dd10f149b5eece6440a9a88, type: 2}
-  - {fileID: 11400000, guid: 35808b1b43154a643b04dde8b861b331, type: 2}
-  - {fileID: 11400000, guid: 28e2dfcdfd00ded4d98e17400980b326, type: 2}
-  - {fileID: 11400000, guid: 765667d3fe30b0d42aebc3648fa8d3c4, type: 2}
-  - {fileID: 11400000, guid: 0bf1ce558cb09ac47805be6551b1fa7e, type: 2}
-  - {fileID: 11400000, guid: 16abfbda20a092149b77fe220e345fe3, type: 2}
-  - {fileID: 11400000, guid: 84df787c2dc80b04bab5df5a5d0bc5be, type: 2}
+  - {fileID: 11400000, guid: 73bcf9cdef3b4c341a4888e24bc924d9, type: 2}
+  - {fileID: 11400000, guid: f3d267d6606c18b409b63f9da8f09559, type: 2}
+  - {fileID: 11400000, guid: e39a066565a86c14e8cc32f9e4068494, type: 2}
 --- !u!4 &799053776
 Transform:
   m_ObjectHideFlags: 0

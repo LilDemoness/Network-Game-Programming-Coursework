@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Gameplay.Actions.Definitions
 {
-    [CreateAssetMenu(menuName = "Actions/New Weapons Testing Action")]
+    [CreateAssetMenu(menuName = "Actions/Testing/Weapons Testing Action")]
     public class WeaponsTestingLogAction : ActionDefinition
     {
         [SerializeField] private string _weaponName;

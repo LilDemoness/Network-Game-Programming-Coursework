@@ -9,18 +9,18 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1b0f7afe3ea01da4d9c9345378de4cb2, type: 3}
-  m_Name: AoETargetingAction
+  m_Script: {fileID: 11500000, guid: 67be874d7b7220a48860d93d2458ae04, type: 3}
+  m_Name: Action_Fire-Railgun
   m_EditorClassIdentifier: 
-  IsHostileAction: 0
+  IsHostileAction: 1
   Cost: 0
   <ShouldNotifyClient>k__BackingField: 1
   <ExecutionDelay>k__BackingField: 0
   <ActionCooldown>k__BackingField: 0
   <BlockingMode>k__BackingField: 1
   <MaxActiveDuration>k__BackingField: 0
-  <CanCharge>k__BackingField: 0
-  <MaxChargeTime>k__BackingField: 0
+  <CanCharge>k__BackingField: 1
+  <MaxChargeTime>k__BackingField: 1
   <ExecuteIfNotAtFullCharge>k__BackingField: 0
   <TriggerType>k__BackingField: 0
   <CancelOnLastTrigger>k__BackingField: 1
@@ -28,31 +28,24 @@ MonoBehaviour:
   <Bursts>k__BackingField: 0
   <BurstDelay>k__BackingField: 0
   <IsInterruptable>k__BackingField: 0
-  ActionEffects: []
+  ActionEffects:
+  - rid: 6632896607793709159
   TriggeringVisuals:
-  - rid: 9030112325067079759
+  - rid: 6632896607793709162
   HitVisuals: []
-  _targetingMethod:
-    rid: 9030112307888259210
-  _actionEffects: []
+  _maxRange: 30
+  _validLayers:
+    serializedVersion: 2
+    m_Bits: 73
+  _pierces: 2
   references:
     version: 2
     RefIds:
-    - rid: -2
-      type: {class: , ns: , asm: }
-    - rid: 9030112307888259210
-      type: {class: AoETargetingAction/SphereAoETargeting, ns: Gameplay.Actions, asm: Assembly-CSharp}
+    - rid: 6632896607793709159
+      type: {class: HealthChangeEffect, ns: Gameplay.Actions.Effects, asm: Assembly-CSharp}
       data:
-        CanTargetOwner: 0
-        RequireLineOfSight: 1
-        ObstructionsMask:
-          serializedVersion: 2
-          m_Bits: 4294967295
-        ValidLayers:
-          serializedVersion: 2
-          m_Bits: 9
-        _sphereRadius: 0
-    - rid: 9030112325067079759
+        _healthChange: -5
+    - rid: 6632896607793709162
       type: {class: SpecialFXActionVisual, ns: Gameplay.Actions.Visuals, asm: Assembly-CSharp}
       data:
         _triggerTimes: 2

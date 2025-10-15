@@ -9,15 +9,11 @@ namespace Gameplay.Actions.Definitions
     /// <summary>
     ///     An action that always targets itself.
     /// </summary>
-    [CreateAssetMenu(menuName = "Actions/New AoE Targeting Action")]
+    [CreateAssetMenu(menuName = "Actions/AoE Action", order = 4)]
     public class AoETargetingAction : ActionDefinition
     {
         [Header("Targeting")]
         [SerializeReference, SubclassSelector] private AoETargeting _targetingMethod;
-
-
-        [Header("Effects")]
-        [SerializeReference][SubclassSelector] private ActionEffect[] _actionEffects;
 
 
         public override bool OnStart(ServerCharacter owner, ref ActionRequestData data) => ActionConclusion.Continue;
@@ -33,9 +29,9 @@ namespace Gameplay.Actions.Definitions
             Debug.DrawRay(hitInfo.HitPoint, hitInfo.HitNormal, Color.red, 1.0f);
             Debug.DrawRay(hitInfo.HitPoint, hitInfo.HitForward, Color.yellow, 1.0f);
 
-            for (int i = 0; i < _actionEffects.Length; ++i)
+            for (int i = 0; i < ActionEffects.Length; ++i)
             {
-                _actionEffects[i].ApplyEffect(owner, hitInfo);
+                ActionEffects[i].ApplyEffect(owner, hitInfo);
             }
         }
 

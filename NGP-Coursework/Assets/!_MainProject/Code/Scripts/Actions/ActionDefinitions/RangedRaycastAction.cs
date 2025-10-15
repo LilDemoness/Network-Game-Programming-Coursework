@@ -10,7 +10,7 @@ namespace Gameplay.Actions.Definitions
     /// <summary>
     ///     An action that uses a raycast to trigger effects on targets from a range.
     /// </summary>
-    [CreateAssetMenu(menuName = "Actions/New Ranged Raycast Action")]
+    [CreateAssetMenu(menuName = "Actions/Raycast Action", order = 1)]
     public class RangedRaycastAction : ActionDefinition
     {
         [Header("Targeting")]
@@ -20,10 +20,6 @@ namespace Gameplay.Actions.Definitions
         [Space(5)]
         [SerializeField, Min(0)] private int _pierces = 0;
         private bool _canPierce => _pierces > 0;
-
-
-        [Header("Effects")]
-        [SerializeReference] [SubclassSelector] private ActionEffect[] _actionEffects;
 
 
 
@@ -76,9 +72,9 @@ namespace Gameplay.Actions.Definitions
             Debug.Log($"{hitInfo.Target.name} was hit!");
             //Debug.DrawRay(hitInfo.HitPoint, hitInfo.HitNormal, Color.yellow, 0.5f);
 
-            for(int i = 0; i < _actionEffects.Length; ++i)
+            for(int i = 0; i < ActionEffects.Length; ++i)
             {
-                _actionEffects[i].ApplyEffect(owner, hitInfo);
+                ActionEffects[i].ApplyEffect(owner, hitInfo);
             }
         }
     }

@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Gameplay.Actions.Definitions
 {
-    [CreateAssetMenu(menuName = "Actions/New Log Action")]
+    [CreateAssetMenu(menuName = "Actions/Testing/Log Action")]
     public class LogAction : ActionDefinition
     {
         [SerializeField] private string _debugMessage;
