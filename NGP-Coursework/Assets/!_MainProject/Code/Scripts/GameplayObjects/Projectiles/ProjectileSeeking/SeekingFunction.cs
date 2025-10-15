@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Gameplay.GameplayObjects.Projectiles
+namespace Gameplay.GameplayObjects.Projectiles.Seeking
 {
     public abstract class SeekingFunction
     {

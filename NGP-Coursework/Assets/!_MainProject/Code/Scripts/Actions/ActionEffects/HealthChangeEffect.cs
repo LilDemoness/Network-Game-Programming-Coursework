@@ -14,7 +14,7 @@ namespace Gameplay.Actions.Effects
         {
             if (hitInfo.Target.TryGetComponentThroughParents<IDamageable>(out IDamageable damageable))
             {
-                damageable.ReceiveHitPoints(owner, _healthChange);
+                damageable.ReceiveHealthChange(owner, _healthChange);
             }
         }
 

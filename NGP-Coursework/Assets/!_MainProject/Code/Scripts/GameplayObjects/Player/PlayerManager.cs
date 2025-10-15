@@ -1,6 +1,7 @@
 using UnityEngine;
 using Unity.Netcode;
 using Gameplay.GameplayObjects.Character.Customisation.Sections;
+using Gameplay.GameplayObjects.Character.Customisation.Data;
 
 public class PlayerManager : NetworkBehaviour
 {

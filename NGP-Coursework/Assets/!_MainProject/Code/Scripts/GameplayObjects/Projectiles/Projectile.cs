@@ -1,6 +1,7 @@
 using UnityEngine;
 using Unity.Netcode;
 using Gameplay.Actions.Effects;
+using Gameplay.GameplayObjects.Projectiles.Seeking;
 
 namespace Gameplay.GameplayObjects.Projectiles
 {

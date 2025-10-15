@@ -1,3 +1,5 @@
+using Gameplay.GameplayObjects.Character.Customisation.Data;
+
 [System.Serializable]
 public class ClientData
 {

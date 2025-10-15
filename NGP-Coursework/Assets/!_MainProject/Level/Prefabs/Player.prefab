@@ -19,7 +19,6 @@ GameObject:
   - component: {fileID: 2215872362936695194}
   - component: {fileID: 5475418768958158863}
   - component: {fileID: 1448333903364849099}
-  - component: {fileID: 3590187670016443541}
   m_Layer: 3
   m_Name: Player
   m_TagString: Untagged
@@ -129,7 +128,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
   m_clientCharacter: {fileID: 6339476480414985111}
-  _damageReceiver: {fileID: 3590187670016443541}
   _movement: {fileID: 3943280201037405906}
   TeamID: 0
 --- !u!114 &5193017226030722943
@@ -235,20 +233,6 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   CurrentHealth:
     m_InternalValue: 0
---- !u!114 &3590187670016443541
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4284907619315406047}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e15055b31920de4690a85624a05c5bb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ShowTopMostFoldoutHeaderGroup: 1
-  _networkLifeState: {fileID: 5475418768958158863}
 --- !u!1 &7315896568923448067
 GameObject:
   m_ObjectHideFlags: 0

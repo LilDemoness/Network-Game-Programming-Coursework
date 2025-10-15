@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
-using Gameplay.Actions.Targeting;
 
 namespace Gameplay.GameplayObjects.Projectiles
 {

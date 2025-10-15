@@ -192,7 +192,6 @@ namespace UserInput
                     _hasMoveRequest = false;
                     _lastSendMoveTime = Time.time;
 
-                    Debug.Log($"Processing Client Move: {_movementInput}");
                     _serverCharacter.SendCharacterMovementInputServerRpc(_movementInput);
                 }
             }

@@ -6,7 +6,7 @@ namespace Gameplay.GameplayObjects.Health
 {
     public class DamageLogger : NetworkBehaviour, IDamageable
     {
-        public void ReceiveHitPoints(ServerCharacter inflicter, int change)
+        public void ReceiveHealthChange(ServerCharacter inflicter, int change)
         {
             if (!IsDamageable())
             {

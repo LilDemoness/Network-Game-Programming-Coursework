@@ -2,6 +2,7 @@ using UnityEngine;
 using Unity.Netcode;
 using Gameplay.Actions;
 using Gameplay.GameplayObjects.Health;
+using Gameplay.GameplayObjects.Character.Customisation.Data;
 
 namespace Gameplay.GameplayObjects.Character
 {
@@ -10,7 +11,7 @@ namespace Gameplay.GameplayObjects.Character
     ///     Separated from the Client Logic so that it is always known whether a section of code is running on the server or the client.
     /// </summary>
     [RequireComponent(typeof(NetworkLifeState), typeof(NetworkHealthState))]
-    public class ServerCharacter : NetworkBehaviour
+    public class ServerCharacter : NetworkBehaviour, IDamageable
     {
         [SerializeField] private ClientCharacter m_clientCharacter;
         public ClientCharacter ClientCharacter => m_clientCharacter;
@@ -40,7 +41,6 @@ namespace Gameplay.GameplayObjects.Character
         public NetworkHealthState NetHealthState { get; private set; }
         public NetworkLifeState NetLifeState { get; private set; }
 
-        [SerializeField] private DamageReceiver _damageReceiver;
 
         public int CurrentHealth
         {
@@ -86,8 +86,6 @@ namespace Gameplay.GameplayObjects.Character
 
             // Subscribe to Health/Life Events.
             NetLifeState.IsDead.OnValueChanged += OnLifeStateChanged;
-            _damageReceiver.OnDamageReceived += ReceiveHealthChange;
-            _damageReceiver.GetMissingHealthFunc += GetMissingHealth;
 
             InitialiseHealth();
         }
@@ -95,11 +93,6 @@ namespace Gameplay.GameplayObjects.Character
         {
             // Unsubscribe from Health/Life Events.
             NetLifeState.IsDead.OnValueChanged -= OnLifeStateChanged;
-            if (_damageReceiver != null)
-            {
-                _damageReceiver.OnDamageReceived -= ReceiveHealthChange;
-                _damageReceiver.GetMissingHealthFunc -= GetMissingHealth;
-            }
         }
 
 
@@ -198,8 +191,12 @@ namespace Gameplay.GameplayObjects.Character
             CurrentHealth = MaxHealth;
         }
 
-        private void ReceiveHealthChange(ServerCharacter inflicter, int healthChange)
+        public void ReceiveHealthChange(ServerCharacter inflicter, int healthChange)
         {
+            if (!IsDamageable())
+                return;
+
+
             if (healthChange > 0)
             {
                 // Healing.
@@ -227,7 +224,16 @@ namespace Gameplay.GameplayObjects.Character
                 //m_serverActionPlayer.ClearActions(false);
             }
         }
-        private int GetMissingHealth() => Mathf.Max(0, MaxHealth - CurrentHealth);
+        public int GetMissingHealth()
+        {
+            if (!IsDamageable())
+            {
+                return 0;
+            }
+
+            return Mathf.Max(0, MaxHealth - CurrentHealth);
+        }
+        public bool IsDamageable() => !NetLifeState.IsDead.Value;
 
         private void OnLifeStateChanged(bool previousValue, bool newValue)
         {

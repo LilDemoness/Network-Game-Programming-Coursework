@@ -2,6 +2,7 @@ using UnityEngine;
 using Unity.Netcode;
 using Gameplay.GameplayObjects.Character;
 using Gameplay.GameplayObjects.Projectiles;
+using Gameplay.GameplayObjects.Projectiles.Seeking;
 using Gameplay.Actions.Effects;
 
 

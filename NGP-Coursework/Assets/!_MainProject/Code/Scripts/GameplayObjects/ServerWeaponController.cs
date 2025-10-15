@@ -38,7 +38,7 @@ namespace Gameplay.GameplayObjects.Character
             // Get our Weapons
             foreach (var weaponAttachmentSlot in GetComponentsInChildren<Customisation.Sections.WeaponAttachmentSlot>())
             {
-                Debug.Log(weaponAttachmentSlot.name + " " + weaponAttachmentSlot.SlotIndex + " " + weaponAttachmentSlot.GetComponentInChildren<Weapon>());
+                Debug.Log(weaponAttachmentSlot.name + " is equipped in Slot " + weaponAttachmentSlot.SlotIndex + ". Weapon Data: " + weaponAttachmentSlot.GetComponentInChildren<Weapon>().WeaponData.name);
                 switch (weaponAttachmentSlot.SlotIndex)
                 {
                     case (int)WeaponSlotIndex.Primary: _primaryWeapon = weaponAttachmentSlot.GetComponentInChildren<Weapon>(); break;
