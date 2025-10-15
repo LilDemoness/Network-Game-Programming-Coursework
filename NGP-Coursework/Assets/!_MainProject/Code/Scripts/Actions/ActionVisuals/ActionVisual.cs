@@ -3,6 +3,7 @@ using Gameplay.GameplayObjects.Character;
 
 namespace Gameplay.Actions.Visuals
 {
+    [System.Serializable]
     public abstract class ActionVisual
     {
         [System.Flags]

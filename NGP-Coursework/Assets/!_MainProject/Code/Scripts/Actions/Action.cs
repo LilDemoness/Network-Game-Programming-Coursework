@@ -1,30 +1,24 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Unity.Netcode;
 using Gameplay.GameplayObjects;
 using Gameplay.GameplayObjects.Character;
+using Gameplay.Actions.Definitions;
 using VisualEffects;
-using Unity.Netcode;
+using Gameplay.Actions.Visuals;
 
 namespace Gameplay.Actions
 {
-    public abstract class Action : ScriptableObject
+    public class Action
     {
         /// <summary>
         ///     The default string for hit reaction animation triggers.
         /// </summary>
         public const string DEFAULT_HIT_REACT_ANIMATION_STRING = "";
 
-        public abstract bool ShouldNotifyClient { get; }
 
-
-        /// <summary>
-        ///     An index into the GameDataSource array of action prototypes.
-        ///     Set at runtime by GameDataSource class.
-        ///     If the action is not itself a prototype, it will contain the ActionID of the prototype reference.
-        ///     <br></br>This field is used to identify actions in a way that can be sent over the network.
-        /// </summary>
-        /// <remarks> Non-serialized, so it doesn't get saved between editor sessions.</remarks>
-        [field: System.NonSerialized] public ActionID ActionID { get; set; }
+        /// <inheritdoc cref="ActionDefinition.ActionID"/>
+        public ActionID ActionID { get => _definition.ActionID; }
 
         protected ActionRequestData m_data;
 
@@ -45,22 +39,46 @@ namespace Gameplay.Actions
         public ref ActionRequestData Data => ref m_data;
 
 
-        [Tooltip("Does this count as a hostile Action? (Should it: Break Stealth, Dropp Shields, etc?)")]
-        public bool IsHostileAction;
-
-        [Tooltip("How much energy/ammo/etc this Action costs.")]
-        public float Cost;
+        [SerializeField] private readonly ActionDefinition _definition;
+        public ActionDefinition Definition => _definition;
 
 
-        public abstract bool HasCooldown { get; }
-        public abstract bool HasCooldownCompleted(float lastActivatedTime);
-        public abstract bool HasExpired { get; }
-
-        public virtual bool CancelsOtherActions => false;
+        private float _nextUpdateTime;
+        private bool _hasPerformedLastTrigger;
+        private int _burstsRemaining;
 
 
-        public virtual bool CanBeInterruptedBy(ActionID otherActionID) => false;
-        public virtual bool ShouldCancelAction(ref ActionRequestData thisData, ref ActionRequestData otherData) => false;
+        #region Pass-through Functions to ActionDefinition
+
+        /// <inheritdoc cref="ActionDefinition.ShouldNotifyClient"/>
+        public bool ShouldNotifyClient => _definition.ShouldNotifyClient;
+
+
+        /// <inheritdoc cref="ActionDefinition.HasCooldown"/>
+        public bool HasCooldown => _definition.HasCooldown;
+
+        /// <inheritdoc cref="ActionDefinition.HasCooldownCompleted"/>
+        public bool HasCooldownCompleted(float lastActivatedTime) => _definition.HasCooldownCompleted(lastActivatedTime);
+
+        /// <inheritdoc cref="ActionDefinition.HasExpired"/>
+        public bool HasExpired => _definition.GetHasExpired(this.TimeStarted);
+
+
+        /// <inheritdoc cref="ActionDefinition.CancelsOtherActions"/>
+        public bool CancelsOtherActions => _definition.CancelsOtherActions;
+
+
+        /// <inheritdoc cref="ActionDefinition.CanBeInterruptedBy"/>
+        public bool CanBeInterruptedBy(in ActionID otherActionID) => _definition.CanBeInterruptedBy(otherActionID);
+
+        /// <inheritdoc cref="ActionDefinition.ShouldCancelAction"/>
+        public bool ShouldCancelAction(ref ActionRequestData thisData, ref ActionRequestData otherData) => _definition.ShouldCancelAction(ref thisData, ref otherData);
+
+
+        /// <inheritdoc cref="ActionDefinition.ShouldBecomeNonBlocking"/>
+        public bool ShouldBecomeNonBlocking() => _definition.ShouldBecomeNonBlocking(TimeRunning);
+
+        #endregion
 
 
         public bool IsChaseAction => ActionID == GameDataSource.Instance.GeneralChaseActionDefinition.ActionID;
@@ -68,6 +86,10 @@ namespace Gameplay.Actions
         public bool IsGeneralTargetAction => ActionID == GameDataSource.Instance.GeneralTargetActionDefinition.ActionID;
 
 
+        public Action(ActionDefinition definition)
+        {
+            this._definition = definition;
+        }
         /// <summary>
         ///     Used as a Constructor.
         ///     The "data" parameter should not be retained after passing into this method, as we're taking ownership of its internal memory.
@@ -75,18 +97,42 @@ namespace Gameplay.Actions
         /// </summary>
         public void Initialise(ref ActionRequestData data)
         {
+            if (data.ActionID != this.ActionID)
+                throw new System.ArgumentException($"The ActionID of the passed data doesn't match this Action's ID (Action: {ActionID} | Data: {data.ActionID})");
+
             this.m_data = data;
-            this.ActionID = data.ActionID;
         }
 
         /// <summary>
         ///     Reset the action before returning it to the pool.
         /// </summary>
-        public virtual void Reset()
+        public virtual void ReturnToPool()
         {
             this.m_data = default;
-            this.ActionID = default;
+            //this.ActionID = default;
             this.TimeStarted = 0;
+            this._nextUpdateTime = 0.0f;
+            this._burstsRemaining = 0;
+            this._hasPerformedLastTrigger = false;
+        }
+
+        /// <summary>
+        ///     Initialise our Data's required Parameters (If they aren't already set-up).
+        /// </summary>
+        private void InitialiseDataParametersIfEmpty(ServerCharacter owner)
+        {
+            if (Data.OriginTransformID != 0)
+            {
+                if (Data.Direction == Vector3.zero)
+                    Data.Direction = Vector3.forward;
+            }
+            else
+            {
+                if (Data.Direction == Vector3.zero)
+                    Data.Direction = owner.transform.forward;
+                if (Data.Position == Vector3.zero)
+                    Data.Position = owner.transform.position;
+            }
         }
 
 
@@ -94,42 +140,100 @@ namespace Gameplay.Actions
         ///     Called when the Action starts actually playing (Which may be after it is created, due to queueing).
         /// </summary>
         /// <returns> False if the Action decided it doesn't want to run. True otherwise.</returns>
-        public virtual bool OnStart(ServerCharacter owner) => HandleStart(owner);
-        /// <summary>
-        ///     Called when the Action starts actually playing (Which may be after it is created, due to queueing).
-        /// </summary>
-        /// <returns> False if the Action decided it doesn't want to run. True otherwise.</returns>
-        protected abstract bool HandleStart(ServerCharacter owner);
+        public virtual bool OnStart(ServerCharacter owner)
+        {
+            _nextUpdateTime = TimeStarted + _definition.ExecutionDelay;
+            _burstsRemaining = _definition.Bursts;
+            InitialiseDataParametersIfEmpty(owner);
+
+            return _definition.OnStart(owner, ref Data);
+        }
 
 
+
+
+        private bool CalculateNextUpdateTime()
+        {
+            switch (_definition.TriggerType)
+            {
+                case ActionTriggerType.Burst:
+                    --_burstsRemaining;
+
+                    if (_burstsRemaining <= 0)
+                        return ActionConclusion.Stop;
+                    else
+                        _nextUpdateTime += _definition.BurstDelay;
+                    break;
+                case ActionTriggerType.RepeatedBurst:
+                    --_burstsRemaining;
+
+                    if (_burstsRemaining > 0)
+                    {
+                        _nextUpdateTime += _definition.BurstDelay;
+                    }
+                    else
+                    {
+                        _burstsRemaining = _definition.Bursts;
+                        _nextUpdateTime += _definition.RetriggerDelay;
+                    }
+                    break;
+                case ActionTriggerType.Repeated:
+                    _nextUpdateTime += _definition.RetriggerDelay;
+                    break;
+                default:
+                    return ActionConclusion.Stop;
+            }
+
+            return ActionConclusion.Continue;
+        }
         /// <summary>
         ///     Called each frame the Action is running.
         /// </summary>
         /// <returns> True to keep running, false to stop. The action will stop by default when its duration expires, if it has one set.</returns>
-        public virtual bool OnUpdate(ServerCharacter owner) => HandleUpdate(owner);
-        
-        /// <summary>
-        ///     Called when the Action wishes to Update itself.
-        /// </summary>
-        /// <returns> True to keep running, false to stop. The Action will stop by default when its duration expires, if it has one set.</returns>
-        protected abstract bool HandleUpdate(ServerCharacter owner);
+        public virtual bool OnUpdate(ServerCharacter owner)
+        {
+            if (_hasPerformedLastTrigger)
+                return !_definition.CancelOnLastTrigger;
 
-        /// <summary>
-        ///     Called each frame (Before OnUpdate()) for the active ("blocking") Action, asking if it should become a background Action.
-        /// </summary>
-        /// <returns> True to become a non-blocking Action. False to remain as a blocking Action.</returns>
-        public abstract bool ShouldBecomeNonBlocking();
+            if (NetworkManager.Singleton.ServerTime.TimeAsFloat < _nextUpdateTime)
+                return ActionConclusion.Continue;   // We shouldn't yet update.
+
+            // We should update ourselves.
+            if (_definition.OnUpdate(owner, ref Data) == false)
+                return ActionConclusion.Stop;
+
+            // We have performed our update and haven't yet stopped.
+            // Check if and when we should perform our next update.
+            _hasPerformedLastTrigger = !CalculateNextUpdateTime();
+
+            if (_definition.CancelOnLastTrigger && _hasPerformedLastTrigger)
+                return ActionConclusion.Stop;
+            else
+                return ActionConclusion.Continue;
+        }
+        
+        
+
+        
 
         /// <summary>
         ///     Called when the Action ends naturally.
         /// </summary>
-        public virtual void End(ServerCharacter owner) => Cleanup(owner);
+        public virtual void End(ServerCharacter owner)
+        {
+            _definition.OnEnd(owner, ref Data);
+            Cleanup(owner);
+        }
         
 
         /// <summary>
         ///     Called when the Action gets cancelled.
         /// </summary>
-        public virtual void Cancel(ServerCharacter owner) => Cleanup(owner);
+        public virtual void Cancel(ServerCharacter owner)
+        {
+            _definition.OnCancel(owner, ref Data);
+            Cleanup(owner);
+        }
         
 
 
@@ -158,7 +262,7 @@ namespace Gameplay.Actions
         /// <summary>
         ///     Called on the active ("Blocking") Action when this character collides with another.
         /// </summary>
-        public virtual void CollisionEntered(ServerCharacter owner, Collision collision) { }
+        public virtual void CollisionEntered(ServerCharacter owner, Collision collision) => _definition.OnCollisionEntered(owner, collision);
 
 
 
@@ -227,27 +331,55 @@ namespace Gameplay.Actions
         {
             AnticipatedClient = false;  // Once we start our ActionFX we are no longer an anticipated action.
             TimeStarted = serverTimeStarted;
+            this._nextUpdateTime = TimeStarted + _definition.ExecutionDelay;
 
-            return ActionConclusion.Continue;
+            return _definition.OnStartClient(clientCharacter, ref Data);
         }
 
-        public virtual bool OnUpdateClient(ClientCharacter clientCharacter) => ActionConclusion.Continue;
+        public virtual bool OnUpdateClient(ClientCharacter clientCharacter)
+        {
+            if (_hasPerformedLastTrigger)
+                return !_definition.CancelOnLastTrigger;
+
+            if (NetworkManager.Singleton.ServerTime.TimeAsFloat < _nextUpdateTime)
+                return ActionConclusion.Continue;
+
+            if (_definition.OnUpdateClient(clientCharacter, ref Data) == false)
+                return ActionConclusion.Stop;
+
+            _hasPerformedLastTrigger = !CalculateNextUpdateTime();
+
+            if (_definition.CancelOnLastTrigger && _hasPerformedLastTrigger)
+                return ActionConclusion.Stop;
+            else
+                return ActionConclusion.Continue;
+        }
         
         
 
         /// <summary>
-        ///     End is always called when the ActionFX finishes playing.
+        ///     End is called when the Action finishes playing.
         ///     This is a good place for derived classes top put wrap-up logic.
         ///     Derived classes should (But aren't required to) call base.End().
         /// </summary>
-        public virtual void EndClient(ClientCharacter clientCharacter) => CleanupClient(clientCharacter);
+        public virtual void EndClient(ClientCharacter clientCharacter)
+        {
+            _definition.OnEndClient(clientCharacter, ref Data);
+
+            CleanupClient(clientCharacter);
+        }
 
         /// <summary>
-        ///     Cancel is called when an ActionFX is interrupted prematurely.
+        ///     Cancel is called when an Action is interrupted prematurely.
         ///     It is kept logically distincy from end to allow for the possibility that an Action might want to pay something different if it is interrupted, rather than completing.
         ///     For example, a "ChargeShot" action might want to emit a projectile object in its end method, but instead play a "Stagger" effect in its Cancel method.
         /// </summary>
-        public virtual void CancelClient(ClientCharacter clientCharacter) => CleanupClient(clientCharacter);
+        public virtual void CancelClient(ClientCharacter clientCharacter)
+        {
+            _definition.OnCancelClient(clientCharacter, ref Data);
+
+            CleanupClient(clientCharacter);
+        }
 
 
         public virtual void CleanupClient(ClientCharacter clientCharacter) { }
@@ -286,46 +418,14 @@ namespace Gameplay.Actions
         /// <summary>
         ///     Called when the visualisation receives an animation event.
         /// </summary>
-        public virtual void OnAnimEventClient(ClientCharacter clientCharacter, string id) { }
+        public virtual void OnAnimEventClient(ClientCharacter clientCharacter, string id) => throw new System.NotImplementedException();
 
         /// <summary>
         ///     Called when this action has finished "Charging Up".
         ///     Only called for a few types of action.
         /// </summary>
-        public virtual void StoppedChargingUpClient(ClientCharacter clientCharacter, float finalChargeUpPercentage) { }
+        public virtual void StoppedChargingUpClient(ClientCharacter clientCharacter, float finalChargeUpPercentage) => throw new System.NotImplementedException();
 
-
-        /// <summary>
-        ///     Utility function that instantiates all graphics in the Spawns list. <br></br>
-        ///     If parentToOrigin is true, the new graphics will be parented to the origin Transform.
-        ///     If false, they are positioned/oriented the same way as the origin but aren't parented.
-        /// </summary>
-        protected List<SpecialFXGraphic> InstantiateSpecialFXGraphics(Transform origin, bool parentToOrigin)
-        {
-            throw new System.NotImplementedException();
-            /*var returnList = new List<SpecialFXGraphic>();
-            foreach(var prefab in Config.Spawns)
-            {
-                if (!prefab) { continue; } // Skip blank entries in our prefab list.
-                returnList.Add(InstantiateSpecialFXGraphic(prefab, origin, parentToOrigin));
-            }
-            return returnList;*/
-        }
-        /// <summary>
-        ///     Utility function that instantiates one of the graphics from the Spawns list. <br></br>
-        ///     If parentToOrigin is true, the new graphics will be parented to the origin Transform.
-        ///     If false, they are positioned/oriented the same way as the origin but aren't parented.
-        /// </summary>
-        protected SpecialFXGraphic InstantiateSpecialFXGraphic(SpecialFXGraphic prefab, Vector3 position, Vector3 forward)
-        {
-            /*if (prefab.GetComponent<SpecialFXGraphic>() == null)
-            {
-                throw new System.Exception($"One of the Spawns on the action {this.Config.name} does not have a SpecialFXGraphic component and can't be instantiated");
-            }*/
-
-            SpecialFXGraphic graphicsInstance = GameObject.Instantiate<SpecialFXGraphic>(prefab, position, Quaternion.LookRotation(forward));
-            return graphicsInstance;
-        }
 
         /// <summary>
         ///     Called when the action is being "anticipated" on the client.

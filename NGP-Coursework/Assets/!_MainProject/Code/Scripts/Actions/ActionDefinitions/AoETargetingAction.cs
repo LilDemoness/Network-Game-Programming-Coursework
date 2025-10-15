@@ -4,13 +4,13 @@ using Gameplay.Actions.Effects;
 using Gameplay.GameplayObjects.Character;
 using System;
 
-namespace Gameplay.Actions
+namespace Gameplay.Actions.Definitions
 {
     /// <summary>
     ///     An action that always targets itself.
     /// </summary>
     [CreateAssetMenu(menuName = "Actions/New AoE Targeting Action")]
-    public class AoETargetingAction : DefaultAction
+    public class AoETargetingAction : ActionDefinition
     {
         [Header("Targeting")]
         [SerializeReference, SubclassSelector] private AoETargeting _targetingMethod;
@@ -20,10 +20,10 @@ namespace Gameplay.Actions
         [SerializeReference][SubclassSelector] private ActionEffect[] _actionEffects;
 
 
-        protected override bool HandleStart(ServerCharacter owner) => ActionConclusion.Continue;
-        protected override bool HandleUpdate(ServerCharacter owner)
+        public override bool OnStart(ServerCharacter owner, ref ActionRequestData data) => ActionConclusion.Continue;
+        public override bool OnUpdate(ServerCharacter owner, ref ActionRequestData data)
         {
-            _targetingMethod.GetTargets(owner, base.GetActionOrigin(), base.GetActionDirection(), callback: ProcessTarget);
+            _targetingMethod.GetTargets(owner, base.GetActionOrigin(ref data), base.GetActionDirection(ref data), callback: ProcessTarget);
 
             return ActionConclusion.Continue;
         }

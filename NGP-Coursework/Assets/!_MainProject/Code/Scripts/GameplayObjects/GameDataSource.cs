@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Gameplay.Actions.Definitions;
 using Gameplay.Actions;
 
 namespace Gameplay.GameplayObjects
@@ -9,20 +10,20 @@ namespace Gameplay.GameplayObjects
         public static GameDataSource Instance { get; private set; }
 
 
-        [SerializeField] private Action m_generalChaseActionDefinition;
-        [SerializeField] private Action m_generalTargetActionDefinition;
-        [SerializeField] private Action m_stunnedActionDefinition;
+        [SerializeField] private ActionDefinition m_generalChaseActionDefinition;
+        [SerializeField] private ActionDefinition m_generalTargetActionDefinition;
+        [SerializeField] private ActionDefinition m_stunnedActionDefinition;
 
 
         [Tooltip("All Action Prototype Scriptable Objects")]
-        [SerializeField] private Action[] _actionDefinitions;
+        [SerializeField] private ActionDefinition[] _actionDefinitions;
 
 
-        public Action GeneralChaseActionDefinition => m_generalChaseActionDefinition;
-        public Action GeneralTargetActionDefinition => m_generalTargetActionDefinition;
-        public Action StunnedActionDefinition => m_stunnedActionDefinition;
+        public ActionDefinition GeneralChaseActionDefinition => m_generalChaseActionDefinition;
+        public ActionDefinition GeneralTargetActionDefinition => m_generalTargetActionDefinition;
+        public ActionDefinition StunnedActionDefinition => m_stunnedActionDefinition;
 
-        private List<Action> _allActions;
+        private List<ActionDefinition> _allActionDefinitions;
 
 
         private void Awake()
@@ -39,43 +40,43 @@ namespace Gameplay.GameplayObjects
         }
         private void BuildActionIDs()
         {
-            HashSet<Action> uniqueActions = new HashSet<Action>(_actionDefinitions);
+            HashSet<ActionDefinition> uniqueDefinitions = new HashSet<ActionDefinition>(_actionDefinitions);
 
             // Add our General Action Prototypes.
-            uniqueActions.Add(m_generalChaseActionDefinition);
-            uniqueActions.Add(m_generalTargetActionDefinition);
-            uniqueActions.Add(m_stunnedActionDefinition);
+            uniqueDefinitions.Add(m_generalChaseActionDefinition);
+            uniqueDefinitions.Add(m_generalTargetActionDefinition);
+            uniqueDefinitions.Add(m_stunnedActionDefinition);
 
-            _allActions = new List<Action>(uniqueActions.Count);
+            _allActionDefinitions = new List<ActionDefinition>(uniqueDefinitions.Count);
 
 
             // Add all our unique actions to '_allActions' and set their IDs to match.
             int i = 0;
-            foreach(Action uniqueAction in uniqueActions)
+            foreach(ActionDefinition uniqueDefinition in uniqueDefinitions)
             {
-                uniqueAction.ActionID = new ActionID() { ID = i };
-                _allActions.Add(uniqueAction);
+                uniqueDefinition.ActionID = new ActionID(i);
+                _allActionDefinitions.Add(uniqueDefinition);
                 ++i;
             }
         }
 
 
-        public Action GetActionPrototypeByID(ActionID index)
+        public ActionDefinition GetActionDefinitionByID(ActionID index)
         {
-            return _allActions[index.ID];
+            return _allActionDefinitions[index.ID];
         }
-        public bool TryGetActionPrototypeById(ActionID index, out Action action)
+        public bool TryGetActionDefinitionById(ActionID index, out ActionDefinition definition)
         {
-            for(int i = 0; i < _allActions.Count; ++i)
+            for(int i = 0; i < _allActionDefinitions.Count; ++i)
             {
-                if (_allActions[i].ActionID == index)
+                if (_allActionDefinitions[i].ActionID == index)
                 {
-                    action = _allActions[i];
+                    definition = _allActionDefinitions[i];
                     return true;
                 }
             }
 
-            action = null;
+            definition = null;
             return false;
         }
     }

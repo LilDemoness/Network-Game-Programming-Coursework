@@ -15,9 +15,8 @@ namespace Gameplay.Actions
             {
                 // We don't yet have a pool for this action type. Create one.
                 actionPool = new ObjectPool<Action>(
-                    createFunc: () => Object.Instantiate<Action>(GameDataSource.Instance.GetActionPrototypeByID(actionID)),
-                    actionOnRelease: action => action.Reset(),
-                    actionOnDestroy: Object.Destroy);
+                    createFunc: () => new Action(GameDataSource.Instance.GetActionDefinitionByID(actionID)),
+                    actionOnRelease: action => action.ReturnToPool());
 
                 s_actionPools.Add(actionID, actionPool);
             }

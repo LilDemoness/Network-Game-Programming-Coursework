@@ -5,13 +5,13 @@ using Unity.Netcode;
 using Gameplay.GameplayObjects.Character;
 using Gameplay.Actions.Effects;
 
-namespace Gameplay.Actions
+namespace Gameplay.Actions.Definitions
 {
     /// <summary>
     ///     An action that uses a raycast to trigger effects on targets from a range.
     /// </summary>
     [CreateAssetMenu(menuName = "Actions/New Ranged Raycast Action")]
-    public class RangedRaycastAction : DefaultAction
+    public class RangedRaycastAction : ActionDefinition
     {
         [Header("Targeting")]
         [SerializeField] private float _maxRange;
@@ -27,20 +27,20 @@ namespace Gameplay.Actions
 
 
 
-        protected override bool HandleStart(ServerCharacter owner) => ActionConclusion.Continue;
-        protected override bool HandleUpdate(ServerCharacter owner)
+        public override bool OnStart(ServerCharacter owner, ref ActionRequestData data) => ActionConclusion.Continue;
+        public override bool OnUpdate(ServerCharacter owner, ref ActionRequestData data)
         {
             // Handle Logic
-            PerformRaycast(owner);
+            PerformRaycast(owner, ref data);
 
             return ActionConclusion.Continue;
         }
 
 
-        private void PerformRaycast(ServerCharacter owner)
+        private void PerformRaycast(ServerCharacter owner, ref ActionRequestData data)
         {
-            Vector3 rayOrigin = GetActionOrigin();
-            Vector3 rayDirection = GetActionDirection();
+            Vector3 rayOrigin = GetActionOrigin(ref data);
+            Vector3 rayDirection = GetActionDirection(ref data);
             Debug.DrawRay(rayOrigin, rayDirection * _maxRange, Color.red, 0.5f);
 
             if (_canPierce)

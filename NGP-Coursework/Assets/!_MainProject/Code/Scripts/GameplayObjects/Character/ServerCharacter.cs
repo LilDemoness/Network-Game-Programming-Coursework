@@ -136,14 +136,14 @@ namespace Gameplay.GameplayObjects.Character
         public void PlayActionServerRpc(ActionRequestData data)
         {
             ActionRequestData data1 = data;
-            if (GameDataSource.Instance.GetActionPrototypeByID(data1.ActionID).IsHostileAction)
+            if (GameDataSource.Instance.GetActionDefinitionByID(data1.ActionID).IsHostileAction)
             {
                 // Notify our running actions that we're using a new hostile action.
                 // Called so that things like Stealth can end themselves.
                 ActionPlayer.OnGameplayActivity(Action.GameplayActivity.UsingHostileAction);
             }
 
-            if (GameDataSource.Instance.GetActionPrototypeByID(data1.ActionID).ShouldNotifyClient)
+            if (GameDataSource.Instance.GetActionDefinitionByID(data1.ActionID).ShouldNotifyClient)
                 m_clientCharacter.PlayActionClientRpc(data, NetworkManager.Singleton.ServerTime.TimeAsFloat);
 
             PlayAction(ref data1);
@@ -171,7 +171,7 @@ namespace Gameplay.GameplayObjects.Character
         }
         private void CancelAction(ActionID actionID, int slotIndentifier = 0)
         {
-            if (GameDataSource.Instance.GetActionPrototypeByID(actionID).ShouldNotifyClient)
+            if (GameDataSource.Instance.GetActionDefinitionByID(actionID).ShouldNotifyClient)
                 m_clientCharacter.CancelRunningActionsByIDClientRpc(actionID, slotIndentifier);
 
             ActionPlayer.CancelRunningActionsByID(actionID, slotIndentifier, true);

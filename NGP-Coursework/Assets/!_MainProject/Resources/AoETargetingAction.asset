@@ -14,22 +14,24 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   IsHostileAction: 0
   Cost: 0
-  m_shouldNotifyClient: 1
-  ExecutionDelay: 0
-  ActionCooldown: 0
-  BlockingMode: 1
-  CanCharge: 0
-  MaxChargeTime: 0
-  ExecuteIfNotAtFullCharge: 0
-  MaxActiveDuration: 0
-  _triggerType: 0
-  _cancelOnLastTrigger: 1
-  _retriggerDelay: 0
-  _bursts: 0
-  _burstDelay: 0
-  _actionVisual:
-    rid: -2
-  IsInterruptable: 0
+  <ShouldNotifyClient>k__BackingField: 1
+  <ExecutionDelay>k__BackingField: 0
+  <ActionCooldown>k__BackingField: 0
+  <BlockingMode>k__BackingField: 1
+  <MaxActiveDuration>k__BackingField: 0
+  <CanCharge>k__BackingField: 0
+  <MaxChargeTime>k__BackingField: 0
+  <ExecuteIfNotAtFullCharge>k__BackingField: 0
+  <TriggerType>k__BackingField: 0
+  <CancelOnLastTrigger>k__BackingField: 1
+  <RetriggerDelay>k__BackingField: 0
+  <Bursts>k__BackingField: 0
+  <BurstDelay>k__BackingField: 0
+  <IsInterruptable>k__BackingField: 0
+  ActionEffects: []
+  TriggeringVisuals:
+  - rid: 9030112325067079759
+  HitVisuals: []
   _targetingMethod:
     rid: 9030112307888259210
   _actionEffects: []
@@ -50,3 +52,8 @@ MonoBehaviour:
           serializedVersion: 2
           m_Bits: 9
         _sphereRadius: 0
+    - rid: 9030112325067079759
+      type: {class: SpecialFXActionVisual, ns: Gameplay.Actions.Visuals, asm: Assembly-CSharp}
+      data:
+        _triggerTimes: 2
+        _specialFXGraphic: {fileID: 4037183185398935712, guid: de6513b59a0ab6e45827e1457b43a2b3, type: 3}

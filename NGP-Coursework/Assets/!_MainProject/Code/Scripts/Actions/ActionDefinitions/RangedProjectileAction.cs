@@ -5,13 +5,13 @@ using Gameplay.GameplayObjects.Projectiles;
 using Gameplay.Actions.Effects;
 
 
-namespace Gameplay.Actions
+namespace Gameplay.Actions.Definitions
 {
     /// <summary>
     ///     An action that uses a raycast to trigger effects on targets from a range.
     /// </summary>
     [CreateAssetMenu(menuName = "Actions/New Ranged Projectile Action")]
-    public class RangedProjectileAction : DefaultAction
+    public class RangedProjectileAction : ActionDefinition
     {
         [Header("Projectile Settings")]
         [SerializeField] private ProjectileInfo _projectileInfo;
@@ -22,19 +22,19 @@ namespace Gameplay.Actions
         [SerializeReference][SubclassSelector] private ActionEffect[] _actionEffects;
 
 
-        protected override bool HandleStart(ServerCharacter owner) => ActionConclusion.Continue;
-        protected override bool HandleUpdate(ServerCharacter owner)
+        public override bool OnStart(ServerCharacter owner, ref ActionRequestData data) => ActionConclusion.Continue;
+        public override bool OnUpdate(ServerCharacter owner, ref ActionRequestData data)
         {
-            SpawnProjectile(owner);
+            SpawnProjectile(owner, ref data);
             return ActionConclusion.Continue;
         }
 
 
         
-        private void SpawnProjectile(ServerCharacter owner)
+        private void SpawnProjectile(ServerCharacter owner, ref ActionRequestData data)
         {
-            Vector3 spawnPosition = GetActionOrigin();
-            Vector3 spawnDirection = GetActionDirection();
+            Vector3 spawnPosition = GetActionOrigin(ref data);
+            Vector3 spawnDirection = GetActionDirection(ref data);
             spawnPosition += spawnDirection * _projectileInfo.ProjectilePrefab.GetAdditionalSpawnDistance();
 
             Projectile projectileInstance = GameObject.Instantiate<Projectile>(_projectileInfo.ProjectilePrefab, spawnPosition, Quaternion.LookRotation(spawnDirection));

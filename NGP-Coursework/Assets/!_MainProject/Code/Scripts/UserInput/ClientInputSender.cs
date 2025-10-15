@@ -5,6 +5,7 @@ using UnityEngine.InputSystem;
 using Gameplay.GameplayObjects.Character;
 using Gameplay.GameplayObjects;
 using Gameplay.Actions;
+using Gameplay.Actions.Definitions;
 
 namespace UserInput
 {
@@ -167,10 +168,10 @@ namespace UserInput
                     case ActionType.StartShooting:
                     case ActionType.StopShooting:
                         // Get our Action Definition.
-                        Action action = GameDataSource.Instance.GetActionPrototypeByID(_actionRequests[i].RequestedActionID);
+                        ActionDefinition actionDefinition = GameDataSource.Instance.GetActionDefinitionByID(_actionRequests[i].RequestedActionID);
 
                         // Create our Data.
-                        ActionRequestData data = ActionRequestData.Create(action);
+                        ActionRequestData data = ActionRequestData.Create(actionDefinition);
                         data.Position = _actionRequests[i].Origin;
                         data.Direction = _actionRequests[i].Direction;
                         data.SlotIdentifier = _actionRequests[i].SlotIdentifier;

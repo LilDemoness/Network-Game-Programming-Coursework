@@ -2,20 +2,19 @@ using System.Collections.Generic;
 using UnityEngine;
 using Gameplay.GameplayObjects.Character;
 
-namespace Gameplay.Actions
+namespace Gameplay.Actions.Definitions
 {
     /// <summary>
     ///     An Action that cancels other Actions when started.
     /// </summary>
     [CreateAssetMenu(menuName = "Actions/New Cancel Action")]
-    public class CancelAction : Action
+    public class CancelAction : ActionDefinition
     {
-        public override bool ShouldNotifyClient => false;   // Maybe?
         [SerializeField] private List<Action> _actionsThisCancels = new List<Action>();
         [SerializeField] private bool _requireSharedSlotIdentifier = false;
 
 
-        protected override bool HandleStart(ServerCharacter owner)
+        public override bool OnStart(ServerCharacter owner, ref ActionRequestData data)
         {
             //foreach (ActionDefinition actionDefinition in OtherActionsThisCancels)
             //    owner.ClientCharacter.CancelAllActionsByActionIDClientRpc(actionDefinition.ActionID);
@@ -23,7 +22,7 @@ namespace Gameplay.Actions
             return ActionConclusion.Stop;
         }
 
-        protected override bool HandleUpdate(ServerCharacter owner)
+        public override bool OnUpdate(ServerCharacter owner, ref ActionRequestData data)
         {
             throw new System.Exception("A CancelAction has made it to a point where it's 'OnUpdate' method has been called.");
         }
@@ -48,8 +47,7 @@ namespace Gameplay.Actions
 
         public override bool HasCooldown => false;
         public override bool HasCooldownCompleted(float lastActivatedTime) => true;
-        public override bool HasExpired => true;
-
-        public override bool ShouldBecomeNonBlocking() => true;
+        public override bool GetHasExpired(float timeStarted) => true;
+        public override bool ShouldBecomeNonBlocking(float timeRunning) => true;
     }
 }

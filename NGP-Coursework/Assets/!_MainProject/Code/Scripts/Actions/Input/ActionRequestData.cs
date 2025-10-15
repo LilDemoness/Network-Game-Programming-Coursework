@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using Unity.Netcode;
+using Gameplay.Actions.Definitions;
 
 namespace Gameplay.Actions
 {
@@ -24,7 +25,7 @@ namespace Gameplay.Actions
         
 
         public static ActionRequestData Default => Create(actionID: default);
-        public static ActionRequestData Create(Action action) => Create(actionID: action.ActionID);
+        public static ActionRequestData Create(ActionDefinition definition) => Create(actionID: definition.ActionID);
         private static ActionRequestData Create(ActionID actionID) => new ActionRequestData()
             {
                 ActionID = actionID
