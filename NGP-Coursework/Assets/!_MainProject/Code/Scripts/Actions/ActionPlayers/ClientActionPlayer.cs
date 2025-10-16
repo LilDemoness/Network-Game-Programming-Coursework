@@ -15,6 +15,8 @@ namespace Gameplay.Actions
         private const float ANTICIPATION_TIMEOUT_SECONDS = 1.0f;
 
 
+        private Dictionary<int, float> _slotIDToChargeDepletedTimeDict = new Dictionary<int, float>();
+
         public ClientCharacter ClientCharacter { get; private set;}
 
 
@@ -42,7 +44,7 @@ namespace Gameplay.Actions
                     if (hasTimedOut)
                     {
                         // An anticipated action that timed out shouldn't get its End() function called. It should be cancelled instead.
-                        action.CancelClient(ClientCharacter);
+                        CancelAction(action);
                     }
                     else
                         action.EndClient(ClientCharacter);
@@ -85,12 +87,13 @@ namespace Gameplay.Actions
         {
             int anticipatedActionIndex = FindAction(data.ActionID, true);
 
-            Action actionFX = anticipatedActionIndex>= 0 ? _playingActions[anticipatedActionIndex] : ActionFactory.CreateActionFromData(ref data);
-            if (actionFX.OnStartClient(ClientCharacter, serverTimeStarted))
+            Action action = anticipatedActionIndex>= 0 ? _playingActions[anticipatedActionIndex] : ActionFactory.CreateActionFromData(ref data);
+            _slotIDToChargeDepletedTimeDict.TryGetValue(action.Data.SlotIdentifier, out float chargeDepletedTime);
+            if (action.OnStartClient(ClientCharacter, chargeDepletedTime, serverTimeStarted))
             {
                 if (anticipatedActionIndex < 0)
                 {
-                    _playingActions.Add(actionFX);
+                    _playingActions.Add(action);
                 }
             }
             else
@@ -98,14 +101,14 @@ namespace Gameplay.Actions
                 // Start returned false. The actionFX shouldn't persist.
                 if (anticipatedActionIndex >= 0)
                     _playingActions.RemoveAt(anticipatedActionIndex);
-                ActionFactory.ReturnAction(actionFX);
+                ActionFactory.ReturnAction(action);
             }
         }
         public void CancelAllActions()
         {
             foreach(Action action in _playingActions)
             {
-                action.CancelClient(ClientCharacter);
+                CancelAction(action);
                 ActionFactory.ReturnAction(action);
             }
             _playingActions.Clear();
@@ -133,9 +136,21 @@ namespace Gameplay.Actions
                 if (!cancelCondition(action))
                     continue;
 
-                action.CancelClient(ClientCharacter);
+                CancelAction(action);
                 _playingActions.RemoveAt(i);
                 ActionFactory.ReturnAction(action);
+            }
+        }
+
+        private void CancelAction(Action actionToCancel)
+        {
+            // Cancel the action.
+            actionToCancel.CancelClient(ClientCharacter, out float chargeDepletedTime);
+
+            // Charge Reduction Time.
+            if (!_slotIDToChargeDepletedTimeDict.TryAdd(actionToCancel.Data.SlotIdentifier, chargeDepletedTime))
+            {
+                _slotIDToChargeDepletedTimeDict[actionToCancel.Data.SlotIdentifier] = chargeDepletedTime;
             }
         }
     }

@@ -16,6 +16,8 @@ namespace Gameplay.Actions
         private List<Action> _actionQueue;
         private List<Action> _nonBlockingActions;
 
+        private Dictionary<int, float> _slotIDToChargeDepletedTimeDict = new Dictionary<int, float>();
+
         private struct ActionIDSlotIdentifierWrapper : System.IEquatable<ActionIDSlotIdentifierWrapper>
         {
             public ActionID ActionID;
@@ -69,7 +71,7 @@ namespace Gameplay.Actions
 
             // Add our action to the queue and start it if we don't have other actions.
             _actionQueue.Add(newAction);
-            if(_actionQueue.Count == 1) { StartAction(); }
+            if(_actionQueue.Count == 1){ StartAction(); }
         }
 
         public void ClearActions(bool cancelNonBlocking)
@@ -77,7 +79,8 @@ namespace Gameplay.Actions
             // Clear the active Action in the Action Queue.
             if (_actionQueue.Count > 0)
             {
-                _actionQueue[0].Cancel(_serverCharacter);
+                CancelAction(_actionQueue[0]);
+                //_actionQueue[0].Cancel(_serverCharacter);
             }
 
             Action actionToBeCancelled; // So we don't repeatedly allocate space.
@@ -97,7 +100,8 @@ namespace Gameplay.Actions
                 for (int i = _nonBlockingActions.Count - 1; i >= 0; --i)
                 {
                     actionToBeCancelled = _nonBlockingActions[i];
-                    actionToBeCancelled.Cancel(_serverCharacter);
+                    CancelAction(actionToBeCancelled);
+                    //actionToBeCancelled.Cancel(_serverCharacter);
                     _nonBlockingActions.RemoveAt(i);
                     TryReturnAction(actionToBeCancelled);
                 }
@@ -122,7 +126,8 @@ namespace Gameplay.Actions
                 {
                     // Cancel this action.
                     //Debug.Log($"Cancelling Action: {_actionQueue[0].name} (Slot: {_actionQueue[0].Data.SlotIdentifier})");
-                    _actionQueue[0].Cancel(_serverCharacter);
+                    CancelAction(_actionQueue[0]);
+                    //_actionQueue[0].Cancel(_serverCharacter);
                     AdvanceQueue(false);    // Advance the queue to the next action and remove the current head.
                 }
             }
@@ -134,7 +139,8 @@ namespace Gameplay.Actions
                 {
                     // Cancel this action
                     //Debug.Log($"Cancelling Action: {nonBlockingAction.name} (Slot: {nonBlockingAction.Data.SlotIdentifier})");
-                    nonBlockingAction.Cancel(_serverCharacter);
+                    CancelAction(nonBlockingAction);
+                    //nonBlockingAction.Cancel(_serverCharacter);
                     _nonBlockingActions.RemoveAt(i);
                     TryReturnAction(nonBlockingAction);
                 }
@@ -204,8 +210,10 @@ namespace Gameplay.Actions
             // Cancel any actions that this action should cancel when being played.
             CancelInterruptedActions(_actionQueue[0]);
 
+            _slotIDToChargeDepletedTimeDict.TryGetValue(_actionQueue[0].Data.SlotIdentifier, out float chargeDepletedTime);
+
             _actionQueue[0].TimeStarted = NetworkManager.Singleton.ServerTime.TimeAsFloat;
-            bool play = _actionQueue[0].OnStart(_serverCharacter);
+            bool play = _actionQueue[0].OnStart(_serverCharacter, chargeDepletedTime);
             if (!play)
             {
                 // Actions that exit in their "Start" method don't have their "End" method called by design.
@@ -417,7 +425,8 @@ namespace Gameplay.Actions
                 if (cancelCondition(action))
                 {
                     // The active blocking action should be removed.
-                    _actionQueue[0].Cancel(_serverCharacter);
+                    CancelAction(_actionQueue[0]);
+                    //_actionQueue[0].Cancel(_serverCharacter);
 
                     // Advance the queue (Removes the now cancelled Action '0').
                     AdvanceQueue(false);
@@ -433,10 +442,24 @@ namespace Gameplay.Actions
                     if (!cancelCondition(action))
                         continue;
 
-                    action.Cancel(_serverCharacter);
+                    CancelAction(action);
+                    //action.Cancel(_serverCharacter);
                     _nonBlockingActions.RemoveAt(i);
                     TryReturnAction(action);
                 }
+            }
+        }
+
+
+        private void CancelAction(Action actionToCancel)
+        {
+            // Cancel the action.
+            actionToCancel.Cancel(_serverCharacter, out float chargeDepletedTime);
+
+            // Charge Reduction Time.
+            if (!_slotIDToChargeDepletedTimeDict.TryAdd(actionToCancel.Data.SlotIdentifier, chargeDepletedTime))
+            {
+                _slotIDToChargeDepletedTimeDict[actionToCancel.Data.SlotIdentifier] = chargeDepletedTime;
             }
         }
     }

@@ -47,7 +47,7 @@ namespace Gameplay.Actions
         private bool _hasPerformedLastTrigger;
         private int _burstsRemaining;
 
-        private bool _isCharging;
+        private bool _isCharging, _isFirstCharge;
         private float _chargeStartTime;
 
 
@@ -119,6 +119,7 @@ namespace Gameplay.Actions
             this._hasPerformedLastTrigger = false;
 
             this._isCharging = false;
+            this._isFirstCharge = false;
             this._chargeStartTime = 0.0f;
         }
 
@@ -146,11 +147,15 @@ namespace Gameplay.Actions
         ///     Called when the Action starts actually playing (Which may be after it is created, due to queueing).
         /// </summary>
         /// <returns> False if the Action decided it doesn't want to run. True otherwise.</returns>
-        public virtual bool OnStart(ServerCharacter owner)
+        public virtual bool OnStart(ServerCharacter owner, float chargeDepletedTime)
         {
             _nextUpdateTime = TimeStarted + _definition.ExecutionDelay;
-            _chargeStartTime = TimeStarted;
 
+            // Initialise Charging Time.
+            float startingChargePercentage = _definition.MaxChargeDepletionTime > 0.0f ? Mathf.Max((chargeDepletedTime - TimeStarted) / _definition.MaxChargeDepletionTime, 0.0f) : 0.0f;
+            _chargeStartTime = _nextUpdateTime - (_definition.MaxChargeTime * startingChargePercentage);
+            _isFirstCharge = true;
+            
             this._burstsRemaining = _definition.Bursts;
             InitialiseDataParametersIfEmpty(owner);
 
@@ -171,6 +176,7 @@ namespace Gameplay.Actions
                         return ActionConclusion.Stop;
                     else
                         _nextUpdateTime = NetworkManager.Singleton.ServerTime.TimeAsFloat + _definition.BurstDelay;
+
                     break;
                 case ActionTriggerType.RepeatedBurst:
                     --_burstsRemaining;
@@ -183,14 +189,11 @@ namespace Gameplay.Actions
                     {
                         _burstsRemaining = _definition.Bursts;
                         _nextUpdateTime = NetworkManager.Singleton.ServerTime.TimeAsFloat + _definition.RetriggerDelay;
-                        _isCharging = false;
                     }
                     break;
                 case ActionTriggerType.Repeated:
                     _nextUpdateTime = NetworkManager.Singleton.ServerTime.TimeAsFloat + _definition.RetriggerDelay;
                     //_nextUpdateTime += _definition.RetriggerDelay;
-                    Debug.Log("Reset Charge");
-                    _isCharging = false;
                     break;
                 default:
                     return ActionConclusion.Stop;
@@ -203,13 +206,17 @@ namespace Gameplay.Actions
             justStartedCharging = false;
             if (!_definition.CanCharge)
                 return false;
+            if (_burstsRemaining != _definition.Bursts)
+                return false;   // We're performing a burst, so can't possibly be charging.
 
             if (!_isCharging)
             {
                 // We haven't yet started charging this action since we last fired.
                 justStartedCharging = true;
                 _isCharging = true;
-                _chargeStartTime = NetworkManager.Singleton.ServerTime.TimeAsFloat;
+                if (!_isFirstCharge)
+                    _chargeStartTime = NetworkManager.Singleton.ServerTime.TimeAsFloat;
+                _isFirstCharge = false;
                 return true;
             }
                 
@@ -220,6 +227,13 @@ namespace Gameplay.Actions
             }
 
             // We've fully charged and should perform this action now.
+
+            if (!_definition.RetainChargeAfterFull)
+            {
+                // We're not wanting to charge this weapon only once.
+                // Mark ourselves as no longer charging to prevent issues with retaining charge after cancelling while in the middle of a burst.
+                _isCharging = false;
+            }
             return false;
         }
         /// <summary>
@@ -268,14 +282,25 @@ namespace Gameplay.Actions
         }
         
 
+        private float CalculateChargePercentage(out float chargeLostTime)
+        {
+            float currentTime = NetworkManager.Singleton.ServerTime.TimeAsFloat;
+            float timeSpendCharging = currentTime - _chargeStartTime;
+            float chargePercentage = Mathf.Clamp01(timeSpendCharging / _definition.MaxChargeTime);
+            Debug.Log($"Time Spent Charging: {timeSpendCharging}\nChargePercentage: {chargePercentage}");
+
+            chargeLostTime = currentTime + (_definition.MaxChargeDepletionTime * chargePercentage);
+            return chargePercentage;
+        }
+
         /// <summary>
         ///     Called when the Action gets cancelled.
         /// </summary>
-        public virtual void Cancel(ServerCharacter owner)
+        public virtual void Cancel(ServerCharacter owner, out float chargeLostTime)
         {
             if (_definition.CanCharge)
             {
-                float chargePercentage = Mathf.Clamp01((NetworkManager.Singleton.ServerTime.TimeAsFloat - _chargeStartTime) / _definition.MaxChargeTime);
+                float chargePercentage = CalculateChargePercentage(out chargeLostTime);
 
                 if (chargePercentage > _definition.MinChargeActivationPercentage)
                 {
@@ -288,6 +313,10 @@ namespace Gameplay.Actions
                         return;
                     }
                 }
+            }
+            else
+            {
+                chargeLostTime = 0.0f;
             }
 
             _definition.OnCancel(owner, ref Data);
@@ -386,14 +415,18 @@ namespace Gameplay.Actions
         ///     Derived classes should be sure to call base.OnStart() in their implementation, but do not that this resets "AnticipatedClient" to false.
         /// </remarks>
         /// <returns> True to play, false to be immediately cleaned up.</returns>
-        public virtual bool OnStartClient(ClientCharacter clientCharacter, float serverTimeStarted)
+        public virtual bool OnStartClient(ClientCharacter clientCharacter, float chargeDepletedTime, float serverTimeStarted)
         {
             AnticipatedClient = false;  // Once we start our ActionFX we are no longer an anticipated action.
             TimeStarted = serverTimeStarted;
             this._nextUpdateTime = TimeStarted + _definition.ExecutionDelay;
-            this._chargeStartTime = TimeStarted;
 
             this._burstsRemaining = _definition.Bursts;
+
+            // Calculate charge.
+            float startingChargePercentage = _definition.MaxChargeDepletionTime > 0.0f ? Mathf.Max((chargeDepletedTime - TimeStarted) / _definition.MaxChargeDepletionTime, 0.0f) : 0.0f;
+            this._chargeStartTime = _nextUpdateTime - (_definition.MaxChargeTime * startingChargePercentage);
+            this._isFirstCharge = true;
 
             return _definition.OnStartClient(clientCharacter, ref Data);
         }
@@ -411,10 +444,14 @@ namespace Gameplay.Actions
             if (IsStillCharging(out bool justStartedCharging))
             {
                 if (justStartedCharging)
+                {
                     _definition.OnStartChargingClient(clientCharacter, ref Data);
+                    PlayerChargeDisplayTestingUI.StartedCharging(_chargeStartTime, _definition.MaxChargeTime);
+                }
                 return ActionConclusion.Continue;
             }
 
+            // To-do: Reset Charging UI Smoothly.
 
             // We should update.
 
@@ -450,11 +487,13 @@ namespace Gameplay.Actions
         ///     It is kept logically distincy from end to allow for the possibility that an Action might want to pay something different if it is interrupted, rather than completing.
         ///     For example, a "ChargeShot" action might want to emit a projectile object in its end method, but instead play a "Stagger" effect in its Cancel method.
         /// </summary>
-        public virtual void CancelClient(ClientCharacter clientCharacter)
+        public virtual void CancelClient(ClientCharacter clientCharacter, out float chargeLostTime)
         {
-            if (_definition.CanCharge)
+            if (_definition.CanCharge && _isCharging)
             {
-                float chargePercentage = Mathf.Clamp01((NetworkManager.Singleton.ServerTime.TimeAsFloat - _chargeStartTime) / _definition.MaxChargeTime);
+                float chargePercentage = CalculateChargePercentage(out chargeLostTime);
+
+                PlayerChargeDisplayTestingUI.StoppedCharging(chargeLostTime, _definition.MaxChargeDepletionTime);
 
                 if (chargePercentage > _definition.MinChargeActivationPercentage)
                 {
@@ -464,6 +503,11 @@ namespace Gameplay.Actions
                         return;
                     }
                 }
+            }
+            else
+            {
+                chargeLostTime = 0.0f;
+                PlayerChargeDisplayTestingUI.StoppedCharging(chargeLostTime, _definition.MaxChargeDepletionTime);
             }
 
             _definition.OnCancelClient(clientCharacter, ref Data);
