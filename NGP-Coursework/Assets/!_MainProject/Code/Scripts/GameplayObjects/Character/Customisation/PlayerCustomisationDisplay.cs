@@ -31,9 +31,9 @@ namespace Gameplay.GameplayObjects.Character.Customisation
                 _gfxElements[i]
                     .OnSelectedFrameChanged(_optionsDatabase.FrameDatas[customisationState.FrameIndex])
                     .OnSelectedLegChanged(_optionsDatabase.LegDatas[customisationState.LegIndex])
-                    .OnSelectedWeaponChanged(0, _optionsDatabase.WeaponDatas[customisationState.PrimaryWeaponIndex])
-                    .OnSelectedWeaponChanged(1, _optionsDatabase.WeaponDatas[customisationState.SecondaryWeaponIndex])
-                    .OnSelectedWeaponChanged(2, _optionsDatabase.WeaponDatas[customisationState.TertiaryWeaponIndex])
+                    .OnSelectedWeaponChanged(WeaponSlotIndex.Primary, _optionsDatabase.WeaponDatas[customisationState.PrimaryWeaponIndex])
+                    .OnSelectedWeaponChanged(WeaponSlotIndex.Secondary, _optionsDatabase.WeaponDatas[customisationState.SecondaryWeaponIndex])
+                    .OnSelectedWeaponChanged(WeaponSlotIndex.Tertiary, _optionsDatabase.WeaponDatas[customisationState.TertiaryWeaponIndex])
                     .OnSelectedAbilityChanged(_optionsDatabase.AbilityDatas[customisationState.AbilityIndex]);
             }
         }

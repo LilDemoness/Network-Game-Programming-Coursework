@@ -6,7 +6,7 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Sections
     public class WeaponAttachmentSlot : MonoBehaviour
     {
         [SerializeField] private WeaponSlotIndex _weaponSlotIndex = WeaponSlotIndex.Primary;
-        public int SlotIndex => (int)_weaponSlotIndex;
+        public WeaponSlotIndex SlotIndex => _weaponSlotIndex;
 
 
         [Header("GFX")]

@@ -17,9 +17,9 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Sections
         [SerializeField] private AbilityGFXSection[] _abilityDatas;
 
         [SerializeField] private WeaponAttachmentSlot[] m_weaponAttachmentSlotArray;
-        private Dictionary<int, WeaponAttachmentSlot> _weaponsAttachPoints = new Dictionary<int, WeaponAttachmentSlot>();
+        private Dictionary<WeaponSlotIndex, WeaponAttachmentSlot> _weaponsAttachPoints = new Dictionary<WeaponSlotIndex, WeaponAttachmentSlot>();
         
-        public bool TryGetAttachmentSlot(int slotIndex, out WeaponAttachmentSlot weaponAttachmentSlot) => _weaponsAttachPoints.TryGetValue(slotIndex, out weaponAttachmentSlot);
+        public bool TryGetAttachmentSlot(WeaponSlotIndex slotIndex, out WeaponAttachmentSlot weaponAttachmentSlot) => _weaponsAttachPoints.TryGetValue(slotIndex, out weaponAttachmentSlot);
 
 
         #if UNITY_EDITOR
@@ -43,7 +43,7 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Sections
 
         private void Awake()
         {
-            _weaponsAttachPoints = new Dictionary<int, WeaponAttachmentSlot>(m_weaponAttachmentSlotArray.Length);
+            _weaponsAttachPoints = new Dictionary<WeaponSlotIndex, WeaponAttachmentSlot>(m_weaponAttachmentSlotArray.Length);
             foreach(WeaponAttachmentSlot weaponAttachmentSlot in m_weaponAttachmentSlotArray)
                 _weaponsAttachPoints.Add(weaponAttachmentSlot.SlotIndex, weaponAttachmentSlot);
         }
@@ -64,7 +64,7 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Sections
 
             return this;
         }
-        public FrameGFX OnSelectedWeaponChanged(int weaponSlot, WeaponData activeData)
+        public FrameGFX OnSelectedWeaponChanged(WeaponSlotIndex weaponSlot, WeaponData activeData)
         {
             if (_weaponsAttachPoints.TryGetValue(weaponSlot, out WeaponAttachmentSlot weaponAttachmentSlot))
             {
@@ -99,18 +99,21 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Sections
             }
 
 
-            // Weapons.
+            // Weapons. (Can we make this into a for loop or similar?)
             WeaponAttachmentSlot weaponAttachmentSlot = null;
-            if (_weaponsAttachPoints.TryGetValue((int)WeaponSlotIndex.Primary, out weaponAttachmentSlot))
+            if (_weaponsAttachPoints.TryGetValue(WeaponSlotIndex.Primary, out weaponAttachmentSlot))
             {
+                // Has Primary Slot.
                 weaponAttachmentSlot.Finalise(activePrimaryWeapon);
                 
-                if (_weaponsAttachPoints.TryGetValue((int)WeaponSlotIndex.Secondary, out weaponAttachmentSlot))
+                if (_weaponsAttachPoints.TryGetValue(WeaponSlotIndex.Secondary, out weaponAttachmentSlot))
                 {
+                    // Has Secondary Slot.
                     weaponAttachmentSlot.Finalise(activeSecondaryWeapon);
                     
-                    if (_weaponsAttachPoints.TryGetValue((int)WeaponSlotIndex.Tertiary, out weaponAttachmentSlot))
+                    if (_weaponsAttachPoints.TryGetValue(WeaponSlotIndex.Tertiary, out weaponAttachmentSlot))
                     {
+                        // Has Tertiary Slot.
                         weaponAttachmentSlot.Finalise(activeTertiaryWeapon);
                     }
                 }

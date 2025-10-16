@@ -41,9 +41,9 @@ namespace Gameplay.GameplayObjects.Character
                 Debug.Log(weaponAttachmentSlot.name + " is equipped in Slot " + weaponAttachmentSlot.SlotIndex + ". Weapon Data: " + weaponAttachmentSlot.GetComponentInChildren<Weapon>().WeaponData.name);
                 switch (weaponAttachmentSlot.SlotIndex)
                 {
-                    case (int)WeaponSlotIndex.Primary: _primaryWeapon = weaponAttachmentSlot.GetComponentInChildren<Weapon>(); break;
-                    case (int)WeaponSlotIndex.Secondary: _secondaryWeapon = weaponAttachmentSlot.GetComponentInChildren<Weapon>(); break;
-                    case (int)WeaponSlotIndex.Tertiary: _tertiaryWeapon = weaponAttachmentSlot.GetComponentInChildren<Weapon>(); break;
+                    case WeaponSlotIndex.Primary: _primaryWeapon = weaponAttachmentSlot.GetComponentInChildren<Weapon>(); break;
+                    case WeaponSlotIndex.Secondary: _secondaryWeapon = weaponAttachmentSlot.GetComponentInChildren<Weapon>(); break;
+                    case WeaponSlotIndex.Tertiary: _tertiaryWeapon = weaponAttachmentSlot.GetComponentInChildren<Weapon>(); break;
                 }
             }
 
