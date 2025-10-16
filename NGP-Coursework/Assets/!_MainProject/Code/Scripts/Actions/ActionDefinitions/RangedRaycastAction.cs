@@ -24,16 +24,16 @@ namespace Gameplay.Actions.Definitions
 
 
         public override bool OnStart(ServerCharacter owner, ref ActionRequestData data) => ActionConclusion.Continue;
-        public override bool OnUpdate(ServerCharacter owner, ref ActionRequestData data)
+        public override bool OnUpdate(ServerCharacter owner, ref ActionRequestData data, float chargePercentage = 1.0f)
         {
             // Handle Logic
-            PerformRaycast(owner, ref data);
+            PerformRaycast(owner, ref data, chargePercentage);
 
             return ActionConclusion.Continue;
         }
 
 
-        private void PerformRaycast(ServerCharacter owner, ref ActionRequestData data)
+        private void PerformRaycast(ServerCharacter owner, ref ActionRequestData data, float chargePercentage)
         {
             Vector3 rayOrigin = GetActionOrigin(ref data);
             Vector3 rayDirection = GetActionDirection(ref data);
@@ -52,7 +52,7 @@ namespace Gameplay.Actions.Definitions
                 while(enumerator.MoveNext())
                 {
                     ActionHitInformation actionHitInfo = new ActionHitInformation(enumerator.Current.transform, enumerator.Current.point, enumerator.Current.normal, GetHitForward(enumerator.Current.normal));
-                    ProcessTarget(owner, actionHitInfo);
+                    ProcessTarget(owner, actionHitInfo, chargePercentage);
                 }
             }
             else
@@ -60,21 +60,21 @@ namespace Gameplay.Actions.Definitions
                 if (Physics.Raycast(rayOrigin, rayDirection, out RaycastHit hitInfo, _maxRange, _validLayers, QueryTriggerInteraction.Ignore))
                 {
                     ActionHitInformation actionHitInfo = new ActionHitInformation(hitInfo.transform, hitInfo.point, hitInfo.normal, GetHitForward(hitInfo.normal));
-                    ProcessTarget(owner, actionHitInfo);
+                    ProcessTarget(owner, actionHitInfo, chargePercentage);
                 }
             }
 
             Vector3 GetHitForward(Vector3 hitNormal) => Mathf.Approximately(Mathf.Abs(Vector3.Dot(hitNormal, rayDirection)), 1.0f) ? Vector3.Cross(hitNormal, -owner.transform.right) : Vector3.Cross(hitNormal, rayDirection);
         }
 
-        private void ProcessTarget(ServerCharacter owner, in ActionHitInformation hitInfo)
+        private void ProcessTarget(ServerCharacter owner, in ActionHitInformation hitInfo, float chargePercentage)
         {
             Debug.Log($"{hitInfo.Target.name} was hit!");
             //Debug.DrawRay(hitInfo.HitPoint, hitInfo.HitNormal, Color.yellow, 0.5f);
 
             for(int i = 0; i < ActionEffects.Length; ++i)
             {
-                ActionEffects[i].ApplyEffect(owner, hitInfo);
+                ActionEffects[i].ApplyEffect(owner, hitInfo, chargePercentage);
             }
         }
     }

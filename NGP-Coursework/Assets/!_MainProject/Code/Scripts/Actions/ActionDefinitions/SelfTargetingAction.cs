@@ -15,7 +15,7 @@ namespace Gameplay.Actions.Definitions
 
 
         public override bool OnStart(ServerCharacter owner, ref ActionRequestData data) => ActionConclusion.Continue;
-        public override bool OnUpdate(ServerCharacter owner, ref ActionRequestData data)
+        public override bool OnUpdate(ServerCharacter owner, ref ActionRequestData data, float chargePercentage = 1.0f)
         {
             Debug.Log($"{owner.name} applied effects to itself!");
             Vector3 origin = _overrideOriginToOwnerPosition ? owner.transform.position : GetActionOrigin(ref data);
@@ -25,7 +25,7 @@ namespace Gameplay.Actions.Definitions
             ActionHitInformation hitInfo = new ActionHitInformation(owner.transform, origin, direction, forward);
             for (int i = 0; i < ActionEffects.Length; ++i)
             {
-                ActionEffects[i].ApplyEffect(owner, hitInfo);
+                ActionEffects[i].ApplyEffect(owner, hitInfo, chargePercentage);
             }
 
             return ActionConclusion.Continue;

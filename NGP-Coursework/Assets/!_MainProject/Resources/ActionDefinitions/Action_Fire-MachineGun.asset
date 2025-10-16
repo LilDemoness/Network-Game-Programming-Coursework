@@ -21,7 +21,7 @@ MonoBehaviour:
   <MaxActiveDuration>k__BackingField: 0
   <CanCharge>k__BackingField: 0
   <MaxChargeTime>k__BackingField: 0
-  <ExecuteIfNotAtFullCharge>k__BackingField: 0
+  <MinChargeActivationPercentage>k__BackingField: 1
   <TriggerType>k__BackingField: 2
   <CancelOnLastTrigger>k__BackingField: 0
   <RetriggerDelay>k__BackingField: 0.1
@@ -48,5 +48,5 @@ MonoBehaviour:
     - rid: 6632896607793709161
       type: {class: SpecialFXActionVisual, ns: Gameplay.Actions.Visuals, asm: Assembly-CSharp}
       data:
-        _triggerTimes: 2
+        _triggerTimes: 4
         _specialFXGraphic: {fileID: 4037183185398935712, guid: de6513b59a0ab6e45827e1457b43a2b3, type: 3}

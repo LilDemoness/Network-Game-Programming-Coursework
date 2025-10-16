@@ -20,17 +20,18 @@ MonoBehaviour:
   <BlockingMode>k__BackingField: 1
   <MaxActiveDuration>k__BackingField: 0
   <CanCharge>k__BackingField: 1
-  <MaxChargeTime>k__BackingField: 1
-  <ExecuteIfNotAtFullCharge>k__BackingField: 0
-  <TriggerType>k__BackingField: 0
+  <MaxChargeTime>k__BackingField: 0.8
+  <MinChargeActivationPercentage>k__BackingField: 1
+  <TriggerType>k__BackingField: 3
   <CancelOnLastTrigger>k__BackingField: 1
-  <RetriggerDelay>k__BackingField: 0
-  <Bursts>k__BackingField: 0
-  <BurstDelay>k__BackingField: 0
+  <RetriggerDelay>k__BackingField: 0.4
+  <Bursts>k__BackingField: 3
+  <BurstDelay>k__BackingField: 0.1
   <IsInterruptable>k__BackingField: 0
   ActionEffects:
   - rid: 6632896607793709159
   TriggeringVisuals:
+  - rid: 6632896609068777570
   - rid: 6632896607793709162
   HitVisuals: []
   _maxRange: 30
@@ -45,8 +46,14 @@ MonoBehaviour:
       type: {class: HealthChangeEffect, ns: Gameplay.Actions.Effects, asm: Assembly-CSharp}
       data:
         _healthChange: -5
+        _scaleValueWithCharge: 1
     - rid: 6632896607793709162
       type: {class: SpecialFXActionVisual, ns: Gameplay.Actions.Visuals, asm: Assembly-CSharp}
       data:
-        _triggerTimes: 2
+        _triggerTimes: 4
         _specialFXGraphic: {fileID: 4037183185398935712, guid: de6513b59a0ab6e45827e1457b43a2b3, type: 3}
+    - rid: 6632896609068777570
+      type: {class: SpecialFXActionVisual, ns: Gameplay.Actions.Visuals, asm: Assembly-CSharp}
+      data:
+        _triggerTimes: 2
+        _specialFXGraphic: {fileID: 4037183185398935712, guid: 23e0f9a3cb233bc429cae2ff4f765694, type: 3}

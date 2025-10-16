@@ -47,6 +47,9 @@ namespace Gameplay.Actions
         private bool _hasPerformedLastTrigger;
         private int _burstsRemaining;
 
+        private bool _isCharging;
+        private float _chargeStartTime;
+
 
         #region Pass-through Functions to ActionDefinition
 
@@ -114,6 +117,9 @@ namespace Gameplay.Actions
             this._nextUpdateTime = 0.0f;
             this._burstsRemaining = 0;
             this._hasPerformedLastTrigger = false;
+
+            this._isCharging = false;
+            this._chargeStartTime = 0.0f;
         }
 
         /// <summary>
@@ -143,7 +149,9 @@ namespace Gameplay.Actions
         public virtual bool OnStart(ServerCharacter owner)
         {
             _nextUpdateTime = TimeStarted + _definition.ExecutionDelay;
-            _burstsRemaining = _definition.Bursts;
+            _chargeStartTime = TimeStarted;
+
+            this._burstsRemaining = _definition.Bursts;
             InitialiseDataParametersIfEmpty(owner);
 
             return _definition.OnStart(owner, ref Data);
@@ -162,23 +170,27 @@ namespace Gameplay.Actions
                     if (_burstsRemaining <= 0)
                         return ActionConclusion.Stop;
                     else
-                        _nextUpdateTime += _definition.BurstDelay;
+                        _nextUpdateTime = NetworkManager.Singleton.ServerTime.TimeAsFloat + _definition.BurstDelay;
                     break;
                 case ActionTriggerType.RepeatedBurst:
                     --_burstsRemaining;
 
                     if (_burstsRemaining > 0)
                     {
-                        _nextUpdateTime += _definition.BurstDelay;
+                        _nextUpdateTime = NetworkManager.Singleton.ServerTime.TimeAsFloat + _definition.BurstDelay;
                     }
                     else
                     {
                         _burstsRemaining = _definition.Bursts;
-                        _nextUpdateTime += _definition.RetriggerDelay;
+                        _nextUpdateTime = NetworkManager.Singleton.ServerTime.TimeAsFloat + _definition.RetriggerDelay;
+                        _isCharging = false;
                     }
                     break;
                 case ActionTriggerType.Repeated:
-                    _nextUpdateTime += _definition.RetriggerDelay;
+                    _nextUpdateTime = NetworkManager.Singleton.ServerTime.TimeAsFloat + _definition.RetriggerDelay;
+                    //_nextUpdateTime += _definition.RetriggerDelay;
+                    Debug.Log("Reset Charge");
+                    _isCharging = false;
                     break;
                 default:
                     return ActionConclusion.Stop;
@@ -186,19 +198,49 @@ namespace Gameplay.Actions
 
             return ActionConclusion.Continue;
         }
+        private bool IsStillCharging(out bool justStartedCharging)
+        {
+            justStartedCharging = false;
+            if (!_definition.CanCharge)
+                return false;
+
+            if (!_isCharging)
+            {
+                // We haven't yet started charging this action since we last fired.
+                justStartedCharging = true;
+                _isCharging = true;
+                _chargeStartTime = NetworkManager.Singleton.ServerTime.TimeAsFloat;
+                return true;
+            }
+                
+            if ((NetworkManager.Singleton.ServerTime.TimeAsFloat - _chargeStartTime) < _definition.MaxChargeTime)
+            {
+                // This action is a charging action, and we haven't yet reached full charge.
+                return true;
+            }
+
+            // We've fully charged and should perform this action now.
+            return false;
+        }
         /// <summary>
         ///     Called each frame the Action is running.
         /// </summary>
         /// <returns> True to keep running, false to stop. The action will stop by default when its duration expires, if it has one set.</returns>
         public virtual bool OnUpdate(ServerCharacter owner)
         {
+            // Check if we should update.
+
             if (_hasPerformedLastTrigger)
                 return !_definition.CancelOnLastTrigger;
 
             if (NetworkManager.Singleton.ServerTime.TimeAsFloat < _nextUpdateTime)
                 return ActionConclusion.Continue;   // We shouldn't yet update.
 
-            // We should update ourselves.
+            if (IsStillCharging(out _))
+                return ActionConclusion.Continue;
+
+            // We should update.
+
             if (_definition.OnUpdate(owner, ref Data) == false)
                 return ActionConclusion.Stop;
 
@@ -231,6 +273,23 @@ namespace Gameplay.Actions
         /// </summary>
         public virtual void Cancel(ServerCharacter owner)
         {
+            if (_definition.CanCharge)
+            {
+                float chargePercentage = Mathf.Clamp01((NetworkManager.Singleton.ServerTime.TimeAsFloat - _chargeStartTime) / _definition.MaxChargeTime);
+
+                if (chargePercentage > _definition.MinChargeActivationPercentage)
+                {
+                    const float CHARGE_ROUNDING_TARGET = 0.05f;
+                    chargePercentage = Mathf.Round(chargePercentage / CHARGE_ROUNDING_TARGET) * CHARGE_ROUNDING_TARGET;
+
+                    if (_definition.OnUpdate(owner, ref Data, chargePercentage) == false)
+                    {
+                        End(owner);
+                        return;
+                    }
+                }
+            }
+
             _definition.OnCancel(owner, ref Data);
             Cleanup(owner);
         }
@@ -332,21 +391,38 @@ namespace Gameplay.Actions
             AnticipatedClient = false;  // Once we start our ActionFX we are no longer an anticipated action.
             TimeStarted = serverTimeStarted;
             this._nextUpdateTime = TimeStarted + _definition.ExecutionDelay;
+            this._chargeStartTime = TimeStarted;
+
+            this._burstsRemaining = _definition.Bursts;
 
             return _definition.OnStartClient(clientCharacter, ref Data);
         }
 
         public virtual bool OnUpdateClient(ClientCharacter clientCharacter)
         {
+            // Check if we should update.
+
             if (_hasPerformedLastTrigger)
                 return !_definition.CancelOnLastTrigger;
 
             if (NetworkManager.Singleton.ServerTime.TimeAsFloat < _nextUpdateTime)
                 return ActionConclusion.Continue;
 
+            if (IsStillCharging(out bool justStartedCharging))
+            {
+                if (justStartedCharging)
+                    _definition.OnStartChargingClient(clientCharacter, ref Data);
+                return ActionConclusion.Continue;
+            }
+
+
+            // We should update.
+
             if (_definition.OnUpdateClient(clientCharacter, ref Data) == false)
                 return ActionConclusion.Stop;
 
+            // We've updated and are still wishing to continue updating.
+            // Determine if and when we should next update.
             _hasPerformedLastTrigger = !CalculateNextUpdateTime();
 
             if (_definition.CancelOnLastTrigger && _hasPerformedLastTrigger)
@@ -376,6 +452,20 @@ namespace Gameplay.Actions
         /// </summary>
         public virtual void CancelClient(ClientCharacter clientCharacter)
         {
+            if (_definition.CanCharge)
+            {
+                float chargePercentage = Mathf.Clamp01((NetworkManager.Singleton.ServerTime.TimeAsFloat - _chargeStartTime) / _definition.MaxChargeTime);
+
+                if (chargePercentage > _definition.MinChargeActivationPercentage)
+                {
+                    if (_definition.OnUpdateClient(clientCharacter, ref Data, chargePercentage) == false)
+                    {
+                        EndClient(clientCharacter);
+                        return;
+                    }
+                }
+            }
+
             _definition.OnCancelClient(clientCharacter, ref Data);
 
             CleanupClient(clientCharacter);

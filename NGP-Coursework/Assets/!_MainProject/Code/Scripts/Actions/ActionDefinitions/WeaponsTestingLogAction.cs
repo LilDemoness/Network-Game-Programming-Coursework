@@ -19,7 +19,7 @@ namespace Gameplay.Actions.Definitions
             return ActionConclusion.Continue;
         }
 
-        public override bool OnUpdate(ServerCharacter owner, ref ActionRequestData data)
+        public override bool OnUpdate(ServerCharacter owner, ref ActionRequestData data, float chargePercentage = 1.0f)
         {
             Debug.Log($"{this.name} {(data.SlotIdentifier != 0 ? $"in slot {data.SlotIdentifier}" : "")} says: Updated \"{_weaponName}\"");
             return ActionConclusion.Continue;

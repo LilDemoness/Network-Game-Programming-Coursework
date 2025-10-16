@@ -6,7 +6,7 @@ namespace Gameplay.GameplayObjects.Health
 {
     public class DamageLogger : NetworkBehaviour, IDamageable
     {
-        public void ReceiveHealthChange(ServerCharacter inflicter, int change)
+        public void ReceiveHealthChange(ServerCharacter inflicter, float change)
         {
             if (!IsDamageable())
             {
@@ -14,9 +14,9 @@ namespace Gameplay.GameplayObjects.Health
                 return;
             }
 
-            Debug.Log($"{this.name} received {(change > 0.0 ? (change + " healing") : (Mathf.Abs(change) + " damage"))} from {inflicter.name}");
+            Debug.Log($"{this.name} received {(change > 0.0f ? (change + " healing") : (Mathf.Abs(change) + " damage"))} from {inflicter.name}");
         }
-        public int GetMissingHealth() => 0;
+        public float GetMissingHealth() => 0;
 
         public bool IsDamageable() => true;
     }

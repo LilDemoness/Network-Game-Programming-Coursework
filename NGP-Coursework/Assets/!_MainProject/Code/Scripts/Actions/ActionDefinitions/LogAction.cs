@@ -14,7 +14,7 @@ namespace Gameplay.Actions.Definitions
             return ActionConclusion.Stop;
         }
 
-        public override bool OnUpdate(ServerCharacter owner, ref ActionRequestData data)
+        public override bool OnUpdate(ServerCharacter owner, ref ActionRequestData data, float chargePercentage = 1.0f)
         {
             throw new System.Exception("A LogAction has made it to a point where it's 'OnUpdate' method has been called.");
         }

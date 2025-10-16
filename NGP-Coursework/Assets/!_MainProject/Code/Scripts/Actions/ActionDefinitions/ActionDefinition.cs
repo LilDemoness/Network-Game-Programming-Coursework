@@ -166,7 +166,7 @@ namespace Gameplay.Actions.Definitions
         ///     Called when the Action wishes to Update itself.
         /// </summary>
         /// <returns> True to keep running, false to stop. The Action will stop by default when its duration expires, if it has one set.</returns>
-        public abstract bool OnUpdate(ServerCharacter owner, ref ActionRequestData data);
+        public abstract bool OnUpdate(ServerCharacter owner, ref ActionRequestData data, float chargePercentage = 1.0f);
 
         /// <summary>
         ///     Called when the Action ends naturally.
@@ -195,7 +195,12 @@ namespace Gameplay.Actions.Definitions
 
             return ActionConclusion.Continue;
         }
-        public virtual bool OnUpdateClient(ClientCharacter clientCharacter, ref ActionRequestData data)
+        public virtual void OnStartChargingClient(ClientCharacter clientCharacter, ref ActionRequestData data)
+        {
+            foreach (ActionVisual visual in TriggeringVisuals)
+                visual.OnClientStartCharging(clientCharacter, GetActionOrigin(ref data), GetActionDirection(ref data));
+        }
+        public virtual bool OnUpdateClient(ClientCharacter clientCharacter, ref ActionRequestData data, float chargePercentage = 1.0f)
         {
             foreach (ActionVisual visual in TriggeringVisuals)
                 visual.OnClientUpdate(clientCharacter, GetActionOrigin(ref data), GetActionDirection(ref data));

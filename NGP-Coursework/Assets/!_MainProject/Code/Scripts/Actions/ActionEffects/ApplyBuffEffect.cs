@@ -10,10 +10,18 @@ namespace Gameplay.Actions.Effects
         [SerializeField] private float _newValue;
         [SerializeField] private float _buffLifetime;
 
+        [Space(5)]
+        [SerializeField] private bool _scaleValueWithCharge = false;
+        [SerializeField] private bool _scaleDurationWithCharge = true;
 
-        public override void ApplyEffect(ServerCharacter owner, in ActionHitInformation hitInfo)
+
+        public override void ApplyEffect(ServerCharacter owner, in ActionHitInformation hitInfo, float chargePercentage)
         {
-            Debug.Log($"Applying Buff {_buffableValueType} (Value: {_newValue}) to '{hitInfo.Target.name}' for {_buffLifetime} seconds");
+            float valueChange = _newValue - Action.GetUnbuffedValue(_buffableValueType);
+            float buffValue = _scaleDurationWithCharge ? (Action.GetUnbuffedValue(_buffableValueType) + valueChange * chargePercentage) : _newValue;
+            float buffLifetime = _scaleDurationWithCharge ? _buffLifetime * chargePercentage : _buffLifetime;
+
+            Debug.Log($"Applying Buff {_buffableValueType} (Value: {buffValue}) to '{hitInfo.Target.name}' for {buffLifetime} seconds");
         }
 
         // We don't need to perform any cleanup as the buff is automatically removed by the character when its duration elapses.

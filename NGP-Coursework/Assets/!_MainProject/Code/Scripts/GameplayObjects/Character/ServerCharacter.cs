@@ -42,12 +42,12 @@ namespace Gameplay.GameplayObjects.Character
         public NetworkLifeState NetLifeState { get; private set; }
 
 
-        public int CurrentHealth
+        public float CurrentHealth
         {
             get => NetHealthState.CurrentHealth.Value;
             private set => NetHealthState.CurrentHealth.Value = value;
         }
-        public int MaxHealth => BuildData.GetFrameData()?.MaxHealth ?? 0;
+        public float MaxHealth => BuildData.GetFrameData()?.MaxHealth ?? 0.0f;
         public bool IsDead
         {
             get => NetLifeState.IsDead.Value;
@@ -191,13 +191,13 @@ namespace Gameplay.GameplayObjects.Character
             CurrentHealth = MaxHealth;
         }
 
-        public void ReceiveHealthChange(ServerCharacter inflicter, int healthChange)
+        public void ReceiveHealthChange(ServerCharacter inflicter, float healthChange)
         {
             if (!IsDamageable())
                 return;
 
 
-            if (healthChange > 0)
+            if (healthChange > 0.0f)
             {
                 // Healing.
                 m_serverActionPlayer.OnGameplayActivity(Action.GameplayActivity.Healed);
@@ -224,14 +224,14 @@ namespace Gameplay.GameplayObjects.Character
                 //m_serverActionPlayer.ClearActions(false);
             }
         }
-        public int GetMissingHealth()
+        public float GetMissingHealth()
         {
             if (!IsDamageable())
             {
-                return 0;
+                return 0.0f;
             }
 
-            return Mathf.Max(0, MaxHealth - CurrentHealth);
+            return Mathf.Max(0.0f, MaxHealth - CurrentHealth);
         }
         public bool IsDamageable() => !NetLifeState.IsDead.Value;
 

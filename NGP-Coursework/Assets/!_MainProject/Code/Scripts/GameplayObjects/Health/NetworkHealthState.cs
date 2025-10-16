@@ -8,6 +8,6 @@ namespace Gameplay.GameplayObjects.Health
     /// </summary>
     public class NetworkHealthState : NetworkBehaviour
     {
-        public NetworkVariable<int> CurrentHealth = new NetworkVariable<int>();
+        public NetworkVariable<float> CurrentHealth = new NetworkVariable<float>();
     }
 }

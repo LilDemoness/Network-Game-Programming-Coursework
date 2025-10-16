@@ -20,15 +20,15 @@ namespace Gameplay.Actions.Definitions
 
 
         public override bool OnStart(ServerCharacter owner, ref ActionRequestData data) => ActionConclusion.Continue;
-        public override bool OnUpdate(ServerCharacter owner, ref ActionRequestData data)
+        public override bool OnUpdate(ServerCharacter owner, ref ActionRequestData data, float chargePercentage = 1.0f)
         {
-            SpawnProjectile(owner, ref data);
+            SpawnProjectile(owner, ref data, chargePercentage);
             return ActionConclusion.Continue;
         }
 
 
         
-        private void SpawnProjectile(ServerCharacter owner, ref ActionRequestData data)
+        private void SpawnProjectile(ServerCharacter owner, ref ActionRequestData data, float chargePercentage)
         {
             Vector3 spawnPosition = GetActionOrigin(ref data);
             Vector3 spawnDirection = GetActionDirection(ref data);
@@ -36,7 +36,7 @@ namespace Gameplay.Actions.Definitions
 
             Projectile projectileInstance = GameObject.Instantiate<Projectile>(_projectileInfo.ProjectilePrefab, spawnPosition, Quaternion.LookRotation(spawnDirection));
             SeekingFunction seekingFunction = _seekingFunction != null ? SetupSeekingFunction(owner, projectileInstance) : null;
-            projectileInstance.Initialise(owner.NetworkObjectId, _projectileInfo, seekingFunction, (ActionHitInformation info) => OnProjectileHit(owner, info));
+            projectileInstance.Initialise(owner.NetworkObjectId, _projectileInfo, seekingFunction, (ActionHitInformation info) => OnProjectileHit(owner, info, chargePercentage));
             projectileInstance.GetComponent<NetworkObject>().Spawn(true);
         }
         private SeekingFunction SetupSeekingFunction(ServerCharacter owner, Projectile projectileInstance)
@@ -63,13 +63,13 @@ namespace Gameplay.Actions.Definitions
             }
         }
 
-        private void OnProjectileHit(ServerCharacter owner, in ActionHitInformation hitInfo)
+        private void OnProjectileHit(ServerCharacter owner, in ActionHitInformation hitInfo, float chargePercentage)
         {
             Debug.Log($"{hitInfo.Target.name} was hit!");
 
             for (int i = 0; i < ActionEffects.Length; ++i)
             {
-                ActionEffects[i].ApplyEffect(owner, hitInfo);
+                ActionEffects[i].ApplyEffect(owner, hitInfo, chargePercentage);
             }
         }
     }

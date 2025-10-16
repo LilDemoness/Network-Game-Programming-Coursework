@@ -95,7 +95,7 @@ namespace Gameplay.Actions.Effects
         }
 
 
-        public override void ApplyEffect(ServerCharacter owner, in ActionHitInformation hitInfo)
+        public override void ApplyEffect(ServerCharacter owner, in ActionHitInformation hitInfo, float chargePercentage)
         {
             NetworkObject parentTargetNetworkObject = null;
             if (_parentToHitTransform && !hitInfo.Target.TryGetComponentThroughParents<NetworkObject>(out parentTargetNetworkObject))
