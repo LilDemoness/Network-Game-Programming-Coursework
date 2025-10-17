@@ -24,7 +24,8 @@ MonoBehaviour:
   <MinChargeActivationPercentage>k__BackingField: 1
   <RetainChargeAfterFull>k__BackingField: 0
   <MaxChargeDepletionTime>k__BackingField: 1.6
-  <TriggerType>k__BackingField: 3
+  <UIChargeDepletionTime>k__BackingField: 0.2
+  <TriggerType>k__BackingField: 2
   <CancelOnLastTrigger>k__BackingField: 1
   <RetriggerDelay>k__BackingField: 0.4
   <Bursts>k__BackingField: 3

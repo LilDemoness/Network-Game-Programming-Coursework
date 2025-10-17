@@ -287,7 +287,6 @@ namespace Gameplay.Actions
             float currentTime = NetworkManager.Singleton.ServerTime.TimeAsFloat;
             float timeSpendCharging = currentTime - _chargeStartTime;
             float chargePercentage = Mathf.Clamp01(timeSpendCharging / _definition.MaxChargeTime);
-            Debug.Log($"Time Spent Charging: {timeSpendCharging}\nChargePercentage: {chargePercentage}");
 
             chargeLostTime = currentTime + (_definition.MaxChargeDepletionTime * chargePercentage);
             return chargePercentage;
@@ -446,12 +445,15 @@ namespace Gameplay.Actions
                 if (justStartedCharging)
                 {
                     _definition.OnStartChargingClient(clientCharacter, ref Data);
-                    PlayerChargeDisplayTestingUI.StartedCharging(_chargeStartTime, _definition.MaxChargeTime);
+                    PlayerActionChargeDisplayUI.StartedCharging(Data.SlotIdentifier, _chargeStartTime, _definition.MaxChargeTime);
                 }
                 return ActionConclusion.Continue;
             }
 
-            // To-do: Reset Charging UI Smoothly.
+            // Reset the charge UI smoothly if this is the first shot within a burst/the only shot.
+            if (_burstsRemaining == _definition.Bursts)
+                PlayerActionChargeDisplayUI.ResetChargeDisplay(Data.SlotIdentifier, CalculateChargePercentage(out _), _definition.UIChargeDepletionTime);
+
 
             // We should update.
 
@@ -492,8 +494,8 @@ namespace Gameplay.Actions
             if (_definition.CanCharge && _isCharging)
             {
                 float chargePercentage = CalculateChargePercentage(out chargeLostTime);
+                PlayerActionChargeDisplayUI.StoppedCharging(Data.SlotIdentifier, chargeLostTime, _definition.MaxChargeDepletionTime);
 
-                PlayerChargeDisplayTestingUI.StoppedCharging(chargeLostTime, _definition.MaxChargeDepletionTime);
 
                 if (chargePercentage > _definition.MinChargeActivationPercentage)
                 {
@@ -507,7 +509,7 @@ namespace Gameplay.Actions
             else
             {
                 chargeLostTime = 0.0f;
-                PlayerChargeDisplayTestingUI.StoppedCharging(chargeLostTime, _definition.MaxChargeDepletionTime);
+                PlayerActionChargeDisplayUI.StoppedCharging(Data.SlotIdentifier, chargeLostTime, _definition.MaxChargeDepletionTime);
             }
 
             _definition.OnCancelClient(clientCharacter, ref Data);

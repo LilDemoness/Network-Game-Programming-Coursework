@@ -44,13 +44,17 @@ namespace Gameplay.Actions.Definitions
         [field: SerializeField] public float MaxChargeTime { get; private set; }
         [field: SerializeField] [field: Range(0.0f, 1.0f)] public float MinChargeActivationPercentage { get; private set; } = 1.0f;
 
-        [field: Space(5)]
+        [field: Space(10)]
         [Tooltip("Should this action treat itself as having no charging once it reaches full charge.")]
         [field: SerializeField] public bool RetainChargeAfterFull { get; private set; } = false;
 
-        [field: Space(5)]
+        [field: Space(10)]
         [Tooltip("The time (In seconds) that it takes for this action to go from 100% charge to 0% charge after being ended/cancelled.")]
         [field: SerializeField] public float MaxChargeDepletionTime { get; private set; }
+
+        [field: Space(10)]
+        [Tooltip("The time (In seconds) that it takes for the UI of this action to reset to 0 after successfully firing (0.0f for instant).")]
+        [field: SerializeField] public float UIChargeDepletionTime { get; private set; }
 
 
         [field: Header("Retrigger Settings")]

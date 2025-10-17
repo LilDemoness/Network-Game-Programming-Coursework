@@ -4,6 +4,7 @@ using Unity.Netcode;
 public class PlayerSpawner : NetworkBehaviour
 {
     [SerializeField] private PlayerManager _playerPrefab;
+    public static event System.Action<ulong, Gameplay.GameplayObjects.Character.Customisation.Data.BuildData> OnPlayerCustomisationFinalised;
 
 
     public override void OnNetworkSpawn()
@@ -29,5 +30,6 @@ public class PlayerSpawner : NetworkBehaviour
     {
         PlayerManager playerInstance = NetworkManager.Singleton.ConnectedClients[clientID].PlayerObject.GetComponent<PlayerManager>();
         playerInstance.SetBuild(frameIndex, legIndex, primaryWeaponIndex, secondaryWeaponIndex, tertiaryWeaponIndex, abilityIndex);
+        OnPlayerCustomisationFinalised?.Invoke(clientID, new Gameplay.GameplayObjects.Character.Customisation.Data.BuildData (frameIndex, legIndex, primaryWeaponIndex, secondaryWeaponIndex, tertiaryWeaponIndex, abilityIndex));
     }
 }
