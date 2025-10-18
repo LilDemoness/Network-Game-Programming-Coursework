@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2660346658608676227}
-  - component: {fileID: 7516786332577838132}
+  - component: {fileID: 1221159111715956207}
   m_Layer: 0
   m_Name: StealthGenerator
   m_TagString: Untagged
@@ -33,7 +33,7 @@ Transform:
   - {fileID: 7372136004776970124}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &7516786332577838132
+--- !u!114 &1221159111715956207
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -42,10 +42,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 5849905726874176668}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cc31ebcc1c0dc544fb9fb9890cbaca62, type: 3}
+  m_Script: {fileID: 11500000, guid: 699c5d4152bb8674095f251802f7c6d2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  AssociatedValue: {fileID: 11400000, guid: 1287eba0821b4a44fa802e707fe52e52, type: 2}
+  AssociatedValue: {fileID: 11400000, guid: 15e9871e445d63e438b6cacbdfe5ec66, type: 2}
 --- !u!1 &8363194859330376792
 GameObject:
   m_ObjectHideFlags: 0

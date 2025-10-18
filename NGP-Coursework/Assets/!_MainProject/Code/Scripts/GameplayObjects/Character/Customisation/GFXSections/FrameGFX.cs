@@ -14,12 +14,11 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Sections
         [SerializeField] private FrameData _associatedFrameData;
 
         [SerializeField] private LegGFXSection[] _legDatas;
-        [SerializeField] private AbilityGFXSection[] _abilityDatas;
 
-        [SerializeField] private WeaponAttachmentSlot[] m_weaponAttachmentSlotArray;
-        private Dictionary<WeaponSlotIndex, WeaponAttachmentSlot> _weaponsAttachPoints = new Dictionary<WeaponSlotIndex, WeaponAttachmentSlot>();
+        [SerializeField] private SlottableDataSlot[] m_slottableDataSlotArray;
+        private Dictionary<SlotIndex, List<SlottableDataSlot>> _slottableDataSlots = new Dictionary<SlotIndex, List<SlottableDataSlot>>();
         
-        public bool TryGetAttachmentSlot(WeaponSlotIndex slotIndex, out WeaponAttachmentSlot weaponAttachmentSlot) => _weaponsAttachPoints.TryGetValue(slotIndex, out weaponAttachmentSlot);
+        //public bool TryGetAttachmentSlot(SlotIndex slotIndex, out SlottableDataSlot weaponAttachmentSlot) => _slottableDataSlots.TryGetValue(slotIndex, out weaponAttachmentSlot);
 
 
         #if UNITY_EDITOR
@@ -31,8 +30,7 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Sections
             UnityEditor.Undo.RecordObject(this, "Setup FrameGFX Container References");
 
             _legDatas = GetComponentsInChildren<LegGFXSection>();
-            _abilityDatas = GetComponentsInChildren<AbilityGFXSection>();
-            m_weaponAttachmentSlotArray = GetComponentsInChildren<WeaponAttachmentSlot>();
+            m_slottableDataSlotArray = GetComponentsInChildren<SlottableDataSlot>();
 
             // Ensure Changes are Recorded.
             UnityEditor.EditorUtility.SetDirty(this);
@@ -43,9 +41,14 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Sections
 
         private void Awake()
         {
-            _weaponsAttachPoints = new Dictionary<WeaponSlotIndex, WeaponAttachmentSlot>(m_weaponAttachmentSlotArray.Length);
-            foreach(WeaponAttachmentSlot weaponAttachmentSlot in m_weaponAttachmentSlotArray)
-                _weaponsAttachPoints.Add(weaponAttachmentSlot.SlotIndex, weaponAttachmentSlot);
+            _slottableDataSlots = new Dictionary<SlotIndex, List<SlottableDataSlot>>(SlotIndex.Unset.GetMaxPossibleSlots());
+            foreach(SlottableDataSlot attachmentSlot in m_slottableDataSlotArray)
+            {
+                if (!_slottableDataSlots.TryAdd(attachmentSlot.SlotIndex, new List<SlottableDataSlot>() { attachmentSlot }))
+                {
+                    _slottableDataSlots[attachmentSlot.SlotIndex].Add(attachmentSlot);
+                }
+            }
         }
 
 
@@ -64,25 +67,17 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Sections
 
             return this;
         }
-        public FrameGFX OnSelectedWeaponChanged(WeaponSlotIndex weaponSlot, WeaponData activeData)
+        public FrameGFX OnSelectedSlottableDataChanged(SlotIndex slotIndex, SlottableData activeData)
         {
-            if (_weaponsAttachPoints.TryGetValue(weaponSlot, out WeaponAttachmentSlot weaponAttachmentSlot))
+            if (_slottableDataSlots.TryGetValue(slotIndex, out List<SlottableDataSlot> slottableDataSlots))
             {
-                weaponAttachmentSlot.Toggle(activeData);
+                for(int i = 0; i < slottableDataSlots.Count; ++i)
+                    slottableDataSlots[i].Toggle(activeData);
             }
             return this;
         }
-        public FrameGFX OnSelectedAbilityChanged(AbilityData activeData)
-        {
-            for (int i = 0; i < _abilityDatas.Length; ++i)
-            {
-                _abilityDatas[i].Toggle(activeData);
-            }
 
-            return this;
-        }
-
-        public void OnCustomisationFinalised(FrameData activeFrame, LegData activeLeg, WeaponData activePrimaryWeapon, WeaponData activeSecondaryWeapon, WeaponData activeTertiaryWeapon, AbilityData activeAbility)
+        public void OnCustomisationFinalised(FrameData activeFrame, LegData activeLeg, SlottableData[] activeSlottableDatas)
         {
             // Frame.
             if (activeFrame != _associatedFrameData)
@@ -99,31 +94,14 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Sections
             }
 
 
-            // Weapons. (Can we make this into a for loop or similar?)
-            WeaponAttachmentSlot weaponAttachmentSlot = null;
-            if (_weaponsAttachPoints.TryGetValue(WeaponSlotIndex.Primary, out weaponAttachmentSlot))
+            // Slottables (Weapons & Abilities).
+            for(int i = 0; i < _slottableDataSlots.Count; ++i)
             {
-                // Has Primary Slot.
-                weaponAttachmentSlot.Finalise(activePrimaryWeapon);
-                
-                if (_weaponsAttachPoints.TryGetValue(WeaponSlotIndex.Secondary, out weaponAttachmentSlot))
+                if (_slottableDataSlots.TryGetValue((SlotIndex)(i + 1), out List<SlottableDataSlot> slottableDataSlots))
                 {
-                    // Has Secondary Slot.
-                    weaponAttachmentSlot.Finalise(activeSecondaryWeapon);
-                    
-                    if (_weaponsAttachPoints.TryGetValue(WeaponSlotIndex.Tertiary, out weaponAttachmentSlot))
-                    {
-                        // Has Tertiary Slot.
-                        weaponAttachmentSlot.Finalise(activeTertiaryWeapon);
-                    }
+                    for (int j = 0; j < slottableDataSlots.Count; ++j)
+                        slottableDataSlots[j].Finalise(activeSlottableDatas[i]);
                 }
-            }
-
-
-            // Ability.
-            for (int i = 0; i < _abilityDatas.Length; ++i)
-            {
-                _abilityDatas[i].Finalise(activeAbility);
             }
         }
     }

@@ -10,13 +10,12 @@ namespace UI.Actions
 {
     public class PlayerActionChargeDisplayUI : MonoBehaviour
     {
-        private static Dictionary<WeaponSlotIndex, List<PlayerActionChargeDisplayUI>> s_weaponSlotToUIDictionary = new Dictionary<WeaponSlotIndex, List<PlayerActionChargeDisplayUI>>();
-        [SerializeField] private WeaponSlotIndex _slotIndex = WeaponSlotIndex.Unset;
+        private static Dictionary<SlotIndex, List<PlayerActionChargeDisplayUI>> s_slotIndexToUIDictionary = new Dictionary<SlotIndex, List<PlayerActionChargeDisplayUI>>();
+        [SerializeField] private SlotIndex _slotIndex = SlotIndex.Unset;
 
 
         [Header("UI References")]
         [SerializeField] private Image _chargeRadialImage;
-
 
         private System.Func<float> CalculateChargePercentageFunc;
         private float _currentChargePercentage, _targetChargePercentage;
@@ -34,10 +33,10 @@ namespace UI.Actions
             if (e.Client.OwnerClientId != NetworkManager.Singleton.LocalClientId)
                 return;
 
-            if (!s_weaponSlotToUIDictionary.TryGetValue((WeaponSlotIndex)e.SlotIndex, out List<PlayerActionChargeDisplayUI> chargeUIElements))
-                throw new System.ArgumentException($"No instances of {nameof(PlayerActionChargeDisplayUI)} exist for the Weapon Slot {(WeaponSlotIndex)e.SlotIndex}");
-        
-            foreach(PlayerActionChargeDisplayUI chargeUI in chargeUIElements)
+            if (!s_slotIndexToUIDictionary.TryGetValue((SlotIndex)e.SlotIndex, out List<PlayerActionChargeDisplayUI> chargeUIElements))
+                throw new System.ArgumentException($"No instances of {nameof(PlayerActionChargeDisplayUI)} exist for the Weapon Slot {(SlotIndex)e.SlotIndex}");
+
+            foreach (PlayerActionChargeDisplayUI chargeUI in chargeUIElements)
                 chargeUI.CalculateChargePercentageFunc = () => CalculateChargePercentage_StartedCharging(e.ChargeStartedTime, e.MaxChargeDuration);
         }
         private static float CalculateChargePercentage_StartedCharging(float chargeStartTime, float maxChargeDuration)
@@ -48,10 +47,10 @@ namespace UI.Actions
             if (e.Client.OwnerClientId != NetworkManager.Singleton.LocalClientId)
                 return;
 
-            if (!s_weaponSlotToUIDictionary.TryGetValue((WeaponSlotIndex)e.SlotIndex, out List<PlayerActionChargeDisplayUI> chargeUIElements))
-                throw new System.ArgumentException($"No instances of {nameof(PlayerActionChargeDisplayUI)} exist for the Weapon Slot {(WeaponSlotIndex)e.SlotIndex}");
+            if (!s_slotIndexToUIDictionary.TryGetValue((SlotIndex)e.SlotIndex, out List<PlayerActionChargeDisplayUI> chargeUIElements))
+                throw new System.ArgumentException($"No instances of {nameof(PlayerActionChargeDisplayUI)} exist for the Weapon Slot {(SlotIndex)e.SlotIndex}");
 
-            foreach(PlayerActionChargeDisplayUI chargeUI in chargeUIElements)
+            foreach (PlayerActionChargeDisplayUI chargeUI in chargeUIElements)
                 chargeUI.CalculateChargePercentageFunc = () => CalculateChargePercentage_StoppedCharging(e.ChargeFullyDepletedTime, e.MaxChargeDepletionTime);
         }
         private static float CalculateChargePercentage_StoppedCharging(float chargeFullyDepletedTime, float maxChargeDepletionTime)
@@ -62,10 +61,10 @@ namespace UI.Actions
             if (e.Client.OwnerClientId != NetworkManager.Singleton.LocalClientId)
                 return;
 
-            if (!s_weaponSlotToUIDictionary.TryGetValue((WeaponSlotIndex)e.SlotIndex, out List<PlayerActionChargeDisplayUI> chargeUIElements))
-                throw new System.ArgumentException($"No instances of {nameof(PlayerActionChargeDisplayUI)} exist for the Weapon Slot {(WeaponSlotIndex)e.SlotIndex}");
+            if (!s_slotIndexToUIDictionary.TryGetValue((SlotIndex)e.SlotIndex, out List<PlayerActionChargeDisplayUI> chargeUIElements))
+                throw new System.ArgumentException($"No instances of {nameof(PlayerActionChargeDisplayUI)} exist for the Weapon Slot {(SlotIndex)e.SlotIndex}");
 
-            foreach(PlayerActionChargeDisplayUI chargeUI in chargeUIElements)
+            foreach (PlayerActionChargeDisplayUI chargeUI in chargeUIElements)
             {
                 // Prepare to reset our UI towards 0 via a lerp.
                 chargeUI._currentChargePercentage = e.TimeToReset > 0.0f ? e.CurrentChargePercentage : 0.0f;
@@ -78,21 +77,21 @@ namespace UI.Actions
         }
 
 
-        
+
         private void Awake()
         {
-            if (_slotIndex == WeaponSlotIndex.Unset)
+            if (_slotIndex == SlotIndex.Unset)
             {
-                Debug.LogError($"Error: {this.name} has an unset Slot Index", this);  
+                Debug.LogError($"Error: {this.name} has an unset Slot Index", this);
                 return;
             }
 
             // Add ourselves (Or create then add ourselves) to the instances of weapon UI for this slot.
-            if (s_weaponSlotToUIDictionary.TryGetValue(_slotIndex, out List<PlayerActionChargeDisplayUI> chargeUIElements))
+            if (s_slotIndexToUIDictionary.TryGetValue(_slotIndex, out List<PlayerActionChargeDisplayUI> chargeUIElements))
                 chargeUIElements.Add(this);
             else
-                s_weaponSlotToUIDictionary.Add(_slotIndex, new List<PlayerActionChargeDisplayUI>(){ this });
-            
+                s_slotIndexToUIDictionary.Add(_slotIndex, new List<PlayerActionChargeDisplayUI>() { this });
+
 
             // Build Change Event (Enable/Disable State of this UI element).
             PlayerSpawner.OnPlayerCustomisationFinalised += PlayerSpawner_OnPlayerCustomisationFinalised;
@@ -113,14 +112,7 @@ namespace UI.Actions
             }
             else
             {
-                bool shouldBeEnabled = _slotIndex switch
-                {
-                    WeaponSlotIndex.Primary => buildData.GetPrimaryWeaponData().AssociatedAction.CanCharge,
-                    WeaponSlotIndex.Secondary => buildData.GetSecondaryWeaponData().AssociatedAction.CanCharge,
-                    WeaponSlotIndex.Tertiary => buildData.GetTertiaryWeaponData().AssociatedAction.CanCharge,
-                    _ => false
-                };
-                this.gameObject.SetActive(shouldBeEnabled);
+                this.gameObject.SetActive(buildData.GetSlottableData(_slotIndex).AssociatedAction.CanCharge);
             }
         }
 
@@ -151,6 +143,7 @@ namespace UI.Actions
 
 
             // Update our UI.
+            //_chargePercentageText.text = (_currentChargePercentage * 100.0f).ToString("00.0") + "%";
             _chargeRadialImage.fillAmount = _currentChargePercentage;
         }
     }

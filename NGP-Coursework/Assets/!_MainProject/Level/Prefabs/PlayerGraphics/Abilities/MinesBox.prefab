@@ -117,7 +117,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 9203495748078888332}
-  - component: {fileID: 4592838160170377191}
+  - component: {fileID: 3414682437076434576}
   m_Layer: 0
   m_Name: MinesBox
   m_TagString: Untagged
@@ -141,7 +141,7 @@ Transform:
   - {fileID: 2104465743084565854}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &4592838160170377191
+--- !u!114 &3414682437076434576
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -150,7 +150,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 4583095267009104167}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cc31ebcc1c0dc544fb9fb9890cbaca62, type: 3}
+  m_Script: {fileID: 11500000, guid: 699c5d4152bb8674095f251802f7c6d2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  AssociatedValue: {fileID: 11400000, guid: c0d1d30d0eb5dab4c899a90fa71beea6, type: 2}
+  AssociatedValue: {fileID: 11400000, guid: 85eeda226bebd8e428b979ab2eb42013, type: 2}

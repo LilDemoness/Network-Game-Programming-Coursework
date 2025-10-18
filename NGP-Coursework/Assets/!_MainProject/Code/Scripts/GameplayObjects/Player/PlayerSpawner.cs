@@ -21,15 +21,15 @@ public class PlayerSpawner : NetworkBehaviour
             playerInstance.GetComponent<Gameplay.GameplayObjects.Character.ServerCharacter>().BuildData = client.BuildData;
             playerInstance.NetworkObject.SpawnAsPlayerObject(client.ClientID);
 
-            SetupPlayerClientRpc(client.ClientID, client.BuildData.ActiveFrameIndex, client.BuildData.ActiveLegIndex, client.BuildData.ActivePrimaryWeaponIndex, client.BuildData.ActiveSecondaryWeaponIndex, client.BuildData.ActiveTertiaryWeaponIndex, client.BuildData.ActiveAbilityIndex);
+            SetupPlayerClientRpc(client.ClientID, client.BuildData.ActiveFrameIndex, client.BuildData.ActiveLegIndex, client.BuildData.ActiveSlottableIndicies);
         }
     }
 
     [ClientRpc]
-    private void SetupPlayerClientRpc(ulong clientID, int frameIndex, int legIndex, int primaryWeaponIndex, int secondaryWeaponIndex, int tertiaryWeaponIndex, int abilityIndex)
+    private void SetupPlayerClientRpc(ulong clientID, int frameIndex, int legIndex, int[] activeSlottableIndicies)
     {
         PlayerManager playerInstance = NetworkManager.Singleton.ConnectedClients[clientID].PlayerObject.GetComponent<PlayerManager>();
-        playerInstance.SetBuild(frameIndex, legIndex, primaryWeaponIndex, secondaryWeaponIndex, tertiaryWeaponIndex, abilityIndex);
-        OnPlayerCustomisationFinalised?.Invoke(clientID, new Gameplay.GameplayObjects.Character.Customisation.Data.BuildData (frameIndex, legIndex, primaryWeaponIndex, secondaryWeaponIndex, tertiaryWeaponIndex, abilityIndex));
+        playerInstance.SetBuild(frameIndex, legIndex, activeSlottableIndicies);
+        OnPlayerCustomisationFinalised?.Invoke(clientID, new Gameplay.GameplayObjects.Character.Customisation.Data.BuildData (frameIndex, legIndex, activeSlottableIndicies));
     }
 }

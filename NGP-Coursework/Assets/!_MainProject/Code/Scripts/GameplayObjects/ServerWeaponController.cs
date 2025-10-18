@@ -36,14 +36,18 @@ namespace Gameplay.GameplayObjects.Character
             yield return null;
 
             // Get our Weapons
-            foreach (var weaponAttachmentSlot in GetComponentsInChildren<Customisation.Sections.WeaponAttachmentSlot>())
+            foreach (var weaponAttachmentSlot in GetComponentsInChildren<Customisation.Sections.SlottableDataSlot>())
             {
-                Debug.Log(weaponAttachmentSlot.name + " is equipped in Slot " + weaponAttachmentSlot.SlotIndex + ". Weapon Data: " + weaponAttachmentSlot.GetComponentInChildren<Weapon>().WeaponData.name);
+                Weapon weapon = weaponAttachmentSlot.GetComponentInChildren<Weapon>();
+                if (weapon == null)
+                    continue;
+
+                Debug.Log(weaponAttachmentSlot.name + " is equipped in Slot " + weaponAttachmentSlot.SlotIndex + ". Weapon Data: " + weapon.WeaponData.name);
                 switch (weaponAttachmentSlot.SlotIndex)
                 {
-                    case WeaponSlotIndex.Primary: _primaryWeapon = weaponAttachmentSlot.GetComponentInChildren<Weapon>(); break;
-                    case WeaponSlotIndex.Secondary: _secondaryWeapon = weaponAttachmentSlot.GetComponentInChildren<Weapon>(); break;
-                    case WeaponSlotIndex.Tertiary: _tertiaryWeapon = weaponAttachmentSlot.GetComponentInChildren<Weapon>(); break;
+                    case SlotIndex.PrimaryWeapon: _primaryWeapon = weapon; break;
+                    case SlotIndex.SecondaryWeapon: _secondaryWeapon = weapon; break;
+                    case SlotIndex.TertiaryWeapon: _tertiaryWeapon = weapon; break;
                 }
             }
 
@@ -51,47 +55,56 @@ namespace Gameplay.GameplayObjects.Character
         }
 
 
+        [Rpc(SendTo.Server)]
+        public void PlayActionForSlotIndexServerRpc(SlotIndex slotIndex, RpcParams rpcParams = default)
+        {
+            if (rpcParams.Receive.SenderClientId != this.OwnerClientId)
+                return;
+
+
+        }
+
         [ServerRpc]
         public void StartFiringPrimaryWeaponServerRpc(ServerRpcParams serverRpcParams = default)
         {
             if (serverRpcParams.Receive.SenderClientId == this.OwnerClientId && this._primaryWeapon != null)
             {
-                StartFiringWeapon(_primaryWeapon, (int)WeaponSlotIndex.Primary);
+                StartFiringWeapon(_primaryWeapon, (int)SlotIndex.PrimaryWeapon);
             }
         }
         [ServerRpc]
         public void StopFiringPrimaryWeaponServerRpc(ServerRpcParams serverRpcParams = default)
         {
             if (serverRpcParams.Receive.SenderClientId == this.OwnerClientId && this._primaryWeapon != null)
-                StopFiringWeapon((int)WeaponSlotIndex.Primary);
+                StopFiringWeapon((int)SlotIndex.PrimaryWeapon);
         }
         [ServerRpc]
         public void StartFiringSecondaryWeaponServerRpc(ServerRpcParams serverRpcParams = default)
         {
             if (serverRpcParams.Receive.SenderClientId == this.OwnerClientId && this._secondaryWeapon != null)
             {
-                StartFiringWeapon(_secondaryWeapon, (int)WeaponSlotIndex.Secondary);
+                StartFiringWeapon(_secondaryWeapon, (int)SlotIndex.SecondaryWeapon);
             }
         }
         [ServerRpc]
         public void StopFiringSecondaryWeaponServerRpc(ServerRpcParams serverRpcParams = default)
         {
             if (serverRpcParams.Receive.SenderClientId == this.OwnerClientId && this._secondaryWeapon != null)
-                StopFiringWeapon((int)WeaponSlotIndex.Secondary);
+                StopFiringWeapon((int)SlotIndex.SecondaryWeapon);
         }
         [ServerRpc]
         public void StartFiringTertiaryWeaponServerRpc(ServerRpcParams serverRpcParams = default)
         {
             if (serverRpcParams.Receive.SenderClientId == this.OwnerClientId && this._tertiaryWeapon != null)
             {
-                StartFiringWeapon(_tertiaryWeapon, (int)WeaponSlotIndex.Tertiary);
+                StartFiringWeapon(_tertiaryWeapon, (int)SlotIndex.TertiaryWeapon);
             }
         }
         [ServerRpc]
         public void StopFiringTertiaryWeaponServerRpc(ServerRpcParams serverRpcParams = default)
         {
             if (serverRpcParams.Receive.SenderClientId == this.OwnerClientId && this._tertiaryWeapon != null)
-                StopFiringWeapon((int)WeaponSlotIndex.Tertiary);
+                StopFiringWeapon((int)SlotIndex.TertiaryWeapon);
         }
 
 

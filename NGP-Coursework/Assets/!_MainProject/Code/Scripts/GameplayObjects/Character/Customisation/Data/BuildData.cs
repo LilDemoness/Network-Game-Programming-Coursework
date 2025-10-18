@@ -8,10 +8,7 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Data
 
         public int ActiveFrameIndex { get; private set; } = -1;
         public int ActiveLegIndex { get; private set; } = -1;
-        public int ActivePrimaryWeaponIndex { get; private set; } = -1;
-        public int ActiveSecondaryWeaponIndex { get; private set; } = -1;
-        public int ActiveTertiaryWeaponIndex { get; private set; } = -1;
-        public int ActiveAbilityIndex { get; private set; } = -1;
+        public int[] ActiveSlottableIndicies { get; private set; }
 
 
         /*public FrameData ActiveFrame            => ActiveOptionsDatabase.GetFrame(ActiveFrameIndex);
@@ -26,19 +23,26 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Data
         {
             ActiveOptionsDatabase = UnityEngine.Resources.Load<CustomisationOptionsDatabase>(DEFAULT_BUILD_OPTIONS_PATH);
         }
-        public BuildData(int activeFrame, int activeLeg, int activePrimaryWeapon, int activeSecondaryWeapon, int activeTertiaryWeapon, int activeAbility)
+        public BuildData(int activeFrame, int activeLeg, int[] weaponSlotIndicies, int[] abilitySlotIndicies)
         {
-            SetBuildData(activeFrame, activeLeg, activePrimaryWeapon, activeSecondaryWeapon, activeTertiaryWeapon, activeAbility);
+            int[] activeSlottableIndicies = new int[SlotIndex.Unset.GetMaxPossibleSlots()];
+            for(int i = 0; i < weaponSlotIndicies.Length; ++i)
+                activeSlottableIndicies[i] = weaponSlotIndicies[i];
+            for(int i = 0; i < abilitySlotIndicies.Length; ++i)
+                activeSlottableIndicies[i + SlotIndexExtensions.WEAPON_SLOT_COUNT + 1] = abilitySlotIndicies[i];
+
+            SetBuildData(activeFrame, activeLeg, activeSlottableIndicies);
         }
-        public BuildData SetBuildData(int activeFrame, int activeLeg, int activePrimaryWeapon, int activeSecondaryWeapon, int activeTertiaryWeapon, int activeAbility)
+        public BuildData(int activeFrame, int activeLeg, int[] activeSlottableIndicies)
+        {
+            SetBuildData(activeFrame, activeLeg, activeSlottableIndicies);
+        }
+        public BuildData SetBuildData(int activeFrame, int activeLeg, int[] activeSlottableIndicies)
         {
             // Set our build data.
             this.ActiveFrameIndex = activeFrame;
             this.ActiveLegIndex = activeLeg;
-            this.ActivePrimaryWeaponIndex = activePrimaryWeapon;
-            this.ActiveSecondaryWeaponIndex = activeSecondaryWeapon;
-            this.ActiveTertiaryWeaponIndex = activeTertiaryWeapon;
-            this.ActiveAbilityIndex = activeAbility;
+            this.ActiveSlottableIndicies = activeSlottableIndicies;
 
             // Return for fluent interface.
             return this;
@@ -47,10 +51,7 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Data
 
         public FrameData GetFrameData() => ActiveOptionsDatabase.GetFrame(ActiveFrameIndex);
         public LegData GetLegData() => ActiveOptionsDatabase.GetLeg(ActiveLegIndex);
-        public WeaponData GetPrimaryWeaponData() => ActiveOptionsDatabase.GetWeapon(ActivePrimaryWeaponIndex);
-        public WeaponData GetSecondaryWeaponData() => ActiveOptionsDatabase.GetWeapon(ActiveSecondaryWeaponIndex);
-        public WeaponData GetTertiaryWeaponData() => ActiveOptionsDatabase.GetWeapon(ActiveTertiaryWeaponIndex);
-        public AbilityData GetAbilityData() => ActiveOptionsDatabase.GetAbility(ActiveAbilityIndex);
+        public SlottableData GetSlottableData(SlotIndex slotIndex) => ActiveOptionsDatabase.GetSlottableData(ActiveSlottableIndicies[(int)slotIndex - 1]);
 
 
         public static void SetAvailableBuildOptions(CustomisationOptionsDatabase newOptionsDatabase) => ActiveOptionsDatabase = newOptionsDatabase;

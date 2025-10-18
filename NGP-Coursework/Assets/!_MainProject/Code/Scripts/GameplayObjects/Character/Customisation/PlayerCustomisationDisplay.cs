@@ -30,11 +30,11 @@ namespace Gameplay.GameplayObjects.Character.Customisation
             {
                 _gfxElements[i]
                     .OnSelectedFrameChanged(_optionsDatabase.FrameDatas[customisationState.FrameIndex])
-                    .OnSelectedLegChanged(_optionsDatabase.LegDatas[customisationState.LegIndex])
-                    .OnSelectedWeaponChanged(WeaponSlotIndex.Primary, _optionsDatabase.WeaponDatas[customisationState.PrimaryWeaponIndex])
-                    .OnSelectedWeaponChanged(WeaponSlotIndex.Secondary, _optionsDatabase.WeaponDatas[customisationState.SecondaryWeaponIndex])
-                    .OnSelectedWeaponChanged(WeaponSlotIndex.Tertiary, _optionsDatabase.WeaponDatas[customisationState.TertiaryWeaponIndex])
-                    .OnSelectedAbilityChanged(_optionsDatabase.AbilityDatas[customisationState.AbilityIndex]);
+                    .OnSelectedLegChanged(_optionsDatabase.LegDatas[customisationState.LegIndex]);
+                for(int j = 1; j <= SlotIndex.Unset.GetMaxPossibleSlots(); ++j)
+                {
+                    _gfxElements[i].OnSelectedSlottableDataChanged((SlotIndex)j, _optionsDatabase.GetSlottableData(customisationState.GetSlottableDataIndexForSlot((SlotIndex)j)));
+                }
             }
         }
         private void Awake()
@@ -63,20 +63,14 @@ namespace Gameplay.GameplayObjects.Character.Customisation
             // Cache data for event call.
             FrameData activeFrame = _optionsDatabase.FrameDatas[customisationState.FrameIndex];
             LegData activeLeg = _optionsDatabase.LegDatas[customisationState.LegIndex];
-            WeaponData[] activeWeapons = new WeaponData[activeFrame.WeaponSlotCount];
-            if (activeFrame.WeaponSlotCount > 0)
+            SlottableData[] activeSlots = new SlottableData[SlotIndex.Unset.GetMaxPossibleSlots()];
+            for(int i = 0; i < SlotIndex.Unset.GetMaxPossibleSlots(); ++i)
             {
-                activeWeapons[0] = _optionsDatabase.WeaponDatas[customisationState.PrimaryWeaponIndex];
-                if (activeFrame.WeaponSlotCount > 1)
+                if (i > SlotIndexExtensions.WEAPON_SLOT_COUNT || i < activeFrame.WeaponSlotCount)
                 {
-                    activeWeapons[1] = _optionsDatabase.WeaponDatas[customisationState.SecondaryWeaponIndex];
-                    if (activeFrame.WeaponSlotCount > 2)
-                    {
-                        activeWeapons[2] = _optionsDatabase.WeaponDatas[customisationState.TertiaryWeaponIndex];
-                    }
+                    activeSlots[i] = _optionsDatabase.WeaponSlotDatas[i];
                 }
             }
-            AbilityData activeAbility = _optionsDatabase.AbilityDatas[customisationState.AbilityIndex];
 
 
             // Call our event.

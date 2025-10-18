@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: FrameData_Large
   m_EditorClassIdentifier: 
   <Name>k__BackingField: Large Chassis
-  <WeaponSlotCount>k__BackingField: 3
+  <WeaponSlotCount>k__BackingField: 4
   <MaxHealth>k__BackingField: 12
