@@ -13,24 +13,22 @@ namespace Gameplay.GameplayObjects.Character.Customisation
     
         public int FrameIndex;
         public int LegIndex;
-        public int PrimaryWeaponIndex;
-        public int SecondaryWeaponIndex;
-        public int TertiaryWeaponIndex;
+        public int[] WeaponIndicies;
         public int AbilityIndex;
 
 
+        public int GetWeaponIndexForSlotIndex(WeaponSlotIndex slotIndex) => WeaponIndicies[(int)slotIndex - 1];
 
-        public PlayerCustomisationState(ulong clientID) : this(clientID, 0, 0, 0, 0, 0, 0, false) { }
-        public PlayerCustomisationState(ulong clientID, int frameIndex, int legIndex, int primaryWeaponIndex, int secondaryWeaponIndex, int tertiaryWeaponIndex, int abilityIndex, bool isReady)
+
+        public PlayerCustomisationState(ulong clientID) : this(clientID, 0, 0, new int[WeaponSlotIndex.Unset.GetMaxPossibleWeaponSlots()], 0, false) { }
+        public PlayerCustomisationState(ulong clientID, int frameIndex, int legIndex, int[] weaponIndicies, int abilityIndex, bool isReady)
         {
             this.ClientID = clientID;
             this.IsReady = isReady;
 
             this.FrameIndex = frameIndex;
             this.LegIndex = legIndex;
-            this.PrimaryWeaponIndex = primaryWeaponIndex;
-            this.SecondaryWeaponIndex = secondaryWeaponIndex;
-            this.TertiaryWeaponIndex = tertiaryWeaponIndex;
+            this.WeaponIndicies = weaponIndicies;
             this.AbilityIndex = abilityIndex;
         }
 
@@ -38,9 +36,7 @@ namespace Gameplay.GameplayObjects.Character.Customisation
 
         public PlayerCustomisationState NewWithFrameIndex(int newValue)             { this.FrameIndex = newValue;           return this; }
         public PlayerCustomisationState NewWithLegIndex(int newValue)               { this.LegIndex = newValue;             return this; }
-        public PlayerCustomisationState NewWithPrimaryWeaponIndex(int newValue)     { this.PrimaryWeaponIndex = newValue;   return this; }
-        public PlayerCustomisationState NewWithSecondaryWeaponIndex(int newValue)   { this.SecondaryWeaponIndex = newValue; return this; }
-        public PlayerCustomisationState NewWithTertiaryWeaponIndex(int newValue)    { this.TertiaryWeaponIndex = newValue;  return this; }
+        public PlayerCustomisationState NewWithWeaponIndex(WeaponSlotIndex slotIndex, int newValue)     { this.WeaponIndicies[(int)slotIndex - 1] = newValue;   return this; }
         public PlayerCustomisationState NewWithAbilityIndex(int newValue)           { this.AbilityIndex = newValue;         return this; }
 
     
@@ -51,21 +47,12 @@ namespace Gameplay.GameplayObjects.Character.Customisation
 
             serializer.SerializeValue(ref FrameIndex);
             serializer.SerializeValue(ref LegIndex);
-            serializer.SerializeValue(ref PrimaryWeaponIndex);
-            serializer.SerializeValue(ref SecondaryWeaponIndex);
-            serializer.SerializeValue(ref TertiaryWeaponIndex);
+            serializer.SerializeValue(ref WeaponIndicies);
             serializer.SerializeValue(ref AbilityIndex);
         }
         public bool Equals(PlayerCustomisationState other)
         {
-            return (this.ClientID == other.ClientID)
-                && (this.IsReady == other.IsReady)
-                && (this.FrameIndex == other.FrameIndex)
-                && (this.LegIndex == other.LegIndex)
-                && (this.PrimaryWeaponIndex == other.PrimaryWeaponIndex)
-                && (this.SecondaryWeaponIndex == other.SecondaryWeaponIndex)
-                && (this.TertiaryWeaponIndex == other.TertiaryWeaponIndex)
-                && (this.AbilityIndex == other.AbilityIndex);
+            return (ClientID, IsReady, FrameIndex, LegIndex, WeaponIndicies, AbilityIndex) == (other.ClientID, other.IsReady, other.FrameIndex, other.LegIndex, other.WeaponIndicies, other.AbilityIndex);
         }
     }
 }

@@ -2,6 +2,7 @@ using UnityEngine;
 using TMPro;
 using Gameplay.GameplayObjects.Character.Customisation;
 using Gameplay.GameplayObjects.Character.Customisation.Data;
+using Gameplay.GameplayObjects;
 
 namespace UI.Customisation
 {
@@ -17,11 +18,6 @@ namespace UI.Customisation
 
         [Space(5)]
         [SerializeField] private TMP_Text _activeLegText;
-    
-        [Space(5)]
-        [SerializeField] private TMP_Text _activeWeapon1Text;
-        [SerializeField] private TMP_Text _activeWeapon2Text;
-        [SerializeField] private TMP_Text _activeWeapon3Text;
 
         [Space(5)]
         [SerializeField] private TMP_Text _activeAbilityText;
@@ -29,7 +25,7 @@ namespace UI.Customisation
 
         [Header("Weapon Button References")]
         [SerializeField] private CanvasGroup _allOptionsGroup;
-        [SerializeField] private CanvasGroup[] _weaponButtonGroups;
+        [SerializeField] private PlayerCustomisationButtonUI[] _weaponCustomisationButtons;
 
 
         [Header("Ready Button References")]
@@ -71,25 +67,12 @@ namespace UI.Customisation
             _activeLegText.text = customisationOptionsDatabase.LegDatas[customisationState.LegIndex].Name;
 
             int activeWeaponSlots = customisationOptionsDatabase.FrameDatas[customisationState.FrameIndex].WeaponSlotCount;
-            for (int i = 0; i < _weaponButtonGroups.Length; ++i)
+            foreach(PlayerCustomisationButtonUI buttonUI in _weaponCustomisationButtons)
             {
-                if (i < activeWeaponSlots)
-                {
-                    // Active.
-                    _weaponButtonGroups[i].alpha = 1.0f;
-                    _weaponButtonGroups[i].interactable = true;
-                }
-                else
-                {
-                    // Inactive.
-                    _weaponButtonGroups[i].alpha = 0.5f;
-                    _weaponButtonGroups[i].interactable = false;
-                }
+                int index = (int)buttonUI.WeaponSlotIndex - 1;
+                buttonUI.SetEnabledState(index < activeWeaponSlots);
+                buttonUI.SetSelectedOptionText(customisationOptionsDatabase.WeaponDatas[customisationState.WeaponIndicies[index]].Name);
             }
-        
-            _activeWeapon1Text.text = customisationOptionsDatabase.WeaponDatas[customisationState.PrimaryWeaponIndex].Name;
-            _activeWeapon2Text.text = customisationOptionsDatabase.WeaponDatas[customisationState.SecondaryWeaponIndex].Name;
-            _activeWeapon3Text.text = customisationOptionsDatabase.WeaponDatas[customisationState.TertiaryWeaponIndex].Name;
 
             _activeAbilityText.text = customisationOptionsDatabase.AbilityDatas[customisationState.AbilityIndex].Name;
         }
@@ -134,24 +117,8 @@ namespace UI.Customisation
         public void SelectNextLeg() => _customisationManager.SelectNextLeg();
         public void SelectPreviousLeg() => _customisationManager.SelectPreviousLeg();
 
-        public void SelectNextWeapon(int weaponSlot)
-        {
-            switch (weaponSlot)
-            {
-                case 0: _customisationManager.SelectNextPrimaryWeapon(); break;
-                case 1: _customisationManager.SelectNextSecondaryWeapon(); break;
-                case 2: _customisationManager.SelectNextTertiaryWeapon(); break;
-            }
-        }
-        public void SelectPreviousWeapon(int weaponSlot)
-        {
-            switch (weaponSlot)
-            {
-                case 0: _customisationManager.SelectPreviousPrimaryWeapon(); break;
-                case 1: _customisationManager.SelectPreviousSecondaryWeapon(); break;
-                case 2: _customisationManager.SelectPreviousTertiaryWeapon(); break;
-            }
-        }
+        public void SelectNextWeapon(WeaponSlotIndex weaponSlotIndex) => _customisationManager.SelectNextWeapon(weaponSlotIndex);
+        public void SelectPreviousWeapon(WeaponSlotIndex weaponSlotIndex) => _customisationManager.SelectPreviousWeapon(weaponSlotIndex);
 
         public void SelectNextAbility() => _customisationManager.SelectNextAbility();
         public void SelectPreviousAbility() => _customisationManager.SelectPreviousAbility();

@@ -8,9 +8,7 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Data
 
         public int ActiveFrameIndex { get; private set; } = -1;
         public int ActiveLegIndex { get; private set; } = -1;
-        public int ActivePrimaryWeaponIndex { get; private set; } = -1;
-        public int ActiveSecondaryWeaponIndex { get; private set; } = -1;
-        public int ActiveTertiaryWeaponIndex { get; private set; } = -1;
+        public int[] ActiveWeaponIndicies { get; private set; } = new int[0];
         public int ActiveAbilityIndex { get; private set; } = -1;
 
 
@@ -26,18 +24,16 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Data
         {
             ActiveOptionsDatabase = UnityEngine.Resources.Load<CustomisationOptionsDatabase>(DEFAULT_BUILD_OPTIONS_PATH);
         }
-        public BuildData(int activeFrame, int activeLeg, int activePrimaryWeapon, int activeSecondaryWeapon, int activeTertiaryWeapon, int activeAbility)
+        public BuildData(int activeFrame, int activeLeg, int[] activeWeaponIndicies, int activeAbility)
         {
-            SetBuildData(activeFrame, activeLeg, activePrimaryWeapon, activeSecondaryWeapon, activeTertiaryWeapon, activeAbility);
+            SetBuildData(activeFrame, activeLeg, activeWeaponIndicies, activeAbility);
         }
-        public BuildData SetBuildData(int activeFrame, int activeLeg, int activePrimaryWeapon, int activeSecondaryWeapon, int activeTertiaryWeapon, int activeAbility)
+        public BuildData SetBuildData(int activeFrame, int activeLeg, int[] activeWeaponIndicies, int activeAbility)
         {
             // Set our build data.
             this.ActiveFrameIndex = activeFrame;
             this.ActiveLegIndex = activeLeg;
-            this.ActivePrimaryWeaponIndex = activePrimaryWeapon;
-            this.ActiveSecondaryWeaponIndex = activeSecondaryWeapon;
-            this.ActiveTertiaryWeaponIndex = activeTertiaryWeapon;
+            this.ActiveWeaponIndicies = activeWeaponIndicies;
             this.ActiveAbilityIndex = activeAbility;
 
             // Return for fluent interface.
@@ -47,9 +43,7 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Data
 
         public FrameData GetFrameData() => ActiveOptionsDatabase.GetFrame(ActiveFrameIndex);
         public LegData GetLegData() => ActiveOptionsDatabase.GetLeg(ActiveLegIndex);
-        public WeaponData GetPrimaryWeaponData() => ActiveOptionsDatabase.GetWeapon(ActivePrimaryWeaponIndex);
-        public WeaponData GetSecondaryWeaponData() => ActiveOptionsDatabase.GetWeapon(ActiveSecondaryWeaponIndex);
-        public WeaponData GetTertiaryWeaponData() => ActiveOptionsDatabase.GetWeapon(ActiveTertiaryWeaponIndex);
+        public WeaponData GetWeaponData(WeaponSlotIndex slotIndex) => ActiveOptionsDatabase.GetWeapon(ActiveWeaponIndicies[(int)slotIndex - 1]);
         public AbilityData GetAbilityData() => ActiveOptionsDatabase.GetAbility(ActiveAbilityIndex);
 
 

@@ -7,6 +7,7 @@ namespace Gameplay.GameplayObjects
         Primary = 1,
         Secondary = 2,
         Tertiary = 3,
+        Quaternary = 4,
     }
 
     public static class WeaponSlotIndexExtensions

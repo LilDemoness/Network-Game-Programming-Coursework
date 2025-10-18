@@ -31,10 +31,12 @@ namespace Gameplay.GameplayObjects.Character.Customisation
                 _gfxElements[i]
                     .OnSelectedFrameChanged(_optionsDatabase.FrameDatas[customisationState.FrameIndex])
                     .OnSelectedLegChanged(_optionsDatabase.LegDatas[customisationState.LegIndex])
-                    .OnSelectedWeaponChanged(WeaponSlotIndex.Primary, _optionsDatabase.WeaponDatas[customisationState.PrimaryWeaponIndex])
-                    .OnSelectedWeaponChanged(WeaponSlotIndex.Secondary, _optionsDatabase.WeaponDatas[customisationState.SecondaryWeaponIndex])
-                    .OnSelectedWeaponChanged(WeaponSlotIndex.Tertiary, _optionsDatabase.WeaponDatas[customisationState.TertiaryWeaponIndex])
                     .OnSelectedAbilityChanged(_optionsDatabase.AbilityDatas[customisationState.AbilityIndex]);
+
+                for(int j = 1; j < WeaponSlotIndex.Unset.GetMaxPossibleWeaponSlots(); ++j)
+                {
+                    _gfxElements[i].OnSelectedWeaponChanged((WeaponSlotIndex)j, _optionsDatabase.GetWeapon(customisationState.GetWeaponIndexForSlotIndex((WeaponSlotIndex)j)));
+                }
             }
         }
         private void Awake()
@@ -64,17 +66,12 @@ namespace Gameplay.GameplayObjects.Character.Customisation
             FrameData activeFrame = _optionsDatabase.FrameDatas[customisationState.FrameIndex];
             LegData activeLeg = _optionsDatabase.LegDatas[customisationState.LegIndex];
             WeaponData[] activeWeapons = new WeaponData[activeFrame.WeaponSlotCount];
-            if (activeFrame.WeaponSlotCount > 0)
+            for(int i = 0; i < activeWeapons.Length; ++i)
             {
-                activeWeapons[0] = _optionsDatabase.WeaponDatas[customisationState.PrimaryWeaponIndex];
-                if (activeFrame.WeaponSlotCount > 1)
-                {
-                    activeWeapons[1] = _optionsDatabase.WeaponDatas[customisationState.SecondaryWeaponIndex];
-                    if (activeFrame.WeaponSlotCount > 2)
-                    {
-                        activeWeapons[2] = _optionsDatabase.WeaponDatas[customisationState.TertiaryWeaponIndex];
-                    }
-                }
+                if (i >= activeFrame.WeaponSlotCount)
+                    break;
+
+                activeWeapons[i] = _optionsDatabase.WeaponDatas[customisationState.WeaponIndicies[i]];
             }
             AbilityData activeAbility = _optionsDatabase.AbilityDatas[customisationState.AbilityIndex];
 

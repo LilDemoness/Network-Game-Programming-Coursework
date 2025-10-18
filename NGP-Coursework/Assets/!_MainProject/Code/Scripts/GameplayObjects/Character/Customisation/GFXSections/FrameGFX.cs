@@ -82,7 +82,7 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Sections
             return this;
         }
 
-        public void OnCustomisationFinalised(FrameData activeFrame, LegData activeLeg, WeaponData activePrimaryWeapon, WeaponData activeSecondaryWeapon, WeaponData activeTertiaryWeapon, AbilityData activeAbility)
+        public void OnCustomisationFinalised(FrameData activeFrame, LegData activeLeg, WeaponData[] activeWeapons, AbilityData activeAbility)
         {
             // Frame.
             if (activeFrame != _associatedFrameData)
@@ -100,22 +100,11 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Sections
 
 
             // Weapons. (Can we make this into a for loop or similar?)
-            WeaponAttachmentSlot weaponAttachmentSlot = null;
-            if (_weaponsAttachPoints.TryGetValue(WeaponSlotIndex.Primary, out weaponAttachmentSlot))
+            for(int i = 0; i < activeWeapons.Length; ++i)
             {
-                // Has Primary Slot.
-                weaponAttachmentSlot.Finalise(activePrimaryWeapon);
-                
-                if (_weaponsAttachPoints.TryGetValue(WeaponSlotIndex.Secondary, out weaponAttachmentSlot))
+                if (_weaponsAttachPoints.TryGetValue((WeaponSlotIndex)(i + 1), out WeaponAttachmentSlot weaponAttachmentSlot))
                 {
-                    // Has Secondary Slot.
-                    weaponAttachmentSlot.Finalise(activeSecondaryWeapon);
-                    
-                    if (_weaponsAttachPoints.TryGetValue(WeaponSlotIndex.Tertiary, out weaponAttachmentSlot))
-                    {
-                        // Has Tertiary Slot.
-                        weaponAttachmentSlot.Finalise(activeTertiaryWeapon);
-                    }
+                    weaponAttachmentSlot.Finalise(activeWeapons[i]);
                 }
             }
 
