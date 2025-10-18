@@ -16,7 +16,6 @@ namespace UI.Actions
 
         [Header("UI References")]
         [SerializeField] private Image _chargeRadialImage;
-        [SerializeField] private TMP_Text _chargePercentageText;
 
 
         private System.Func<float> CalculateChargePercentageFunc;
@@ -152,9 +151,6 @@ namespace UI.Actions
 
 
             // Update our UI.
-            if (_chargePercentageText != null)
-                _chargePercentageText.text = (_currentChargePercentage * 100.0f).ToString("00.0") + "%";
-            if (_chargeRadialImage != null)
             _chargeRadialImage.fillAmount = _currentChargePercentage;
         }
     }
