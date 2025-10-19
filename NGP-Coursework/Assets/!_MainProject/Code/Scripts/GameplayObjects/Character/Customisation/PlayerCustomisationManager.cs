@@ -13,8 +13,7 @@ namespace Gameplay.GameplayObjects.Character.Customisation
     {
         [SerializeField] private CustomisationOptionsDatabase _optionsDatabase;
         [SerializeField] private PlayerCustomisationUI _playerCustomisationUI;
-        private PlayerCustomisationState _localPlayerState;
-        private Dictionary<ulong, PlayerCustomisationState> _otherPlayerStates;
+        private NetworkList<PlayerCustomisationState> _players;
 
 
         [Header("Player Lobby GFX Instances")]
@@ -37,7 +36,7 @@ namespace Gameplay.GameplayObjects.Character.Customisation
 
         private void Awake()
         {
-            _otherPlayerStates = new Dictionary<ulong, PlayerCustomisationState>();
+            _players = new NetworkList<PlayerCustomisationState>();
             _playerLobbyInstances = new Dictionary<ulong, PlayerCustomisationDisplay>();
         }
 
@@ -48,83 +47,64 @@ namespace Gameplay.GameplayObjects.Character.Customisation
             {
                 _playerCustomisationUI.Setup(this, NetworkManager.Singleton.LocalClientId, _optionsDatabase);
 
+                _players.OnListChanged += HandlePlayersStateChanged;
+
                 // Ensure that we're accounting for other already existing players.
-                foreach (var clientID in _otherPlayerStates.Keys)
+                for(int i = 0; i < _players.Count; ++i)
                 {
-                    AddPlayerInstance(clientID);
+                    AddPlayerInstance(_players[i].ClientID);
                 }
             }
 
             if (IsServer)
             {
-                NetworkManager.Singleton.OnClientConnectedCallback += Server_HandleClientConnected;
-                NetworkManager.Singleton.OnClientDisconnectCallback += Server_HandleClientDisconnected;
+                NetworkManager.Singleton.OnClientConnectedCallback += HandleClientConnected;
+                NetworkManager.Singleton.OnClientDisconnectCallback += HandleClientDisconnected;
 
                 // Ensure that we're accounting for already connected clients.
                 foreach(NetworkClient client in NetworkManager.Singleton.ConnectedClientsList)
                 {
-                    Server_HandleClientConnected(client.ClientId);
+                    HandleClientConnected(client.ClientId);
                 }
             }
         }
         public override void OnNetworkDespawn()
         {
+            if (IsClient)
+            {
+                _players.OnListChanged -= HandlePlayersStateChanged;
+            }
+
             if (IsServer)
             {
-                NetworkManager.Singleton.OnClientConnectedCallback -= Server_HandleClientConnected;
-                NetworkManager.Singleton.OnClientDisconnectCallback -= Server_HandleClientDisconnected;
+                NetworkManager.Singleton.OnClientConnectedCallback -= HandleClientConnected;
+                NetworkManager.Singleton.OnClientDisconnectCallback -= HandleClientDisconnected;
             }
         }
 
 
-        [Rpc(SendTo.Server)]
-        public void AlterPlayerStateServerRpc(PlayerCustomisationState customisationState, RpcParams rpcParams = default)
-        {
-            AlterPlayerStateClientRpc(customisationState);
-        }
-        [Rpc(SendTo.ClientsAndHost)]
-        public void AlterPlayerStateClientRpc(PlayerCustomisationState customisationState)
-        {
-            AlterPlayerState(ref customisationState);
-        }
-        private void AlterPlayerState(ref PlayerCustomisationState customisationState)
-        {
-            if (customisationState.ClientID == this.OwnerClientId)
-            {
-                _localPlayerState = customisationState;
-                HandleLocalPlayerStateChanged();
-            }
-            else
-            {
-                // Update the corresponding other player state.
-                if (!_otherPlayerStates.TryAdd(customisationState.ClientID, customisationState))
-                    _otherPlayerStates[customisationState.ClientID] = customisationState;
-
-                // Update the displayed graphics.
-                HandlePlayersStateChanged(customisationState);
-            }
-        }
-
-        private void Server_HandleClientConnected(ulong clientID)
+        private void HandleClientConnected(ulong clientID)
         {
             // Ensure we've not already added this client.
-            if (_otherPlayerStates.ContainsKey(clientID))
-                return;
+            for(int i = 0; i < _players.Count; ++i)
+                if (_players[i].ClientID == clientID)
+                    return;
 
             // Add the client.
-            _otherPlayerStates.Add(clientID, new PlayerCustomisationState(clientID));
-            Debug.Log("Players Count: " + _otherPlayerStates.Count);
-
-            // Notify the Clients of the new player.
-            HandleClientConnectedClientRpc(_otherPlayerStates[clientID]);
+            _players.Add(new PlayerCustomisationState(clientID));
+            Debug.Log("Players Count: " + _players.Count);
         }
-        private void Server_HandleClientDisconnected(ulong clientID)
+        private void HandleClientDisconnected(ulong clientID)
         {
-            // Remove the player who just left from our dictionary.
-            _otherPlayerStates.Remove(clientID);
-
-            // Notify the Clients of the disconnect.
-            HandleClientDisconnectClientRpc(clientID);
+            // Remove the player who just left from our '_players' list.
+            for(int i = 0; i < _players.Count; ++i)
+            {
+                if (_players[i].ClientID == clientID)
+                {
+                    _players.RemoveAt(i);
+                    break;
+                }
+            }
         }
 
 
@@ -138,12 +118,14 @@ namespace Gameplay.GameplayObjects.Character.Customisation
         [ServerRpc(RequireOwnership = false)]
         private void SelectFrameServerRpc(bool isIncrement, ServerRpcParams serverRpcParams = default)
         {
-            if (!_otherPlayerStates.TryGetValue(serverRpcParams.Receive.SenderClientId, out PlayerCustomisationState customisationState))
-                throw new System.Exception();
-
-            int newValue = Loop(customisationState.FrameIndex + (isIncrement ? 1 : -1), _optionsDatabase.FrameDatas.Length);
-            _otherPlayerStates[serverRpcParams.Receive.SenderClientId] = customisationState.NewWithFrameIndex(newValue);
-            AlterPlayerStateClientRpc(_otherPlayerStates[serverRpcParams.Receive.SenderClientId]);
+            for(int i = 0; i < _players.Count; ++i)
+            {
+                if (_players[i].ClientID == serverRpcParams.Receive.SenderClientId)
+                {
+                    int newValue = Loop(_players[i].FrameIndex + (isIncrement ? 1 : -1), _optionsDatabase.FrameDatas.Length);
+                    _players[i] = _players[i].NewWithFrameIndex(newValue);
+                }
+            }
         }
 
     #endregion
@@ -155,12 +137,14 @@ namespace Gameplay.GameplayObjects.Character.Customisation
         [ServerRpc(RequireOwnership = false)]
         private void SelectLegServerRpc(bool isIncrement, ServerRpcParams serverRpcParams = default)
         {
-            if (!_otherPlayerStates.TryGetValue(serverRpcParams.Receive.SenderClientId, out PlayerCustomisationState customisationState))
-                throw new System.Exception();
-
-            int newValue = Loop(customisationState.LegIndex + (isIncrement ? 1 : -1), _optionsDatabase.LegDatas.Length);
-            _otherPlayerStates[serverRpcParams.Receive.SenderClientId] = customisationState.NewWithLegIndex(newValue);
-            AlterPlayerStateClientRpc(_otherPlayerStates[serverRpcParams.Receive.SenderClientId]);
+            for (int i = 0; i < _players.Count; ++i)
+            {
+                if (_players[i].ClientID == serverRpcParams.Receive.SenderClientId)
+                {
+                    int newValue = Loop(_players[i].LegIndex + (isIncrement ? 1 : -1), _optionsDatabase.LegDatas.Length);
+                    _players[i] = _players[i].NewWithLegIndex(newValue);
+                }
+            }
         }
 
     #endregion
@@ -168,19 +152,54 @@ namespace Gameplay.GameplayObjects.Character.Customisation
     #region Weapons
 
         // Primary.
-        public void SelectNextWeapon(WeaponSlotIndex slotIndex) => SelectWeaponServerRpc(slotIndex, isIncrement: true);
-        public void SelectPreviousWeapon(WeaponSlotIndex slotIndex) => SelectWeaponServerRpc(slotIndex, isIncrement: false);
+        public void SelectNextPrimaryWeapon() => SelectPrimaryWeaponServerRpc(isIncrement: true);
+        public void SelectPreviousPrimaryWeapon() => SelectPrimaryWeaponServerRpc(isIncrement: false);
         [ServerRpc(RequireOwnership = false)]
-        private void SelectWeaponServerRpc(WeaponSlotIndex slotIndex, bool isIncrement, ServerRpcParams serverRpcParams = default)
+        private void SelectPrimaryWeaponServerRpc(bool isIncrement, ServerRpcParams serverRpcParams = default)
         {
-            if (!_otherPlayerStates.TryGetValue(serverRpcParams.Receive.SenderClientId, out PlayerCustomisationState customisationState))
-                throw new System.Exception();
+            for (int i = 0; i < _players.Count; ++i)
+            {
+                if (_players[i].ClientID == serverRpcParams.Receive.SenderClientId)
+                {
+                    int newValue = Loop(_players[i].PrimaryWeaponIndex + (isIncrement ? 1 : -1), _optionsDatabase.WeaponDatas.Length);
+                    _players[i] = _players[i].NewWithPrimaryWeaponIndex(newValue);
+                }
+            }
+        }
 
 
-            int newValue = Loop(customisationState.GetWeaponIndexForSlotIndex(slotIndex) + (isIncrement ? 1 : -1), _optionsDatabase.WeaponDatas.Length);
+        // Secondary.
+        public void SelectNextSecondaryWeapon() => SelectSecondaryWeaponServerRpc(isIncrement: true);
+        public void SelectPreviousSecondaryWeapon() => SelectSecondaryWeaponServerRpc(isIncrement: false);
+    
+        [ServerRpc(RequireOwnership = false)]
+        private void SelectSecondaryWeaponServerRpc(bool isIncrement, ServerRpcParams serverRpcParams = default)
+        {
+            for (int i = 0; i < _players.Count; ++i)
+            {
+                if (_players[i].ClientID == serverRpcParams.Receive.SenderClientId)
+                {
+                    int newValue = Loop(_players[i].SecondaryWeaponIndex + (isIncrement ? 1 : -1), _optionsDatabase.WeaponDatas.Length);
+                    _players[i] = _players[i].NewWithSecondaryWeaponIndex(newValue);
+                }
+            }
+        }
 
-            _otherPlayerStates[serverRpcParams.Receive.SenderClientId] = customisationState.NewWithWeaponIndex(slotIndex, newValue);
-            AlterPlayerStateClientRpc(_otherPlayerStates[serverRpcParams.Receive.SenderClientId]);
+
+        // Tertiary.
+        public void SelectNextTertiaryWeapon() => SelectTertiaryWeaponServerRpc(isIncrement: true);
+        public void SelectPreviousTertiaryWeapon() => SelectTertiaryWeaponServerRpc(isIncrement: false);
+        [ServerRpc(RequireOwnership = false)]
+        private void SelectTertiaryWeaponServerRpc(bool isIncrement, ServerRpcParams serverRpcParams = default)
+        {
+            for (int i = 0; i < _players.Count; ++i)
+            {
+                if (_players[i].ClientID == serverRpcParams.Receive.SenderClientId)
+                {
+                    int newValue = Loop(_players[i].TertiaryWeaponIndex + (isIncrement ? 1 : -1), _optionsDatabase.WeaponDatas.Length);
+                    _players[i] = _players[i].NewWithTertiaryWeaponIndex(newValue);
+                }
+            }
         }
 
     #endregion
@@ -192,12 +211,14 @@ namespace Gameplay.GameplayObjects.Character.Customisation
         [ServerRpc(RequireOwnership = false)]
         private void SelectAbilityServerRpc(bool isIncrement, ServerRpcParams serverRpcParams = default)
         {
-            if (!_otherPlayerStates.TryGetValue(serverRpcParams.Receive.SenderClientId, out PlayerCustomisationState customisationState))
-                throw new System.Exception();
-
-            int newValue = Loop(customisationState.AbilityIndex + (isIncrement ? 1 : -1), _optionsDatabase.AbilityDatas.Length);
-            _otherPlayerStates[serverRpcParams.Receive.SenderClientId] = customisationState.NewWithAbilityIndex(newValue);
-            AlterPlayerStateClientRpc(_otherPlayerStates[serverRpcParams.Receive.SenderClientId]);
+            for (int i = 0; i < _players.Count; ++i)
+            {
+                if (_players[i].ClientID == serverRpcParams.Receive.SenderClientId)
+                {
+                    int newValue = Loop(_players[i].AbilityIndex + (isIncrement ? 1 : -1), _optionsDatabase.AbilityDatas.Length);
+                    _players[i] = _players[i].NewWithAbilityIndex(newValue);
+                }
+            }
         }
 
     #endregion
@@ -215,27 +236,27 @@ namespace Gameplay.GameplayObjects.Character.Customisation
         #endregion
 
 
-        private void HandleLocalPlayerStateChanged()
+        private void HandlePlayersStateChanged(NetworkListEvent<PlayerCustomisationState> changeEvent)
         {
-            OnPlayerCustomisationStateChanged?.Invoke(_localPlayerState.ClientID, _localPlayerState);
-        }
-        private void HandlePlayersStateChanged(PlayerCustomisationState newState)
-        {
-            OnPlayerCustomisationStateChanged?.Invoke(newState.ClientID, newState);
-        }
-        [Rpc(SendTo.ClientsAndHost)]
-        private void HandleClientConnectedClientRpc(PlayerCustomisationState initialState)
-        {
-            AddPlayerInstance(initialState.ClientID);
-            AlterPlayerState(ref initialState);
-        }
-        [Rpc(SendTo.ClientsAndHost)]
-        private void HandleClientDisconnectClientRpc(ulong clientID)
-        {
-            RemovePlayerInstance(clientID);
-        }
+            // Handle player joining/leaving.
+            switch(changeEvent.Type)
+            {
+                case NetworkListEvent<PlayerCustomisationState>.EventType.Add:
+                    AddPlayerInstance(changeEvent.Value.ClientID);
+                    break;
+                case NetworkListEvent<PlayerCustomisationState>.EventType.Remove:
+                case NetworkListEvent<PlayerCustomisationState>.EventType.RemoveAt:
+                case NetworkListEvent<PlayerCustomisationState>.EventType.Clear:
+                    RemovePlayerInstance(changeEvent.Value.ClientID);
+                    break;
+            }
 
-
+            // Handle any changes in the player's build.
+            for (int i = 0; i < _players.Count; ++i)
+            {
+                OnPlayerCustomisationStateChanged?.Invoke(_players[i].ClientID, _players[i]);
+            }
+        }
         private void RemovePlayerInstance(ulong clientIDToRemove)
         {
             // Allow this client's lobby spawn position can be reused.
@@ -294,10 +315,13 @@ namespace Gameplay.GameplayObjects.Character.Customisation
 
         public void ToggleReady()
         {
-            if (_otherPlayerStates.ContainsKey(NetworkManager.LocalClientId))
+            for(int i = 0; i < _players.Count; ++i)
             {
+                if (_players[i].ClientID != NetworkManager.Singleton.LocalClientId)
+                    continue;
+
                 // Toggle our ready state on the server.
-                if (_otherPlayerStates[NetworkManager.LocalClientId].IsReady)
+                if (_players[i].IsReady)
                     SetPlayerNotReadyServerRpc();
                 else
                     SetPlayerReadyServerRpc();
@@ -307,35 +331,40 @@ namespace Gameplay.GameplayObjects.Character.Customisation
         private void SetPlayerReadyServerRpc(ServerRpcParams serverRpcParams = default)
         {
             // Update the triggering client as ready.
-            if (_otherPlayerStates.ContainsKey(NetworkManager.LocalClientId))
+            for (int i = 0; i < _players.Count; ++i)
             {
+                if (_players[i].ClientID != serverRpcParams.Receive.SenderClientId)
+                    continue;
+
                 // Mark this player as ready.
-                _otherPlayerStates[NetworkManager.LocalClientId] = _otherPlayerStates[NetworkManager.LocalClientId].NewWithIsReady(true);
+                _players[i] = _players[i].NewWithIsReady(true);
             }
 
 
             // Check if all players are ready.
-            foreach (var kvp in _otherPlayerStates)
+            for(int i = 0; i < _players.Count; ++i)
             {
-                if (!kvp.Value.IsReady)
+                if (!_players[i].IsReady)
                 {
                     // This player isn't ready. Not all players are ready.
-                    Debug.Log($"Player {kvp.Key} is not ready");
+                    Debug.Log($"Player {_players[i].ClientID} is not ready");
                     return;
                 }
             }
 
 
             // Set the player's data for loading into new scenes?
-            foreach (ulong clientID in _otherPlayerStates.Keys)
+            foreach (var player in _players)
             {
                 BuildData playerBuildData = new BuildData(
-                    activeFrame:            _otherPlayerStates[clientID].FrameIndex,
-                    activeLeg:              _otherPlayerStates[clientID].LegIndex,
-                    activeWeaponIndicies:   _otherPlayerStates[clientID].WeaponIndicies,
-                    activeAbility:          _otherPlayerStates[clientID].AbilityIndex);
+                    activeFrame:            player.FrameIndex,
+                    activeLeg:              player.LegIndex,
+                    activePrimaryWeapon:    player.PrimaryWeaponIndex,
+                    activeSecondaryWeapon:  player.SecondaryWeaponIndex,
+                    activeTertiaryWeapon:   player.TertiaryWeaponIndex,
+                    activeAbility:          player.AbilityIndex);
 
-                ServerManager.Instance.SetBuild(clientID, playerBuildData);
+                ServerManager.Instance.SetBuild(player.ClientID, playerBuildData);
             }
 
 
@@ -345,9 +374,9 @@ namespace Gameplay.GameplayObjects.Character.Customisation
         [ClientRpc]
         private void FinaliseCustomisationClientRpc()
         {
-            foreach (ulong clientID in _otherPlayerStates.Keys)
+            for(int i = 0; i < _players.Count; ++i)
             {
-                OnPlayerCustomisationFinalised?.Invoke(clientID, _otherPlayerStates[clientID]);
+                OnPlayerCustomisationFinalised?.Invoke(_players[i].ClientID, _players[i]);
             }
         }
 
@@ -355,9 +384,12 @@ namespace Gameplay.GameplayObjects.Character.Customisation
         private void SetPlayerNotReadyServerRpc(ServerRpcParams serverRpcParams = default)
         {
             // Update the triggering client as ready.
-            if (_otherPlayerStates.ContainsKey(serverRpcParams.Receive.SenderClientId))
+            for (int i = 0; i < _players.Count; ++i)
             {
-                _otherPlayerStates[serverRpcParams.Receive.SenderClientId] = _otherPlayerStates[serverRpcParams.Receive.SenderClientId].NewWithIsReady(false);
+                if (_players[i].ClientID != serverRpcParams.Receive.SenderClientId)
+                    continue;
+
+                _players[i] = _players[i].NewWithIsReady(false);
             }
         }
     }

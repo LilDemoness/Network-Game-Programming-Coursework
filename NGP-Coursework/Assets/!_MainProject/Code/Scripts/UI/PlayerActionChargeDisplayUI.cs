@@ -113,7 +113,14 @@ namespace UI.Actions
             }
             else
             {
-                this.gameObject.SetActive(buildData.GetWeaponData(_slotIndex).AssociatedAction.CanCharge);
+                bool shouldBeEnabled = _slotIndex switch
+                {
+                    WeaponSlotIndex.Primary => buildData.GetPrimaryWeaponData().AssociatedAction.CanCharge,
+                    WeaponSlotIndex.Secondary => buildData.GetSecondaryWeaponData().AssociatedAction.CanCharge,
+                    WeaponSlotIndex.Tertiary => buildData.GetTertiaryWeaponData().AssociatedAction.CanCharge,
+                    _ => false
+                };
+                this.gameObject.SetActive(shouldBeEnabled);
             }
         }
 
