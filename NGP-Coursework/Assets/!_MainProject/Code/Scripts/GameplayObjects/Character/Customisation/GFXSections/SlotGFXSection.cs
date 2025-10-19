@@ -2,5 +2,5 @@
 
 namespace Gameplay.GameplayObjects.Character.Customisation.Sections
 {
-    public class WeaponGFXSection : GFXSection<WeaponData> { }
+    public class SlotGFXSection : GFXSection<SlottableData> { }
 }

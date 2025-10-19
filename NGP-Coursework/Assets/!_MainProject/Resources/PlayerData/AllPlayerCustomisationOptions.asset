@@ -20,10 +20,11 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 655dffe3a46ae194eaba389293f1ec2b, type: 2}
   - {fileID: 11400000, guid: b25a19fb8f3b4134f965e7bb2f770209, type: 2}
   - {fileID: 11400000, guid: 6e597fb286a54e24a890020d07bdd906, type: 2}
-  WeaponDatas:
-  - {fileID: 11400000, guid: 19fcffcb66d8abf4cbae0a4105ce50e3, type: 2}
-  - {fileID: 11400000, guid: 490b4b2473ba06f408b4502d24142112, type: 2}
-  - {fileID: 11400000, guid: ef46446ee510fb54ea3599f68738390e, type: 2}
-  AbilityDatas:
-  - {fileID: 11400000, guid: 1287eba0821b4a44fa802e707fe52e52, type: 2}
-  - {fileID: 11400000, guid: c0d1d30d0eb5dab4c899a90fa71beea6, type: 2}
+  WeaponSlotDatas:
+  - {fileID: 11400000, guid: 21e4d85d0a2461e45ba54594f0e3e797, type: 2}
+  - {fileID: 11400000, guid: 7185a6b1497f49e489dade294a6d052e, type: 2}
+  - {fileID: 11400000, guid: 6d86d74cc927741488860aea43d34f98, type: 2}
+  AbilitySlotDatas:
+  - {fileID: 11400000, guid: 15e9871e445d63e438b6cacbdfe5ec66, type: 2}
+  - {fileID: 11400000, guid: 85eeda226bebd8e428b979ab2eb42013, type: 2}
+  _maxWeaponSlots: 2

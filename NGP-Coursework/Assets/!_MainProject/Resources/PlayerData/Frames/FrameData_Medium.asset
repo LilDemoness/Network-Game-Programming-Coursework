@@ -13,5 +13,8 @@ MonoBehaviour:
   m_Name: FrameData_Medium
   m_EditorClassIdentifier: 
   <Name>k__BackingField: Medium Chassis
-  <WeaponSlotCount>k__BackingField: 2
   <MaxHealth>k__BackingField: 9
+  <MovementSpeed>k__BackingField: 0
+  <AttachmentPoints>k__BackingField:
+  - <ValidSlottableDatas>k__BackingField: []
+  - <ValidSlottableDatas>k__BackingField: []

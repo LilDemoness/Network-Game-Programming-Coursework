@@ -9,8 +9,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4949632326426587182}
-  - component: {fileID: 2126588548702367360}
   - component: {fileID: -7111691496842507489}
+  - component: {fileID: 6493610602193639181}
   m_Layer: 0
   m_Name: RailcannonGFX
   m_TagString: Untagged
@@ -35,19 +35,6 @@ Transform:
   - {fileID: 5151399883238014008}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2126588548702367360
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1262809234522404837}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5b17562dd5dac8745a2e8594ffd2260b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  AssociatedValue: {fileID: 11400000, guid: ef46446ee510fb54ea3599f68738390e, type: 2}
 --- !u!114 &-7111691496842507489
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -60,8 +47,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 99fa0cb7ce3500545a36865a33aa04b3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_weaponData: {fileID: 11400000, guid: ef46446ee510fb54ea3599f68738390e, type: 2}
+  m_weaponData: {fileID: 11400000, guid: 6d86d74cc927741488860aea43d34f98, type: 2}
   _firingOrigin: {fileID: 2854506927164998321}
+--- !u!114 &6493610602193639181
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1262809234522404837}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 699c5d4152bb8674095f251802f7c6d2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  AssociatedValue: {fileID: 11400000, guid: 6d86d74cc927741488860aea43d34f98, type: 2}
 --- !u!1 &2153377155135808606
 GameObject:
   m_ObjectHideFlags: 0

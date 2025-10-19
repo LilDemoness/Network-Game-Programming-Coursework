@@ -150,7 +150,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8330398972626283626}
-  - component: {fileID: 8044899639164833472}
+  - component: {fileID: 3132058174755255275}
   - component: {fileID: 8143190950097723047}
   m_Layer: 0
   m_Name: MachineGunGFX
@@ -176,7 +176,7 @@ Transform:
   - {fileID: 5223160151108771762}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &8044899639164833472
+--- !u!114 &3132058174755255275
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -185,10 +185,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 8731729149792807350}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5b17562dd5dac8745a2e8594ffd2260b, type: 3}
+  m_Script: {fileID: 11500000, guid: 699c5d4152bb8674095f251802f7c6d2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  AssociatedValue: {fileID: 11400000, guid: 19fcffcb66d8abf4cbae0a4105ce50e3, type: 2}
+  AssociatedValue: {fileID: 11400000, guid: 21e4d85d0a2461e45ba54594f0e3e797, type: 2}
 --- !u!114 &8143190950097723047
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -201,5 +201,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 99fa0cb7ce3500545a36865a33aa04b3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_weaponData: {fileID: 11400000, guid: 19fcffcb66d8abf4cbae0a4105ce50e3, type: 2}
+  m_weaponData: {fileID: 11400000, guid: 21e4d85d0a2461e45ba54594f0e3e797, type: 2}
   _firingOrigin: {fileID: 4038143418034971446}
