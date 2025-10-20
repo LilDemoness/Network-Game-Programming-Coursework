@@ -6,7 +6,12 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Data
     [CreateAssetMenu(menuName = "Customisation Options Database")]
     public class CustomisationOptionsDatabase : ScriptableObject
     {
-        public static CustomisationOptionsDatabase AllOptionsDatabase;
+        [System.NonSerialized]
+        private static CustomisationOptionsDatabase  s_allOptionsDatabase;
+        public static CustomisationOptionsDatabase AllOptionsDatabase
+        {
+            get => s_allOptionsDatabase ??= Resources.Load<CustomisationOptionsDatabase>(ALL_OPTIONS_DATABASE_PATH);
+        }
         private const string ALL_OPTIONS_DATABASE_PATH = "PlayerData/AllPlayerCustomisationOptions";
 
 
@@ -16,18 +21,13 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Data
         [System.NonSerialized] public Dictionary<SlottableData, int> _slottableDataToIndexDict;
 
 
-        private void OnEnable()
+        private void InitialiseSlottableDataDict()
         {
-            AllOptionsDatabase ??= Resources.Load<CustomisationOptionsDatabase>(ALL_OPTIONS_DATABASE_PATH);
-
             _slottableDataToIndexDict = new Dictionary<SlottableData, int>();
             for(int i = 0; i < SlottableDatas.Length; ++i)
             {
                 _slottableDataToIndexDict.Add(SlottableDatas[i], i);
             }
-        }
-        private void InitialiseSlottableDataDict()
-        {
         }
 
 
