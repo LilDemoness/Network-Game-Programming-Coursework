@@ -4,6 +4,7 @@ using TMPro;
 using Unity.Netcode;
 using UnityEngine;
 using UserInput;
+using UI.Tables;
 
 namespace UI.Customisation
 {
@@ -11,10 +12,6 @@ namespace UI.Customisation
     {
         [SerializeField] private PlayerCustomisationManager _playerCustomisationManager;
         private int _frameDataCount;
-
-
-        [Header("Selected Frame Display")]
-        [SerializeField] private TMP_Text _selectedFrameName;
 
 
         [Header("Frame Selection")]
@@ -31,6 +28,7 @@ namespace UI.Customisation
         [Space(5)]
         [SerializeField] private FrameSelectionOption _frameSelectionOptionPrefab;
         private FrameSelectionOption[] _frameSelectionOptions;
+
 
 
         private void Awake()
@@ -87,7 +85,6 @@ namespace UI.Customisation
                 return; // Not the client.
 
             _selectedFrameIndex = customisationState.FrameIndex;
-            SetSelectedFrameText(CustomisationOptionsDatabase.AllOptionsDatabase.GetFrame(customisationState.FrameIndex).Name);
             MarkActiveFrameOption();
         }
 
@@ -117,9 +114,11 @@ namespace UI.Customisation
 
 
 
-        public void SetSelectedFrameText(string frameName) => _selectedFrameName.text = frameName;
         public void SelectNextFramePressed() => throw new System.NotImplementedException();
         public void SelectPreviousFramePressed() => throw new System.NotImplementedException();
+
+
+        
 
 
         public void ToggleSelectionOptions()
