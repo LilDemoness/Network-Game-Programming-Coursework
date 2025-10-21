@@ -18,7 +18,7 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Data
         [field: SerializeField] public FrameData[] FrameDatas;
         [field: SerializeField] public LegData[] LegDatas;
         [field: SerializeField] public SlottableData[] SlottableDatas;
-        [System.NonSerialized] public Dictionary<SlottableData, int> _slottableDataToIndexDict;
+        [System.NonSerialized] private Dictionary<SlottableData, int> _slottableDataToIndexDict;
 
 
         private void InitialiseSlottableDataDict()

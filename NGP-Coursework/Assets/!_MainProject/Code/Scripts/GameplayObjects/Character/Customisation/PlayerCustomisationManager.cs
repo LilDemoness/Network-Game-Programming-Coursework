@@ -3,6 +3,7 @@ using UnityEngine;
 using Unity.Netcode;
 using Gameplay.GameplayObjects.Character.Customisation.Data;
 using UI.Customisation;
+using Unity.Collections.LowLevel.Unsafe;
 
 namespace Gameplay.GameplayObjects.Character.Customisation
 {
@@ -12,8 +13,7 @@ namespace Gameplay.GameplayObjects.Character.Customisation
     public class PlayerCustomisationManager : NetworkBehaviour
     {
         [SerializeField] private CustomisationOptionsDatabase _optionsDatabase;
-        [SerializeField] private PlayerCustomisationUI _playerCustomisationUI;
-        private PlayerCustomisationState _localPlayerState;
+        private PlayerCustomisationState _localPlayerState => _otherPlayerStates[NetworkManager.LocalClientId];
         private Dictionary<ulong, PlayerCustomisationState> _otherPlayerStates;
 
 
@@ -31,8 +31,10 @@ namespace Gameplay.GameplayObjects.Character.Customisation
         }
 
 
+        // Events.
         public static event System.Action<ulong, PlayerCustomisationState> OnPlayerCustomisationStateChanged;
         public static event System.Action<ulong, PlayerCustomisationState> OnPlayerCustomisationFinalised;
+
 
 
         private void Awake()
@@ -56,7 +58,6 @@ namespace Gameplay.GameplayObjects.Character.Customisation
         {
             if (customisationState.ClientID == this.OwnerClientId)
             {
-                _localPlayerState = customisationState;
                 HandleLocalPlayerStateChanged();
             }
             else
@@ -75,8 +76,6 @@ namespace Gameplay.GameplayObjects.Character.Customisation
         {
             if (IsClient)
             {
-                _playerCustomisationUI.Setup(this, NetworkManager.Singleton.LocalClientId, _optionsDatabase);
-
                 // Ensure that we're accounting for other already existing players.
                 foreach(var clientID in _otherPlayerStates.Keys)
                 {
@@ -134,35 +133,29 @@ namespace Gameplay.GameplayObjects.Character.Customisation
 
     #region Frame
 
-        public void SelectNextFrame() => SelectFrameServerRpc(isIncrement: transform);
-        public void SelectPreviousFrame() => SelectFrameServerRpc(isIncrement: false);
+        public void SelectNextFrame() => IncrementSelectedFrameServerRpc(isIncrement: true);
+        public void SelectPreviousFrame() => IncrementSelectedFrameServerRpc(isIncrement: false);
 
-        [ServerRpc(RequireOwnership = false)]
-        private void SelectFrameServerRpc(bool isIncrement, ServerRpcParams serverRpcParams = default)
+        [Rpc(SendTo.Server, RequireOwnership = false)]
+        private void IncrementSelectedFrameServerRpc(bool isIncrement, RpcParams rpcParams = default)
         {
-            if (!_otherPlayerStates.TryGetValue(serverRpcParams.Receive.SenderClientId, out PlayerCustomisationState customisationState))
-                throw new System.Exception();
+            if (!_otherPlayerStates.TryGetValue(rpcParams.Receive.SenderClientId, out PlayerCustomisationState customisationState))
+                throw new System.Exception($"We haven't set up a Customisation State for ClientID {rpcParams.Receive.SenderClientId}");
 
             int newValue = Loop(customisationState.FrameIndex + (isIncrement ? 1 : -1), _optionsDatabase.FrameDatas.Length);
-            _otherPlayerStates[serverRpcParams.Receive.SenderClientId] = customisationState.NewWithFrameIndex(newValue);
-            AlterPlayerStateClientRpc(_otherPlayerStates[serverRpcParams.Receive.SenderClientId]);
+            _otherPlayerStates[rpcParams.Receive.SenderClientId] = customisationState.NewWithFrameIndex(newValue);
+            AlterPlayerStateClientRpc(_otherPlayerStates[rpcParams.Receive.SenderClientId]);
         }
 
-    #endregion
-
-    #region Leg
-
-        public void SelectNextLeg() => SelectLegServerRpc(isIncrement: true);
-        public void SelectPreviousLeg() => SelectLegServerRpc(isIncrement: false);
-        [ServerRpc(RequireOwnership = false)]
-        private void SelectLegServerRpc(bool isIncrement, ServerRpcParams serverRpcParams = default)
+        public void SelectFrame(int selectedFrameDataIndex) => SelectFrameServerRpc(selectedFrameDataIndex);
+        [Rpc(SendTo.Server, RequireOwnership = false)]
+        private void SelectFrameServerRpc(int selectedFrameIndex, RpcParams rpcParams = default)
         {
-            if (!_otherPlayerStates.TryGetValue(serverRpcParams.Receive.SenderClientId, out PlayerCustomisationState customisationState))
-                throw new System.Exception();
+            if (!_otherPlayerStates.TryGetValue(rpcParams.Receive.SenderClientId, out PlayerCustomisationState customisationState))
+                throw new System.Exception($"We haven't set up a Customisation State for ClientID {rpcParams.Receive.SenderClientId}");
 
-            int newValue = Loop(customisationState.LegIndex + (isIncrement ? 1 : -1), _optionsDatabase.LegDatas.Length);
-            _otherPlayerStates[serverRpcParams.Receive.SenderClientId] = customisationState.NewWithLegIndex(newValue);
-            AlterPlayerStateClientRpc(_otherPlayerStates[serverRpcParams.Receive.SenderClientId]);
+            _otherPlayerStates[rpcParams.Receive.SenderClientId] = customisationState.NewWithFrameIndex(selectedFrameIndex);
+            AlterPlayerStateClientRpc(_otherPlayerStates[rpcParams.Receive.SenderClientId]);
         }
 
     #endregion
@@ -175,7 +168,7 @@ namespace Gameplay.GameplayObjects.Character.Customisation
         private void SelectSlottableDataServerRpc(SlotIndex slotIndex, int slottableDataIndex, RpcParams rpcParams = default)
         {
             if (!_otherPlayerStates.TryGetValue(rpcParams.Receive.SenderClientId, out PlayerCustomisationState customisationState))
-                throw new System.Exception();
+                throw new System.Exception($"We haven't set up a Customisation State for ClientID {rpcParams.Receive.SenderClientId}");
 
             // Remove once we've fixed our UI?
             bool isValid = false;
@@ -195,7 +188,9 @@ namespace Gameplay.GameplayObjects.Character.Customisation
             AlterPlayerStateServerRpc(_otherPlayerStates[rpcParams.Receive.SenderClientId]);
         }
 
-    #endregion
+        public int GetClientSelectedSlottableIndex(SlotIndex slotIndex) => _localPlayerState.SlottableDataIndicies[slotIndex.GetSlotInteger()];
+
+#endregion
 
         private int Loop(int value, int maxValueExclusive) => Loop(value, 0, maxValueExclusive);
         private int Loop(int value, int minValueInclusive, int maxValueExclusive)

@@ -1,48 +1,201 @@
+using System.Collections.Generic;
+using System.Linq;
 using Gameplay.GameplayObjects;
 using Gameplay.GameplayObjects.Character.Customisation.Data;
 using UnityEngine;
+using Gameplay.GameplayObjects.Character.Customisation;
+using Unity.Netcode;
 
 namespace UI.Customisation
 {
     public class SlottableSelectionUI : MonoBehaviour
     {
-        [SerializeField] private SlotIndex _slotIndex;
-        [SerializeField] private PlayerCustomisationUI _customisationUI;
+        [SerializeField] private PlayerCustomisationManager _playerCustomisationManager;
+        private FrameData _selectedFrameData;
+        private SlotIndex _activeTab;
+
+
+        [Header("Tabs")]
+        [SerializeField] private SlottableSelectionUITab _tabButtonPrefab;
+        [SerializeField] private Transform _tabButtonContainer;
+        private SlottableSelectionUITab[] _tabButtons;
 
 
         [Header("Buttons")]
-        [SerializeField] private SlottableSelectionUIButton _buttonPrefab;
-        [SerializeField] private Transform _buttonContainer;
-        private SlottableSelectionUIButton[] _buttons;
+        [SerializeField] private SlottableSelectionUIButton _selectionButtonPrefab;
+        [SerializeField] private Transform _selectionButtonContainer;
+        private SlottableSelectionUIButton[] _selectionButtons;
 
 
 
+        private void Awake()
+        {
+            GenerateButtons();
+            CleanupTabs();
+
+            PlayerCustomisationManager.OnPlayerCustomisationStateChanged += PlayerCustomisationManager_OnPlayerCustomisationStateChanged; ;
+        }
+        private void OnDestroy() => PlayerCustomisationManager.OnPlayerCustomisationStateChanged -= PlayerCustomisationManager_OnPlayerCustomisationStateChanged;
+        
         private void GenerateButtons()
         {
+            // Cleanup existing button instances.
+            for(int i = _selectionButtonContainer.childCount - 1; i >= 0; --i)
+            {
+                Destroy(_selectionButtonContainer.GetChild(i).gameObject);
+            }
+
+            // Add in our buttons so that we'll always have enough.
             int maxOptionsCount = CustomisationOptionsDatabase.AllOptionsDatabase.SlottableDatas.Length;
-            for(int i = 0; i < maxOptionsCount; ++i)
+            _selectionButtons = new SlottableSelectionUIButton[maxOptionsCount];
+            for (int i = 0; i < maxOptionsCount; ++i)
             {
-                SlottableSelectionUIButton button = Instantiate(_buttonPrefab, _buttonContainer);
-                button.OnPressed += Button_OnPressed;
+                SlottableSelectionUIButton button = Instantiate(_selectionButtonPrefab, _selectionButtonContainer);
+                button.OnPressed += SlottableSelectionButton_OnPressed;
+
+                // Setup the button.
+                button.SetupButton(CustomisationOptionsDatabase.AllOptionsDatabase.SlottableDatas[i]);
+
+                // Add to an array for future referencing (Disabling & Enabling for different Attachment Points).
+                _selectionButtons[i] = button;
+
+                // Start the button as hidden
+                button.Hide();
             }
         }
-        public void ToggleOptionsForFrame(FrameData frameData)
+        private void CleanupTabs()
         {
-            if (_slotIndex.GetSlotInteger() >= frameData.AttachmentPoints.Length)
+            // Cleanup existing button instances.
+            for (int i = _tabButtonContainer.childCount - 1; i >= 0; --i)
             {
-                // Disable Self
-                this.gameObject.SetActive(false);
-                return;
+                Destroy(_tabButtonContainer.GetChild(i).gameObject);
             }
+            _tabButtons = new SlottableSelectionUITab[0];   // Probably unneeded.
+        }
+        private void SetupTabs()
+        {
+            int currentTabCount = _tabButtons.Length;
+            int desiredTabCount = _selectedFrameData.AttachmentPoints.Length;
+            if (currentTabCount >= desiredTabCount)
+                return;
 
-            AttachmentPoint attachmentPoint = frameData.AttachmentPoints[_slotIndex.GetSlotInteger()];
-            for(int i = 0; i < _buttons.Length; ++i)
+            // We don't have enough tab buttons.
+            // Resize our array to facilitate the addition of the new tabs.
+            System.Array.Resize(ref _tabButtons, desiredTabCount);
+
+            // Ensure we have enough
+            for(int i = currentTabCount; i < desiredTabCount; ++i)
             {
-                _buttons[i].SetupButton(attachmentPoint.ValidSlottableDatas[i]);
+                // We don't have enough tab buttons. Create a new one.
+                SlottableSelectionUITab slottableSelectionUITab = Instantiate<SlottableSelectionUITab>(_tabButtonPrefab, _tabButtonContainer);
+                slottableSelectionUITab.SetSlotIndex((SlotIndex)(i + 1));
+
+
+                // Setup the tab.
+                slottableSelectionUITab.OnPressed += SelectTab;
+
+                // Cache a reference to our tab.
+                _tabButtons[i] = slottableSelectionUITab;
             }
         }
 
 
-        private void Button_OnPressed(int slottableDataIndex) => _customisationUI.SelectSlottableData(_slotIndex, slottableDataIndex);
+        [ContextMenu("Set Test Frame")]
+        private void SetTestFrame()
+        {
+            _playerCustomisationManager.SelectFrame(2);
+        }
+
+        private void PlayerCustomisationManager_OnPlayerCustomisationStateChanged(ulong clientID, PlayerCustomisationState playerCustomisationState)
+        {
+            if (clientID != NetworkManager.Singleton.LocalClientId)
+                return; // Not the client.
+
+            // Check if our selected frame has changed, and if it has update our cached data.
+            FrameData frameData = CustomisationOptionsDatabase.AllOptionsDatabase.GetFrame(playerCustomisationState.FrameIndex);
+            if (frameData != _selectedFrameData)
+            {
+                // Set our selected frame.
+                SetSelectedFrame(frameData);
+            }
+        }
+
+
+        public void SetSelectedFrame(FrameData frameData)
+        {
+            this._selectedFrameData = frameData;
+            SetupTabs();
+            SelectTab(SlotIndex.PrimaryWeapon);
+        }
+
+        [ContextMenu("Select Next")]
+        public void SelectNextTab() => SelectTab(Loop(_activeTab.GetSlotInteger() + 1, 0, _selectedFrameData.AttachmentPoints.Length).ToSlotInteger());
+        [ContextMenu("Select Prev")]
+        public void SelectPreviousTab() => SelectTab(Loop(_activeTab.GetSlotInteger() - 1, 0, _selectedFrameData.AttachmentPoints.Length).ToSlotInteger());
+        
+        public void SelectTab(SlotIndex slotIndex)
+        {
+            if (slotIndex.GetSlotInteger() >= _selectedFrameData.AttachmentPoints.Length)
+                throw new System.ArgumentException($"Active Frame '{_selectedFrameData.name}' has no Attachment Point for SlotIndex {slotIndex}");
+
+            // Set the active tab.
+            this._activeTab = slotIndex;
+
+            // Mark the corresponding tab button as selected.
+            for(int i = 0; i < _tabButtons.Length; ++i)
+            {
+                _tabButtons[i].SetSelectedState(i == _activeTab.GetSlotInteger());
+            }
+
+            // Disable all buttons.
+            // Can we compress this & enabling into a single loop so as to not disable neccessary buttons?
+            DisableAllButtons();
+
+            // Enable the required buttons.
+            foreach(SlottableData slottableData in _selectedFrameData.AttachmentPoints[_activeTab.GetSlotInteger()].ValidSlottableDatas)
+            {
+                int slottableIndex = CustomisationOptionsDatabase.AllOptionsDatabase.GetIndexForSlottableData(slottableData);
+                _selectionButtons[slottableIndex].Show();
+            }
+
+            // Select the corresponding slot for the currently selected slottable.
+            _selectionButtons[_playerCustomisationManager.GetClientSelectedSlottableIndex(_activeTab)].MarkAsSelected();
+        }
+
+        private void DisableAllButtons()
+        {
+            for(int i = 0; i < _selectionButtons.Length; ++i)
+            {
+                _selectionButtons[i].Hide();
+            }
+        }
+
+
+        private void SlottableSelectionButton_OnPressed(int slottableDataIndex)
+        {
+            // Ensure the selected index is valid for the active slot.
+            // Change to a check made by the PlayerCustomisationManager?
+            if (!_selectedFrameData.AttachmentPoints[_activeTab.GetSlotInteger()].ValidSlottableDatas.Any(t => CustomisationOptionsDatabase.AllOptionsDatabase.GetIndexForSlottableData(t) == slottableDataIndex))
+                throw new System.ArgumentException($"You are trying to select an invalid slottable index ({slottableDataIndex}) for slot {_activeTab}");
+
+            Debug.Log($"Slottable {slottableDataIndex} Selected (Name: {CustomisationOptionsDatabase.AllOptionsDatabase.GetSlottableData(slottableDataIndex).Name})");
+            _playerCustomisationManager.SelectSlottableData(_activeTab, slottableDataIndex);
+        }
+
+
+        #region Utils
+
+        private int Loop(int value, int maxValueExclusive) => Loop(value, 0, maxValueExclusive);
+        private int Loop(int value, int minValueInclusive, int maxValueExclusive)
+        {
+            if (value >= maxValueExclusive)
+                return minValueInclusive;
+            else if (value < minValueInclusive)
+                return maxValueExclusive - 1;
+            else
+                return value;
+        }
+
+        #endregion
     }
 }

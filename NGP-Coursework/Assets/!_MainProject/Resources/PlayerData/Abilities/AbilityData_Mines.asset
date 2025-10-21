@@ -13,4 +13,5 @@ MonoBehaviour:
   m_Name: AbilityData_Mines
   m_EditorClassIdentifier: 
   <Name>k__BackingField: Mines
+  <Sprite>k__BackingField: {fileID: 10901, guid: 0000000000000000f000000000000000, type: 0}
   <AssociatedAction>k__BackingField: {fileID: 0}

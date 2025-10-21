@@ -13,4 +13,5 @@ MonoBehaviour:
   m_Name: WeaponData_Railgun
   m_EditorClassIdentifier: 
   <Name>k__BackingField: Railgun
+  <Sprite>k__BackingField: {fileID: 10901, guid: 0000000000000000f000000000000000, type: 0}
   <AssociatedAction>k__BackingField: {fileID: 11400000, guid: e39a066565a86c14e8cc32f9e4068494, type: 2}

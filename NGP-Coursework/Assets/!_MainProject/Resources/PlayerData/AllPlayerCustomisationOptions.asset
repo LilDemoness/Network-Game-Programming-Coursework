@@ -20,11 +20,9 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 655dffe3a46ae194eaba389293f1ec2b, type: 2}
   - {fileID: 11400000, guid: b25a19fb8f3b4134f965e7bb2f770209, type: 2}
   - {fileID: 11400000, guid: 6e597fb286a54e24a890020d07bdd906, type: 2}
-  WeaponSlotDatas:
+  SlottableDatas:
   - {fileID: 11400000, guid: 21e4d85d0a2461e45ba54594f0e3e797, type: 2}
   - {fileID: 11400000, guid: 7185a6b1497f49e489dade294a6d052e, type: 2}
   - {fileID: 11400000, guid: 6d86d74cc927741488860aea43d34f98, type: 2}
-  AbilitySlotDatas:
-  - {fileID: 11400000, guid: 15e9871e445d63e438b6cacbdfe5ec66, type: 2}
   - {fileID: 11400000, guid: 85eeda226bebd8e428b979ab2eb42013, type: 2}
-  _maxWeaponSlots: 2
+  - {fileID: 11400000, guid: 15e9871e445d63e438b6cacbdfe5ec66, type: 2}
