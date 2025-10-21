@@ -3,12 +3,6 @@ using UnityEngine;
 
 namespace UI.Tables
 {
-    public class InformationTable : MonoBehaviour
-    {
-        [SerializeField] private InformationTableRow[] _informationTableRows;
-    }
-
-
     public class InformationTableRow : MonoBehaviour
     {
         [SerializeField] private TMP_Text _rowName;

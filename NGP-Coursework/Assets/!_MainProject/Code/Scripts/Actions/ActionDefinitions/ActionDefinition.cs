@@ -25,7 +25,7 @@ namespace Gameplay.Actions.Definitions
         public bool IsHostileAction;
 
         [Tooltip("How much energy/ammo/etc this Action costs.")]
-        public float Cost;
+        public float Heat;
 
         // Change to be based on the Action Type?
         [field: SerializeField] public bool ShouldNotifyClient { get; private set; } = true;

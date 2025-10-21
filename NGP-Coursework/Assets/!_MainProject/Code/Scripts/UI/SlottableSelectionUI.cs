@@ -25,6 +25,11 @@ namespace UI.Customisation
         [SerializeField] private SlottableSelectionUIButton _selectionButtonPrefab;
         [SerializeField] private Transform _selectionButtonContainer;
         private SlottableSelectionUIButton[] _selectionButtons;
+        private int _currentPreviewSlottableIndex;
+
+
+        // Events.
+        public static event System.Action<int> OnSlottablePreviewSelectionChanged;
 
 
 
@@ -159,7 +164,9 @@ namespace UI.Customisation
             }
 
             // Select the corresponding slot for the currently selected slottable.
-            _selectionButtons[_playerCustomisationManager.GetClientSelectedSlottableIndex(_activeTab)].MarkAsSelected();
+            int selectedIndex = _playerCustomisationManager.GetClientSelectedSlottableIndex(_activeTab);
+            OnSlottablePreviewSelectionChanged?.Invoke(selectedIndex);
+            _selectionButtons[selectedIndex].MarkAsSelected();
         }
 
         private void DisableAllButtons()
@@ -178,8 +185,15 @@ namespace UI.Customisation
             if (!_selectedFrameData.AttachmentPoints[_activeTab.GetSlotInteger()].ValidSlottableDatas.Any(t => CustomisationOptionsDatabase.AllOptionsDatabase.GetIndexForSlottableData(t) == slottableDataIndex))
                 throw new System.ArgumentException($"You are trying to select an invalid slottable index ({slottableDataIndex}) for slot {_activeTab}");
 
-            Debug.Log($"Slottable {slottableDataIndex} Selected (Name: {CustomisationOptionsDatabase.AllOptionsDatabase.GetSlottableData(slottableDataIndex).Name})");
-            _playerCustomisationManager.SelectSlottableData(_activeTab, slottableDataIndex);
+            OnSlottablePreviewSelectionChanged?.Invoke(slottableDataIndex);
+
+            _currentPreviewSlottableIndex = slottableDataIndex;
+            EquipSelectedSlottable();
+        }
+        private void EquipSelectedSlottable()
+        {
+            Debug.Log($"Slottable {_currentPreviewSlottableIndex} Selected (Name: {CustomisationOptionsDatabase.AllOptionsDatabase.GetSlottableData(_currentPreviewSlottableIndex).Name})");
+            _playerCustomisationManager.SelectSlottableData(_activeTab, _currentPreviewSlottableIndex);
         }
 
 

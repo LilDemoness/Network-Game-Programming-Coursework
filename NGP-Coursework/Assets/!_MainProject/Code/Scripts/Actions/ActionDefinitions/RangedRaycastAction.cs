@@ -14,12 +14,12 @@ namespace Gameplay.Actions.Definitions
     public class RangedRaycastAction : ActionDefinition
     {
         [Header("Targeting")]
-        [SerializeField] private float _maxRange;
-        [SerializeField] private LayerMask _validLayers;
+        [field: SerializeField] public float MaxRange { get; private set; }
+        [field: SerializeField] public LayerMask ValidLayers { get; private set; }
 
-        [Space(5)]
-        [SerializeField, Min(0)] private int _pierces = 0;
-        private bool _canPierce => _pierces > 0;
+        [field: Space(5)]
+        [field: SerializeField, Min(0)] public int Pierces { get; private set; } = 0;
+        public bool CanPierce => Pierces > 0;
 
 
 
@@ -37,15 +37,15 @@ namespace Gameplay.Actions.Definitions
         {
             Vector3 rayOrigin = GetActionOrigin(ref data);
             Vector3 rayDirection = GetActionDirection(ref data);
-            Debug.DrawRay(rayOrigin, rayDirection * _maxRange, Color.red, 0.5f);
+            Debug.DrawRay(rayOrigin, rayDirection * MaxRange, Color.red, 0.5f);
 
-            if (_canPierce)
+            if (CanPierce)
             {
                 // Get all valid targets.
-                RaycastHit[] colliders = Physics.RaycastAll(rayOrigin, rayDirection, _maxRange, _validLayers, QueryTriggerInteraction.Ignore);
+                RaycastHit[] colliders = Physics.RaycastAll(rayOrigin, rayDirection, MaxRange, ValidLayers, QueryTriggerInteraction.Ignore);
 
                 // Order our targets in ascending order, taking only the number we wish to pierce.
-                IEnumerable<RaycastHit> orderedValidTargets = colliders.OrderBy(t => (t.point - rayOrigin).sqrMagnitude).Take(_pierces + 1);
+                IEnumerable<RaycastHit> orderedValidTargets = colliders.OrderBy(t => (t.point - rayOrigin).sqrMagnitude).Take(Pierces + 1);
 
                 // Loop through and process all valid targets.
                 IEnumerator<RaycastHit> enumerator = orderedValidTargets.GetEnumerator();
@@ -57,7 +57,7 @@ namespace Gameplay.Actions.Definitions
             }
             else
             {
-                if (Physics.Raycast(rayOrigin, rayDirection, out RaycastHit hitInfo, _maxRange, _validLayers, QueryTriggerInteraction.Ignore))
+                if (Physics.Raycast(rayOrigin, rayDirection, out RaycastHit hitInfo, MaxRange, ValidLayers, QueryTriggerInteraction.Ignore))
                 {
                     ActionHitInformation actionHitInfo = new ActionHitInformation(hitInfo.transform, hitInfo.point, hitInfo.normal, GetHitForward(hitInfo.normal));
                     ProcessTarget(owner, actionHitInfo, chargePercentage);

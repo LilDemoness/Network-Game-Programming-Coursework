@@ -147,6 +147,7 @@ GameObject:
   - component: {fileID: 475657991688631991}
   - component: {fileID: 8662534428956056748}
   - component: {fileID: 997370090896443731}
+  - component: {fileID: 3138438156073710422}
   m_Layer: 5
   m_Name: StatsTableRow
   m_TagString: Untagged
@@ -214,6 +215,20 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &3138438156073710422
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1398045781694424525}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2d41727db5dd24144bc284a5d22c1f17, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _rowName: {fileID: 6880298193925678369}
+  _rowContent: {fileID: 6416412589302712796}
 --- !u!1 &2577254815023211221
 GameObject:
   m_ObjectHideFlags: 0

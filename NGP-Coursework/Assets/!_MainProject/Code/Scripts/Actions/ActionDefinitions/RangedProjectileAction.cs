@@ -18,6 +18,8 @@ namespace Gameplay.Actions.Definitions
         [SerializeField] private ProjectileInfo _projectileInfo;
         [SerializeReference, SubclassSelector] private SeekingFunction _seekingFunction;
 
+        public float MaxRange => _projectileInfo.MaxRange > 0 ? _projectileInfo.MaxRange : _projectileInfo.MaxLifetime * _projectileInfo.Speed;
+
 
         public override bool OnStart(ServerCharacter owner, ref ActionRequestData data) => ActionConclusion.Continue;
         public override bool OnUpdate(ServerCharacter owner, ref ActionRequestData data, float chargePercentage = 1.0f)
