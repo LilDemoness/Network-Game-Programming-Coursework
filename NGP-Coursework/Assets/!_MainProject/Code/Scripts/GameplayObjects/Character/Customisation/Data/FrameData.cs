@@ -6,7 +6,12 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Data
     public class FrameData : ScriptableObject
     {
         [field: SerializeField] public string Name { get; private set; }
+
+
+        public enum SizeCategory { Small, Medium, Large }
+        [field: SerializeField] public SizeCategory FrameSize { get; private set; }
         [field: SerializeField] public int MaxHealth { get; private set; }
+        [field: SerializeField] public int HeatCapacity { get; private set; }
         [field: SerializeField] public float MovementSpeed { get; private set; }
 
 
@@ -16,6 +21,8 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Data
     [System.Serializable]
     public class AttachmentPoint
     {
+        [SerializeField] private string _dataPlaceholder;   // Should hopefully prevent the slots being erased on editor reset.
+
         public SlottableData[] ValidSlottableDatas => CustomisationOptionsDatabase.AllOptionsDatabase.SlottableDatas;
     }
 }

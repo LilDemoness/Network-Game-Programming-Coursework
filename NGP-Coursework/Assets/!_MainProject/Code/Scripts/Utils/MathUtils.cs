@@ -1,5 +1,20 @@
 using UnityEngine;
 
+public static class MathUtils
+{
+    public static int Loop(int value, int maxValueExclusive) => Loop(value, 0, maxValueExclusive);
+    public static int Loop(int value, int minValueInclusive, int maxValueExclusive)
+    {
+        if (value >= maxValueExclusive)
+            return minValueInclusive;
+        else if (value < minValueInclusive)
+            return maxValueExclusive - 1;
+        else
+            return value;
+    }
+}
+
+
 public static class Interception
 {
     public static bool CalculateInterceptionDirection(Vector2 a, Vector2 b, Vector2 vA, float sB, out Vector2 result)

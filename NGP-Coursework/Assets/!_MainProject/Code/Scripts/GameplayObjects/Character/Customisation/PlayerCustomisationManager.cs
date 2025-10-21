@@ -142,7 +142,7 @@ namespace Gameplay.GameplayObjects.Character.Customisation
             if (!_otherPlayerStates.TryGetValue(rpcParams.Receive.SenderClientId, out PlayerCustomisationState customisationState))
                 throw new System.Exception($"We haven't set up a Customisation State for ClientID {rpcParams.Receive.SenderClientId}");
 
-            int newValue = Loop(customisationState.FrameIndex + (isIncrement ? 1 : -1), _optionsDatabase.FrameDatas.Length);
+            int newValue = MathUtils.Loop(customisationState.FrameIndex + (isIncrement ? 1 : -1), _optionsDatabase.FrameDatas.Length);
             _otherPlayerStates[rpcParams.Receive.SenderClientId] = customisationState.NewWithFrameIndex(newValue);
             AlterPlayerStateClientRpc(_otherPlayerStates[rpcParams.Receive.SenderClientId]);
         }
@@ -191,17 +191,6 @@ namespace Gameplay.GameplayObjects.Character.Customisation
         public int GetClientSelectedSlottableIndex(SlotIndex slotIndex) => _localPlayerState.SlottableDataIndicies[slotIndex.GetSlotInteger()];
 
 #endregion
-
-        private int Loop(int value, int maxValueExclusive) => Loop(value, 0, maxValueExclusive);
-        private int Loop(int value, int minValueInclusive, int maxValueExclusive)
-        {
-            if (value >= maxValueExclusive)
-                return minValueInclusive;
-            else if (value < minValueInclusive)
-                return maxValueExclusive - 1;
-            else
-                return value;
-        }
 
         #endregion
 

@@ -16,10 +16,6 @@ namespace UI.Customisation
         [SerializeField] private InformationTableRow[] _informationTable = new InformationTableRow[INFORMATION_TABLE_ROWS];
         private const int INFORMATION_TABLE_ROWS = 7;
 
-        private const string DISTANCE_UNITS = "u";
-        private const string SPEED_UNITS = "u/s";
-        private const string TIME_UNITS = "s";
-
 
         private void Awake()
         {
@@ -64,32 +60,32 @@ namespace UI.Customisation
         {
             string rangeText = action switch
             {
-                RangedRaycastAction => (action as RangedRaycastAction).MaxRange + DISTANCE_UNITS,
-                RangedProjectileAction => (action as RangedProjectileAction).MaxRange + DISTANCE_UNITS,
-                AoETargetingAction => (action as AoETargetingAction).GetRangeString(DISTANCE_UNITS),
+                RangedRaycastAction => (action as RangedRaycastAction).MaxRange + Units.DISTANCE_UNITS,
+                RangedProjectileAction => (action as RangedProjectileAction).MaxRange + Units.DISTANCE_UNITS,
+                AoETargetingAction => (action as AoETargetingAction).RangeString,
                 SelfTargetingAction => "Self",
                 _ => throw new System.NotImplementedException(),
             };
 
             _informationTable[1].SetText("Range:", rangeText);
         }
-        private void SetUseTimeRow(int rowIndex, ActionDefinition action) => _informationTable[rowIndex].SetText("Use Time: ", (action.ExecutionDelay > 0.0f ? action.ExecutionDelay + TIME_UNITS : "Instant"));
+        private void SetUseTimeRow(int rowIndex, ActionDefinition action) => _informationTable[rowIndex].SetText("Use Time: ", (action.ExecutionDelay > 0.0f ? action.ExecutionDelay + Units.TIME_UNITS : "Instant"));
         private void SetUseRateRow(int rowIndex, ActionDefinition action)
         {
             string retriggerText = action.TriggerType switch
             {
                 Gameplay.Actions.ActionTriggerType.Single => "Single",
                 Gameplay.Actions.ActionTriggerType.Burst => "Single",
-                Gameplay.Actions.ActionTriggerType.Repeated => (1.0f / action.RetriggerDelay) + ("/" + TIME_UNITS),
-                Gameplay.Actions.ActionTriggerType.RepeatedBurst => (action.RetriggerDelay + TIME_UNITS),
+                Gameplay.Actions.ActionTriggerType.Repeated => (1.0f / action.RetriggerDelay) + ("/" + Units.TIME_UNITS),
+                Gameplay.Actions.ActionTriggerType.RepeatedBurst => (action.RetriggerDelay + Units.TIME_UNITS),
                 _ => throw new System.NotImplementedException(),
             };
 
             _informationTable[rowIndex].SetText("Use Rate: ", retriggerText);
         }
-        private void SetChargeTimeRow(int rowIndex, ActionDefinition action) => _informationTable[rowIndex].SetText("Charge Time: ", (action.CanCharge ? action.MaxChargeTime : 0.0f).ToString());
-        private void SetCooldownRow(int rowIndex, ActionDefinition action) => _informationTable[rowIndex].SetText("Cooldown: ", (action.HasCooldown ? action.ActionCooldown : 0.0f).ToString());
-        private void SetBurstCountRow(int rowIndex, ActionDefinition action) => _informationTable[rowIndex].SetText("Burst Count: ", (action.Bursts.ToString() + " in " + (action.Bursts * action.BurstDelay) + TIME_UNITS));
+        private void SetChargeTimeRow(int rowIndex, ActionDefinition action) => _informationTable[rowIndex].SetText("Charge Time: ", (action.CanCharge ? action.MaxChargeTime : 0.0f).ToString() + Units.TIME_UNITS);
+        private void SetCooldownRow(int rowIndex, ActionDefinition action) => _informationTable[rowIndex].SetText("Cooldown: ", (action.HasCooldown ? action.ActionCooldown : 0.0f).ToString() + Units.TIME_UNITS);
+        private void SetBurstCountRow(int rowIndex, ActionDefinition action) => _informationTable[rowIndex].SetText("Burst Count: ", (action.Bursts.ToString() + " in " + (action.Bursts * action.BurstDelay) + Units.TIME_UNITS));
 
 
         private void SetTableForInvalidData()

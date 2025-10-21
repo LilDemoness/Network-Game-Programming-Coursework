@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Action_Fire-MachineGun
   m_EditorClassIdentifier: 
   IsHostileAction: 1
-  Cost: 0
+  Heat: 0
   <ShouldNotifyClient>k__BackingField: 1
   <ExecutionDelay>k__BackingField: 0
   <ActionCooldown>k__BackingField: 0
@@ -22,6 +22,9 @@ MonoBehaviour:
   <CanCharge>k__BackingField: 0
   <MaxChargeTime>k__BackingField: 0
   <MinChargeActivationPercentage>k__BackingField: 1
+  <RetainChargeAfterFull>k__BackingField: 0
+  <MaxChargeDepletionTime>k__BackingField: 0
+  <UIChargeDepletionTime>k__BackingField: 0
   <TriggerType>k__BackingField: 2
   <CancelOnLastTrigger>k__BackingField: 0
   <RetriggerDelay>k__BackingField: 0.1
@@ -33,11 +36,11 @@ MonoBehaviour:
   TriggeringVisuals:
   - rid: 6632896607793709161
   HitVisuals: []
-  _maxRange: 30
-  _validLayers:
+  <MaxRange>k__BackingField: 0
+  <ValidLayers>k__BackingField:
     serializedVersion: 2
-    m_Bits: 73
-  _pierces: 0
+    m_Bits: 0
+  <Pierces>k__BackingField: 0
   references:
     version: 2
     RefIds:
@@ -45,6 +48,7 @@ MonoBehaviour:
       type: {class: HealthChangeEffect, ns: Gameplay.Actions.Effects, asm: Assembly-CSharp}
       data:
         _healthChange: -1
+        _scaleValueWithCharge: 1
     - rid: 6632896607793709161
       type: {class: SpecialFXActionVisual, ns: Gameplay.Actions.Visuals, asm: Assembly-CSharp}
       data:

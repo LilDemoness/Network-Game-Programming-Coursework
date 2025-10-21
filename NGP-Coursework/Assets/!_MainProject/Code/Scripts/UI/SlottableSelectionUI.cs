@@ -134,9 +134,9 @@ namespace UI.Customisation
         }
 
         [ContextMenu("Select Next")]
-        public void SelectNextTab() => SelectTab(Loop(_activeTab.GetSlotInteger() + 1, 0, _selectedFrameData.AttachmentPoints.Length).ToSlotInteger());
+        public void SelectNextTab() => SelectTab(MathUtils.Loop(_activeTab.GetSlotInteger() + 1, 0, _selectedFrameData.AttachmentPoints.Length).ToSlotInteger());
         [ContextMenu("Select Prev")]
-        public void SelectPreviousTab() => SelectTab(Loop(_activeTab.GetSlotInteger() - 1, 0, _selectedFrameData.AttachmentPoints.Length).ToSlotInteger());
+        public void SelectPreviousTab() => SelectTab(MathUtils.Loop(_activeTab.GetSlotInteger() - 1, 0, _selectedFrameData.AttachmentPoints.Length).ToSlotInteger());
         
         public void SelectTab(SlotIndex slotIndex)
         {
@@ -195,21 +195,5 @@ namespace UI.Customisation
             Debug.Log($"Slottable {_currentPreviewSlottableIndex} Selected (Name: {CustomisationOptionsDatabase.AllOptionsDatabase.GetSlottableData(_currentPreviewSlottableIndex).Name})");
             _playerCustomisationManager.SelectSlottableData(_activeTab, _currentPreviewSlottableIndex);
         }
-
-
-        #region Utils
-
-        private int Loop(int value, int maxValueExclusive) => Loop(value, 0, maxValueExclusive);
-        private int Loop(int value, int minValueInclusive, int maxValueExclusive)
-        {
-            if (value >= maxValueExclusive)
-                return minValueInclusive;
-            else if (value < minValueInclusive)
-                return maxValueExclusive - 1;
-            else
-                return value;
-        }
-
-        #endregion
     }
 }

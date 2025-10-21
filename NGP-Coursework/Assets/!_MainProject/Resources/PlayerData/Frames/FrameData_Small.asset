@@ -13,6 +13,9 @@ MonoBehaviour:
   m_Name: FrameData_Small
   m_EditorClassIdentifier: 
   <Name>k__BackingField: Small Chassis
+  <FrameSize>k__BackingField: 0
   <MaxHealth>k__BackingField: 6
+  <HeatCapacity>k__BackingField: 0
   <MovementSpeed>k__BackingField: 0
-  <AttachmentPoints>k__BackingField: []
+  <AttachmentPoints>k__BackingField:
+  - _dataPlaceholder: 

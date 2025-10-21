@@ -14,7 +14,7 @@ namespace Gameplay.Actions.Definitions
     {
         [Header("Targeting")]
         [SerializeReference, SubclassSelector] private AoETargeting _targetingMethod;
-        public string GetRangeString(string distanceUnits) => _targetingMethod.GetRangeString(distanceUnits);
+        public string RangeString => _targetingMethod.RangeString;
 
 
         public override bool OnStart(ServerCharacter owner, ref ActionRequestData data) => ActionConclusion.Continue;
@@ -41,7 +41,7 @@ namespace Gameplay.Actions.Definitions
         // Sphere, Line, Cone.
         private abstract class AoETargeting
         {
-            public abstract string GetRangeString(string distanceUnits);
+            public abstract string RangeString { get; }
 
             [SerializeField] protected bool CanTargetOwner;
 
@@ -87,7 +87,7 @@ namespace Gameplay.Actions.Definitions
         [System.Serializable]
         private class SphereAoETargeting : AoETargeting
         {
-            public override string GetRangeString(string distanceUnits) => _sphereRadius + distanceUnits + " Sphere";
+            public override string RangeString => _sphereRadius + Units.DISTANCE_UNITS + " Sphere";
 
             [SerializeField] private float _sphereRadius;
 
@@ -114,7 +114,7 @@ namespace Gameplay.Actions.Definitions
         [System.Serializable]
         private class LineAoETargeting : AoETargeting
         {
-            public override string GetRangeString(string distanceUnits) => _lineLength + distanceUnits + " Long " + _lineRadius + distanceUnits + " Wide Line";
+            public override string RangeString => _lineLength + Units.DISTANCE_UNITS + " Long " + _lineRadius + Units.DISTANCE_UNITS + " Wide Line";
 
             [SerializeField] private float _lineLength;
             [SerializeField] private float _lineRadius;
@@ -149,7 +149,7 @@ namespace Gameplay.Actions.Definitions
         [System.Serializable]
         private class ConeAoETargeting : AoETargeting
         {
-            public override string GetRangeString(string distanceUnits) => _coneLength + distanceUnits + " Long " + _coneAngle + "d Angle Cone";
+            public override string RangeString => _coneLength + Units.DISTANCE_UNITS + " Long " + _coneAngle + Units.DEGREES_UNITS + " Angle Cone";
             [SerializeField] private float _coneLength;
             [SerializeField] private float _coneAngle;
 
