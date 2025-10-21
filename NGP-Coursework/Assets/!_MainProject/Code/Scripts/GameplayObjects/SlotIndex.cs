@@ -31,6 +31,6 @@ namespace Gameplay.GameplayObjects
             return s_maxPossibleSlots;
         }
         public static int GetSlotInteger(this SlotIndex slotIndex) => (int)slotIndex - 1;
-        public static SlotIndex ToSlotInteger(this int integer) => (SlotIndex)(integer + 1);
+        public static SlotIndex ToSlotIndex(this int integer) => (SlotIndex)(integer + 1);
     }
 }

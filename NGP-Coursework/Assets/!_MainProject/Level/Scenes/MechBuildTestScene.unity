@@ -2448,8 +2448,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 869429556}
   m_HandleRect: {fileID: 869429555}
   m_Direction: 2
-  m_Value: 1
-  m_Size: 0.7747252
+  m_Value: 1.0000002
+  m_Size: 0.7747253
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -2544,7 +2544,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Navigation:
-    m_Mode: 3
+    m_Mode: 0
     m_WrapAround: 0
     m_SelectOnUp: {fileID: 0}
     m_SelectOnDown: {fileID: 0}
@@ -7066,6 +7066,8 @@ MonoBehaviour:
   _healthText: {fileID: 1905932763}
   _speedText: {fileID: 2083210362}
   _heatCapText: {fileID: 1067362898}
+  _deselectedOverlayGO: {fileID: 0}
+  _isActiveFrameGO: {fileID: 0}
 --- !u!225 &876715046
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -10291,7 +10293,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Navigation:
-    m_Mode: 3
+    m_Mode: 0
     m_WrapAround: 0
     m_SelectOnUp: {fileID: 0}
     m_SelectOnDown: {fileID: 0}
@@ -11214,6 +11216,77 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 225, y: 87.5}
   m_Pivot: {x: 0, y: 1}
+--- !u!1 &1299616453
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1299616454}
+  - component: {fileID: 1299616455}
+  - component: {fileID: 1299616456}
+  m_Layer: 0
+  m_Name: PlayerInput
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1299616454
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1299616453}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1299616455
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1299616453}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  GlobalObjectIdHash: 1108666671
+  InScenePlacedSourceGlobalObjectIdHash: 0
+  DeferredDespawnTick: 0
+  Ownership: 1
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 0
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
+--- !u!114 &1299616456
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1299616453}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ab56a91d9eb63f94a9c1f81457b0fcca, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
 --- !u!1 &1321534807
 GameObject:
   m_ObjectHideFlags: 0
@@ -11978,7 +12051,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Navigation:
-    m_Mode: 3
+    m_Mode: 0
     m_WrapAround: 0
     m_SelectOnUp: {fileID: 0}
     m_SelectOnDown: {fileID: 0}
@@ -12427,6 +12500,8 @@ MonoBehaviour:
   _healthText: {fileID: 216047696}
   _speedText: {fileID: 142245375}
   _heatCapText: {fileID: 1933091808}
+  _deselectedOverlayGO: {fileID: 0}
+  _isActiveFrameGO: {fileID: 0}
 --- !u!225 &1469279299
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -12896,6 +12971,8 @@ MonoBehaviour:
   _healthText: {fileID: 995524272}
   _speedText: {fileID: 2018921718}
   _heatCapText: {fileID: 1124028848}
+  _deselectedOverlayGO: {fileID: 0}
+  _isActiveFrameGO: {fileID: 0}
 --- !u!225 &1544540431
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -13220,6 +13297,8 @@ MonoBehaviour:
   _healthText: {fileID: 78134566}
   _speedText: {fileID: 1184022284}
   _heatCapText: {fileID: 521203104}
+  _deselectedOverlayGO: {fileID: 0}
+  _isActiveFrameGO: {fileID: 0}
 --- !u!225 &1615450540
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -14282,6 +14361,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _playerCustomisationManager: {fileID: 14889075}
+  _frameSelectionUI: {fileID: 2033728776}
   _tabButtonPrefab: {fileID: 401711318420102509, guid: 63e33541ccf1bbf42b324c34409056ef, type: 3}
   _tabButtonContainer: {fileID: 580338680}
   _selectionButtonPrefab: {fileID: 1098675253895633356, guid: a68ac370fc5350b4a85769fbfde1bda7, type: 3}
@@ -17810,3 +17890,4 @@ SceneRoots:
   - {fileID: 109777445}
   - {fileID: 418112738}
   - {fileID: 849535220}
+  - {fileID: 1299616454}

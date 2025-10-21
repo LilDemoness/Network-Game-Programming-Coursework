@@ -5,12 +5,14 @@ using Gameplay.GameplayObjects.Character.Customisation.Data;
 using UnityEngine;
 using Gameplay.GameplayObjects.Character.Customisation;
 using Unity.Netcode;
+using UserInput;
 
 namespace UI.Customisation
 {
     public class SlottableSelectionUI : MonoBehaviour
     {
         [SerializeField] private PlayerCustomisationManager _playerCustomisationManager;
+        [SerializeField] private FrameSelectionUI _frameSelectionUI;
         private FrameData _selectedFrameData;
         private SlotIndex _activeTab;
 
@@ -38,10 +40,28 @@ namespace UI.Customisation
             GenerateButtons();
             CleanupTabs();
 
+            ClientInput.OnNextTabPerformed += ClientInput_OnNextTabPerformed;
+            ClientInput.OnPreviousTabPerformed += ClientInput_OnPreviousTabPerformed;
             PlayerCustomisationManager.OnPlayerCustomisationStateChanged += PlayerCustomisationManager_OnPlayerCustomisationStateChanged; ;
         }
-        private void OnDestroy() => PlayerCustomisationManager.OnPlayerCustomisationStateChanged -= PlayerCustomisationManager_OnPlayerCustomisationStateChanged;
-        
+        private void OnDestroy()
+        {
+            ClientInput.OnNextTabPerformed -= ClientInput_OnNextTabPerformed;
+            ClientInput.OnPreviousTabPerformed -= ClientInput_OnPreviousTabPerformed;
+            PlayerCustomisationManager.OnPlayerCustomisationStateChanged -= PlayerCustomisationManager_OnPlayerCustomisationStateChanged;
+        }
+
+        private void ClientInput_OnNextTabPerformed()
+        {
+            if (!_frameSelectionUI.IsFrameSelectionScreenActive)
+                SelectNextTab();
+        }
+        private void ClientInput_OnPreviousTabPerformed()
+        {
+            if (!_frameSelectionUI.IsFrameSelectionScreenActive)
+                SelectPreviousTab();
+        }
+
         private void GenerateButtons()
         {
             // Cleanup existing button instances.
@@ -134,9 +154,9 @@ namespace UI.Customisation
         }
 
         [ContextMenu("Select Next")]
-        public void SelectNextTab() => SelectTab(MathUtils.Loop(_activeTab.GetSlotInteger() + 1, 0, _selectedFrameData.AttachmentPoints.Length).ToSlotInteger());
+        public void SelectNextTab() => SelectTab(MathUtils.Loop(_activeTab.GetSlotInteger() + 1, 0, _selectedFrameData.AttachmentPoints.Length).ToSlotIndex());
         [ContextMenu("Select Prev")]
-        public void SelectPreviousTab() => SelectTab(MathUtils.Loop(_activeTab.GetSlotInteger() - 1, 0, _selectedFrameData.AttachmentPoints.Length).ToSlotInteger());
+        public void SelectPreviousTab() => SelectTab(MathUtils.Loop(_activeTab.GetSlotInteger() - 1, 0, _selectedFrameData.AttachmentPoints.Length).ToSlotIndex());
         
         public void SelectTab(SlotIndex slotIndex)
         {

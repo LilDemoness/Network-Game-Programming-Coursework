@@ -3,6 +3,7 @@ using Gameplay.GameplayObjects.Character.Customisation.Data;
 using TMPro;
 using Unity.Netcode;
 using UnityEngine;
+using UserInput;
 
 namespace UI.Customisation
 {
@@ -18,6 +19,7 @@ namespace UI.Customisation
 
         [Header("Frame Selection")]
         [SerializeField] private GameObject _frameSelectionRoot;
+        public bool IsFrameSelectionScreenActive => _frameSelectionRoot.activeSelf;
 
         [Space(10)]
         [SerializeField] private Transform _frameOptionsContainer;
@@ -36,10 +38,12 @@ namespace UI.Customisation
             SetupFrameSelectionOptions();
             HideSelectionOptions();
 
+            SubscribeToInput();
             PlayerCustomisationManager.OnPlayerCustomisationStateChanged += PlayerCustomisationManager_OnPlayerCustomisationStateChanged;
         }
         private void OnDestroy()
         {
+            UnsubscribeFromInput();
             PlayerCustomisationManager.OnPlayerCustomisationStateChanged -= PlayerCustomisationManager_OnPlayerCustomisationStateChanged;   
         }
         /// <summary>
@@ -70,7 +74,6 @@ namespace UI.Customisation
         }
         private static readonly System.Text.RegularExpressions.Regex sWhitespace = new System.Text.RegularExpressions.Regex(@"\s+");
         private static string ReplaceWhitespace(string input, string replacement) => sWhitespace.Replace(input, replacement);
-
         private void CleanupFrameSelectionOptions()
         {
             for(int i = _frameOptionsContainer.childCount - 1; i >= 0; --i)
@@ -89,11 +92,43 @@ namespace UI.Customisation
         }
 
 
+        private void SubscribeToInput()
+        {
+            ClientInput.OnOpenFrameSelectionPerformed += ToggleSelectionOptions;
+            ClientInput.OnConfirmPerformed += ClientInput_OnConfirmPerformed;
+
+            ClientInput.OnNextTabPerformed += SelectNextFrameOption;
+            ClientInput.OnPreviousTabPerformed += SelectPreviousFrameOption;
+        }
+        private void UnsubscribeFromInput()
+        {
+            ClientInput.OnOpenFrameSelectionPerformed -= ToggleSelectionOptions;
+            ClientInput.OnConfirmPerformed -= ClientInput_OnConfirmPerformed;
+
+            ClientInput.OnNextTabPerformed -= SelectNextFrameOption;
+            ClientInput.OnPreviousTabPerformed -= SelectPreviousFrameOption;
+        }
+
+        private void ClientInput_OnConfirmPerformed()
+        {
+            if (IsFrameSelectionScreenActive)
+                SelectCurrentFrameOption();
+        }
+
+
+
         public void SetSelectedFrameText(string frameName) => _selectedFrameName.text = frameName;
         public void SelectNextFramePressed() => throw new System.NotImplementedException();
         public void SelectPreviousFramePressed() => throw new System.NotImplementedException();
 
 
+        public void ToggleSelectionOptions()
+        {
+            if (_frameSelectionRoot.activeSelf)
+                HideSelectionOptions();
+            else
+                ShowSelectionOptions();
+        }
         [ContextMenu("Show")]
         public void ShowSelectionOptions()
         {

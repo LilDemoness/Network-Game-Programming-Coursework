@@ -54,9 +54,6 @@ namespace UserInput
         [SerializeField] private ServerCharacter _serverCharacter;
 
 
-        private PlayerInputActions _inputActions;
-
-
         [SerializeField] private ServerWeaponController _serverWeaponController;
 
         
@@ -69,93 +66,41 @@ namespace UserInput
             }
 
 
-            // Setup our InputActionMap.
-            CreateInputActions();
+            // Subscribe to Client Inputs.
+            SubscribeToClientInput();
         }
         public override void OnNetworkDespawn()
         {
-            if (_inputActions != null)
-            {
-                // Dispose of our InputActionMap.
-                DestroyInputActions();
-            }
+            if (!IsClient || !IsOwner)
+                return;
+
+            // Unsubscribe from Client Inputs.
+            UnsubscribeFromClientInput();
         }
-        // Note: We can possible remove this?
-        public override void OnDestroy()
+        private void SubscribeToClientInput()
         {
-            base.OnDestroy();
+            ClientInput.OnMovementInputChanged += ClientInput_OnMovementInputChanged;
 
-            if (_inputActions != null)
-            {
-                // Dispose of our InputActionMap.
-                DestroyInputActions();
-            }
+            ClientInput.OnActivateSlotStarted += ClientInput_OnActivateSlotStarted;
         }
-
-
-        private void CreateInputActions()
+        private void UnsubscribeFromClientInput()
         {
-            // Create the InputActionMap.
-            _inputActions = new PlayerInputActions();
+            ClientInput.OnMovementInputChanged -= ClientInput_OnMovementInputChanged;
 
-
-            // Subscribe to Input Events.
-            #region Movement
-
-            //_inputActions.General.Movement.performed += Movement_performed;
-
-            #endregion
-
-            #region Combat
-
-            _inputActions.Combat.UsePrimaryWeapon.started += UsePrimaryWeapon_started;
-            _inputActions.Combat.UsePrimaryWeapon.canceled += UsePrimaryWeapon_cancelled;
-
-            _inputActions.Combat.UseSecondaryWeapon.started += UseSecondaryWeapon_started;
-            _inputActions.Combat.UseSecondaryWeapon.canceled += UseSecondaryWeapon_cancelled;
-
-            _inputActions.Combat.UseTertiaryWeapon.started += UseTertiaryWeapon_started;
-            _inputActions.Combat.UseTertiaryWeapon.canceled += UseTertiaryWeapon_cancelled;
-
-            #endregion
-
-
-            // Enable the Action Maps.
-            _inputActions.Enable();
+            ClientInput.OnActivateSlotStarted -= ClientInput_OnActivateSlotStarted;
         }
-        private void DestroyInputActions()
+
+        private void ClientInput_OnMovementInputChanged()
         {
-            // Unsubscribe from Input Events.
-            //_inputActions.General.Movement.started -= Movement_performed;
-
-            _inputActions.Combat.UsePrimaryWeapon.started -= UsePrimaryWeapon_started;
-            _inputActions.Combat.UsePrimaryWeapon.canceled -= UsePrimaryWeapon_cancelled;
-
-            _inputActions.Combat.UseSecondaryWeapon.started -= UseSecondaryWeapon_started;
-            _inputActions.Combat.UseSecondaryWeapon.canceled -= UseSecondaryWeapon_cancelled;
-
-            _inputActions.Combat.UseTertiaryWeapon.started -= UseTertiaryWeapon_started;
-            _inputActions.Combat.UseTertiaryWeapon.canceled -= UseTertiaryWeapon_cancelled;
-
-
-            // Dispose of the Input Actions.
-            _inputActions.Dispose();
-
-            // Remove our Reference.
-            _inputActions = null;
+            _movementInput = ClientInput.MovementInput;
+            _hasMoveRequest = true;
         }
-
-
-        private void Update()
+        private void ClientInput_OnActivateSlotStarted(int slotIndex)
         {
-            // Get Framewise Input.
-            Vector2 newMovementInput = _inputActions.General.Movement.ReadValue<Vector2>();
-            if (newMovementInput != _movementInput)
-            {
-                _movementInput = newMovementInput;
-                _hasMoveRequest = true;
-            }
+            _serverWeaponController.ActivateSlotServerRpc(slotIndex);
         }
+
+
         private void FixedUpdate()
         {
             // Send Non-client Only Input Requests to the Server.
@@ -214,15 +159,5 @@ namespace UserInput
                 ++_actionRequestCount;
             }
         }*/
-
-
-        private void UsePrimaryWeapon_started(InputAction.CallbackContext obj) => _serverWeaponController.StartFiringPrimaryWeaponServerRpc();
-        private void UsePrimaryWeapon_cancelled(InputAction.CallbackContext obj) => _serverWeaponController.StopFiringPrimaryWeaponServerRpc();
-
-        private void UseSecondaryWeapon_started(InputAction.CallbackContext obj) => _serverWeaponController.StartFiringSecondaryWeaponServerRpc();
-        private void UseSecondaryWeapon_cancelled(InputAction.CallbackContext obj) => _serverWeaponController.StopFiringSecondaryWeaponServerRpc();
-
-        private void UseTertiaryWeapon_started(InputAction.CallbackContext obj) => _serverWeaponController.StartFiringTertiaryWeaponServerRpc();
-        private void UseTertiaryWeapon_cancelled(InputAction.CallbackContext obj) => _serverWeaponController.StopFiringTertiaryWeaponServerRpc();
     }
 }
