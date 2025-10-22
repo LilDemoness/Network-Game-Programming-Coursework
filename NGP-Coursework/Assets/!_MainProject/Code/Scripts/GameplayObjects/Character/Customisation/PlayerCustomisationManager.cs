@@ -2,8 +2,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
 using Gameplay.GameplayObjects.Character.Customisation.Data;
-using UI.Customisation;
-using Unity.Collections.LowLevel.Unsafe;
 
 namespace Gameplay.GameplayObjects.Character.Customisation
 {
@@ -13,8 +11,15 @@ namespace Gameplay.GameplayObjects.Character.Customisation
     public class PlayerCustomisationManager : NetworkBehaviour
     {
         [SerializeField] private CustomisationOptionsDatabase _optionsDatabase;
-        private PlayerCustomisationState _localPlayerState => _otherPlayerStates[NetworkManager.LocalClientId];
-        private Dictionary<ulong, PlayerCustomisationState> _otherPlayerStates;
+        private PlayerCustomisationState _localPlayerState
+        {
+            get => _syncedPlayerServerState[NetworkManager.LocalClientId];
+            set => _syncedPlayerServerState[NetworkManager.LocalClientId] = value;
+        }
+        private Dictionary<ulong, PlayerCustomisationState> _syncedPlayerServerState;   // Set by RPC calls.
+
+        private Dictionary<int, BuildData> _localClientFrameIndexToCachedBuildDict = new Dictionary<int, BuildData>();
+
 
 
         [Header("Player Lobby GFX Instances")]
@@ -33,20 +38,27 @@ namespace Gameplay.GameplayObjects.Character.Customisation
 
         // Events.
         public static event System.Action<ulong, PlayerCustomisationState> OnPlayerCustomisationStateChanged;
+        public static event System.Action<PlayerCustomisationState> OnLocalClientCustomisationStateChanged;
         public static event System.Action<ulong, PlayerCustomisationState> OnPlayerCustomisationFinalised;
 
 
 
         private void Awake()
         {
-            _otherPlayerStates = new Dictionary<ulong, PlayerCustomisationState>();
+            _syncedPlayerServerState = new Dictionary<ulong, PlayerCustomisationState>();
             _playerLobbyInstances = new Dictionary<ulong, PlayerCustomisationDisplay>();
         }
 
 
         [Rpc(SendTo.Server)]
-        public void AlterPlayerStateServerRpc(PlayerCustomisationState customisationState, RpcParams rpcParams = default)
+        public void AlterPlayerStateServerRpc(PlayerCustomisationState customisationState)
         {
+            // If we are ONLY the server (NOT the Host too), then update our cached value.
+            if (!IsHost)
+                if (_syncedPlayerServerState.TryAdd(customisationState.ClientID, customisationState))
+                    _syncedPlayerServerState[customisationState.ClientID] = customisationState;
+            
+
             AlterPlayerStateClientRpc(customisationState);
         }
         [Rpc(SendTo.ClientsAndHost)]
@@ -56,18 +68,13 @@ namespace Gameplay.GameplayObjects.Character.Customisation
         }
         private void AlterPlayerState(ref PlayerCustomisationState customisationState)
         {
-            if (customisationState.ClientID == this.OwnerClientId)
+            if (customisationState.ClientID == NetworkManager.LocalClientId)
             {
-                HandleLocalPlayerStateChanged();
+                HandleLocalPlayerStateChanged(ref customisationState);
             }
             else
             {
-                // Update the corresponding other player state.
-                if (!_otherPlayerStates.TryAdd(customisationState.ClientID, customisationState))
-                    _otherPlayerStates[customisationState.ClientID] = customisationState;
-
-                // Update the displayed graphics.
-                HandlePlayersStateChanged(customisationState);
+                HandlePlayersStateChanged(ref customisationState);
             }
         }
 
@@ -77,7 +84,7 @@ namespace Gameplay.GameplayObjects.Character.Customisation
             if (IsClient)
             {
                 // Ensure that we're accounting for other already existing players.
-                foreach(var clientID in _otherPlayerStates.Keys)
+                foreach(var clientID in _syncedPlayerServerState.Keys)
                 {
                     AddPlayerInstance(clientID);
                 }
@@ -108,20 +115,20 @@ namespace Gameplay.GameplayObjects.Character.Customisation
         private void Server_HandleClientConnected(ulong clientID)
         {
             // Ensure we've not already added this client.
-            if (_otherPlayerStates.ContainsKey(clientID))
+            if (_syncedPlayerServerState.ContainsKey(clientID))
                 return;
 
             // Add the client.
-            _otherPlayerStates.Add(clientID, _optionsDatabase.GetDefaultState(clientID));
-            Debug.Log("Players Count: " + _otherPlayerStates.Count);
+            _syncedPlayerServerState.Add(clientID, _optionsDatabase.GetDefaultState(clientID));
+            Debug.Log("Players Count: " + _syncedPlayerServerState.Count);
 
             // Notify the Clients of the new player.
-            HandleClientConnectedClientRpc(_otherPlayerStates[clientID]);
+            HandleClientConnectedClientRpc(_syncedPlayerServerState[clientID]);
         }
         private void Server_HandleClientDisconnected(ulong clientID)
         {
             // Remove the player who just left from our dictionary.
-            _otherPlayerStates.Remove(clientID);
+            _syncedPlayerServerState.Remove(clientID);
 
             // Notify the Clients of the disconnect.
             HandleClientDisconnectClientRpc(clientID);
@@ -136,26 +143,25 @@ namespace Gameplay.GameplayObjects.Character.Customisation
         public void SelectNextFrame() => IncrementSelectedFrameServerRpc(isIncrement: true);
         public void SelectPreviousFrame() => IncrementSelectedFrameServerRpc(isIncrement: false);
 
+
         [Rpc(SendTo.Server, RequireOwnership = false)]
         private void IncrementSelectedFrameServerRpc(bool isIncrement, RpcParams rpcParams = default)
         {
-            if (!_otherPlayerStates.TryGetValue(rpcParams.Receive.SenderClientId, out PlayerCustomisationState customisationState))
+            if (!_syncedPlayerServerState.TryGetValue(rpcParams.Receive.SenderClientId, out PlayerCustomisationState customisationState))
                 throw new System.Exception($"We haven't set up a Customisation State for ClientID {rpcParams.Receive.SenderClientId}");
 
             int newValue = MathUtils.Loop(customisationState.FrameIndex + (isIncrement ? 1 : -1), _optionsDatabase.FrameDatas.Length);
-            _otherPlayerStates[rpcParams.Receive.SenderClientId] = customisationState.NewWithFrameIndex(newValue);
-            AlterPlayerStateClientRpc(_otherPlayerStates[rpcParams.Receive.SenderClientId]);
+            AlterPlayerStateServerRpc(customisationState.NewWithFrameIndex(newValue));
         }
 
         public void SelectFrame(int selectedFrameDataIndex) => SelectFrameServerRpc(selectedFrameDataIndex);
         [Rpc(SendTo.Server, RequireOwnership = false)]
         private void SelectFrameServerRpc(int selectedFrameIndex, RpcParams rpcParams = default)
         {
-            if (!_otherPlayerStates.TryGetValue(rpcParams.Receive.SenderClientId, out PlayerCustomisationState customisationState))
+            if (!_syncedPlayerServerState.TryGetValue(rpcParams.Receive.SenderClientId, out PlayerCustomisationState customisationState))
                 throw new System.Exception($"We haven't set up a Customisation State for ClientID {rpcParams.Receive.SenderClientId}");
 
-            _otherPlayerStates[rpcParams.Receive.SenderClientId] = customisationState.NewWithFrameIndex(selectedFrameIndex);
-            AlterPlayerStateClientRpc(_otherPlayerStates[rpcParams.Receive.SenderClientId]);
+            AlterPlayerStateServerRpc(customisationState.NewWithFrameIndex(selectedFrameIndex));
         }
 
     #endregion
@@ -167,7 +173,7 @@ namespace Gameplay.GameplayObjects.Character.Customisation
         [Rpc(SendTo.Server, RequireOwnership = false)]
         private void SelectSlottableDataServerRpc(SlotIndex slotIndex, int slottableDataIndex, RpcParams rpcParams = default)
         {
-            if (!_otherPlayerStates.TryGetValue(rpcParams.Receive.SenderClientId, out PlayerCustomisationState customisationState))
+            if (!_syncedPlayerServerState.TryGetValue(rpcParams.Receive.SenderClientId, out PlayerCustomisationState customisationState))
                 throw new System.Exception($"We haven't set up a Customisation State for ClientID {rpcParams.Receive.SenderClientId}");
 
             // Remove once we've fixed our UI?
@@ -184,8 +190,7 @@ namespace Gameplay.GameplayObjects.Character.Customisation
                 throw new System.ArgumentException($"Slottable Data Index {slottableDataIndex} isn't supported by \"{_optionsDatabase.FrameDatas[customisationState.FrameIndex].name}\"'s attach point {slotIndex.GetSlotInteger()}");
 
 
-            _otherPlayerStates[rpcParams.Receive.SenderClientId] = customisationState.NewWithSlottableDataValue(slotIndex, slottableDataIndex);
-            AlterPlayerStateServerRpc(_otherPlayerStates[rpcParams.Receive.SenderClientId]);
+            AlterPlayerStateServerRpc(customisationState.NewWithSlottableDataValue(slotIndex, slottableDataIndex));
         }
 
         public int GetClientSelectedSlottableIndex(SlotIndex slotIndex) => _localPlayerState.SlottableDataIndicies[slotIndex.GetSlotInteger()];
@@ -195,12 +200,48 @@ namespace Gameplay.GameplayObjects.Character.Customisation
         #endregion
 
 
-        private void HandleLocalPlayerStateChanged()
+        /// <summary>
+        ///     Handle the updating of the local client's PlayerCustomisationState.
+        ///     Includes caching the BuildData for the active state, and loading cached data if we swapped frames.
+        /// </summary>
+        private void HandleLocalPlayerStateChanged(ref PlayerCustomisationState newState)
         {
+            if (newState.FrameIndex != _localPlayerState.FrameIndex)
+            {
+                // We've changed our frame. Load our cached data.
+                if (_localClientFrameIndexToCachedBuildDict.ContainsKey(newState.FrameIndex))
+                    newState = _localClientFrameIndexToCachedBuildDict[newState.FrameIndex].ToCustomisationState(NetworkManager.LocalClientId);
+                else
+                {
+                    // We've not used this frame before, and so have nothing to load.
+                    // Create a empty CustomisationState for this frame (Resets Slottables as desired).
+                    newState = new PlayerCustomisationState(newState.ClientID, newState.FrameIndex, 0, false); 
+                }
+            }
+
+
+            // Update our cached BuildData for this Frame Index.
+            BuildData buildData = newState.ToBuildData();
+            if (!_localClientFrameIndexToCachedBuildDict.TryAdd(newState.FrameIndex, buildData))
+            {
+                Debug.Log("Updating Cached State");
+                _localClientFrameIndexToCachedBuildDict[newState.FrameIndex] = buildData;
+            }
+
+
+            // Update the corresponding other player state.
+            _localPlayerState = newState;
+
+            // Notify listeners of the change.
             OnPlayerCustomisationStateChanged?.Invoke(_localPlayerState.ClientID, _localPlayerState);
         }
-        private void HandlePlayersStateChanged(PlayerCustomisationState newState)
+        private void HandlePlayersStateChanged(ref PlayerCustomisationState newState)
         {
+            // Update the corresponding player state.
+            if (!_syncedPlayerServerState.TryAdd(newState.ClientID, newState))
+                _syncedPlayerServerState[newState.ClientID] = newState;
+
+            // Update listeners (E.g. To update displayed graphics).
             OnPlayerCustomisationStateChanged?.Invoke(newState.ClientID, newState);
         }
         [Rpc(SendTo.ClientsAndHost)]
@@ -274,10 +315,10 @@ namespace Gameplay.GameplayObjects.Character.Customisation
 
         public void ToggleReady()
         {
-            if (_otherPlayerStates.ContainsKey(NetworkManager.LocalClientId))
+            if (_syncedPlayerServerState.ContainsKey(NetworkManager.LocalClientId))
             {
                 // Toggle our ready state on the server.
-                if (_otherPlayerStates[NetworkManager.LocalClientId].IsReady)
+                if (_syncedPlayerServerState[NetworkManager.LocalClientId].IsReady)
                     SetPlayerNotReadyServerRpc();
                 else
                     SetPlayerReadyServerRpc();
@@ -287,15 +328,15 @@ namespace Gameplay.GameplayObjects.Character.Customisation
         private void SetPlayerReadyServerRpc(ServerRpcParams serverRpcParams = default)
         {
             // Update the triggering client as ready.
-            if (_otherPlayerStates.ContainsKey(NetworkManager.LocalClientId))
+            if (_syncedPlayerServerState.ContainsKey(NetworkManager.LocalClientId))
             {
                 // Mark this player as ready.
-                _otherPlayerStates[NetworkManager.LocalClientId] = _otherPlayerStates[NetworkManager.LocalClientId].NewWithIsReady(true);
+                _syncedPlayerServerState[NetworkManager.LocalClientId] = _syncedPlayerServerState[NetworkManager.LocalClientId].NewWithIsReady(true);
             }
 
 
             // Check if all players are ready.
-            foreach(var kvp in _otherPlayerStates)
+            foreach(var kvp in _syncedPlayerServerState)
             {
                 if (!kvp.Value.IsReady)
                 {
@@ -307,12 +348,12 @@ namespace Gameplay.GameplayObjects.Character.Customisation
 
 
             // Set the player's data for loading into new scenes?
-            foreach (var clientID in _otherPlayerStates.Keys)
+            foreach (var clientID in _syncedPlayerServerState.Keys)
             {
                 BuildData playerBuildData = new BuildData(
-                    activeFrame:            _otherPlayerStates[clientID].FrameIndex,
-                    activeLeg:              _otherPlayerStates[clientID].LegIndex,
-                    activeSlottableIndicies:_otherPlayerStates[clientID].SlottableDataIndicies
+                    activeFrame:            _syncedPlayerServerState[clientID].FrameIndex,
+                    activeLeg:              _syncedPlayerServerState[clientID].LegIndex,
+                    activeSlottableIndicies:_syncedPlayerServerState[clientID].SlottableDataIndicies
                 );
 
                 ServerManager.Instance.SetBuild(clientID, playerBuildData);
@@ -325,9 +366,9 @@ namespace Gameplay.GameplayObjects.Character.Customisation
         [ClientRpc]
         private void FinaliseCustomisationClientRpc()
         {
-            foreach(var clientID in _otherPlayerStates.Keys)
+            foreach(var clientID in _syncedPlayerServerState.Keys)
             {
-                OnPlayerCustomisationFinalised?.Invoke(clientID, _otherPlayerStates[clientID]);
+                OnPlayerCustomisationFinalised?.Invoke(clientID, _syncedPlayerServerState[clientID]);
             }
         }
 
@@ -335,9 +376,9 @@ namespace Gameplay.GameplayObjects.Character.Customisation
         private void SetPlayerNotReadyServerRpc(ServerRpcParams serverRpcParams = default)
         {
             // Update the triggering client as ready.
-            if (_otherPlayerStates.ContainsKey(serverRpcParams.Receive.SenderClientId))
+            if (_syncedPlayerServerState.ContainsKey(serverRpcParams.Receive.SenderClientId))
             {
-                _otherPlayerStates[serverRpcParams.Receive.SenderClientId] = _otherPlayerStates[serverRpcParams.Receive.SenderClientId].NewWithIsReady(false);
+                _syncedPlayerServerState[serverRpcParams.Receive.SenderClientId] = _syncedPlayerServerState[serverRpcParams.Receive.SenderClientId].NewWithIsReady(false);
             }
         }
     }

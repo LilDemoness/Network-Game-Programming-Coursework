@@ -14,12 +14,13 @@ namespace Gameplay.GameplayObjects.Character.Customisation
         public int FrameIndex;
         public int LegIndex;
         public int[] SlottableDataIndicies;
-        public void SetSlottableDataIndexForSlot(SlotIndex slotIndex, int newValue) => this.SlottableDataIndicies[(int)slotIndex - 1] = newValue;
-        public int GetSlottableDataIndexForSlot(SlotIndex slotIndex) => this.SlottableDataIndicies[(int)slotIndex - 1];
+        public void SetSlottableDataIndexForSlot(SlotIndex slotIndex, int newValue) => this.SlottableDataIndicies[slotIndex.GetSlotInteger()] = newValue;
+        public int GetSlottableDataIndexForSlot(SlotIndex slotIndex) => this.SlottableDataIndicies[slotIndex.GetSlotInteger()];
 
 
 
         public PlayerCustomisationState(ulong clientID) : this(clientID, 0, 0, false) { }
+        public PlayerCustomisationState(ulong clientID, int frameIndex, int legIndex, bool isReady, int[] slottableDataIndicies) : this(clientID, frameIndex, legIndex, isReady, ConvertIntArrayToSlottableIntTuple(slottableDataIndicies)) { }
         public PlayerCustomisationState(ulong clientID, int frameIndex, int legIndex, bool isReady, params(SlotIndex, int)[] param)
         {
             this.ClientID = clientID;
@@ -34,11 +35,27 @@ namespace Gameplay.GameplayObjects.Character.Customisation
             }
         }
 
+
+        /// <summary>
+        ///     Convert an int array to an (SlotIndex, int) tuple array, where SlotIndex corresponds to the position of the integer in the array.
+        /// </summary>
+        private static (SlotIndex, int)[] ConvertIntArrayToSlottableIntTuple(in int[] dataIndicies)
+        {
+            (SlotIndex, int)[] output = new (SlotIndex, int)[dataIndicies.Length];
+            for(int i = 0; i < dataIndicies.Length; ++i)
+                output[i] = (i.ToSlotIndex(), dataIndicies[i]);
+            
+
+            return output;
+        }
+
         public PlayerCustomisationState NewWithIsReady(bool isReadyValue)           { this.IsReady = isReadyValue;          return this; }
 
         public PlayerCustomisationState NewWithFrameIndex(int newValue)             { this.FrameIndex = newValue;           return this; }
         public PlayerCustomisationState NewWithLegIndex(int newValue)               { this.LegIndex = newValue;             return this; }
         public PlayerCustomisationState NewWithSlottableDataValue(SlotIndex slotIndex, int newValue) { this.SetSlottableDataIndexForSlot(slotIndex, newValue); return this; }
+
+
 
         
         public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
@@ -69,5 +86,11 @@ namespace Gameplay.GameplayObjects.Character.Customisation
         {
             return (SlotIndex, SelectedIndex) == (other.SlotIndex, other.SelectedIndex);
         }
+    }
+
+    public static class PlayerCustomsationStateExtensions
+    {
+        public static Data.BuildData ToBuildData(this PlayerCustomisationState customisationState) => new Data.BuildData(customisationState.FrameIndex, customisationState.LegIndex, customisationState.SlottableDataIndicies);
+        public static PlayerCustomisationState ToCustomisationState(this Data.BuildData buildData, ulong clientID) => new PlayerCustomisationState(clientID, buildData.ActiveFrameIndex, buildData.ActiveLegIndex, false, buildData.ActiveSlottableIndicies);
     }
 }
