@@ -82,12 +82,14 @@ namespace UserInput
             ClientInput.OnMovementInputChanged += ClientInput_OnMovementInputChanged;
 
             ClientInput.OnActivateSlotStarted += ClientInput_OnActivateSlotStarted;
+            ClientInput.OnActivateSlotCancelled += ClientInput_OnActivateSlotCancelled;
         }
         private void UnsubscribeFromClientInput()
         {
             ClientInput.OnMovementInputChanged -= ClientInput_OnMovementInputChanged;
 
             ClientInput.OnActivateSlotStarted -= ClientInput_OnActivateSlotStarted;
+            ClientInput.OnActivateSlotCancelled -= ClientInput_OnActivateSlotCancelled;
         }
 
         private void ClientInput_OnMovementInputChanged()
@@ -95,10 +97,9 @@ namespace UserInput
             _movementInput = ClientInput.MovementInput;
             _hasMoveRequest = true;
         }
-        private void ClientInput_OnActivateSlotStarted(int slotIndex)
-        {
-            _serverWeaponController.ActivateSlotServerRpc(slotIndex);
-        }
+        private void ClientInput_OnActivateSlotStarted(int slotIndex) => _serverWeaponController.ActivateSlotServerRpc(slotIndex);
+        private void ClientInput_OnActivateSlotCancelled(int slotIndex) => _serverWeaponController.DeactivateSlotServerRpc(slotIndex);
+        
 
 
         private void FixedUpdate()

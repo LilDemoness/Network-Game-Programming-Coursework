@@ -14,6 +14,7 @@ namespace UserInput
         #region Combat Events
 
         public static event System.Action<int> OnActivateSlotStarted;
+        public static event System.Action<int> OnActivateSlotCancelled;
 
         #endregion
 
@@ -165,16 +166,16 @@ namespace UserInput
         #region Combat Event Functions
 
         private void ActivateSlot0_started(InputAction.CallbackContext obj)     => OnActivateSlotStarted?.Invoke(0);
-        private void ActivateSlot0_cancelled(InputAction.CallbackContext obj)   => OnActivateSlotStarted?.Invoke(0);
+        private void ActivateSlot0_cancelled(InputAction.CallbackContext obj)   => OnActivateSlotCancelled?.Invoke(0);
 
         private void ActivateSlot1_started(InputAction.CallbackContext obj)     => OnActivateSlotStarted?.Invoke(1);
-        private void ActivateSlot1_cancelled(InputAction.CallbackContext obj)   => OnActivateSlotStarted?.Invoke(1);
+        private void ActivateSlot1_cancelled(InputAction.CallbackContext obj)   => OnActivateSlotCancelled?.Invoke(1);
 
         private void ActivateSlot2_started(InputAction.CallbackContext obj)     => OnActivateSlotStarted?.Invoke(2);
-        private void ActivateSlot2_cancelled(InputAction.CallbackContext obj)   => OnActivateSlotStarted?.Invoke(2);
+        private void ActivateSlot2_cancelled(InputAction.CallbackContext obj)   => OnActivateSlotCancelled?.Invoke(2);
 
         private void ActivateSlot3_started(InputAction.CallbackContext obj)     => OnActivateSlotStarted?.Invoke(3);
-        private void ActivateSlot3_cancelled(InputAction.CallbackContext obj)   => OnActivateSlotStarted?.Invoke(3);
+        private void ActivateSlot3_cancelled(InputAction.CallbackContext obj)   => OnActivateSlotCancelled?.Invoke(3);
 
         #endregion
 
