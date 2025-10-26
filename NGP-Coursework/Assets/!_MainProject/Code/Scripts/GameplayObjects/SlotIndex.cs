@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace Gameplay.GameplayObjects
 {
     [System.Serializable]
@@ -15,22 +17,36 @@ namespace Gameplay.GameplayObjects
 
     public static class SlotIndexExtensions
     {
-        private const int WEAPON_SLOT_INDEX_ADDITIONAL_VALUES = 1;  // Non-Slot Integer Values for WeaponSlotIndex.
+        // Non-Slot Integer Values for SlotIndex (E.g. Unset).
+        private static readonly HashSet<SlotIndex> NON_SLOT_SLOT_INDICIES = new HashSet<SlotIndex>
+        {
+            SlotIndex.Unset
+        };
         private static int s_maxPossibleSlots = -1;  // -1 is our uninitialised value.
 
-        public const int WEAPON_SLOT_COUNT = 4;
-
-        public static int GetMaxPossibleSlots(this SlotIndex slotIndex)
+        public static int GetMaxPossibleSlots()
         {
             if (s_maxPossibleSlots == -1)
             {
                 // Initialise s_maxPossibleWeaponsSlots.
-                s_maxPossibleSlots = System.Enum.GetValues(typeof(SlotIndex)).Length - WEAPON_SLOT_INDEX_ADDITIONAL_VALUES;
+                s_maxPossibleSlots = System.Enum.GetValues(typeof(SlotIndex)).Length - NON_SLOT_SLOT_INDICIES.Count;
             }
 
             return s_maxPossibleSlots;
         }
         public static int GetSlotInteger(this SlotIndex slotIndex) => (int)slotIndex - 1;
         public static SlotIndex ToSlotIndex(this int integer) => (SlotIndex)(integer + 1);
+
+
+        public static void PerformForAllValidSlots(System.Action<SlotIndex> action)
+        {
+            for(int i = 0; i < GetMaxPossibleSlots(); ++i)
+            {
+                if (NON_SLOT_SLOT_INDICIES.Contains(i.ToSlotIndex()))
+                    continue;   // Invalid Slot Index.
+
+                action(i.ToSlotIndex());
+            }
+        }
     }
 }

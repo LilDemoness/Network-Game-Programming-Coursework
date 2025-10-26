@@ -11,6 +11,7 @@ namespace Gameplay.GameplayObjects.Character.Customisation
     public class PlayerCustomisationManager : NetworkBehaviour
     {
         [SerializeField] private CustomisationOptionsDatabase _optionsDatabase;
+
         private PlayerCustomisationState _localPlayerState
         {
             get => _syncedPlayerServerState[NetworkManager.LocalClientId];
@@ -47,6 +48,25 @@ namespace Gameplay.GameplayObjects.Character.Customisation
         {
             _syncedPlayerServerState = new Dictionary<ulong, PlayerCustomisationState>();
             _playerLobbyInstances = new Dictionary<ulong, PlayerCustomisationDisplay>();
+
+            DontDestroyOnLoad(this.gameObject);
+        }
+
+
+        [ContextMenu("Randomise Build")]
+        private void RandomiseBuild()
+        {
+            int[] slottableDatas = new int[SlotIndexExtensions.GetMaxPossibleSlots()];
+            for(int i = 0; i < SlotIndexExtensions.GetMaxPossibleSlots(); ++i)
+                slottableDatas[i] = Random.Range(0, CustomisationOptionsDatabase.AllOptionsDatabase.SlottableDatas.Length);
+
+            PlayerCustomisationState newState = new PlayerCustomisationState(0,
+                frameIndex: Random.Range(0, CustomisationOptionsDatabase.AllOptionsDatabase.FrameDatas.Length),
+                legIndex: Random.Range(0, CustomisationOptionsDatabase.AllOptionsDatabase.LegDatas.Length),
+                true,
+                slottableDataIndicies: slottableDatas);
+
+            AlterPlayerStateServerRpc(newState);
         }
 
 

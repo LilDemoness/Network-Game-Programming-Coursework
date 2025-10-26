@@ -28,7 +28,7 @@ namespace Gameplay.GameplayObjects.Character.Customisation
 
             this.FrameIndex = frameIndex;
             this.LegIndex = legIndex;
-            this.SlottableDataIndicies = new int[SlotIndex.Unset.GetMaxPossibleSlots()];
+            this.SlottableDataIndicies = new int[SlotIndexExtensions.GetMaxPossibleSlots()];
             foreach((SlotIndex slot, int setValue) slotInfo in param)
             {
                 SetSlottableDataIndexForSlot(slotInfo.slot, slotInfo.setValue);

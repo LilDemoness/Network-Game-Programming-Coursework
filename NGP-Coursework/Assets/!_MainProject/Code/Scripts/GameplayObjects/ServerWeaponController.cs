@@ -3,6 +3,7 @@ using Gameplay.Actions;
 using System.Collections;
 using Unity.Netcode;
 using UnityEngine;
+using Gameplay.GameplayObjects.Character.Customisation;
 
 namespace Gameplay.GameplayObjects.Character
 {
@@ -17,6 +18,15 @@ namespace Gameplay.GameplayObjects.Character
         [SerializeField] private CancelAction _cancelFiringAction;
 
 
+        private void Awake()
+        {
+            PlayerCustomisationManager.OnPlayerCustomisationStateChanged += OnPlayerBuildChanged;
+        }
+        public override void OnDestroy()
+        {
+            base.OnDestroy();
+            PlayerCustomisationManager.OnPlayerCustomisationStateChanged -= OnPlayerBuildChanged;
+        }
         public override void OnNetworkSpawn()
         {
             if (!IsServer)
@@ -35,23 +45,42 @@ namespace Gameplay.GameplayObjects.Character
 
             // Get our Weapons
             Customisation.Sections.SlottableDataSlot[] attachmentSlots = GetComponentsInChildren<Customisation.Sections.SlottableDataSlot>();
-            _activationSlots = new Weapon[attachmentSlots.Length];
+            int activeSlots = 0;
+            for(int i = 0; i < attachmentSlots.Length; ++i)
+                if (attachmentSlots[i].isActiveAndEnabled)
+                    ++activeSlots;
+            _activationSlots = new Weapon[activeSlots];
             foreach (var weaponAttachmentSlot in attachmentSlots)
             {
-                Weapon weapon = weaponAttachmentSlot.GetComponentInChildren<Weapon>();
-                if (weapon == null)
+                if (!weaponAttachmentSlot.isActiveAndEnabled)
                     continue;
 
-                Debug.Log(weaponAttachmentSlot.name + " is equipped in Slot " + weaponAttachmentSlot.SlotIndex + ". Weapon Data: " + weapon.WeaponData.name);
-                switch (weaponAttachmentSlot.SlotIndex)
+                foreach (Weapon weapon in weaponAttachmentSlot.GetComponentsInChildren<Weapon>())
                 {
-                    case SlotIndex.PrimaryWeapon: _activationSlots[0] = weapon; break;
-                    case SlotIndex.SecondaryWeapon: _activationSlots[1] = weapon; break;
-                    case SlotIndex.TertiaryWeapon: _activationSlots[2] = weapon; break;
+                    if (!weapon.isActiveAndEnabled)
+                        continue;
+
+                    Debug.Log(weaponAttachmentSlot.name + " is equipped in Slot " + weaponAttachmentSlot.SlotIndex + ". Weapon Data: " + weapon.WeaponData.name);
+                    switch (weaponAttachmentSlot.SlotIndex)
+                    {
+                        case SlotIndex.PrimaryWeapon: _activationSlots[0] = weapon; break;
+                        case SlotIndex.SecondaryWeapon: _activationSlots[1] = weapon; break;
+                        case SlotIndex.TertiaryWeapon: _activationSlots[2] = weapon; break;
+                    }
                 }
             }
 
             // Initialise Weapons (Or their Actions) on Client too?
+        }
+
+
+        private void OnPlayerBuildChanged(ulong clientID, PlayerCustomisationState newState)
+        {
+            if (clientID != _serverCharacter.OwnerClientId)
+                return;
+
+            // To-do: Improve this (E.g. Having it be not tied to activation state).
+            StartCoroutine(InitialiseWeaponsAfterFrame());
         }
 
 

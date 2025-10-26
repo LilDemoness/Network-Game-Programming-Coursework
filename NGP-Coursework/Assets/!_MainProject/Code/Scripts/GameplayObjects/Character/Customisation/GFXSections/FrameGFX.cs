@@ -41,7 +41,7 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Sections
 
         private void Awake()
         {
-            _slottableDataSlots = new Dictionary<SlotIndex, List<SlottableDataSlot>>(SlotIndex.Unset.GetMaxPossibleSlots());
+            _slottableDataSlots = new Dictionary<SlotIndex, List<SlottableDataSlot>>(SlotIndexExtensions.GetMaxPossibleSlots());
             foreach(SlottableDataSlot attachmentSlot in m_slottableDataSlotArray)
             {
                 if (!_slottableDataSlots.TryAdd(attachmentSlot.SlotIndex, new List<SlottableDataSlot>() { attachmentSlot }))
@@ -82,7 +82,8 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Sections
             // Frame.
             if (activeFrame != _associatedFrameData)
             {
-                Destroy(this.gameObject);
+                this.gameObject.SetActive(false);
+                //Destroy(this.gameObject);
                 return;
             }
 
@@ -90,7 +91,8 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Sections
             // Legs.
             for (int i = 0; i < _legDatas.Length; ++i)
             {
-                _legDatas[i].Finalise(activeLeg);
+                _legDatas[i].Toggle(activeLeg);
+                //_legDatas[i].Finalise(activeLeg);
             }
 
 
@@ -100,7 +102,10 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Sections
                 if (_slottableDataSlots.TryGetValue((SlotIndex)(i + 1), out List<SlottableDataSlot> slottableDataSlots))
                 {
                     for (int j = 0; j < slottableDataSlots.Count; ++j)
-                        slottableDataSlots[j].Finalise(activeSlottableDatas[i]);
+                    {
+                        slottableDataSlots[j].Toggle(activeSlottableDatas[i]);
+                        //slottableDataSlots[j].Finalise(activeSlottableDatas[i]);
+                    }
                 }
             }
         }
