@@ -148,7 +148,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7810325600904412365}
-  - component: {fileID: -1862860746417142053}
   - component: {fileID: 3418622057233608991}
   m_Layer: 0
   m_Name: MissileLauncherGFX
@@ -174,20 +173,6 @@ Transform:
   - {fileID: 7907272511991419202}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &-1862860746417142053
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4183947330775833831}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 99fa0cb7ce3500545a36865a33aa04b3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_weaponData: {fileID: 11400000, guid: 7185a6b1497f49e489dade294a6d052e, type: 2}
-  _firingOrigin: {fileID: 3988238998462500084}
 --- !u!114 &3418622057233608991
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -201,3 +186,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   AssociatedValue: {fileID: 11400000, guid: 7185a6b1497f49e489dade294a6d052e, type: 2}
+  _abilityOrigin: {fileID: 3988238998462500084}

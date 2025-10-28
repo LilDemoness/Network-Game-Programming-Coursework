@@ -23,6 +23,9 @@ namespace Gameplay.GameplayObjects.Character
         public bool CanPerformActions => _serverCharacter.CanPerformActions;
 
 
+        [SerializeField] private GameObject _graphicsRoot;  // Temp.
+
+
         #region Client RPCs
 
         /// <summary>
@@ -88,9 +91,10 @@ namespace Gameplay.GameplayObjects.Character
         }
 
 
-        private void OnIsInStealthChanged(bool oldValue, bool newValue)
+        private void OnIsInStealthChanged(bool oldStealthState, bool newStealthState)
         {
-
+            Debug.LogWarning("Visuals Require Actual Implementation");
+            _graphicsRoot.SetActive(!newStealthState);
         }
         private void OnMovementStatusChanged(MovementStatus oldMovementStatus, MovementStatus newMovementStatus)
         {

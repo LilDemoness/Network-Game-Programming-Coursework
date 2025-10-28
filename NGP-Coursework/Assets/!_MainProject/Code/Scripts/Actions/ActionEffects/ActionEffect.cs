@@ -19,6 +19,6 @@ namespace Gameplay.Actions.Effects
         /// <summary>
         ///     Cleanup the ActionEffect to be used the next time the Action is created.
         /// </summary>
-        public abstract void Cleanup();
+        public virtual void Cleanup(ServerCharacter owner) { }
     }
 }

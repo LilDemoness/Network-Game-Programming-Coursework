@@ -2,5 +2,8 @@
 
 namespace Gameplay.GameplayObjects.Character.Customisation.Sections
 {
-    public class SlotGFXSection : GFXSection<SlottableData> { }
+    public class SlotGFXSection : GFXSection<SlottableData>
+    {
+        public SlottableData SlottableData => AssociatedValue;
+    }
 }

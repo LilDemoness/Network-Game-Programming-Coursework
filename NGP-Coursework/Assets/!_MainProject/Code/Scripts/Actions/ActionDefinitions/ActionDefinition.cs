@@ -194,7 +194,13 @@ namespace Gameplay.Actions.Definitions
         /// <summary>
         ///     Cleans up any ongoing effects.
         /// </summary>
-        public virtual void Cleanup(ServerCharacter owner) { }
+        public virtual void Cleanup(ServerCharacter owner)
+        {
+            for(int i = 0; i < ActionEffects.Length; ++i)
+            {
+                ActionEffects[i].Cleanup(owner);
+            }
+        }
 
         
         public virtual void OnCollisionEntered(ServerCharacter owner, Collision collision) { }

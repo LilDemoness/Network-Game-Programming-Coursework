@@ -18,10 +18,5 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Sections
             for (int i = 0; i < _slotGFXs.Length; ++i)
                 _slotGFXs[i].Toggle(activeData);
         }
-        public void Finalise(SlottableData activeData)
-        {
-            for (int i = 0; i < _slotGFXs.Length; ++i)
-                _slotGFXs[i].Finalise(activeData);
-        }
     }
 }

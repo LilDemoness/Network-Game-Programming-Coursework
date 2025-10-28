@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Unity.Netcode;
+using UnityEngine;
 
 namespace Gameplay.GameplayObjects.Character.Customisation.Sections
 {
@@ -8,16 +9,62 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Sections
 
 
         public void Toggle(T activeData) => this.gameObject.SetActive(activeData != null && activeData.Equals(AssociatedValue));
-        public void Finalise(T activeData)
+        [SerializeField] private Transform _abilityOrigin;
+        private NetworkObject _parentNetworkObject;
+
+
+        private void Awake()
         {
-            if (!activeData.Equals(AssociatedValue))
+            _parentNetworkObject = GetComponentInParent<NetworkObject>();
+            if (_parentNetworkObject == null)
             {
-                Destroy(this.gameObject);
+                //Debug.LogError("Weapon failed to find parent NetworkObject");
+                this.enabled = false;
+                return;
+            }
+        }
+
+
+        public ulong GetAbilityOriginTransformID() => _parentNetworkObject.NetworkObjectId;
+        public Vector3 GetAbilityLocalOffset() => _parentNetworkObject.transform.InverseTransformPoint(_abilityOrigin.position);
+        public Vector3 GetAbilityLocalDirection() => _parentNetworkObject.transform.InverseTransformDirection(_abilityOrigin.forward);
+
+
+#if UNITY_EDITOR
+        private bool Editor_IsThisOrChildSelected()
+        {
+            Transform selectedTransform = UnityEditor.Selection.activeTransform;
+            while (selectedTransform != null)
+            {
+                if (selectedTransform == this.transform)
+                    return true;
+
+                selectedTransform = selectedTransform.parent;
+            }
+
+            return false;
+        }
+
+        private void OnDrawGizmos()
+        {
+            if (_abilityOrigin == null)
+                return;
+            if (!Editor_IsThisOrChildSelected())
+                return;
+
+            Gizmos.color = Color.red;
+
+            if (_parentNetworkObject == null)
+            {
+                Gizmos.DrawSphere(transform.TransformPoint(_abilityOrigin.localPosition), 0.05f);
+                Gizmos.DrawRay(transform.TransformPoint(_abilityOrigin.localPosition), transform.TransformDirection(_abilityOrigin.forward));
             }
             else
             {
-                Destroy(this);
+                Gizmos.DrawSphere(GetAbilityLocalOffset(), 0.05f);
+                Gizmos.DrawRay(GetAbilityLocalOffset(), GetAbilityLocalDirection());
             }
         }
+#endif
     }
 }

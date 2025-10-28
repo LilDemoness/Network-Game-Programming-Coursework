@@ -1,0 +1,49 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d2cae861ac9e7f4eb3e9d954ac1508d, type: 3}
+  m_Name: Action_ToggleStealth
+  m_EditorClassIdentifier: 
+  IsHostileAction: 0
+  Heat: 0
+  <ShouldNotifyClient>k__BackingField: 1
+  <ExecutionDelay>k__BackingField: 0
+  <ActionCooldown>k__BackingField: 0
+  <BlockingMode>k__BackingField: 1
+  <MaxActiveDuration>k__BackingField: 0
+  <CanCharge>k__BackingField: 0
+  <MaxChargeTime>k__BackingField: 0
+  <MinChargeActivationPercentage>k__BackingField: 1
+  <RetainChargeAfterFull>k__BackingField: 0
+  <MaxChargeDepletionTime>k__BackingField: 0
+  <UIChargeDepletionTime>k__BackingField: 0
+  <TriggerType>k__BackingField: 0
+  <CancelOnLastTrigger>k__BackingField: 0
+  <RetriggerDelay>k__BackingField: 0
+  <Bursts>k__BackingField: 0
+  <BurstDelay>k__BackingField: 0
+  <IsInterruptable>k__BackingField: 0
+  ActionEffects:
+  - rid: 9030112626022285444
+  TriggeringVisuals: []
+  HitVisuals: []
+  _overrideOriginToOwnerPosition: 1
+  _overrideDirectionToOwnerUp: 1
+  references:
+    version: 2
+    RefIds:
+    - rid: 9030112626022285444
+      type: {class: ApplyBuffEffect, ns: Gameplay.Actions.Effects, asm: Assembly-CSharp}
+      data:
+        _statusEffectDefinition: {fileID: 11400000, guid: 55076bc978802794eb8db5340349d750, type: 2}
+        _cancelEffectOnEnd: 0
+        _scaleValueWithCharge: 0
+        _scaleDurationWithCharge: 1

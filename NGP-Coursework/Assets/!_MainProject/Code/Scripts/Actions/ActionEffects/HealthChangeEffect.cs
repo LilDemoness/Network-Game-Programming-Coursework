@@ -18,7 +18,5 @@ namespace Gameplay.Actions.Effects
                 damageable.ReceiveHealthChange(owner, _scaleValueWithCharge ? chargePercentage * _healthChange : _healthChange);
             }
         }
-
-        public override void Cleanup() { }
     }
 }

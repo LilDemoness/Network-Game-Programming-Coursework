@@ -176,6 +176,7 @@ MonoBehaviour:
   _serverCharacter: {fileID: 8374713656994953261}
   _clientInputSender: {fileID: 5193017226030722943}
   m_animator: {fileID: 0}
+  _graphicsRoot: {fileID: 7878760385393213879}
 --- !u!114 &3943280201037405906
 MonoBehaviour:
   m_ObjectHideFlags: 0

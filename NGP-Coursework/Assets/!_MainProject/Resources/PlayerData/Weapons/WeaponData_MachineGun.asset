@@ -14,4 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   <Name>k__BackingField: Machine Gun
   <Sprite>k__BackingField: {fileID: 10901, guid: 0000000000000000f000000000000000, type: 0}
+  <Description>k__BackingField: 
   <AssociatedAction>k__BackingField: {fileID: 11400000, guid: 73bcf9cdef3b4c341a4888e24bc924d9, type: 2}

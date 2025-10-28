@@ -3462,7 +3462,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d7dedd319d6dbb445b5f1f13492ae32f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _lobbyManager: {fileID: 364703824}
   _readyCheckMarkRoot: {fileID: 282691974}
   _readyCheckMarkPrefab: {fileID: 4842036044824390125, guid: ffe08c0fe5012bc448189df3b0e4c3f8, type: 3}
 --- !u!1 &387327823
@@ -4424,7 +4423,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_PresetAsset: {fileID: 0}
   m_PresetReference:
-    rid: 6632896607793709165
+    rid: 9030112626022285457
   m_Scenario:
     rid: -2
   m_IsScenarioSettingsFolded: 0
@@ -4434,7 +4433,7 @@ MonoBehaviour:
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
-    - rid: 6632896607793709165
+    - rid: 9030112626022285457
       type: {class: NetworkSimulatorPreset, ns: Unity.Multiplayer.Tools.NetworkSimulator.Runtime, asm: Unity.Multiplayer.Tools.NetworkSimulator.Runtime}
       data:
         <Name>k__BackingField: None
@@ -6289,6 +6288,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 73bcf9cdef3b4c341a4888e24bc924d9, type: 2}
   - {fileID: 11400000, guid: f3d267d6606c18b409b63f9da8f09559, type: 2}
   - {fileID: 11400000, guid: e39a066565a86c14e8cc32f9e4068494, type: 2}
+  - {fileID: 11400000, guid: e9561157cb9850545b65ef1e3eb07d97, type: 2}
 --- !u!4 &799053776
 Transform:
   m_ObjectHideFlags: 0

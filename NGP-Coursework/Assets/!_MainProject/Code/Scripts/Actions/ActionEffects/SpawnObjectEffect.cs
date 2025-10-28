@@ -125,7 +125,7 @@ namespace Gameplay.Actions.Effects
             }
         }        
 
-        public override void Cleanup() => _spawnType.Cleanup();
+        public override void Cleanup(ServerCharacter owner) => _spawnType.Cleanup();
 
         private void ReturnToPool(ServerCharacter owner, SpawnableObject_Server instance)
         {

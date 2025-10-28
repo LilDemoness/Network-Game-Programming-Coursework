@@ -12,8 +12,5 @@ namespace Gameplay.Actions.Effects
         {
             Debug.Log($"Removing Buffs from {hitInfo.Target.name}: {_removedBuffTypes.ToString()}");
         }
-
-        // We don't need to perform any cleanup as this effect is instantaneous.
-        public override void Cleanup() { }
     }
 }

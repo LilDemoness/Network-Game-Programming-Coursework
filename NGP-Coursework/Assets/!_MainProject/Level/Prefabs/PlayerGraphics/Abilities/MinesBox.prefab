@@ -154,3 +154,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   AssociatedValue: {fileID: 11400000, guid: 85eeda226bebd8e428b979ab2eb42013, type: 2}
+  _abilityOrigin: {fileID: 9203495748078888332}

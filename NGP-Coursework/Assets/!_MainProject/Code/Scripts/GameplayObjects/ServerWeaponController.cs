@@ -5,6 +5,7 @@ using Unity.Netcode;
 using UnityEngine;
 using Gameplay.GameplayObjects.Character.Customisation;
 using Gameplay.GameplayObjects.Character.Customisation.Data;
+using Gameplay.GameplayObjects.Character.Customisation.Sections;
 
 namespace Gameplay.GameplayObjects.Character
 {
@@ -13,10 +14,7 @@ namespace Gameplay.GameplayObjects.Character
         [SerializeField] private ServerCharacter _serverCharacter;
 
         
-        private Weapon[] _activationSlots;
-
-
-        [SerializeField] private CancelAction _cancelFiringAction;
+        private SlotGFXSection[] _activationSlots;
 
 
         private void Awake()
@@ -44,30 +42,32 @@ namespace Gameplay.GameplayObjects.Character
             // Wait for Setup.
             yield return null;
 
-            // Get our Weapons
-            Customisation.Sections.SlottableDataSlot[] attachmentSlots = GetComponentsInChildren<Customisation.Sections.SlottableDataSlot>();
+            // Get our Attachment Slots
+            SlottableDataSlot[] attachmentSlots = GetComponentsInChildren<SlottableDataSlot>();
+
+            // Determine the number of active attachment slots.
             int activeSlots = 0;
             for(int i = 0; i < attachmentSlots.Length; ++i)
+            {
                 if (attachmentSlots[i].isActiveAndEnabled)
                     ++activeSlots;
-            _activationSlots = new Weapon[activeSlots];
-            foreach (var weaponAttachmentSlot in attachmentSlots)
+            }
+
+            // Populate our Attachment Slots
+            _activationSlots = new SlotGFXSection[activeSlots];
+            foreach (var attachmentSlot in attachmentSlots)
             {
-                if (!weaponAttachmentSlot.isActiveAndEnabled)
-                    continue;
+                if (!attachmentSlot.isActiveAndEnabled)
+                    continue;   // The attachment slot is inactive.
 
-                foreach (Weapon weapon in weaponAttachmentSlot.GetComponentsInChildren<Weapon>())
+                foreach (SlotGFXSection slotSection in attachmentSlot.GetComponentsInChildren<SlotGFXSection>())
                 {
-                    if (!weapon.isActiveAndEnabled)
-                        continue;
+                    if (!slotSection.isActiveAndEnabled)
+                        continue;   // The slot section is inactive.
 
-                    Debug.Log(weaponAttachmentSlot.name + " is equipped in Slot " + weaponAttachmentSlot.SlotIndex + ". Weapon Data: " + weapon.WeaponData.name);
-                    switch (weaponAttachmentSlot.SlotIndex)
-                    {
-                        case SlotIndex.PrimaryWeapon: _activationSlots[0] = weapon; break;
-                        case SlotIndex.SecondaryWeapon: _activationSlots[1] = weapon; break;
-                        case SlotIndex.TertiaryWeapon: _activationSlots[2] = weapon; break;
-                    }
+                    Debug.Log(attachmentSlot.name + " is equipped in Slot " + attachmentSlot.SlotIndex + ". Data Data: " + slotSection.SlottableData.Name);
+                    _activationSlots[attachmentSlot.SlotIndex.GetSlotInteger()] = slotSection;
+                    break;  // Fails to account for duplicates.
                 }
             }
 
@@ -94,7 +94,7 @@ namespace Gameplay.GameplayObjects.Character
             if (slotIndex >= _activationSlots.Length)
                 return; // Outwith our slot count.
 
-            StartFiringWeapon(_activationSlots[slotIndex], slotIndex.ToSlotIndex());
+            StartUsingSlottable(_activationSlots[slotIndex], slotIndex.ToSlotIndex());
         }
         [Rpc(SendTo.Server)]
         public void DeactivateSlotServerRpc(int slotIndex, RpcParams rpcParams = default)
@@ -105,23 +105,23 @@ namespace Gameplay.GameplayObjects.Character
             if (slotIndex >= _activationSlots.Length)
                 return; // Outwith our slot count.
 
-            StopFiringWeapon(slotIndex.ToSlotIndex());
+            StopUsingSlottable(slotIndex.ToSlotIndex());
         }
 
 
-        private void StartFiringWeapon(Weapon weapon, SlotIndex slotIndex)
+        private void StartUsingSlottable(SlotGFXSection weapon, SlotIndex slotIndex)
         {
-            ActionRequestData actionRequestData = ActionRequestData.Create(weapon.WeaponData.AssociatedAction);
+            ActionRequestData actionRequestData = ActionRequestData.Create(weapon.SlottableData.AssociatedAction);
 
             // Setup the ActionRequestData.
-            actionRequestData.OriginTransformID = weapon.GetAttackOriginTransformID();
-            actionRequestData.Position = weapon.GetAttackLocalOffset();
-            actionRequestData.Direction = weapon.GetAttackLocalDirection();
+            actionRequestData.OriginTransformID = weapon.GetAbilityOriginTransformID();
+            actionRequestData.Position = weapon.GetAbilityLocalOffset();
+            actionRequestData.Direction = weapon.GetAbilityLocalDirection();
             actionRequestData.SlotIdentifier = (int)slotIndex;
 
             // Request to play our action.
             _serverCharacter.PlayActionServerRpc(actionRequestData);
         }
-        private void StopFiringWeapon(SlotIndex slotIndex) => _serverCharacter.CancelActionBySlotServerRpc((int)slotIndex);
+        private void StopUsingSlottable(SlotIndex slotIndex) => _serverCharacter.CancelActionBySlotServerRpc((int)slotIndex);
     }
 }

@@ -17,7 +17,6 @@ namespace Gameplay.Actions.Definitions
         public override bool OnStart(ServerCharacter owner, ref ActionRequestData data) => ActionConclusion.Continue;
         public override bool OnUpdate(ServerCharacter owner, ref ActionRequestData data, float chargePercentage = 1.0f)
         {
-            Debug.Log($"{owner.name} applied effects to itself!");
             Vector3 origin = _overrideOriginToOwnerPosition ? owner.transform.position : GetActionOrigin(ref data);
             Vector3 direction = _overrideDirectionToOwnerUp ? owner.transform.up : GetActionDirection(ref data);
             Vector3 forward = Vector3.Cross(direction, owner.transform.right); // To-do: Fix & Test

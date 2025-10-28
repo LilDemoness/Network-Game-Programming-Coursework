@@ -3,6 +3,7 @@ using Unity.Netcode;
 using Gameplay.Actions;
 using Gameplay.GameplayObjects.Health;
 using Gameplay.GameplayObjects.Character.Customisation.Data;
+using Gameplay.StatusEffects;
 
 namespace Gameplay.GameplayObjects.Character
 {
@@ -55,6 +56,33 @@ namespace Gameplay.GameplayObjects.Character
         }
 
 
+        // Heat.
+
+        private float m_currentHeat;
+        public float CurrentHeat
+        {
+            get => m_currentHeat;
+            set
+            {
+                if (m_currentHeat < value)
+                    _lastHeatIncreaseTime = NetworkManager.ServerTime.TimeAsFloat;
+
+                if (value > MaxHeat)
+                {
+                    // Exceeded Heat Cap.
+                    Debug.Log("Exceeded Heat Cap");
+                    m_currentHeat = 0.0f;
+                }
+                
+                m_currentHeat = Mathf.Max(value, 0);
+            }
+        }
+        public float MaxHeat => BuildData.GetFrameData()?.HeatCapacity ?? 0.0f;
+        private float _lastHeatIncreaseTime = 0.0f;
+
+
+        // References.
+
         /// <summary>
         ///     This Character's ActionPlayer, exposed for use by ActionEffects.
         /// </summary>
@@ -62,6 +90,13 @@ namespace Gameplay.GameplayObjects.Character
         private ServerActionPlayer m_serverActionPlayer;
 
         public bool CanPerformActions => !IsDead;
+
+
+        /// <summary>
+        ///     The character's StatusEffectPlayer, exposed for use by ActionEffects.
+        /// </summary>
+        public ServerStatusEffectPlayer StatusEffectPlayer => m_statusEffectPlayer;
+        private ServerStatusEffectPlayer m_statusEffectPlayer;
 
 
         [SerializeField] private ServerCharacterMovement _movement; 
@@ -73,6 +108,7 @@ namespace Gameplay.GameplayObjects.Character
         private void Awake()
         {
             m_serverActionPlayer = new ServerActionPlayer(this);
+            m_statusEffectPlayer = new ServerStatusEffectPlayer(this);
             NetLifeState = GetComponent<NetworkLifeState>();
             NetHealthState = GetComponent<NetworkHealthState>();
         }
@@ -180,6 +216,14 @@ namespace Gameplay.GameplayObjects.Character
         private void Update()
         {
             ActionPlayer.OnUpdate();
+            StatusEffectPlayer.OnUpdate();
+
+            float heatDecreaseDelay = 1.0f;
+            float heatDecreaseRate = 1.0f;
+            if (NetworkManager.ServerTime.TimeAsFloat >= (_lastHeatIncreaseTime + heatDecreaseDelay))
+            {
+                CurrentHeat -= heatDecreaseRate * Time.deltaTime;
+            }
         }
 
 
@@ -243,6 +287,16 @@ namespace Gameplay.GameplayObjects.Character
                 m_serverActionPlayer.ClearActions(true);
                 _movement.CancelMove();
             }
+        }
+
+        #endregion
+
+
+        #region Heat
+
+        public void ReceiveHeatChange(float heatChange)
+        {
+            CurrentHeat += heatChange;
         }
 
         #endregion

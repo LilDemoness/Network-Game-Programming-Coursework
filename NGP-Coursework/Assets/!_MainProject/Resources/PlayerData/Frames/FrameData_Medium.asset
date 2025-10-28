@@ -13,8 +13,10 @@ MonoBehaviour:
   m_Name: FrameData_Medium
   m_EditorClassIdentifier: 
   <Name>k__BackingField: Medium Chassis
+  <FrameSize>k__BackingField: 0
   <MaxHealth>k__BackingField: 9
-  <MovementSpeed>k__BackingField: 0
+  <HeatCapacity>k__BackingField: 10
+  <MovementSpeed>k__BackingField: 5
   <AttachmentPoints>k__BackingField:
-  - <ValidSlottableDatas>k__BackingField: []
-  - <ValidSlottableDatas>k__BackingField: []
+  - _dataPlaceholder: 
+  - _dataPlaceholder: 
