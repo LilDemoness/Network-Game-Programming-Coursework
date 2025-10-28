@@ -154,7 +154,6 @@ namespace Gameplay.GameplayObjects.Character.Customisation
             }
 
             Debug.Log("Received All Build Data: " + _syncedPlayerBuilds.Count);
-            Debug.Log(_syncedPlayerBuilds[NetworkManager.LocalClientId].ActiveSlottableIndicies.Length);
         }
 
 
@@ -188,13 +187,15 @@ namespace Gameplay.GameplayObjects.Character.Customisation
             if (_syncedPlayerBuilds.ContainsKey(clientID))
                 return;
 
+            // Notify the New Client of Existing Clients (Called before adding to prevent duplicate addition of the new client).
+            RequestFullBuildDataSyncServerRpc(clientID);
+
             // Add the client.
             _syncedPlayerBuilds.Add(clientID, new BuildData());
             Debug.Log("Players Count: " + _syncedPlayerBuilds.Count);
 
-            // Notify the Clients of the new player.
-            RequestFullBuildDataSyncServerRpc(clientID);
-            //HandleClientConnectedClientRpc(_syncedPlayerBuilds[clientID]);
+            // Notify All Clients of the New Client.
+            AlterPlayerBuildClientRpc(clientID, _syncedPlayerBuilds[clientID]);
         }
         private void Server_HandleClientDisconnected(ulong clientID)
         {
@@ -305,6 +306,7 @@ namespace Gameplay.GameplayObjects.Character.Customisation
             _clientBuild = newBuild;
 
             // Notify listeners of the change.
+            OnLocalClientBuildChanged?.Invoke(newBuild);
             OnNonLocalClientPlayerBuildChanged?.Invoke(NetworkManager.LocalClientId, newBuild);
         }
         private void HandlePlayersStateChanged(ulong clientID, BuildData newBuild)
@@ -320,7 +322,7 @@ namespace Gameplay.GameplayObjects.Character.Customisation
 
 
         [Rpc(SendTo.ClientsAndHost)]
-        private void HandleClientConnectedClientRpc()
+        private void HandleClientConnectedClientRpc(ulong clientID, BuildData initialBuild)
         {
             /*AddPlayerInstance(initialState.ClientID);
             AlterPlayerState(ref initialState);*/
@@ -328,7 +330,7 @@ namespace Gameplay.GameplayObjects.Character.Customisation
         [Rpc(SendTo.ClientsAndHost)]
         private void HandleClientDisconnectClientRpc(ulong clientID)
         {
-            OnPlayerDisconnected(clientID);
+            OnPlayerDisconnected?.Invoke(clientID);
         }
     }
 }
