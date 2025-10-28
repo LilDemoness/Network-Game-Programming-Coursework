@@ -1,23 +1,37 @@
 ﻿using UnityEngine;
 using Unity.Netcode;
 using System.Collections.Generic;
+using System;
 
 public class LobbyManager : NetworkBehaviour
 {
     // Player Ready States.
-    private Dictionary<ulong, PlayerLobbyState> _playerStates = new Dictionary<ulong, PlayerLobbyState>();
+    private NetworkList<PlayerLobbyState> _playerStates = new NetworkList<PlayerLobbyState>();
+
+    public static event System.Action<ulong> OnClientIsReady;
+    public static event System.Action<ulong> OnClientNotReady;
 
 
+    private void Awake() => _playerStates.OnListChanged += OnPlayerStatesChanged;
     public override void OnNetworkSpawn()
     {
-        if (!IsServer)
+        if (IsClient)
         {
-            //this.enabled = false;
-            return;
+            foreach(var player in _playerStates)
+            {
+                if (player.IsReady)
+                    OnClientIsReady?.Invoke(player.ClientID);
+                else
+                    OnClientNotReady?.Invoke(player.ClientID);
+            }
         }
 
-        NetworkManager.OnClientConnectedCallback += NetworkManager_OnClientConnectedCallback;
-        NetworkManager.OnClientDisconnectCallback += NetworkManager_OnClientDisconnectCallback;
+        if (IsServer)
+        {
+            NetworkManager.OnClientConnectedCallback += NetworkManager_OnClientConnectedCallback;
+            NetworkManager.OnClientDisconnectCallback += NetworkManager_OnClientDisconnectCallback;
+        }
+
     }
     public override void OnNetworkDespawn()
     {
@@ -27,10 +41,34 @@ public class LobbyManager : NetworkBehaviour
         NetworkManager.Singleton.OnClientConnectedCallback -= NetworkManager_OnClientConnectedCallback;
         NetworkManager.Singleton.OnClientDisconnectCallback -= NetworkManager_OnClientDisconnectCallback;
     }
+    public override void OnDestroy()
+    {
+        base.OnDestroy();
+        _playerStates.OnListChanged -= OnPlayerStatesChanged;
+    }
 
 
-    private void NetworkManager_OnClientConnectedCallback(ulong clientID) => _playerStates.Add(clientID, new PlayerLobbyState() { ClientID = clientID, IsReady = false });
-    private void NetworkManager_OnClientDisconnectCallback(ulong clientID) => _playerStates.Remove(clientID);
+    private void OnPlayerStatesChanged(NetworkListEvent<PlayerLobbyState> changeEvent)
+    {
+        if (changeEvent.Value.IsReady)
+            OnClientIsReady?.Invoke(changeEvent.Value.ClientID);
+        else
+            OnClientNotReady?.Invoke(changeEvent.Value.ClientID);
+    }
+
+
+    private void NetworkManager_OnClientConnectedCallback(ulong clientID) => _playerStates.Add(new PlayerLobbyState() { ClientID = clientID, IsReady = false });
+    private void NetworkManager_OnClientDisconnectCallback(ulong clientID)
+    {
+        for(int i = 0; i < _playerStates.Count; ++i)
+        {
+            if (_playerStates[i].ClientID == clientID)
+            {
+                _playerStates.RemoveAt(i);
+                return;
+            }
+        }
+    }
     
 
     public void ToggleReady()
@@ -41,12 +79,16 @@ public class LobbyManager : NetworkBehaviour
     [Rpc(SendTo.Server, RequireOwnership = false)]
     private void TogglePlayerReadyServerRpc(ulong clientID)
     {
-        if (_playerStates.ContainsKey(clientID))
+        if (TryGetIndexForId(clientID, out int playerStateIndex))
         {
-            if (_playerStates[clientID].IsReady)
+            if (_playerStates[playerStateIndex].IsReady)
+            {
                 SetPlayerNotReadyServerRpc(clientID);
+            }
             else
+            {
                 SetPlayerReadyServerRpc(clientID);
+            }
         }
         else
             throw new System.Exception("A player is trying to ready that we didn't receive a connection request for");
@@ -55,20 +97,22 @@ public class LobbyManager : NetworkBehaviour
     private void SetPlayerReadyServerRpc(ulong clientID)
     {
         // Update the triggering client as ready.
-        if (_playerStates.ContainsKey(clientID))
+        if (TryGetIndexForId(clientID, out int playerStateIndex))
         {
             // Mark this player as ready.
-            _playerStates[clientID] = _playerStates[clientID].NewWithIsReady(true);
+            _playerStates[playerStateIndex] = _playerStates[playerStateIndex].NewWithIsReady(true);
         }
+
+        //SetPlayerReadyClientRpc(clientID);
 
 
         // Check if all players are ready.
-        foreach (var kvp in _playerStates)
+        foreach (PlayerLobbyState lobbyState in _playerStates)
         {
-            if (!kvp.Value.IsReady)
+            if (!lobbyState.IsReady)
             {
                 // This player isn't ready. Not all players are ready.
-                Debug.Log($"Player {kvp.Key} is not ready");
+                Debug.Log($"Player {lobbyState.ClientID} is not ready");
                 return;
             }
         }
@@ -79,14 +123,49 @@ public class LobbyManager : NetworkBehaviour
 
         ServerManager.Instance.StartGame();
     }
+    [Rpc(SendTo.ClientsAndHost)]
+    private void SetPlayerReadyClientRpc(ulong clientID) => OnClientIsReady?.Invoke(clientID);
+
 
     [Rpc(SendTo.Server, RequireOwnership = false)]
     private void SetPlayerNotReadyServerRpc(ulong clientID)
     {
-        // Update the triggering client as ready.
-        if (_playerStates.ContainsKey(clientID))
+        // Update the triggering client as not ready.
+        if (TryGetIndexForId(clientID, out int playerStateIndex))
         {
-            _playerStates[clientID] = _playerStates[clientID].NewWithIsReady(false);
+            _playerStates[playerStateIndex] = _playerStates[playerStateIndex].NewWithIsReady(false);
         }
+
+        //SetPlayerNotReadyClientRpc(clientID);
+    }
+    [Rpc(SendTo.ClientsAndHost)]
+    private void SetPlayerNotReadyClientRpc(ulong clientID) => OnClientNotReady?.Invoke(clientID);
+
+
+    private int GetIndexForId(ulong clientID)
+    {
+        for(int i = 0; i < _playerStates.Count; ++i)
+        {
+            if (_playerStates[i].ClientID == clientID)
+            {
+                return i;
+            }
+        }
+
+        throw new System.ArgumentException($"Invalid Client ID: No '_playerState' element matches the ClientID {clientID}");
+    }
+    private bool TryGetIndexForId(ulong clientID, out int index)
+    {
+        for (int i = 0; i < _playerStates.Count; ++i)
+        {
+            if (_playerStates[i].ClientID == clientID)
+            {
+                index = i;
+                return true;
+            }
+        }
+
+        index = -1;
+        return false;
     }
 }
