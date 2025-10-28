@@ -55,7 +55,7 @@ namespace UI.Customisation
         }
 
 
-        private void SetHeatRow(int rowIndex, ActionDefinition action) => _informationTable[rowIndex].SetText("Heat:", action.Heat.ToString());
+        private void SetHeatRow(int rowIndex, ActionDefinition action) => _informationTable[rowIndex].SetText("Activation Heat:", action.ImmediateHeat.ToString());
         private void SetRangeRow(int rowIndex, ActionDefinition action)
         {
             string rangeText = action switch
@@ -67,7 +67,7 @@ namespace UI.Customisation
                 _ => throw new System.NotImplementedException(),
             };
 
-            _informationTable[1].SetText("Range:", rangeText);
+            _informationTable[rowIndex].SetText("Range:", rangeText);
         }
         private void SetUseTimeRow(int rowIndex, ActionDefinition action) => _informationTable[rowIndex].SetText("Use Time: ", (action.ExecutionDelay > 0.0f ? action.ExecutionDelay + Units.TIME_UNITS : "Instant"));
         private void SetUseRateRow(int rowIndex, ActionDefinition action)

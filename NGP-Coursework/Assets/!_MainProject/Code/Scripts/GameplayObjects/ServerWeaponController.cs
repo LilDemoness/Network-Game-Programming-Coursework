@@ -122,6 +122,13 @@ namespace Gameplay.GameplayObjects.Character
             // Request to play our action.
             _serverCharacter.PlayActionServerRpc(actionRequestData);
         }
-        private void StopUsingSlottable(SlotIndex slotIndex) => _serverCharacter.CancelActionBySlotServerRpc((int)slotIndex);
+        private void StopUsingSlottable(SlotIndex slotIndex)
+        {
+            if (_activationSlots[slotIndex.GetSlotInteger()].SlottableData.AssociatedAction.ActivationStyle != ActionActivationStyle.Held)
+                return; // Don't cancel this action on release.
+
+            // Cancel the action triggered from this slot.
+            _serverCharacter.CancelActionBySlotServerRpc((int)slotIndex);
+        }
     }
 }

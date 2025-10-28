@@ -213,9 +213,14 @@ namespace Gameplay.Actions
             _chargeStartTime = _nextUpdateTime - (_definition.MaxChargeTime * startingChargePercentage);
             _isFirstCharge = true;
             
+            // Initialise other parameters.
             this._burstsRemaining = _definition.Bursts;
             InitialiseDataParametersIfEmpty(owner);
 
+            // Apply Heat.
+            owner.ReceiveHeatChange(_definition.ImmediateHeat);
+
+            // Call our OnStart function.
             return _definition.OnStart(owner, ref Data);
         }
 
@@ -299,8 +304,10 @@ namespace Gameplay.Actions
         /// <returns> True to keep running, false to stop. The action will stop by default when its duration expires, if it has one set.</returns>
         public virtual bool OnUpdate(ServerCharacter owner)
         {
-            // Check if we should update.
+            // Apply Heat.
+            owner.ReceiveHeatChange(_definition.ContinuousHeat * Time.deltaTime);
 
+            // Check if we should update.
             if (_hasPerformedLastTrigger)
                 return !_definition.CancelOnLastTrigger;
 
@@ -312,6 +319,9 @@ namespace Gameplay.Actions
 
             // We should update.
 
+            // Apply Heat.
+            owner.ReceiveHeatChange(_definition.RetriggerHeat);
+            // Update.
             if (_definition.OnUpdate(owner, ref Data) == false)
                 return ActionConclusion.Stop;
 

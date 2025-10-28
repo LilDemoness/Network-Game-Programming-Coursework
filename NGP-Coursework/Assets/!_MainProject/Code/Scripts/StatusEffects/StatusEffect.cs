@@ -45,12 +45,6 @@ namespace Gameplay.StatusEffects
         }
         public void OnUpdate(ServerCharacter serverCharacter)
         {
-            // Here or in the Action Definition?
-            if (_definition.HeatGeneratedPerSecond != 0.0f)
-            {
-                serverCharacter.ReceiveHeatChange(_definition.HeatGeneratedPerSecond * UnityEngine.Time.deltaTime);
-            }
-            
             if (_hasPerformedFinalTick)
                 return;
 

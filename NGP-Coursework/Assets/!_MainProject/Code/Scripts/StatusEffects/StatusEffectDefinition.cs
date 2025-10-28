@@ -13,7 +13,6 @@ namespace Gameplay.StatusEffects
 
 
         [field: SerializeField, Min(0.0f)] public float RetriggerDelay = 0.0f;
-        [field: SerializeField] public float HeatGeneratedPerSecond = 0.0f;
 
 
         public virtual void OnStart(ServerCharacter serverCharacter) { }

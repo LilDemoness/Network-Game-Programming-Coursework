@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   <Name>k__BackingField: Toggle Stealth
   <Lifetime>k__BackingField: -1
-  <StackingType>k__BackingField: 4
+  <StackingType>k__BackingField: 0
   <Type>k__BackingField: 0
   RetriggerDelay: 0
   HeatGeneratedPerSecond: 1

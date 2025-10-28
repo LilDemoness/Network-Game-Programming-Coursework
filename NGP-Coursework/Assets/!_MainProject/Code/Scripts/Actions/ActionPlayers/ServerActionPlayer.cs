@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
 using Gameplay.GameplayObjects.Character;
+using System;
 
 namespace Gameplay.Actions
 {
@@ -65,6 +66,13 @@ namespace Gameplay.Actions
 
             // Create our action.
             var newAction = ActionFactory.CreateActionFromData(ref action);
+            
+            if (CancelExistingActionsForToggle(newAction))
+            {
+                // We cancelled an action rather than starting a new one.
+                ActionFactory.ReturnAction(newAction);
+                return;
+            }
 
             // Cancel any actions that this action should cancel when being queued.
             CancelInterruptedActions(newAction);
@@ -72,6 +80,18 @@ namespace Gameplay.Actions
             // Add our action to the queue and start it if we don't have other actions.
             _actionQueue.Add(newAction);
             if(_actionQueue.Count == 1){ StartAction(); }
+        }
+        /// <summary>
+        ///     If the passed action is a Toggle action, cancel all active instances of that action and return true.
+        /// </summary>
+        private bool CancelExistingActionsForToggle(Action action)
+        {
+            if (action.Definition.ActivationStyle != ActionActivationStyle.Toggle)
+                return false; // The action is not a toggleable action, so we shouldn't cancel existing ones.
+            
+            // Cancel all actions that match our action's ID and Slot ID.
+            bool ShouldCancelFunc(Action action) => action.ActionID == action.ActionID && (action.Data.SlotIdentifier == 0 || action.Data.SlotIdentifier == action.Data.SlotIdentifier);
+            return CancelActions(ShouldCancelFunc, true, true);
         }
 
         public void ClearActions(bool cancelNonBlocking)
@@ -405,7 +425,7 @@ namespace Gameplay.Actions
         public void CancelRunningActionsByID(ActionID actionID, int slotIdentifier = 0, bool cancelNonBlocking = true, Action exceptThis = null)
         {
             bool ShouldCancelFunc(Action action) => action.ActionID == actionID && action != exceptThis && (slotIdentifier == 0 || action.Data.SlotIdentifier == slotIdentifier);
-            CancelActiveActions(ShouldCancelFunc, cancelNonBlocking);
+            CancelActions(ShouldCancelFunc, false, cancelNonBlocking);
         }
         public void CancelRunningActionsBySlotID(int slotIdentifier, bool cancelNonBlocking)
         {
@@ -413,25 +433,51 @@ namespace Gameplay.Actions
                 throw new System.ArgumentException($"You are trying to cancel actions with an invalid SlotIdentifier ({slotIdentifier}). Use a value >= 1.");
 
             bool ShouldCancelFunc(Action action) => action.Data.SlotIdentifier == slotIdentifier;
-            CancelActiveActions(ShouldCancelFunc, cancelNonBlocking);
+            CancelActions(ShouldCancelFunc, false, cancelNonBlocking);
         }
 
-        private void CancelActiveActions(System.Func<Action, bool> cancelCondition, bool cancelNonBlocking)
+        /// <summary>
+        ///     Cancel all actions based on the passed condition function.
+        /// </summary>
+        /// <param name="cancelCondition"> The condition that actions will be tested against to determine if they should be cancelled.</param>
+        /// <param name="cancelQueuedActions"> Should we cancel Queued Actions?</param>
+        /// <param name="cancelNonBlocking"> Should we cancel Non-Blocking Actions?</param>
+        /// <returns> True if at least one action was cancelled, otherwise false.</returns>
+        private bool CancelActions(System.Func<Action, bool> cancelCondition, bool cancelQueuedActions, bool cancelNonBlocking)
         {
+            bool hasRemovedAction = false;
+
             // Blocking Actions.
             if (_actionQueue.Count > 0)
             {
-                Action action = _actionQueue[0];
+                Action action;
+                if (cancelQueuedActions)
+                {
+                    for (int i = _actionQueue.Count - 1; i >= 1; --i)
+                    {
+                        action = _actionQueue[i];
+                        if (!cancelCondition(action))
+                            continue;
+
+                        hasRemovedAction = true;
+                        CancelAction(action);
+                        _actionQueue.RemoveAt(i);
+                        TryReturnAction(action);
+                    }
+                }
+
+                action = _actionQueue[0];
                 if (cancelCondition(action))
                 {
                     // The active blocking action should be removed.
+                    hasRemovedAction = true;
                     CancelAction(_actionQueue[0]);
-                    //_actionQueue[0].Cancel(_serverCharacter);
 
                     // Advance the queue (Removes the now cancelled Action '0').
                     AdvanceQueue(false);
                 }
             }
+
 
             if (cancelNonBlocking)
             {
@@ -442,12 +488,15 @@ namespace Gameplay.Actions
                     if (!cancelCondition(action))
                         continue;
 
+                    hasRemovedAction = true;
                     CancelAction(action);
                     //action.Cancel(_serverCharacter);
                     _nonBlockingActions.RemoveAt(i);
                     TryReturnAction(action);
                 }
             }
+
+            return hasRemovedAction;
         }
 
 

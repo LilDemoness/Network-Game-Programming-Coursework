@@ -13,8 +13,12 @@ MonoBehaviour:
   m_Name: Action_Fire-MachineGun
   m_EditorClassIdentifier: 
   IsHostileAction: 1
-  Heat: 0
   <ShouldNotifyClient>k__BackingField: 1
+  <Toggle>k__BackingField: 0
+  <CancelOnRelease>k__BackingField: 1
+  <ImmediateHeat>k__BackingField: 0
+  <ContinuousHeat>k__BackingField: 0
+  <ActivationHeat>k__BackingField: 0.1
   <ExecutionDelay>k__BackingField: 0
   <ActionCooldown>k__BackingField: 0
   <BlockingMode>k__BackingField: 1

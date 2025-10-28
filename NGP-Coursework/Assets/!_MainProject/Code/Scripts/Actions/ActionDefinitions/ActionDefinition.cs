@@ -24,11 +24,23 @@ namespace Gameplay.Actions.Definitions
         [Tooltip("Does this count as a hostile Action? (Should it: Break Stealth, Dropp Shields, etc?)")]
         public bool IsHostileAction;
 
-        [Tooltip("How much energy/ammo/etc this Action costs.")]
-        public float Heat;
-
         // Change to be based on the Action Type?
         [field: SerializeField] public bool ShouldNotifyClient { get; private set; } = true;
+
+        [field: SerializeField] public ActionActivationStyle ActivationStyle { get; private set; } = ActionActivationStyle.Held;
+
+
+        [field: Header("Heat")]
+        [Tooltip("How much heat this Action generates when activated.")]
+        [field: SerializeField] public float ImmediateHeat { get; private set; } = 0.0f;
+
+        [Tooltip("How much heat this Action generates each second while in use.")]
+        [field: SerializeField] public float ContinuousHeat { get; private set; } = 0.0f;
+
+        [Tooltip("How much heat this Action generates each time that it successfully updates.")]
+        [field: SerializeField] public float RetriggerHeat { get; private set; } = 0.0f;
+
+
 
 
         [field: Header("Timing Settings")]
@@ -243,5 +255,15 @@ namespace Gameplay.Actions.Definitions
         public virtual void CleanupClient(ClientCharacter clientCharacter) { }
 
         #endregion
+    }
+}
+
+namespace Gameplay.Actions
+{
+    public enum ActionActivationStyle
+    {
+        Held,       // Activate the action upon press. Cancel it upon release.
+        Toggle,     // Activate the action upon press. Cancel it upon the next press.
+        Pressed,    // Activate the action upon press. Don't cancel it ourselves.
     }
 }
