@@ -4,10 +4,6 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-#if UNITY_EDITOR
-using UnityEditor.Events;
-#endif
-
 namespace UI.Customisation
 {
     public class SlottableSelectionUIButton : Selectable
@@ -27,9 +23,14 @@ namespace UI.Customisation
         [SerializeField] private Image _image;
 
 
+        #if UNITY_EDITOR
         protected override void Reset()
         {
             base.Reset();
+        #else
+        private void Reset()
+        {
+        #endif
             ResetTransitionParameters();
         }
         private void ResetTransitionParameters()

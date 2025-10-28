@@ -2,31 +2,63 @@
 using Unity.Netcode;
 using System.Collections.Generic;
 
-public class LobbyManager : MonoBehaviour
+public class LobbyManager : NetworkBehaviour
 {
     // Player Ready States.
     private Dictionary<ulong, PlayerLobbyState> _playerStates = new Dictionary<ulong, PlayerLobbyState>();
 
 
+    public override void OnNetworkSpawn()
+    {
+        if (!IsServer)
+        {
+            //this.enabled = false;
+            return;
+        }
+
+        NetworkManager.OnClientConnectedCallback += NetworkManager_OnClientConnectedCallback;
+        NetworkManager.OnClientDisconnectCallback += NetworkManager_OnClientDisconnectCallback;
+    }
+    public override void OnNetworkDespawn()
+    {
+        if (!IsServer)
+            return;
+
+        NetworkManager.Singleton.OnClientConnectedCallback -= NetworkManager_OnClientConnectedCallback;
+        NetworkManager.Singleton.OnClientDisconnectCallback -= NetworkManager_OnClientDisconnectCallback;
+    }
+
+
+    private void NetworkManager_OnClientConnectedCallback(ulong clientID) => _playerStates.Add(clientID, new PlayerLobbyState() { ClientID = clientID, IsReady = false });
+    private void NetworkManager_OnClientDisconnectCallback(ulong clientID) => _playerStates.Remove(clientID);
+    
+
     public void ToggleReady()
     {
         // Toggle our ready state on the server.
-        if (_playerStates.ContainsKey(NetworkManager.Singleton.LocalClientId))
-        {
-            if (_playerStates[NetworkManager.Singleton.LocalClientId].IsReady)
-                SetPlayerNotReadyServerRpc();
-            else
-                SetPlayerReadyServerRpc();
-        }
+        TogglePlayerReadyServerRpc(NetworkManager.LocalClientId);
     }
-    [ServerRpc(RequireOwnership = false)]
-    private void SetPlayerReadyServerRpc(ServerRpcParams serverRpcParams = default)
+    [Rpc(SendTo.Server, RequireOwnership = false)]
+    private void TogglePlayerReadyServerRpc(ulong clientID)
+    {
+        if (_playerStates.ContainsKey(clientID))
+        {
+            if (_playerStates[clientID].IsReady)
+                SetPlayerNotReadyServerRpc(clientID);
+            else
+                SetPlayerReadyServerRpc(clientID);
+        }
+        else
+            throw new System.Exception("A player is trying to ready that we didn't receive a connection request for");
+    }
+    [Rpc(SendTo.Server, RequireOwnership = false)]
+    private void SetPlayerReadyServerRpc(ulong clientID)
     {
         // Update the triggering client as ready.
-        if (_playerStates.ContainsKey(serverRpcParams.Receive.SenderClientId))
+        if (_playerStates.ContainsKey(clientID))
         {
             // Mark this player as ready.
-            _playerStates[serverRpcParams.Receive.SenderClientId] = _playerStates[serverRpcParams.Receive.SenderClientId].NewWithIsReady(true);
+            _playerStates[clientID] = _playerStates[clientID].NewWithIsReady(true);
         }
 
 
@@ -48,13 +80,13 @@ public class LobbyManager : MonoBehaviour
         ServerManager.Instance.StartGame();
     }
 
-    [ServerRpc(RequireOwnership = false)]
-    private void SetPlayerNotReadyServerRpc(ServerRpcParams serverRpcParams = default)
+    [Rpc(SendTo.Server, RequireOwnership = false)]
+    private void SetPlayerNotReadyServerRpc(ulong clientID)
     {
         // Update the triggering client as ready.
-        if (_playerStates.ContainsKey(serverRpcParams.Receive.SenderClientId))
+        if (_playerStates.ContainsKey(clientID))
         {
-            _playerStates[serverRpcParams.Receive.SenderClientId] = _playerStates[serverRpcParams.Receive.SenderClientId].NewWithIsReady(false);
+            _playerStates[clientID] = _playerStates[clientID].NewWithIsReady(false);
         }
     }
 }
