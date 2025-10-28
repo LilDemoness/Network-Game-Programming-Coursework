@@ -39,17 +39,17 @@ namespace Gameplay.GameplayObjects.Character.Customisation
         {
             if (_playerLobbyInstances.ContainsKey(clientID))
             {
-
+                Debug.Log("Contains Key");
             }
             else
             {
-                AddPlayerInstance(clientID);
+                AddPlayerInstance(clientID, buildData);
             }
         }
         private void HandlePlayerDisconnected(ulong clientID) => RemovePlayerInstance(clientID);
 
 
-        private void AddPlayerInstance(ulong clientIDToAdd)
+        private void AddPlayerInstance(ulong clientIDToAdd, BuildData initialBuild)
         {
             // Get our desired spawn position.
             LobbySpawnPositions lobbySpawnPosition = null;
@@ -80,9 +80,9 @@ namespace Gameplay.GameplayObjects.Character.Customisation
             lobbySpawnPosition.OccupyingClientID = clientIDToAdd;
 
 
-            // Add the client's GFX Instance (Not updated here, instead updated later via the 'OnPlayerCustomisationStateChanged' call in 'HandlePlayersStateChanged').
+            // Add the client's GFX Instance (Updated here for the first time only as the CustomisationDisplay is created after the event call is triggered, and so doesn't receive it otherwise).
             PlayerCustomisationDisplay clientGFXInstance = Instantiate<PlayerCustomisationDisplay>(_playerLobbyPrefab, lobbySpawnPosition.SpawnPosition, worldPositionStays: false);
-            clientGFXInstance.Setup(clientIDToAdd);
+            clientGFXInstance.Setup(clientIDToAdd, initialBuild);
             _playerLobbyInstances.Add(clientIDToAdd, clientGFXInstance);
         }
         private void RemovePlayerInstance(ulong clientIDToRemove)
