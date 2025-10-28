@@ -6,7 +6,7 @@ namespace Gameplay.GameplayObjects.Character.Customisation
     /// <summary>
     ///     A network-serializeable struct which stores build data for the various players.
     /// </summary>
-    public struct PlayerCustomisationState : INetworkSerializable, IEquatable<PlayerCustomisationState>
+    /*public struct PlayerCustomisationState : INetworkSerializable, IEquatable<PlayerCustomisationState>
     {
         public ulong ClientID;
         public bool IsReady;
@@ -86,11 +86,5 @@ namespace Gameplay.GameplayObjects.Character.Customisation
         {
             return (SlotIndex, SelectedIndex) == (other.SlotIndex, other.SelectedIndex);
         }
-    }
-
-    public static class PlayerCustomsationStateExtensions
-    {
-        public static Data.BuildData ToBuildData(this PlayerCustomisationState customisationState) => new Data.BuildData(customisationState.FrameIndex, customisationState.LegIndex, customisationState.SlottableDataIndicies);
-        public static PlayerCustomisationState ToCustomisationState(this Data.BuildData buildData, ulong clientID) => new PlayerCustomisationState(clientID, buildData.ActiveFrameIndex, buildData.ActiveLegIndex, false, buildData.ActiveSlottableIndicies);
-    }
+    }*/
 }

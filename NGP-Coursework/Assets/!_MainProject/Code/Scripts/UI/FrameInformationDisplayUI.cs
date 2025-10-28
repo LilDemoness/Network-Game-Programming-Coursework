@@ -21,15 +21,15 @@ namespace UI.Customisation
 
 
 
-        private void Awake() => PlayerCustomisationManager.OnPlayerCustomisationStateChanged += PlayerCustomisationManager_OnPlayerCustomisationStateChanged;
+        private void Awake() => PlayerCustomisationManager.OnNonLocalClientPlayerBuildChanged += PlayerCustomisationManager_OnPlayerCustomisationStateChanged;
         
-        private void OnDestroy() => PlayerCustomisationManager.OnPlayerCustomisationStateChanged -= PlayerCustomisationManager_OnPlayerCustomisationStateChanged;
-        private void PlayerCustomisationManager_OnPlayerCustomisationStateChanged(ulong clientID, PlayerCustomisationState customisationState)
+        private void OnDestroy() => PlayerCustomisationManager.OnNonLocalClientPlayerBuildChanged -= PlayerCustomisationManager_OnPlayerCustomisationStateChanged;
+        private void PlayerCustomisationManager_OnPlayerCustomisationStateChanged(ulong clientID, BuildData buildData)
         {
             if (clientID != NetworkManager.Singleton.LocalClientId)
                 return; // Not the client.
 
-            FrameData frameData = CustomisationOptionsDatabase.AllOptionsDatabase.GetFrame(customisationState.FrameIndex);
+            FrameData frameData = buildData.GetFrameData();
             SetSelectedFrameText(frameData.Name);
             UpdateFrameStatsDisplay(frameData);
         }

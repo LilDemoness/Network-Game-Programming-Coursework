@@ -1,5 +1,7 @@
 using UnityEngine;
 using Unity.Netcode;
+using Gameplay.GameplayObjects.Character.Customisation;
+using Gameplay.GameplayObjects.Character.Customisation.Data;
 
 public class PlayerSpawner : NetworkBehaviour
 {
@@ -12,24 +14,24 @@ public class PlayerSpawner : NetworkBehaviour
         if (!IsServer)
             return;
 
-        foreach (ClientData client in ServerManager.Instance.ClientData.Values)
+        foreach (var kvp in PlayerCustomisationManager.Instance.BuildData)
         {
-            Vector3 spawnPosition = Vector3.right * Mathf.Floor(client.ClientID) * 2.0f;
+            Vector3 spawnPosition = Vector3.right * Mathf.Floor(kvp.Key) * 2.0f;
 
             PlayerManager playerInstance = Instantiate<PlayerManager>(_playerPrefab, spawnPosition, Quaternion.identity);
 
-            playerInstance.GetComponent<Gameplay.GameplayObjects.Character.ServerCharacter>().BuildData = client.BuildData;
-            playerInstance.NetworkObject.SpawnAsPlayerObject(client.ClientID);
+            playerInstance.GetComponent<Gameplay.GameplayObjects.Character.ServerCharacter>().BuildData = kvp.Value;
+            playerInstance.NetworkObject.SpawnAsPlayerObject(kvp.Key);
 
-            SetupPlayerClientRpc(client.ClientID, client.BuildData.ActiveFrameIndex, client.BuildData.ActiveLegIndex, client.BuildData.ActiveSlottableIndicies);
+            SetupPlayerClientRpc(kvp.Key, kvp.Value);
         }
     }
 
     [ClientRpc]
-    private void SetupPlayerClientRpc(ulong clientID, int frameIndex, int legIndex, int[] activeSlottableIndicies)
+    private void SetupPlayerClientRpc(ulong clientID, BuildData buildData)
     {
         PlayerManager playerInstance = NetworkManager.Singleton.ConnectedClients[clientID].PlayerObject.GetComponent<PlayerManager>();
-        playerInstance.SetBuild(frameIndex, legIndex, activeSlottableIndicies);
-        OnPlayerCustomisationFinalised?.Invoke(clientID, new Gameplay.GameplayObjects.Character.Customisation.Data.BuildData (frameIndex, legIndex, activeSlottableIndicies));
+        playerInstance.SetBuild(buildData.ActiveFrameIndex, 0, buildData.ActiveSlottableIndicies);
+        OnPlayerCustomisationFinalised?.Invoke(clientID, buildData);
     }
 }

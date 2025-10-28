@@ -4,6 +4,7 @@ using System.Collections;
 using Unity.Netcode;
 using UnityEngine;
 using Gameplay.GameplayObjects.Character.Customisation;
+using Gameplay.GameplayObjects.Character.Customisation.Data;
 
 namespace Gameplay.GameplayObjects.Character
 {
@@ -20,12 +21,12 @@ namespace Gameplay.GameplayObjects.Character
 
         private void Awake()
         {
-            PlayerCustomisationManager.OnPlayerCustomisationStateChanged += OnPlayerBuildChanged;
+            PlayerCustomisationManager.OnNonLocalClientPlayerBuildChanged += OnPlayerBuildChanged;
         }
         public override void OnDestroy()
         {
             base.OnDestroy();
-            PlayerCustomisationManager.OnPlayerCustomisationStateChanged -= OnPlayerBuildChanged;
+            PlayerCustomisationManager.OnNonLocalClientPlayerBuildChanged -= OnPlayerBuildChanged;
         }
         public override void OnNetworkSpawn()
         {
@@ -74,7 +75,7 @@ namespace Gameplay.GameplayObjects.Character
         }
 
 
-        private void OnPlayerBuildChanged(ulong clientID, PlayerCustomisationState newState)
+        private void OnPlayerBuildChanged(ulong clientID, BuildData newBuild)
         {
             if (clientID != _serverCharacter.OwnerClientId)
                 return;

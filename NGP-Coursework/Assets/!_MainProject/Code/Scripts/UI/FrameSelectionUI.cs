@@ -37,12 +37,12 @@ namespace UI.Customisation
             HideSelectionOptions();
 
             SubscribeToInput();
-            PlayerCustomisationManager.OnPlayerCustomisationStateChanged += PlayerCustomisationManager_OnPlayerCustomisationStateChanged;
+            PlayerCustomisationManager.OnNonLocalClientPlayerBuildChanged += PlayerCustomisationManager_OnPlayerCustomisationStateChanged;
         }
         private void OnDestroy()
         {
             UnsubscribeFromInput();
-            PlayerCustomisationManager.OnPlayerCustomisationStateChanged -= PlayerCustomisationManager_OnPlayerCustomisationStateChanged;   
+            PlayerCustomisationManager.OnNonLocalClientPlayerBuildChanged -= PlayerCustomisationManager_OnPlayerCustomisationStateChanged;   
         }
         /// <summary>
         ///     Create FrameSelectionOption instances for each possible Frame in the game.
@@ -79,12 +79,12 @@ namespace UI.Customisation
                 Destroy(_frameOptionsContainer.GetChild(i).gameObject);
             }
         }
-        private void PlayerCustomisationManager_OnPlayerCustomisationStateChanged(ulong clientID, PlayerCustomisationState customisationState)
+        private void PlayerCustomisationManager_OnPlayerCustomisationStateChanged(ulong clientID, BuildData buildData)
         {
             if (clientID != NetworkManager.Singleton.LocalClientId)
                 return; // Not the client.
 
-            _selectedFrameIndex = customisationState.FrameIndex;
+            _selectedFrameIndex = buildData.ActiveFrameIndex;
             MarkActiveFrameOption();
         }
 

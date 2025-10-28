@@ -42,13 +42,13 @@ namespace UI.Customisation
 
             ClientInput.OnNextTabPerformed += ClientInput_OnNextTabPerformed;
             ClientInput.OnPreviousTabPerformed += ClientInput_OnPreviousTabPerformed;
-            PlayerCustomisationManager.OnPlayerCustomisationStateChanged += PlayerCustomisationManager_OnPlayerCustomisationStateChanged; ;
+            PlayerCustomisationManager.OnNonLocalClientPlayerBuildChanged += PlayerCustomisationManager_OnPlayerCustomisationStateChanged; ;
         }
         private void OnDestroy()
         {
             ClientInput.OnNextTabPerformed -= ClientInput_OnNextTabPerformed;
             ClientInput.OnPreviousTabPerformed -= ClientInput_OnPreviousTabPerformed;
-            PlayerCustomisationManager.OnPlayerCustomisationStateChanged -= PlayerCustomisationManager_OnPlayerCustomisationStateChanged;
+            PlayerCustomisationManager.OnNonLocalClientPlayerBuildChanged -= PlayerCustomisationManager_OnPlayerCustomisationStateChanged;
         }
 
         private void ClientInput_OnNextTabPerformed()
@@ -131,13 +131,13 @@ namespace UI.Customisation
             _playerCustomisationManager.SelectFrame(2);
         }
 
-        private void PlayerCustomisationManager_OnPlayerCustomisationStateChanged(ulong clientID, PlayerCustomisationState playerCustomisationState)
+        private void PlayerCustomisationManager_OnPlayerCustomisationStateChanged(ulong clientID, BuildData buildData)
         {
             if (clientID != NetworkManager.Singleton.LocalClientId)
                 return; // Not the client.
 
             // Check if our selected frame has changed, and if it has update our cached data.
-            FrameData frameData = CustomisationOptionsDatabase.AllOptionsDatabase.GetFrame(playerCustomisationState.FrameIndex);
+            FrameData frameData = CustomisationOptionsDatabase.AllOptionsDatabase.GetFrame(buildData.ActiveFrameIndex);
             if (frameData != _selectedFrameData)
             {
                 // Set our selected frame.

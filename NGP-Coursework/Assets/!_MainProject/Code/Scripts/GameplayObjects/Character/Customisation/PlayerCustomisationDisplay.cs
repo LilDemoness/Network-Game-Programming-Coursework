@@ -18,25 +18,23 @@ namespace Gameplay.GameplayObjects.Character.Customisation
     
 
         public void Setup(ulong ownerClientID) => this.ownerClientID = ownerClientID;
-        public void Setup(ulong ownerClientID, PlayerCustomisationState initialState)
+        public void Setup(ulong ownerClientID, BuildData initialState)
         {
             this.ownerClientID = ownerClientID;
             PlayerCustomisationManager_OnPlayerCustomisationStateChanged(ownerClientID, initialState);
         }
         private void Awake()
         {
-            PlayerCustomisationManager.OnPlayerCustomisationStateChanged += PlayerCustomisationManager_OnPlayerCustomisationStateChanged;
-            PlayerCustomisationManager.OnPlayerCustomisationFinalised += PlayerCustomisationManager_OnPlayerCustomisationFinalised;
+            PlayerCustomisationManager.OnNonLocalClientPlayerBuildChanged += PlayerCustomisationManager_OnPlayerCustomisationStateChanged;
 
             _gfxElements = GetComponentsInChildren<FrameGFX>();
         }
         private void OnDestroy()
         {
-            PlayerCustomisationManager.OnPlayerCustomisationStateChanged -= PlayerCustomisationManager_OnPlayerCustomisationStateChanged;
-            PlayerCustomisationManager.OnPlayerCustomisationFinalised -= PlayerCustomisationManager_OnPlayerCustomisationFinalised;
+            PlayerCustomisationManager.OnNonLocalClientPlayerBuildChanged -= PlayerCustomisationManager_OnPlayerCustomisationStateChanged;
         }
 
-        private void PlayerCustomisationManager_OnPlayerCustomisationStateChanged(ulong clientID, PlayerCustomisationState customisationState)
+        private void PlayerCustomisationManager_OnPlayerCustomisationStateChanged(ulong clientID, BuildData buildData)
         {
             if (clientID != ownerClientID)
                 return; // Not the owning client.
@@ -44,18 +42,10 @@ namespace Gameplay.GameplayObjects.Character.Customisation
 
             for (int i = 0; i < _gfxElements.Length; ++i)
             {
-                _gfxElements[i].OnSelectedFrameChanged(CustomisationOptionsDatabase.AllOptionsDatabase.GetFrame(customisationState.FrameIndex));
-                _gfxElements[i].OnSelectedLegChanged(CustomisationOptionsDatabase.AllOptionsDatabase.GetLeg(customisationState.LegIndex));
+                _gfxElements[i].OnSelectedFrameChanged(CustomisationOptionsDatabase.AllOptionsDatabase.GetFrame(buildData.ActiveFrameIndex));
                 SlotIndexExtensions.PerformForAllValidSlots(
-                    (slotIndex) => _gfxElements[i].OnSelectedSlottableDataChanged(slotIndex, CustomisationOptionsDatabase.AllOptionsDatabase.GetSlottableData(customisationState.GetSlottableDataIndexForSlot(slotIndex))));
+                    (slotIndex) => _gfxElements[i].OnSelectedSlottableDataChanged(slotIndex, buildData.GetSlottableData(slotIndex)));
             }
-        }
-        private void PlayerCustomisationManager_OnPlayerCustomisationFinalised(ulong clientID, PlayerCustomisationState customisationState)
-        {
-            if (clientID != ownerClientID)
-                return;
-
-            PlayerCustomisationManager_OnPlayerCustomisationStateChanged(clientID, customisationState);
         }
     }
 }

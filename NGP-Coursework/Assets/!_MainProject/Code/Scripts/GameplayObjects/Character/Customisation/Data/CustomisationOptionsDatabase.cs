@@ -49,7 +49,7 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Data
         }
 
 
-        public PlayerCustomisationState GetDefaultState(ulong clientID)
+        /*public PlayerCustomisationState GetDefaultState(ulong clientID)
         {
             (SlotIndex, int)[] slottableDataVaues = new (SlotIndex, int)[SlotIndexExtensions.GetMaxPossibleSlots()];
             for(int i = 0; i < SlotIndexExtensions.GetMaxPossibleSlots(); ++i)
@@ -58,6 +58,6 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Data
             }
 
             return new PlayerCustomisationState(clientID, 0, 0, false, slottableDataVaues);
-        }
+        }*/
     }
 }

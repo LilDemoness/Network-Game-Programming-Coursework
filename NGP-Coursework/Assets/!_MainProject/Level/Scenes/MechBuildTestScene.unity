@@ -448,17 +448,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
   _optionsDatabase: {fileID: 11400000, guid: 4ac138f60c58a9b469e5e446fdb0223d, type: 2}
-  _playerLobbyPrefab: {fileID: 1189479451218648122, guid: bf990d160d4b5fd4f9cd3264956f3f0f, type: 3}
-  _playerLobbyGFXSpawnPositions:
-  - SpawnPosition: {fileID: 1120132533}
-    IsOccupied: 0
-    OccupyingClientID: 0
-  - SpawnPosition: {fileID: 1242330600}
-    IsOccupied: 0
-    OccupyingClientID: 0
-  - SpawnPosition: {fileID: 882569408}
-    IsOccupied: 0
-    OccupyingClientID: 0
 --- !u!4 &14889076
 Transform:
   m_ObjectHideFlags: 0
@@ -2162,9 +2151,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 14889075}
-        m_TargetAssemblyTypeName: Gameplay.GameplayObjects.Character.Customisation.PlayerCustomisationManager,
-          Assembly-CSharp
+      - m_Target: {fileID: 364703824}
+        m_TargetAssemblyTypeName: LobbyManager, Assembly-CSharp
         m_MethodName: ToggleReady
         m_Mode: 1
         m_Arguments:
@@ -2295,7 +2283,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 869429556}
   m_HandleRect: {fileID: 869429555}
   m_Direction: 2
-  m_Value: 0.9999997
+  m_Value: 1
   m_Size: 0.7747252
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -3329,6 +3317,50 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 352768828}
   m_CullTransparentMesh: 1
+--- !u!1 &364703823
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 364703825}
+  - component: {fileID: 364703824}
+  m_Layer: 0
+  m_Name: Lobby
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &364703824
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 364703823}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 03edfc0ae2d2b1943ba6054431327f70, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!4 &364703825
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 364703823}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &372053691
 GameObject:
   m_ObjectHideFlags: 0
@@ -3754,6 +3786,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 418112738}
+  - component: {fileID: 418112739}
   m_Layer: 0
   m_Name: PlayerGFXSpawnLocations
   m_TagString: Untagged
@@ -3779,6 +3812,29 @@ Transform:
   - {fileID: 882569408}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &418112739
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 418112737}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed5aadfa15419c64fbeb6862e7c1abe2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _playerLobbyPrefab: {fileID: 1189479451218648122, guid: bf990d160d4b5fd4f9cd3264956f3f0f, type: 3}
+  _playerLobbyGFXSpawnPositions:
+  - SpawnPosition: {fileID: 1120132533}
+    IsOccupied: 0
+    OccupyingClientID: 0
+  - SpawnPosition: {fileID: 1242330600}
+    IsOccupied: 0
+    OccupyingClientID: 0
+  - SpawnPosition: {fileID: 882569408}
+    IsOccupied: 0
+    OccupyingClientID: 0
 --- !u!1 &454665924
 GameObject:
   m_ObjectHideFlags: 0
@@ -16464,3 +16520,4 @@ SceneRoots:
   - {fileID: 418112738}
   - {fileID: 849535220}
   - {fileID: 1299616454}
+  - {fileID: 364703825}

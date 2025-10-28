@@ -7,7 +7,7 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Sections
         [SerializeField] protected T AssociatedValue;
 
 
-        public void Toggle(T activeData) => this.gameObject.SetActive(activeData.Equals(AssociatedValue));
+        public void Toggle(T activeData) => this.gameObject.SetActive(activeData != null && activeData.Equals(AssociatedValue));
         public void Finalise(T activeData)
         {
             if (!activeData.Equals(AssociatedValue))
