@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 850eab3a75d84b74c891751374e58612, type: 3}
+  m_Name: AllSpecialFXList
+  m_EditorClassIdentifier: 
+  _specialFXGraphics:
+  - {fileID: 4037183185398935712, guid: 07dedc6d9d8e8ab468b454fc9f0fdf49, type: 3}
+  - {fileID: 4037183185398935712, guid: de6513b59a0ab6e45827e1457b43a2b3, type: 3}
+  - {fileID: 4037183185398935712, guid: 23e0f9a3cb233bc429cae2ff4f765694, type: 3}

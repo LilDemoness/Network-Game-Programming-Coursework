@@ -26,6 +26,10 @@ namespace Gameplay.Actions.Effects
         private Coroutine _handleLifetimeCoroutine;
 
 
+        // Special FX.
+        private int _specialFXIndex;
+
+
         public event System.Action<ServerCharacter, SpawnableObject_Server> OnShouldReturnToPool;
         public event System.Action<SpawnableObject_Server> OnReturnedToPool;
 
@@ -42,10 +46,10 @@ namespace Gameplay.Actions.Effects
                 return;
             }
         }
-        public void Setup(ServerCharacter owner, float lifetime = 0.0f)
+        public void Setup(ServerCharacter owner, int specialFXIndex, float lifetime = 0.0f)
         {
             this._owner = owner;
-
+            this._specialFXIndex = specialFXIndex;
 
             if (_handleLifetimeCoroutine != null)
                 StopCoroutine(_handleLifetimeCoroutine);
@@ -54,8 +58,25 @@ namespace Gameplay.Actions.Effects
                 _handleLifetimeCoroutine = StartCoroutine(HandleLifetime(lifetime));
             }
 
-            this._clientScript.SpawnRpc();
+            this._clientScript.SpawnRpc(transform.position, transform.forward, transform.up, specialFXIndex);
         }
+        public void Setup(ServerCharacter owner, NetworkObject parentObject, int specialFXIndex, float lifetime = 0.0f)
+        {
+            this._owner = owner;
+            this._specialFXIndex = specialFXIndex;
+
+            if (_handleLifetimeCoroutine != null)
+            {
+                StopCoroutine(_handleLifetimeCoroutine);
+            }
+            if (lifetime > 0.0f)
+            {
+                _handleLifetimeCoroutine = StartCoroutine(HandleLifetime(lifetime));
+            }
+
+            AttachToTransform(parentObject, specialFXIndex);
+        }
+
         public void ReturnedToPool()
         {
             // Notify attached objects that we've been returned to the pool.
@@ -75,10 +96,10 @@ namespace Gameplay.Actions.Effects
 
 
         /// <summary>
-        ///     Attach this spawnable object to a transform.
+        ///     Attach this spawnable object to a transform and spawn it.
         ///     Similar to parenting them, but done this way to prevent NetworkObject parenting issues.
         /// </summary>
-        public void AttachToTransform(NetworkObject parentObject)
+        private void AttachToTransform(NetworkObject parentObject, int specialFXIndex)
         {
             this._attachedTransform = parentObject.transform;
             this._hasAttachedTransform = true;
@@ -103,8 +124,9 @@ namespace Gameplay.Actions.Effects
 
 
             // Notify client-only visuals script.
-            this._clientScript.AttachToTransformRpc(parentObject.NetworkObjectId, _localPosition, _localForward, _localUp);
+            this._clientScript.SpawnRpc(parentObject.NetworkObjectId, _localPosition, _localForward, _localUp, specialFXIndex);
         }
+
 
         private void ParentSpawnableObject_OnReturnedToPool(SpawnableObject_Server parentInstance)
         {

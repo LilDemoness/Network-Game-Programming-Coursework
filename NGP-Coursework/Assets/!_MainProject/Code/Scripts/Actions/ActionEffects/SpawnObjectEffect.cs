@@ -16,7 +16,7 @@ namespace Gameplay.Actions.Effects
 
         [Space(5)]
         [SerializeField] private SpawnableObject_Server _prefab;
-        private static Dictionary<(ServerCharacter, SpawnableObject_Server), RecyclingPool<SpawnableObject_Server>> s_characterAndPrefabToObjectPool;
+        [System.NonSerialized] private static Dictionary<(ServerCharacter, SpawnableObject_Server), RecyclingPool<SpawnableObject_Server>> s_characterAndPrefabToObjectPool = new Dictionary<(ServerCharacter, SpawnableObject_Server), RecyclingPool<SpawnableObject_Server>>();
         private static Transform s_defaultObjectParent;
 
         [Space(5)]
@@ -26,12 +26,6 @@ namespace Gameplay.Actions.Effects
         [Space(5)]
         [SerializeField] private SpecialFXGraphic _destroyFX;
 
-
-        static SpawnObjectEffect()
-        {
-            Debug.LogWarning("Spawnable objects are not yet finished for Client-Side visuals");
-            s_characterAndPrefabToObjectPool = new Dictionary<(ServerCharacter, SpawnableObject_Server), RecyclingPool<SpawnableObject_Server>>();
-        }
 
 
         #region Object Pool Setup
@@ -63,12 +57,6 @@ namespace Gameplay.Actions.Effects
         private void OnGetSpawnableObject(SpawnableObject_Server spawnableObject) => spawnableObject.gameObject.SetActive(true);
         private void OnReleaseSpawnableObject(SpawnableObject_Server spawnableObject)
         {
-            SpecialFXGraphic destroyFXInstance = SpecialFXPoolManager.GetFromPrefab(_destroyFX);
-            destroyFXInstance.OnShutdownComplete += SpecialFXGraphic_OnShutdownComplete;
-            destroyFXInstance.transform.position = spawnableObject.transform.position;
-            destroyFXInstance.transform.up = spawnableObject.transform.up;
-            destroyFXInstance.Play();
-
             UnsubscribeFromInstanceCallbacks(spawnableObject);
             spawnableObject.ReturnedToPool();
 
@@ -76,12 +64,6 @@ namespace Gameplay.Actions.Effects
             spawnableObject.gameObject.SetActive(false);
         }
         private void OnDestroySpawnableObject(SpawnableObject_Server spawnableObject) => spawnableObject.NetworkObject.Despawn(true);
-
-        private void SpecialFXGraphic_OnShutdownComplete(SpecialFXGraphic graphicInstance)
-        {
-            graphicInstance.OnShutdownComplete -= SpecialFXGraphic_OnShutdownComplete;
-            SpecialFXPoolManager.ReturnFromPrefab(_destroyFX, graphicInstance);
-        }
 
         #endregion
 
@@ -112,16 +94,15 @@ namespace Gameplay.Actions.Effects
 
             // Spawn all our objects.
             SpawnableObject_Server[] spawnedObjects = _spawnType.SpawnObject(GetPool(owner), hitInfo.HitPoint, hitInfo.HitNormal, hitInfo.HitForward);
+            int destroyFXGraphicIndex = SpecialFXList.AllOptionsDatabase.GetIndexForSpecialFXGraphic(_destroyFX);
             foreach (var spawnedObject in spawnedObjects)
             {
-                spawnedObject.Setup(owner, _lifetime);
-                spawnedObject.OnShouldReturnToPool += ReturnToPool;
-                Debug.Log("Subscribe", spawnedObject);
-
                 if (_parentToHitTransform)
-                {
-                    spawnedObject.AttachToTransform(parentTargetNetworkObject);
-                }
+                    spawnedObject.Setup(owner, parentTargetNetworkObject, destroyFXGraphicIndex, _lifetime);
+                else
+                    spawnedObject.Setup(owner, destroyFXGraphicIndex, _lifetime);
+
+                spawnedObject.OnShouldReturnToPool += ReturnToPool;
             }
         }        
 
@@ -135,7 +116,6 @@ namespace Gameplay.Actions.Effects
         }
         private void UnsubscribeFromInstanceCallbacks(SpawnableObject_Server instance)
         {
-            Debug.Log("Unsubscribe", instance);
             instance.OnShouldReturnToPool -= ReturnToPool;
         }
     }
@@ -166,10 +146,14 @@ namespace Gameplay.Actions.Effects
         [SerializeField] private int _spawnCount = 3;
         [SerializeField] private float _spawnRadius = 1.0f;
 
-        [Space(5)]
+        [Header("Randomisation")]
         [SerializeField] private float _randomisationAngle = 0.0f;
         [SerializeField] private bool _randomiseOnlyDefaultVector = true;   // If true, we keep the same angle between our spawn positions, with only the spawnForward being slightly randomised.
 
+        [Header("Force to Ground")]
+        [SerializeField] private bool _forceToGround = true;
+        [SerializeField] private float _forceToGroundDistance = 0.0f;
+        [SerializeField] private LayerMask _groundLayers;
 
         public override Vector3[] GetSpawnPositions(Vector3 spawnCentre, Vector3 spawnNormal, Vector3 spawnForward)
         {
@@ -183,6 +167,11 @@ namespace Gameplay.Actions.Effects
                     ? (Quaternion.AngleAxis(degreesBetweenSpawns * i, spawnNormal) * firstSpawnDirection).normalized
                     : (Quaternion.AngleAxis(degreesBetweenSpawns * i + (Random.Range(-_randomisationAngle / 2.0f, _randomisationAngle / 2.0f)), spawnNormal) * firstSpawnDirection).normalized;
                 spawnPositions[i] = spawnCentre + (spawnDirection * _spawnRadius);
+
+                if (_forceToGround && Physics.Raycast(spawnPositions[i], -spawnNormal, out RaycastHit hitInfo, _forceToGroundDistance, _groundLayers))
+                    spawnPositions[i] = hitInfo.point;
+                else
+                    throw new System.NotImplementedException("Remove the object");
             }
 
             return spawnPositions;
@@ -192,7 +181,7 @@ namespace Gameplay.Actions.Effects
         {
             Vector3[] spawnPositions = GetSpawnPositions(spawnCentre, spawnNormal, spawnForward);
             SpawnableObject_Server[] spawnedObjects = new SpawnableObject_Server[_spawnCount];
-            for (int i = 0; i < _spawnCount; ++i)
+            for (int i = 0; i < spawnPositions.Length; ++i)
             {
                 spawnedObjects[i] = SpawnObjectAtPosition(prefabPool, spawnPositions[i], Quaternion.LookRotation(spawnForward, spawnNormal));
             }
@@ -219,6 +208,12 @@ namespace Gameplay.Actions.Effects
         [SerializeField] private float _maxSpawnRadius = 1.0f;
 
 
+        [Header("Force to Ground")]
+        [SerializeField] private bool _forceToGround = true;
+        [SerializeField] private float _forceToGroundDistance = 0.0f;
+        [SerializeField] private LayerMask _groundLayers;
+
+
         public override Vector3[] GetSpawnPositions(Vector3 spawnCentre, Vector3 spawnNormal, Vector3 spawnForward)
         {
             Vector3[] spawnPositions = new Vector3[_spawnCount];
@@ -227,6 +222,11 @@ namespace Gameplay.Actions.Effects
             {
                 Vector3 spawnDirection = (Quaternion.AngleAxis(Random.Range(-_spawnAngle / 2.0f, _spawnAngle / 2.0f), spawnNormal) * spawnForward).normalized;
                 spawnPositions[i] = spawnCentre + (spawnDirection * Random.Range(_minSpawnRadius, _maxSpawnRadius));
+
+                if (_forceToGround && Physics.Raycast(spawnPositions[i], -spawnNormal, out RaycastHit hitInfo, _forceToGroundDistance, _groundLayers))
+                    spawnPositions[i] = hitInfo.point;
+                else
+                    throw new System.NotImplementedException("Remove the object");
             }
 
             return spawnPositions;
@@ -236,7 +236,7 @@ namespace Gameplay.Actions.Effects
         {
             Vector3[] spawnPositions = GetSpawnPositions(spawnCentre, spawnNormal, spawnForward);
             SpawnableObject_Server[] spawnedObjects = new SpawnableObject_Server[_spawnCount];
-            for (int i = 0; i < _spawnCount; ++i)
+            for (int i = 0; i < spawnPositions.Length; ++i)
             {
                 spawnedObjects[i] = SpawnObjectAtPosition(prefabPool, spawnPositions[i], Quaternion.LookRotation(spawnForward, spawnNormal));
             }

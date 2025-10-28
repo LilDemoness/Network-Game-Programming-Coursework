@@ -14,6 +14,7 @@ namespace VisualEffects
         public event System.Action<SpecialFXGraphic> OnShutdownComplete;
 
         private bool _isInShutdown = false;
+        public int SpecialFXListIndex = -1;
 
 
         public void Play()

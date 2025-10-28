@@ -15,4 +15,4 @@ MonoBehaviour:
   <Name>k__BackingField: Mines
   <Sprite>k__BackingField: {fileID: 10901, guid: 0000000000000000f000000000000000, type: 0}
   <Description>k__BackingField: 
-  <AssociatedAction>k__BackingField: {fileID: 0}
+  <AssociatedAction>k__BackingField: {fileID: 11400000, guid: 649c4f2d3bdd98c408d1fc3533078f8b, type: 2}

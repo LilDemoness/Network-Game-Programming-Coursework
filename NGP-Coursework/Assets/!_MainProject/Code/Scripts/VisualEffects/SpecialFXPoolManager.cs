@@ -50,6 +50,7 @@ namespace VisualEffects
                 return pool.Get();
             }
         }
+        public static void ReturnFromIndex(int graphicIndex, SpecialFXGraphic instance) => ReturnFromPrefab(SpecialFXList.AllOptionsDatabase.SpecialFXGraphics[graphicIndex], instance);
         public static void ReturnFromPrefab(SpecialFXGraphic prefab, SpecialFXGraphic instance)
         {
             if (s_specialEffectToInstancePool.TryGetValue(prefab, out ObjectPool<SpecialFXGraphic> pool))
