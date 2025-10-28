@@ -25,17 +25,17 @@ namespace Gameplay.GameplayObjects.Character.Customisation
         {
             _playerLobbyInstances = new Dictionary<ulong, PlayerCustomisationDisplay>();
 
-            PlayerCustomisationManager.OnNonLocalClientPlayerBuildChanged += HandlePlayerStateChanged;
+            PlayerCustomisationManager.OnPlayerConnected += HandlePlayerConnected;
             PlayerCustomisationManager.OnPlayerDisconnected += HandlePlayerDisconnected;
         }
         private void OnDestroy()
         {
-            PlayerCustomisationManager.OnNonLocalClientPlayerBuildChanged -= HandlePlayerStateChanged;
+            PlayerCustomisationManager.OnPlayerConnected -= HandlePlayerConnected;
             PlayerCustomisationManager.OnPlayerDisconnected -= HandlePlayerDisconnected;
         }
 
 
-        private void HandlePlayerStateChanged(ulong clientID, BuildData buildData)
+        private void HandlePlayerConnected(ulong clientID, BuildData initialBuild)
         {
             if (_playerLobbyInstances.ContainsKey(clientID))
             {
@@ -43,7 +43,7 @@ namespace Gameplay.GameplayObjects.Character.Customisation
             }
             else
             {
-                AddPlayerInstance(clientID, buildData);
+                AddPlayerInstance(clientID, initialBuild);
             }
         }
         private void HandlePlayerDisconnected(ulong clientID) => RemovePlayerInstance(clientID);

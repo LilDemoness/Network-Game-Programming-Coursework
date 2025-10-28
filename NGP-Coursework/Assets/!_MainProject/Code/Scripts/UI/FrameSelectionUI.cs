@@ -114,11 +114,19 @@ namespace UI.Customisation
 
 
 
-        public void SelectNextFramePressed() => throw new System.NotImplementedException();
-        public void SelectPreviousFramePressed() => throw new System.NotImplementedException();
+        public void SelectNextFramePressed()
+        {
+            _currentPreviewedFrameIndex = MathUtils.Loop(_currentPreviewedFrameIndex + 1, _frameDataCount);
+            SelectCurrentFrameOption();
+        }
+        public void SelectPreviousFramePressed()
+        {
+            _currentPreviewedFrameIndex = MathUtils.Loop(_currentPreviewedFrameIndex - 1, _frameDataCount);
+            SelectCurrentFrameOption();
+        }
 
 
-        
+
 
 
         public void ToggleSelectionOptions()

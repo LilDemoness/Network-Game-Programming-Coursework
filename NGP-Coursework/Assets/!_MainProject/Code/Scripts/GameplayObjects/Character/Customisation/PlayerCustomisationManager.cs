@@ -28,6 +28,7 @@ namespace Gameplay.GameplayObjects.Character.Customisation
         public static event System.Action<ulong, BuildData> OnNonLocalClientPlayerBuildChanged;
         public static event System.Action<BuildData> OnLocalClientBuildChanged;
 
+        public static event System.Action<ulong, BuildData> OnPlayerConnected;     // Remove.
         public static event System.Action<ulong> OnPlayerDisconnected;  // Remove.
 
 
@@ -196,6 +197,7 @@ namespace Gameplay.GameplayObjects.Character.Customisation
 
             // Notify All Clients of the New Client.
             AlterPlayerBuildClientRpc(clientID, _syncedPlayerBuilds[clientID]);
+            HandleClientConnectedClientRpc(clientID, _syncedPlayerBuilds[clientID]);
         }
         private void Server_HandleClientDisconnected(ulong clientID)
         {
@@ -324,8 +326,7 @@ namespace Gameplay.GameplayObjects.Character.Customisation
         [Rpc(SendTo.ClientsAndHost)]
         private void HandleClientConnectedClientRpc(ulong clientID, BuildData initialBuild)
         {
-            /*AddPlayerInstance(initialState.ClientID);
-            AlterPlayerState(ref initialState);*/
+            OnPlayerConnected?.Invoke(clientID, initialBuild);
         }
         [Rpc(SendTo.ClientsAndHost)]
         private void HandleClientDisconnectClientRpc(ulong clientID)
