@@ -5,10 +5,11 @@ using Unity.Netcode;
 using UnityEngine;
 using UserInput;
 using UI.Tables;
+using UnityEngine.UI;
 
 namespace UI.Customisation
 {
-    public class FrameSelectionUI : MonoBehaviour
+    public class FrameSelectionUI : OverlayMenu
     {
         [SerializeField] private PlayerCustomisationManager _playerCustomisationManager;
         private int _frameDataCount;
@@ -17,6 +18,8 @@ namespace UI.Customisation
         [Header("Frame Selection")]
         [SerializeField] private GameObject _frameSelectionRoot;
         public bool IsFrameSelectionScreenActive => _frameSelectionRoot.activeSelf;
+        protected override GameObject RootObject => _frameSelectionRoot;
+
 
         [Space(10)]
         [SerializeField] private Transform _frameOptionsContainer;
@@ -30,11 +33,15 @@ namespace UI.Customisation
         private FrameSelectionOption[] _frameSelectionOptions;
 
 
+        [Header("Selection Navigation")]
+        [SerializeField] private Button _selectedFrameConfirmationButton;
+        protected override GameObject FirstSelectedItem => _selectedFrameConfirmationButton.gameObject;
+
 
         private void Awake()
         {
             SetupFrameSelectionOptions();
-            HideSelectionOptions();
+            Close(false);
 
             SubscribeToInput();
             PlayerCustomisationManager.OnNonLocalClientPlayerBuildChanged += PlayerCustomisationManager_OnPlayerCustomisationStateChanged;
@@ -94,16 +101,16 @@ namespace UI.Customisation
             ClientInput.OnOpenFrameSelectionPerformed += ToggleSelectionOptions;
             ClientInput.OnConfirmPerformed += ClientInput_OnConfirmPerformed;
 
-            ClientInput.OnNextTabPerformed += SelectNextFrameOption;
-            ClientInput.OnPreviousTabPerformed += SelectPreviousFrameOption;
+            //ClientInput.OnNextTabPerformed += SelectNextFrameOption;
+            //ClientInput.OnPreviousTabPerformed += SelectPreviousFrameOption;
         }
         private void UnsubscribeFromInput()
         {
             ClientInput.OnOpenFrameSelectionPerformed -= ToggleSelectionOptions;
             ClientInput.OnConfirmPerformed -= ClientInput_OnConfirmPerformed;
 
-            ClientInput.OnNextTabPerformed -= SelectNextFrameOption;
-            ClientInput.OnPreviousTabPerformed -= SelectPreviousFrameOption;
+            //ClientInput.OnNextTabPerformed -= SelectNextFrameOption;
+            //ClientInput.OnPreviousTabPerformed -= SelectPreviousFrameOption;
         }
 
         private void ClientInput_OnConfirmPerformed()
@@ -132,22 +139,19 @@ namespace UI.Customisation
         public void ToggleSelectionOptions()
         {
             if (_frameSelectionRoot.activeSelf)
-                HideSelectionOptions();
+                Close();
             else
-                ShowSelectionOptions();
+                Open();
         }
-        [ContextMenu("Show")]
-        public void ShowSelectionOptions()
+        public override void Open(GameObject initialSelectedObject)
         {
-            // Enable the selection root.
-            _frameSelectionRoot.SetActive(true);
+            base.Open(initialSelectedObject);
 
             // Start with previewing the selected frame.
             _currentPreviewedFrameIndex = _selectedFrameIndex;
             ScrollFrameOptionsToSelected(isInstant: true);      
         }
-        [ContextMenu("Hide")]
-        public void HideSelectionOptions() => _frameSelectionRoot.SetActive(false);
+        public override void Close(bool selectPreviousSelectable = true) => base.Close(selectPreviousSelectable);
 
 
         public void SelectNextFrameOption()
@@ -205,7 +209,7 @@ namespace UI.Customisation
         public void SelectCurrentFrameOption()
         {
             _playerCustomisationManager.SelectFrame(_currentPreviewedFrameIndex);
-            HideSelectionOptions();
+            Close();
         }
     }
 }

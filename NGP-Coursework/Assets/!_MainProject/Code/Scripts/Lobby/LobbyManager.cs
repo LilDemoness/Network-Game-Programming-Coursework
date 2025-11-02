@@ -3,7 +3,7 @@ using Unity.Netcode;
 using System.Collections.Generic;
 using System;
 
-public class LobbyManager : NetworkBehaviour
+public class LobbyManager : NetworkSingleton<LobbyManager>
 {
     // Player Ready States.
     private NetworkList<PlayerLobbyState> _playerStates = new NetworkList<PlayerLobbyState>();
@@ -12,7 +12,11 @@ public class LobbyManager : NetworkBehaviour
     public static event System.Action<ulong> OnClientNotReady;
 
 
-    private void Awake() => _playerStates.OnListChanged += OnPlayerStatesChanged;
+    protected override void Awake()
+    {
+        base.Awake();
+        _playerStates.OnListChanged += OnPlayerStatesChanged;
+    }
     public override void OnNetworkSpawn()
     {
         if (IsClient)

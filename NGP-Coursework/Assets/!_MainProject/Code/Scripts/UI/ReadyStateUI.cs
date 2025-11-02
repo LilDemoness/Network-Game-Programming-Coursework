@@ -1,14 +1,20 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
+using UserInput;
 
 namespace UI.Lobby
 {
     /// <summary>
     ///     A UI element that displays the ready states of all players in a lobby.
+    ///     Also acts as a pass-through for set ready state input.
     /// </summary>
     public class ReadyStateUI : MonoBehaviour
     {
+        [Tooltip("(Optional) The Overlay Menu this element is a child of")]
+            [SerializeField] private OverlayMenu _parentOverlayMenu = null;
+
+        [Space(10)]
         [SerializeField] private Transform _readyCheckMarkRoot;
         [SerializeField] private ReadyCheckMark _readyCheckMarkPrefab;
         private Dictionary<ulong, ReadyCheckMark> _readyCheckMarkInstances = new Dictionary<ulong, ReadyCheckMark>();
@@ -18,11 +24,15 @@ namespace UI.Lobby
         {
             LobbyManager.OnClientIsReady += SetClientReady;
             LobbyManager.OnClientNotReady += SetClientNotReady;
+
+            ClientInput.OnConfirmPerformed += TogglePlayerReadyState;   // Temp - Replace with a 'OnReadyPressed' or similar.
         }
         private void OnDestroy()
         {
             LobbyManager.OnClientIsReady -= SetClientReady;
             LobbyManager.OnClientNotReady -= SetClientNotReady;
+
+            ClientInput.OnConfirmPerformed -= TogglePlayerReadyState;
         }
 
 
@@ -82,6 +92,19 @@ namespace UI.Lobby
                 // Return the instance.
                 return readyCheckMark;
             }
+        }
+
+
+
+        /// <summary>
+        ///     If there is no overlay menu which would prevent the input, toggle the ready state on the lobby manager.
+        /// </summary>
+        public void TogglePlayerReadyState()
+        {
+            if (OverlayMenu.IsOverlayMenuOpen && (_parentOverlayMenu == null || _parentOverlayMenu == OverlayMenu.ActiveOverlayMenu))
+                return; // An overlay menu is above this element and so our input shouldn't be counted.
+
+            LobbyManager.Instance.ToggleReady();
         }
     }
 }
