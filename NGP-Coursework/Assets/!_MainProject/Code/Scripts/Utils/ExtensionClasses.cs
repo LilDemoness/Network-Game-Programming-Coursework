@@ -54,7 +54,7 @@ public static class ScrollRectExtensions
     /// <summary>
     ///     Ensure that the child element of this ScrollRect is visible within the contents.
     /// </summary>
-    // Based on https://stackoverflow.com/a/50191835
+    // Source: 'https://stackoverflow.com/a/62005575'.
     public static void BringChildIntoView(this ScrollRect instance, RectTransform child)
     {
         // Ensure that our RectTransforms have been updated.
