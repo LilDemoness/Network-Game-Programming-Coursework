@@ -3,6 +3,10 @@ using Gameplay.GameplayObjects.Character;
 
 namespace Gameplay.Actions.Visuals
 {
+    /// <summary>
+    ///     Base class for all purely visual elements created by an action.
+    /// </summary>
+    /// <remarks> Should only be triggered Client-side.</remarks>
     [System.Serializable]
     public abstract class ActionVisual
     {
@@ -28,6 +32,12 @@ namespace Gameplay.Actions.Visuals
         public void OnClientEnd(ClientCharacter clientCharacter, in Vector3 origin, in Vector3 direction)       { if (_triggerTimes.HasFlag(TriggerTimes.OnEnd))    { Trigger(clientCharacter, origin, direction); } }
         public void OnClientCancel(ClientCharacter clientCharacter, in Vector3 origin, in Vector3 direction)    { if (_triggerTimes.HasFlag(TriggerTimes.OnCancel)) { Trigger(clientCharacter, origin, direction); } }
 
+        /// <summary>
+        ///     Trigger the ActionVisual with the passed origin parameters.
+        /// </summary>
+        /// <param name="clientCharacter"> The triggering character.</param>
+        /// <param name="origin"> The origin of the visual.</param>
+        /// <param name="direction"> The forwards direction of the visual.</param>
         protected abstract void Trigger(ClientCharacter clientCharacter, in Vector3 origin, in Vector3 direction);
     }
 }

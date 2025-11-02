@@ -1,8 +1,10 @@
-using UnityEngine;
 using Gameplay.GameplayObjects.Character;
 
 namespace Gameplay.Actions.Effects
 {
+    /// <summary>
+    ///     Base class for all game-state affecting effects created by an action.
+    /// </summary>
     [System.Serializable]
     public abstract class ActionEffect
     {

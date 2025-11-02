@@ -51,17 +51,17 @@ namespace Gameplay.GameplayObjects.Character
         ///     RPC invoked to cancel all Action FXs of a certain type (E.g. When a Stealth Action ends).
         /// </summary>
         [ClientRpc]
-        public void CancelRunningActionsByIDClientRpc(ActionID actionID, int slotIdentifier = 0)
+        public void CancelRunningActionsByIDClientRpc(ActionID actionID, SlotIndex slotIndex = SlotIndex.Unset)
         {
-            _clientActionPlayer.CancelRunningActionsByID(actionID, slotIdentifier);
+            _clientActionPlayer.CancelRunningActionsByID(actionID, slotIndex);
         }
         /// <summary>
         ///     RPC invoked to cancel all Action FXs of a certain type (E.g. When a Stealth Action ends).
         /// </summary>
         [ClientRpc]
-        public void CancelRunningActionsBySlotIDClientRpc(int slotIdentifier)
+        public void CancelRunningActionsBySlotIDClientRpc(SlotIndex slotIndex)
         {
-            _clientActionPlayer.CancelRunningActionsBySlotID(slotIdentifier);
+            _clientActionPlayer.CancelRunningActionsBySlotID(slotIndex);
         }
 
         #endregion
@@ -108,6 +108,9 @@ namespace Gameplay.GameplayObjects.Character
             _clientActionPlayer.OnAnimEvent(id);
         }
 
+        /// <summary>
+        ///     Returns true if this action is currently affecting the animation of the character.
+        /// </summary>
         public bool IsAnimating()
         {
             /*if (OurAnimator.GetFloat(_visualisationConfiguration.SpeedVariableID) > 0.0f)

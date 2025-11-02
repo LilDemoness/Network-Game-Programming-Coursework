@@ -1,10 +1,12 @@
-﻿using System.Collections;
-using UnityEngine;
+﻿using UnityEngine;
 using Gameplay.GameplayObjects.Character;
 using Gameplay.StatusEffects;
 
 namespace Gameplay.Actions.Effects
 {
+    /// <summary>
+    ///     Applies a <see cref="StatusEffect"/> to hit characters.
+    /// </summary>
     [System.Serializable]
     public class ApplyBuffEffect : ActionEffect
     {
@@ -22,7 +24,10 @@ namespace Gameplay.Actions.Effects
             float buffValue = _scaleDurationWithCharge ? (Action.GetUnbuffedValue(_buffableValueType) + valueChange * chargePercentage) : _newValue;
             float buffLifetime = _scaleDurationWithCharge ? _buffLifetime * chargePercentage : _buffLifetime;*/
 
-            owner.StatusEffectPlayer.AddStatusEffect(_statusEffectDefinition);
+            if (hitInfo.Target.TryGetComponent<ServerCharacter>(out ServerCharacter serverCharacter))
+            {
+                serverCharacter.StatusEffectPlayer.AddStatusEffect(_statusEffectDefinition);
+            }
         }
 
         // We don't need to perform any cleanup as the buff is automatically removed by the character when its duration elapses.

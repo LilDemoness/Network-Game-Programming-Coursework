@@ -32,7 +32,7 @@ namespace Gameplay.Actions.Definitions
 
         public override bool ShouldCancelAction(ref ActionRequestData thisData, ref ActionRequestData otherData)
         {
-            return CanCancelAction(otherData.ActionID) && (!_requireSharedSlotIdentifier || thisData.SlotIdentifier == otherData.SlotIdentifier);
+            return CanCancelAction(otherData.ActionID) && (!_requireSharedSlotIdentifier || thisData.SlotIndex == otherData.SlotIndex);
         }
         private bool CanCancelAction(ActionID otherActionID)
         {

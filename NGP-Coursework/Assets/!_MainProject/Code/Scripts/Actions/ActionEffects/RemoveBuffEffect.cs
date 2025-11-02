@@ -3,6 +3,9 @@ using Gameplay.GameplayObjects.Character;
 
 namespace Gameplay.Actions.Effects
 {
+    /// <summary>
+    ///     Removes buffs from the hit characters.
+    /// </summary>
     [System.Serializable]
     public class RemoveBuffEffect : ActionEffect
     {

@@ -6,13 +6,17 @@ using Gameplay.Actions.Visuals;
 
 namespace Gameplay.Actions.Definitions
 {
+    /// <summary>
+    ///     The shared definition for an Action.<br/>
+    ///     Contains the shared data and the functions/logic for the triggering of an action.
+    /// </summary>
     public abstract class ActionDefinition : ScriptableObject
     {
         /// <summary>
         ///     An index into the GameDataSource array of action prototypes.
         ///     Set at runtime by GameDataSource class.
         ///     If the action is not itself a prototype, it will contain the ActionID of the prototype reference.
-        ///     <br></br>This field is used to identify actions in a way that can be sent over the network.
+        ///     <br/>This field is used to identify actions in a way that can be sent over the network.
         /// </summary>
         /// <remarks> Non-serialized, so it doesn't get saved between editor sessions.</remarks>
         [field: System.NonSerialized] public ActionID ActionID { get; set; }
@@ -108,6 +112,10 @@ namespace Gameplay.Actions.Definitions
 
         public virtual bool HasCooldown => ActionCooldown > 0.0f;
         public virtual bool HasCooldownCompleted(float lastActivatedTime) => (NetworkManager.Singleton.ServerTime.TimeAsFloat - lastActivatedTime) >= ActionCooldown;
+        /// <summary>
+        ///     Determines if this action has expired given the passed starting time.
+        /// </summary>
+        /// <returns> True if the action has exprired, otherwise false.</returns>
         public virtual bool GetHasExpired(float timeStarted)
         {
             bool isExpirable = MaxActiveDuration > 0.0f;  // Non-positive values indicate that the duration is infinite.
@@ -118,11 +126,18 @@ namespace Gameplay.Actions.Definitions
         public virtual bool CancelsOtherActions => false;
 
 
+        /// <summary>
+        ///     Returns true if this Action can be interrupted by actions with the passed ActionID.
+        /// </summary>
         public virtual bool CanBeInterruptedBy(in ActionID otherActionID)
         {
             Debug.LogWarning("Not Implemented");
             return false;
         }
+        /// <summary>
+        ///     Returns true if this Action should cancel other actions with the passed <see cref="ActionRequestData"/>.
+        /// </summary>
+        // Using 'ActionRequestData' to let us compare SlotIndexes.
         public virtual bool ShouldCancelAction(ref ActionRequestData thisData, ref ActionRequestData otherData)
         {
             Debug.LogWarning("Not Implemented");
@@ -204,7 +219,7 @@ namespace Gameplay.Actions.Definitions
 
 
         /// <summary>
-        ///     Cleans up any ongoing effects.
+        ///     Cleans up any ongoing effects on the server.
         /// </summary>
         public virtual void Cleanup(ServerCharacter owner)
         {
@@ -218,6 +233,10 @@ namespace Gameplay.Actions.Definitions
         public virtual void OnCollisionEntered(ServerCharacter owner, Collision collision) { }
 
 
+        /// <summary>
+        ///     Called on the client when the Action starts actually playing (Which may be after it is created, due to queueing).
+        /// </summary>
+        /// <returns> False if the Action decided it doesn't want to run. True otherwise.</returns>
         public virtual bool OnStartClient(ClientCharacter clientCharacter, ref ActionRequestData data)
         {
             foreach (ActionVisual visual in TriggeringVisuals)
@@ -225,11 +244,18 @@ namespace Gameplay.Actions.Definitions
 
             return ActionConclusion.Continue;
         }
+        /// <summary>
+        ///     Called on the client when this action should start charging.
+        /// </summary>
         public virtual void OnStartChargingClient(ClientCharacter clientCharacter, ref ActionRequestData data)
         {
             foreach (ActionVisual visual in TriggeringVisuals)
                 visual.OnClientStartCharging(clientCharacter, GetActionOrigin(ref data), GetActionDirection(ref data));
         }
+        /// <summary>
+        ///     Called on the client when the Action wishes to Update itself.
+        /// </summary>
+        /// <returns> True to keep running, false to stop. The Action will stop by default when its duration expires, if it has one set.</returns>
         public virtual bool OnUpdateClient(ClientCharacter clientCharacter, ref ActionRequestData data, float chargePercentage = 1.0f)
         {
             foreach (ActionVisual visual in TriggeringVisuals)
@@ -237,6 +263,9 @@ namespace Gameplay.Actions.Definitions
 
             return ActionConclusion.Continue;
         }
+        /// <summary>
+        ///     Called on the client when the Action ends naturally.
+        /// </summary>
         public virtual void OnEndClient(ClientCharacter clientCharacter, ref ActionRequestData data)
         {
             foreach (ActionVisual visual in TriggeringVisuals)
@@ -244,6 +273,9 @@ namespace Gameplay.Actions.Definitions
 
             CleanupClient(clientCharacter);
         }
+        /// <summary>
+        ///     Called on the client when the Action gets cancelled.
+        /// </summary>
         public virtual void OnCancelClient(ClientCharacter clientCharacter, ref ActionRequestData data)
         {
             foreach (ActionVisual visual in TriggeringVisuals)
@@ -252,6 +284,9 @@ namespace Gameplay.Actions.Definitions
             CleanupClient(clientCharacter);
         }
 
+        /// <summary>
+        ///     Cleans up any ongoing effects on the client.
+        /// </summary>
         public virtual void CleanupClient(ClientCharacter clientCharacter) { }
 
         #endregion
@@ -262,8 +297,13 @@ namespace Gameplay.Actions
 {
     public enum ActionActivationStyle
     {
-        Held,       // Activate the action upon press. Cancel it upon release.
-        Toggle,     // Activate the action upon press. Cancel it upon the next press.
-        Pressed,    // Activate the action upon press. Don't cancel it ourselves.
+        /// <summary> Activate the action upon press. Cancel it upon release. </summary>
+        Held,
+
+        /// <summary> Activate the action upon press. Cancel it upon the next press.</summary>
+        Toggle,
+
+        /// <summary> Activate the action upon press. Don't cancel it ourselves.</summary>
+        Pressed,
     }
 }

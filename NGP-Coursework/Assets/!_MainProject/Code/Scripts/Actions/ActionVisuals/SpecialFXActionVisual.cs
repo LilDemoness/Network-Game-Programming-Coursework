@@ -4,6 +4,9 @@ using VisualEffects;
 
 namespace Gameplay.Actions.Visuals
 {
+    /// <summary>
+    ///     Spawns and deletes a SpecialFXGraphic.
+    /// </summary>
     [System.Serializable]
     public class SpecialFXActionVisual : ActionVisual
     {

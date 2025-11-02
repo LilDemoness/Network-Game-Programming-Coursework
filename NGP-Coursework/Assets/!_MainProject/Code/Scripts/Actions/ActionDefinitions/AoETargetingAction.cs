@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEngine;
 using Gameplay.Actions.Effects;
 using Gameplay.GameplayObjects.Character;
@@ -7,7 +6,7 @@ using System;
 namespace Gameplay.Actions.Definitions
 {
     /// <summary>
-    ///     An action that always targets itself.
+    ///     An action that selects targets within an Area of Effect using a given <see cref="AoETargeting"/> method.
     /// </summary>
     [CreateAssetMenu(menuName = "Actions/AoE Action", order = 4)]
     public class AoETargetingAction : ActionDefinition

@@ -4,8 +4,14 @@ using UnityEngine;
 
 namespace Gameplay.Actions
 {
+    /// <summary>
+    ///     A class responsible for playing action visuals on clients.
+    /// </summary>
     public class ClientActionPlayer
     {
+        /// <summary>
+        ///     The currently active actions that are using client visuals.
+        /// </summary>
         private List<Action> _playingActions = new List<Action>();
 
         /// <summary>
@@ -15,7 +21,10 @@ namespace Gameplay.Actions
         private const float ANTICIPATION_TIMEOUT_SECONDS = 1.0f;
 
 
-        private Dictionary<int, float> _slotIDToChargeDepletedTimeDict = new Dictionary<int, float>();
+        /// <summary>
+        ///     Maps a SlotIndex to the time when the charge percentage will reach 0%.
+        /// </summary>
+        private Dictionary<SlotIndex, float> _slotIndexToChargeDepletedTimeDict = new Dictionary<SlotIndex, float>();
 
         public ClientCharacter ClientCharacter { get; private set;}
 
@@ -38,6 +47,7 @@ namespace Gameplay.Actions
                 bool hasTimedOut = action.AnticipatedClient && action.TimeRunning >= ANTICIPATION_TIMEOUT_SECONDS;
 
 
+                // Determine if we should end the action.
                 if (!shouldKeepGoing || hasExpired || hasTimedOut)
                 {
                     // End the action.
@@ -71,7 +81,6 @@ namespace Gameplay.Actions
         ///     Called on the client that owns the Character when the player triggers an action.
         ///     This allows for actions to immediately start playing feedback.
         /// </summary>
-        /// <param name="data"> The action that is being requested.</param>
         public void AnticipateAction(ref ActionRequestData data)
         {
             if (!ClientCharacter.IsAnimating() && Action.ShouldClientAnticipate(ClientCharacter, ref data))
@@ -83,12 +92,16 @@ namespace Gameplay.Actions
         }
 
 
+        /// <summary>
+        ///     Start playing an action based on the given ActionRequestData.
+        /// </summary>
+        /// <param name="serverTimeStarted"> The time on the server that this action was started.<br/>Used for synchronisation.</param>
         public void PlayAction(ref ActionRequestData data, float serverTimeStarted)
         {
             int anticipatedActionIndex = FindAction(data.ActionID, true);
 
             Action action = anticipatedActionIndex>= 0 ? _playingActions[anticipatedActionIndex] : ActionFactory.CreateActionFromData(ref data);
-            _slotIDToChargeDepletedTimeDict.TryGetValue(action.Data.SlotIdentifier, out float chargeDepletedTime);
+            _slotIndexToChargeDepletedTimeDict.TryGetValue(action.Data.SlotIndex, out float chargeDepletedTime);
             if (action.OnStartClient(ClientCharacter, chargeDepletedTime, serverTimeStarted))
             {
                 if (anticipatedActionIndex < 0)
@@ -104,6 +117,9 @@ namespace Gameplay.Actions
                 ActionFactory.ReturnAction(action);
             }
         }
+        /// <summary>
+        ///     Cancel all playing actions.
+        /// </summary>
         public void CancelAllActions()
         {
             foreach(Action action in _playingActions)
@@ -114,20 +130,30 @@ namespace Gameplay.Actions
             _playingActions.Clear();
         }
 
-        public void CancelRunningActionsByID(ActionID actionID, int slotIdentifier = 0, Action exceptThis = null)
+        /// <summary>
+        ///     Cancel all playing actions that match the given parameters.
+        /// </summary>
+        /// <param name="actionID"> The <see cref="ActionID"/> of the action to cancel.</param>
+        /// <param name="slotIndex"> The <see cref="SlotIndex"/> of the action to cancel.</param>
+        /// <param name="exceptThis"> The action you don't wish to cancel.</param>
+        public void CancelRunningActionsByID(ActionID actionID, SlotIndex slotIndex = SlotIndex.Unset, Action exceptThis = null)
         {
-            bool ShouldCancelFunc(Action action) => action.ActionID == actionID && action != exceptThis && (slotIdentifier == 0 || action.Data.SlotIdentifier == slotIdentifier);
+            bool ShouldCancelFunc(Action action) => action.ActionID == actionID && action != exceptThis && (slotIndex == SlotIndex.Unset || action.Data.SlotIndex == slotIndex);
             CancelActiveActions(ShouldCancelFunc);
         }
-        public void CancelRunningActionsBySlotID(int slotIdentifier)
+        /// <summary>
+        ///     Cancel all actions for the given <see cref="SlotIndex"/>.
+        /// </summary>
+        public void CancelRunningActionsBySlotID(SlotIndex slotIndex)
         {
-            if (slotIdentifier <= 0)
-                throw new System.ArgumentException($"You are trying to cancel actions with an invalid SlotIdentifier ({slotIdentifier}). Use a value >= 1.");
-
-            bool ShouldCancelFunc(Action action) => action.Data.SlotIdentifier == slotIdentifier;
+            bool ShouldCancelFunc(Action action) => action.Data.SlotIndex == slotIndex;
             CancelActiveActions(ShouldCancelFunc);
         }
 
+        /// <summary>
+        ///     Cancel all actions based on the passed condition function.
+        /// </summary>
+        /// <param name="cancelCondition"> The cancel condition we are checking against.</param>
         private void CancelActiveActions(System.Func<Action, bool> cancelCondition)
         {
             for (int i = _playingActions.Count - 1; i >= 0; --i)
@@ -142,15 +168,19 @@ namespace Gameplay.Actions
             }
         }
 
+        /// <summary>
+        ///     A helper function to properly cancel the passed action.
+        /// </summary>
+        /// <remarks> Doesn't remove the Action from its associated list.</remarks>
         private void CancelAction(Action actionToCancel)
         {
             // Cancel the action.
             actionToCancel.CancelClient(ClientCharacter, out float chargeDepletedTime);
 
             // Charge Reduction Time.
-            if (!_slotIDToChargeDepletedTimeDict.TryAdd(actionToCancel.Data.SlotIdentifier, chargeDepletedTime))
+            if (!_slotIndexToChargeDepletedTimeDict.TryAdd(actionToCancel.Data.SlotIndex, chargeDepletedTime))
             {
-                _slotIDToChargeDepletedTimeDict[actionToCancel.Data.SlotIdentifier] = chargeDepletedTime;
+                _slotIndexToChargeDepletedTimeDict[actionToCancel.Data.SlotIndex] = chargeDepletedTime;
             }
         }
     }

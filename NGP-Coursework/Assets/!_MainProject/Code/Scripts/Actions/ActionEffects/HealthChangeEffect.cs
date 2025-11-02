@@ -4,6 +4,9 @@ using Gameplay.GameplayObjects;
 
 namespace Gameplay.Actions.Effects
 {
+    /// <summary>
+    ///     Affects the health of hit <see cref="IDamageable"/>.
+    /// </summary>
     [System.Serializable]
     public class HealthChangeEffect : ActionEffect
     {

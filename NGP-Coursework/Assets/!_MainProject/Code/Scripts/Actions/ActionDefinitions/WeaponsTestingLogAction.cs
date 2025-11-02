@@ -15,25 +15,25 @@ namespace Gameplay.Actions.Definitions
 
         public override bool OnStart(ServerCharacter owner, ref ActionRequestData data)
         {
-            Debug.Log($"{this.name} {(data.SlotIdentifier != 0 ? $"in slot {data.SlotIdentifier}" : "")} says: Started Firing \"{_weaponName}\"");
+            Debug.Log($"{this.name} {(data.SlotIndex != 0 ? $"in slot {data.SlotIndex}" : "")} says: Started Firing \"{_weaponName}\"");
             return ActionConclusion.Continue;
         }
 
         public override bool OnUpdate(ServerCharacter owner, ref ActionRequestData data, float chargePercentage = 1.0f)
         {
-            Debug.Log($"{this.name} {(data.SlotIdentifier != 0 ? $"in slot {data.SlotIdentifier}" : "")} says: Updated \"{_weaponName}\"");
+            Debug.Log($"{this.name} {(data.SlotIndex != 0 ? $"in slot {data.SlotIndex}" : "")} says: Updated \"{_weaponName}\"");
             return ActionConclusion.Continue;
         }
         public override void OnEnd(ServerCharacter owner, ref ActionRequestData data)
         {
             if (_displayEndLog)
-                Debug.Log($"Ending Action: {this.name} (Slot: {data.SlotIdentifier})");
+                Debug.Log($"Ending Action: {this.name} (Slot: {data.SlotIndex})");
             base.OnEnd(owner, ref data);
         }
         public override void OnCancel(ServerCharacter owner, ref ActionRequestData data)
         {
             if (_displayCancelLog)
-                Debug.Log($"Cancelling Action: {this.name} (Slot: {data.SlotIdentifier})");
+                Debug.Log($"Cancelling Action: {this.name} (Slot: {data.SlotIndex})");
             base.OnCancel(owner, ref data);
         }
     }

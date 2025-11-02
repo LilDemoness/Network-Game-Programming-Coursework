@@ -17,22 +17,22 @@ namespace Gameplay.Actions
         private List<Action> _actionQueue;
         private List<Action> _nonBlockingActions;
 
-        private Dictionary<int, float> _slotIDToChargeDepletedTimeDict = new Dictionary<int, float>();
+        private Dictionary<SlotIndex, float> _slotIndexToChargeDepletedTimeDict = new Dictionary<SlotIndex, float>();
 
-        private struct ActionIDSlotIdentifierWrapper : System.IEquatable<ActionIDSlotIdentifierWrapper>
+        private struct ActionIDSlotIndexWrapper : System.IEquatable<ActionIDSlotIndexWrapper>
         {
             public ActionID ActionID;
-            public int SlotIdentifier;
+            public SlotIndex SlotIndex;
 
-            public void SetValues(ActionID id, int slotIndentifier)
+            public void SetValues(ActionID id, SlotIndex slotIndex)
             {
                 this.ActionID = id;
-                this.SlotIdentifier = slotIndentifier;
+                this.SlotIndex = slotIndex;
             }
-            public bool Equals(ActionIDSlotIdentifierWrapper other) => ActionID == other.ActionID && SlotIdentifier == other.SlotIdentifier;
+            public bool Equals(ActionIDSlotIndexWrapper other) => ActionID == other.ActionID && SlotIndex == other.SlotIndex;
         }
-        private Dictionary<ActionIDSlotIdentifierWrapper, float> _actionLastUsedTimestamps;  // Stores when the Action with the associated ActionID & Slot Identifier was last used.
-        private ActionIDSlotIdentifierWrapper _timestampComparison;
+        private Dictionary<ActionIDSlotIndexWrapper, float> _actionLastUsedTimestamps;  // Stores when the Action with the associated ActionID & Slot Identifier was last used.
+        private ActionIDSlotIndexWrapper _timestampComparison;
 
 
 
@@ -47,7 +47,7 @@ namespace Gameplay.Actions
 
             _actionQueue = new List<Action>();
             _nonBlockingActions = new List<Action>();
-            _actionLastUsedTimestamps = new Dictionary<ActionIDSlotIdentifierWrapper, float>();
+            _actionLastUsedTimestamps = new Dictionary<ActionIDSlotIndexWrapper, float>();
             _hasPendingSynthesisedAction = false;
         }
 
@@ -90,7 +90,7 @@ namespace Gameplay.Actions
                 return false; // The action is not a toggleable action, so we shouldn't cancel existing ones.
             
             // Cancel all actions that match our action's ID and Slot ID.
-            bool ShouldCancelFunc(Action action) => action.ActionID == action.ActionID && (action.Data.SlotIdentifier == 0 || action.Data.SlotIdentifier == action.Data.SlotIdentifier);
+            bool ShouldCancelFunc(Action action) => action.ActionID == action.ActionID && (action.Data.SlotIndex == 0 || action.Data.SlotIndex == action.Data.SlotIndex);
             return CancelActions(ShouldCancelFunc, true, true);
         }
 
@@ -212,7 +212,7 @@ namespace Gameplay.Actions
             if (_actionQueue.Count <= 0)
                 return;
 
-            _timestampComparison.SetValues(_actionQueue[0].ActionID, _actionQueue[0].Data.SlotIdentifier);
+            _timestampComparison.SetValues(_actionQueue[0].ActionID, _actionQueue[0].Data.SlotIndex);
             if (_actionQueue[0].HasCooldown
                 && _actionLastUsedTimestamps.TryGetValue(_timestampComparison, out float lastTimeUsed)
                 && !_actionQueue[0].HasCooldownCompleted(lastTimeUsed))
@@ -224,13 +224,14 @@ namespace Gameplay.Actions
             }
 
 
+            // (Functions for AI Agents).
             //int index = SynthesiseTargetIfNeccessary(0);
             //SynthesiseChaseIfNeccessary(index);
 
             // Cancel any actions that this action should cancel when being played.
             CancelInterruptedActions(_actionQueue[0]);
 
-            _slotIDToChargeDepletedTimeDict.TryGetValue(_actionQueue[0].Data.SlotIdentifier, out float chargeDepletedTime);
+            _slotIndexToChargeDepletedTimeDict.TryGetValue(_actionQueue[0].Data.SlotIndex, out float chargeDepletedTime);
 
             _actionQueue[0].TimeStarted = NetworkManager.Singleton.ServerTime.TimeAsFloat;
             bool play = _actionQueue[0].OnStart(_serverCharacter, chargeDepletedTime);
@@ -241,7 +242,7 @@ namespace Gameplay.Actions
                 return;
             }
 
-            _timestampComparison.SetValues(_actionQueue[0].ActionID, _actionQueue[0].Data.SlotIdentifier);
+            _timestampComparison.SetValues(_actionQueue[0].ActionID, _actionQueue[0].Data.SlotIndex);
             _actionLastUsedTimestamps[_timestampComparison] = Time.time;
 
             if (_actionQueue[0].ShouldBecomeNonBlocking())
@@ -278,6 +279,7 @@ namespace Gameplay.Actions
         {
             if (_actionQueue.Count > 0)
             {
+                // Remove the currently active action.
                 if (callEndOnRemoved)
                 {
                     _actionQueue[0].End(_serverCharacter);
@@ -370,11 +372,21 @@ namespace Gameplay.Actions
         private float GetQueueTimeDepth() => throw new System.NotImplementedException();
 
 
+        /// <summary>
+        ///     Notify our active actions that we've collided with something.
+        /// </summary>
         public void CollisionEntered(Collision collision)
         {
+            // Blocking Action.
             if (_actionQueue.Count > 0)
             {
                 _actionQueue[0].CollisionEntered(_serverCharacter, collision);
+            }
+
+            // Non-blocking Actions.
+            for(int i = 0; i < _nonBlockingActions.Count; ++i)
+            {
+                _nonBlockingActions[i].CollisionEntered(_serverCharacter, collision);
             }
         }
 
@@ -422,17 +434,25 @@ namespace Gameplay.Actions
         }
 
 
-        public void CancelRunningActionsByID(ActionID actionID, int slotIdentifier = 0, bool cancelNonBlocking = true, Action exceptThis = null)
+        /// <summary>
+        ///     Cancel all playing actions that match the given parameters.
+        /// </summary>
+        /// <param name="actionID"> The <see cref="ActionID"/> of the action to cancel.</param>
+        /// <param name="slotIndex"> The <see cref="SlotIndex"/> of the action to cancel.</param>
+        /// <param name="cancelNonBlocking"> Should we also cancel non-blocking actions?</param>
+        /// <param name="exceptThis"> The action you don't wish to cancel.</param>
+        public void CancelRunningActionsByID(ActionID actionID, SlotIndex slotIndex = SlotIndex.Unset, bool cancelNonBlocking = true, Action exceptThis = null)
         {
-            bool ShouldCancelFunc(Action action) => action.ActionID == actionID && action != exceptThis && (slotIdentifier == 0 || action.Data.SlotIdentifier == slotIdentifier);
+            bool ShouldCancelFunc(Action action) => action.ActionID == actionID && action != exceptThis && (slotIndex == SlotIndex.Unset || action.Data.SlotIndex == slotIndex);
             CancelActions(ShouldCancelFunc, false, cancelNonBlocking);
         }
-        public void CancelRunningActionsBySlotID(int slotIdentifier, bool cancelNonBlocking)
+        /// <summary>
+        ///     Cancel all actions for the given <see cref="SlotIndex"/>.
+        /// </summary>
+        /// <param name="cancelNonBlocking"> Should we also cancel non-blocking actions?</param>
+        public void CancelRunningActionsBySlotID(SlotIndex slotIndex, bool cancelNonBlocking)
         {
-            if (slotIdentifier <= 0)
-                throw new System.ArgumentException($"You are trying to cancel actions with an invalid SlotIdentifier ({slotIdentifier}). Use a value >= 1.");
-
-            bool ShouldCancelFunc(Action action) => action.Data.SlotIdentifier == slotIdentifier;
+            bool ShouldCancelFunc(Action action) => action.Data.SlotIndex == slotIndex;
             CancelActions(ShouldCancelFunc, false, cancelNonBlocking);
         }
 
@@ -500,15 +520,19 @@ namespace Gameplay.Actions
         }
 
 
+        /// <summary>
+        ///     A helper function to properly cancel the passed action.
+        /// </summary>
+        /// <remarks> Doesn't remove the Action from its associated list.</remarks>
         private void CancelAction(Action actionToCancel)
         {
             // Cancel the action.
             actionToCancel.Cancel(_serverCharacter, out float chargeDepletedTime);
 
             // Charge Reduction Time.
-            if (!_slotIDToChargeDepletedTimeDict.TryAdd(actionToCancel.Data.SlotIdentifier, chargeDepletedTime))
+            if (!_slotIndexToChargeDepletedTimeDict.TryAdd(actionToCancel.Data.SlotIndex, chargeDepletedTime))
             {
-                _slotIDToChargeDepletedTimeDict[actionToCancel.Data.SlotIdentifier] = chargeDepletedTime;
+                _slotIndexToChargeDepletedTimeDict[actionToCancel.Data.SlotIndex] = chargeDepletedTime;
             }
         }
     }

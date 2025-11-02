@@ -117,7 +117,7 @@ namespace Gameplay.GameplayObjects.Character
             actionRequestData.OriginTransformID = weapon.GetAbilityOriginTransformID();
             actionRequestData.Position = weapon.GetAbilityLocalOffset();
             actionRequestData.Direction = weapon.GetAbilityLocalDirection();
-            actionRequestData.SlotIdentifier = (int)slotIndex;
+            actionRequestData.SlotIndex = slotIndex;
 
             // Request to play our action.
             _serverCharacter.PlayActionServerRpc(actionRequestData);
@@ -128,7 +128,7 @@ namespace Gameplay.GameplayObjects.Character
                 return; // Don't cancel this action on release.
 
             // Cancel the action triggered from this slot.
-            _serverCharacter.CancelActionBySlotServerRpc((int)slotIndex);
+            _serverCharacter.CancelActionBySlotServerRpc(slotIndex);
         }
     }
 }

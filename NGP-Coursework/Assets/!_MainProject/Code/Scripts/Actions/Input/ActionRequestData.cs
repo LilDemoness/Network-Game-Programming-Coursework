@@ -12,16 +12,16 @@ namespace Gameplay.Actions
     //      Note: The outcomes of the action event don't ride along with this object when it is broadcast to clients; that information is instead synced separately (E.g. By NetworkVariables).
     public struct ActionRequestData : INetworkSerializeByMemcpy
     {
-        public ActionID ActionID;   // The index of the action in the list of all actions in the game (Used to recover the reference to the instance at runtime).
+        public ActionID ActionID;       // The index of the action in the list of all actions in the game (Used to recover the reference to the instance at runtime).
         public ulong OriginTransformID; // NetworkObjectID of the transform where this skill originates. (If set, Position and Direction become local to this transform).
-        public Vector3 Position;    // Centre position of the skill (E.g. The source of an explosion). May Remove
-        public Vector3 Direction;   // Direction of a skill, if not inferrable from the character's facing direction.
-        public ulong[] TargetIDs;   // NetworkObjectIds of the targets (E.g. A homing attack), or null if it is untargeted (E.g. A standard projectile)
-        public float Amount;        // Means different things based on the action. (E.g. For a charge, this would be the target range;)
-        public int SlotIdentifier;  // If non-zero, represents the identifier of the slot that this action was triggered from.
-        public bool ShouldQueue;    // If true, the action should queue. If false, it clears all other actions and plays immediately
-        public bool ShouldClose;    // If true, the server should synthesise a ChaseAction to reach the target before playing the Action (Used for AI entities)
-        public bool PreventMovement;// If true, movement is cancelled before playing this action, and isn't allowed during it's runtime.
+        public Vector3 Position;        // Centre position of the skill (E.g. The source of an explosion). May Remove
+        public Vector3 Direction;       // Direction of a skill, if not inferrable from the character's facing direction.
+        public ulong[] TargetIDs;       // NetworkObjectIds of the targets (E.g. A homing attack), or null if it is untargeted (E.g. A standard projectile)
+        public float Amount;            // Means different things based on the action. (E.g. For a charge, this would be the target range;)
+        public SlotIndex SlotIndex;      // If non-zero, represents the identifier of the slot that this action was triggered from.
+        public bool ShouldQueue;        // If true, the action should queue. If false, it clears all other actions and plays immediately
+        public bool ShouldClose;        // If true, the server should synthesise a ChaseAction to reach the target before playing the Action (Used for AI entities)
+        public bool PreventMovement;    // If true, movement is cancelled before playing this action, and isn't allowed during it's runtime.
         
 
         public static ActionRequestData Default => Create(actionID: default);
@@ -59,7 +59,7 @@ namespace Gameplay.Actions
         /// </summary>
         public bool Compare(ref ActionRequestData rhs)
         {
-            bool areScalarParamsEqual = (ActionID, OriginTransformID, Position, Direction, Amount, SlotIdentifier) == (rhs.ActionID, rhs.OriginTransformID, rhs.Position, rhs.Direction, rhs.Amount, rhs.SlotIdentifier);
+            bool areScalarParamsEqual = (ActionID, OriginTransformID, Position, Direction, Amount, SlotIndex) == (rhs.ActionID, rhs.OriginTransformID, rhs.Position, rhs.Direction, rhs.Amount, rhs.SlotIndex);
             if (!areScalarParamsEqual) { return false; }
 
             if (TargetIDs == rhs.TargetIDs) { return true; }    // Also covers the case of both being null.
@@ -81,7 +81,7 @@ namespace Gameplay.Actions
             if (Direction != Vector3.zero)  { flags |= PackFlags.HasDirection; }
             if (TargetIDs != null)          { flags |= PackFlags.HasTargetIds; }
             if (Amount != 0)                { flags |= PackFlags.HasAmount; }
-            if (SlotIdentifier != 0)       { flags |= PackFlags.HasSlotIdentifier; }
+            if (SlotIndex != 0)       { flags |= PackFlags.HasSlotIdentifier; }
             if (ShouldQueue)                { flags |= PackFlags.ShouldQueue; }
             if (ShouldClose)                { flags |= PackFlags.ShouldClose; }
             if (PreventMovement)            { flags |= PackFlags.PreventMovement; }
@@ -113,7 +113,7 @@ namespace Gameplay.Actions
             if (flags.HasFlag(PackFlags.HasDirection))      { serializer.SerializeValue(ref Direction); }
             if (flags.HasFlag(PackFlags.HasTargetIds))      { serializer.SerializeValue(ref TargetIDs); }
             if (flags.HasFlag(PackFlags.HasAmount))         { serializer.SerializeValue(ref Amount); }
-            if (flags.HasFlag(PackFlags.HasSlotIdentifier)) { serializer.SerializeValue(ref SlotIdentifier); }
+            if (flags.HasFlag(PackFlags.HasSlotIdentifier)) { serializer.SerializeValue(ref SlotIndex); }
         }
     }
 }

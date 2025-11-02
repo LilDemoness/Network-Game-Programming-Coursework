@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
 using UnityEngine.Pool;
@@ -8,6 +7,9 @@ using VisualEffects;
 
 namespace Gameplay.Actions.Effects
 {
+    /// <summary>
+    ///     Spawns a <see cref="SpawnableObject_Server"/>.
+    /// </summary>
     [System.Serializable]
     public class SpawnObjectEffect : ActionEffect
     {

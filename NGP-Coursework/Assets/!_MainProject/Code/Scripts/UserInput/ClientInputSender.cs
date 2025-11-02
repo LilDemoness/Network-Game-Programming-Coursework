@@ -28,7 +28,7 @@ namespace UserInput
 
             public Vector3 Origin;
             public Vector3 Direction;
-            public int SlotIdentifier;
+            public SlotIndex SlotIndex;
         }
 
         /// <summary>
@@ -108,7 +108,6 @@ namespace UserInput
             // Play All ActionRequests (In FIFO order).
             for(int i = 0; i < _actionRequestCount; ++i)
             {
-                
                 switch (_actionRequests[i].ActionType)
                 {
                     case ActionType.StartShooting:
@@ -120,7 +119,7 @@ namespace UserInput
                         ActionRequestData data = ActionRequestData.Create(actionDefinition);
                         data.Position = _actionRequests[i].Origin;
                         data.Direction = _actionRequests[i].Direction;
-                        data.SlotIdentifier = _actionRequests[i].SlotIdentifier;
+                        data.SlotIndex = _actionRequests[i].SlotIndex;
 
                         // Send our Input.
                         SendInput(data);
@@ -143,6 +142,9 @@ namespace UserInput
             }
         }
 
+        /// <summary>
+        ///     Send the ActionRequestData to the server to be processed.
+        /// </summary>
         private void SendInput(ActionRequestData action) => _serverCharacter.PlayActionServerRpc(action);
         
 
