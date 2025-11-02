@@ -17,9 +17,9 @@ MonoBehaviour:
   <ActivationStyle>k__BackingField: 1
   <ImmediateHeat>k__BackingField: 2
   <ContinuousHeat>k__BackingField: 1
-  <ActivationHeat>k__BackingField: 0
+  <RetriggerHeat>k__BackingField: 0
   <ExecutionDelay>k__BackingField: 0
-  <ActionCooldown>k__BackingField: 0
+  <ActionCooldown>k__BackingField: 10
   <BlockingMode>k__BackingField: 1
   <MaxActiveDuration>k__BackingField: 0
   <CanCharge>k__BackingField: 0

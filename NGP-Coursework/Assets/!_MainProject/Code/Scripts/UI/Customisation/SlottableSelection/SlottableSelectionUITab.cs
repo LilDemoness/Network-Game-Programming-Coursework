@@ -3,8 +3,11 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
-namespace UI.Customisation
+namespace UI.Customisation.SlottableSelection
 {
+    /// <summary>
+    ///     A tab button for an Attachment Point.
+    /// </summary>
     public class SlottableSelectionUITab : MonoBehaviour, IPointerClickHandler
     {
         [SerializeField] private Image _backgroundImage;
@@ -16,7 +19,23 @@ namespace UI.Customisation
         public event System.Action<SlotIndex> OnPressed;
 
 
+        /// <summary>
+        ///     Show this Button.
+        /// </summary>
+        public void Show() => this.gameObject.SetActive(true);
+        /// <summary>
+        ///     Hide this button
+        /// </summary>
+        public void Hide() => this.gameObject.SetActive(false);
+
+
+        /// <summary>
+        ///     Set our active slot index.
+        /// </summary>
         public void SetSlotIndex(SlotIndex slotIndex) => _slotIndex = slotIndex;
+        /// <summary>
+        ///     Set our selected state and alter the corresponding visuals.
+        /// </summary>
         public void SetSelectedState(bool isSelected) => _backgroundImage.color = isSelected ? _selectedColor : _unselectedColor;
         public void OnPointerClick(PointerEventData eventData)
         {

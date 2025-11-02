@@ -3,7 +3,7 @@ using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
-namespace UI.Buttons
+namespace UI
 {
     /// <summary>
     ///     A button that can be pressed by a mouse and triggered via a PlayerInputAction, but that cannot be selected via navigation
@@ -13,20 +13,29 @@ namespace UI.Buttons
         [System.Serializable]
         private enum InputActionType
         {
+            /// <summary> Trigger the action without a check.</summary>
             Press,
 
+            /// <summary> Trigger the action if there is any horizontal input.</summary>
             Horizonal,
+            /// <summary> Trigger the action if there is positive horizontal input.</summary>
             HorizonalPositive,
+            /// <summary> Trigger the action if there is negative horizontal input.</summary>
             HorizonalNegative,
 
+            /// <summary> Trigger the action if there is any vertical input.</summary>
             Vertical,
+            /// <summary> Trigger the action if there is positive vertical input.</summary>
             VerticalPositive,
+            /// <summary> Trigger the action if there is negative vertical input.</summary>
             VerticalNegative,
         }
 
 
-        [SerializeField] private InputActionReference _inputAction;
-        [SerializeField] private InputActionType _inputActionType;
+        [Tooltip("(Optional) The input action that this button will be triggered by.")]
+            [SerializeField] private InputActionReference _inputAction;
+        [Tooltip("The type of check that will be run when the input action is performed.")]
+            [SerializeField] private InputActionType _inputActionType;
 
         [Space(10)]
         [SerializeField] private UnityEvent _onButtonTriggered;

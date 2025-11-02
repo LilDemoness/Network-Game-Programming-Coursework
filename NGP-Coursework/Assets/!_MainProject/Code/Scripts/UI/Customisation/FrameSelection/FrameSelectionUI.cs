@@ -1,23 +1,22 @@
+using UnityEngine;
+using UnityEngine.UI;
+using Unity.Netcode;
+using UserInput;
 using Gameplay.GameplayObjects.Character.Customisation;
 using Gameplay.GameplayObjects.Character.Customisation.Data;
-using TMPro;
-using Unity.Netcode;
-using UnityEngine;
-using UserInput;
-using UI.Tables;
-using UnityEngine.UI;
 
-namespace UI.Customisation
+namespace UI.Customisation.FrameSelection
 {
+    /// <summary>
+    ///     The UI that handles the player selecting their desired frame.
+    /// </summary>
     public class FrameSelectionUI : OverlayMenu
     {
-        [SerializeField] private PlayerCustomisationManager _playerCustomisationManager;
         private int _frameDataCount;
 
 
         [Header("Frame Selection")]
         [SerializeField] private GameObject _frameSelectionRoot;
-        public bool IsFrameSelectionScreenActive => _frameSelectionRoot.activeSelf;
         protected override GameObject RootObject => _frameSelectionRoot;
 
 
@@ -51,6 +50,10 @@ namespace UI.Customisation
             UnsubscribeFromInput();
             PlayerCustomisationManager.OnNonLocalClientPlayerBuildChanged -= PlayerCustomisationManager_OnPlayerCustomisationStateChanged;   
         }
+
+
+        #region Frame Options Setup
+
         /// <summary>
         ///     Create FrameSelectionOption instances for each possible Frame in the game.
         /// </summary>
@@ -77,98 +80,122 @@ namespace UI.Customisation
                 _frameSelectionOptions[i] = frameSelectionOption;
             }
         }
+
         private static readonly System.Text.RegularExpressions.Regex sWhitespace = new System.Text.RegularExpressions.Regex(@"\s+");
+        /// <summary>
+        ///     Replace the whitespace in a given string with the desired replacement text.
+        /// </summary>
         private static string ReplaceWhitespace(string input, string replacement) => sWhitespace.Replace(input, replacement);
+
+        /// <summary>
+        ///     Remove all existing frame Option Elements.
+        /// </summary>
         private void CleanupFrameSelectionOptions()
         {
             for(int i = _frameOptionsContainer.childCount - 1; i >= 0; --i)
             {
                 Destroy(_frameOptionsContainer.GetChild(i).gameObject);
             }
+
+            _frameDataCount = 0;
+            _frameSelectionOptions = new FrameSelectionOption[0];
         }
+
+        #endregion
+
+
         private void PlayerCustomisationManager_OnPlayerCustomisationStateChanged(ulong clientID, BuildData buildData)
         {
             if (clientID != NetworkManager.Singleton.LocalClientId)
                 return; // Not the client.
 
+            // Update the selected frame option.
             _selectedFrameIndex = buildData.ActiveFrameIndex;
-            MarkActiveFrameOption();
+            UpdateActiveFrameIdentifier();
         }
-
 
         private void SubscribeToInput()
         {
             ClientInput.OnOpenFrameSelectionPerformed += ToggleSelectionOptions;
             ClientInput.OnConfirmPerformed += ClientInput_OnConfirmPerformed;
-
-            //ClientInput.OnNextTabPerformed += SelectNextFrameOption;
-            //ClientInput.OnPreviousTabPerformed += SelectPreviousFrameOption;
         }
         private void UnsubscribeFromInput()
         {
             ClientInput.OnOpenFrameSelectionPerformed -= ToggleSelectionOptions;
             ClientInput.OnConfirmPerformed -= ClientInput_OnConfirmPerformed;
-
-            //ClientInput.OnNextTabPerformed -= SelectNextFrameOption;
-            //ClientInput.OnPreviousTabPerformed -= SelectPreviousFrameOption;
         }
 
         private void ClientInput_OnConfirmPerformed()
         {
-            if (IsFrameSelectionScreenActive)
-                SelectCurrentFrameOption();
+            if (this.IsActiveMenu)
+                EquipPreviewedFrameOption();
         }
 
 
 
-        public void SelectNextFramePressed()
+        /// <summary>
+        ///     Increment our active frame (With looping).
+        /// </summary>
+        public void SetActiveFrameAsNext()
         {
             _currentPreviewedFrameIndex = MathUtils.Loop(_currentPreviewedFrameIndex + 1, _frameDataCount);
-            SelectCurrentFrameOption();
+            EquipPreviewedFrameOption();
         }
-        public void SelectPreviousFramePressed()
+        /// <summary>
+        ///     Decrement our active frame (With looping).
+        /// </summary>
+        public void SetActiveFrameAsPrevious()
         {
             _currentPreviewedFrameIndex = MathUtils.Loop(_currentPreviewedFrameIndex - 1, _frameDataCount);
-            SelectCurrentFrameOption();
+            EquipPreviewedFrameOption();
         }
 
 
 
-
-
+        /// <summary>
+        ///     Toggle the active state of this menu.
+        /// </summary>
         public void ToggleSelectionOptions()
         {
-            if (_frameSelectionRoot.activeSelf)
+            if (this.IsOpen)
                 Close();
             else
                 Open();
         }
+        /// <inheritdoc/>
         public override void Open(GameObject initialSelectedObject)
         {
             base.Open(initialSelectedObject);
 
             // Start with previewing the selected frame.
             _currentPreviewedFrameIndex = _selectedFrameIndex;
-            ScrollFrameOptionsToSelected(isInstant: true);      
+            ScrollFrameOptionsToPreviewed(isInstant: true);      
         }
+        /// <inheritdoc/>
         public override void Close(bool selectPreviousSelectable = true) => base.Close(selectPreviousSelectable);
 
 
-        public void SelectNextFrameOption()
+        /// <summary>
+        ///     Mark the next frame as our preview.
+        /// </summary>
+        public void PreviewNextFrame()
         {
             _currentPreviewedFrameIndex = MathUtils.Loop(_currentPreviewedFrameIndex + 1, _frameDataCount);
-            ScrollFrameOptionsToSelected(false);
-        }
-        public void SelectPreviousFrameOption()
-        {
-            _currentPreviewedFrameIndex = MathUtils.Loop(_currentPreviewedFrameIndex - 1, _frameDataCount);
-            ScrollFrameOptionsToSelected(false);
+            ScrollFrameOptionsToPreviewed(false);
         }
         /// <summary>
-        ///     Scroll the Frame Options so that the selected option is in the centre of the screen.
+        ///     Mark the previous frame as our preview.
+        /// </summary>
+        public void PreviewPreviousFrame()
+        {
+            _currentPreviewedFrameIndex = MathUtils.Loop(_currentPreviewedFrameIndex - 1, _frameDataCount);
+            ScrollFrameOptionsToPreviewed(false);
+        }
+        /// <summary>
+        ///     Scroll the Frame Options so that the currently previewed option is in the centre of the screen.
         /// </summary>
         /// <param name="isInstant"> Should the transition take time or be instant?</param>
-        private void ScrollFrameOptionsToSelected(bool isInstant)
+        private void ScrollFrameOptionsToPreviewed(bool isInstant)
         {
             // To-do: Implement non-instant transitions.
 
@@ -186,7 +213,7 @@ namespace UI.Customisation
 
 
                 // Set our option's selected state (Only the previewed frame should be selected).
-                _frameSelectionOptions[i].SetSelectionState(i == _currentPreviewedFrameIndex);
+                _frameSelectionOptions[i].SetIsPreviewedFrame(i == _currentPreviewedFrameIndex);
             }
         }
 
@@ -194,7 +221,7 @@ namespace UI.Customisation
         /// <summary>
         ///     Toggle the 'IsEquipped' sprite of the FrameSelectionOption Instances so that only the equipped one is visible.
         /// </summary>
-        public void MarkActiveFrameOption()
+        public void UpdateActiveFrameIdentifier()
         {
             for(int i = 0; i < _frameSelectionOptions.Length; ++i)
             {
@@ -205,10 +232,10 @@ namespace UI.Customisation
         /// <summary>
         ///     Set the currently previewed frame as our selected frame.
         /// </summary>
-        /// <remarks> Hides the Frame Selection Options UI when performed.</remarks>
-        public void SelectCurrentFrameOption()
+        /// <remarks> Hides this menu once performed.</remarks>
+        public void EquipPreviewedFrameOption()
         {
-            _playerCustomisationManager.SelectFrame(_currentPreviewedFrameIndex);
+            PlayerCustomisationManager.Instance.SelectFrame(_currentPreviewedFrameIndex);
             Close();
         }
     }

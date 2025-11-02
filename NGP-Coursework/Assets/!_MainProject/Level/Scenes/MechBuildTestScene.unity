@@ -2162,13 +2162,13 @@ MonoBehaviour:
   _onButtonTriggered:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 372053691}
-        m_TargetAssemblyTypeName: 
-        m_MethodName: 
-        m_Mode: 0
+      - m_Target: {fileID: 372053693}
+        m_TargetAssemblyTypeName: UI.Lobby.ReadyStateUI, Assembly-CSharp
+        m_MethodName: TogglePlayerReadyState
+        m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: 
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
@@ -2384,8 +2384,9 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 2033728776}
-        m_TargetAssemblyTypeName: UI.Customisation.FrameSelectionUI, Assembly-CSharp
-        m_MethodName: SelectCurrentFrameOption
+        m_TargetAssemblyTypeName: UI.Customisation.FrameSelection.FrameSelectionUI,
+          Assembly-CSharp
+        m_MethodName: EquipPreviewedFrameOption
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -3435,8 +3436,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d7dedd319d6dbb445b5f1f13492ae32f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _lobbyManager: {fileID: 364703824}
-  _parentOverlayMenu: {fileID: 0}
   _readyCheckMarkRoot: {fileID: 282691974}
   _readyCheckMarkPrefab: {fileID: 4842036044824390125, guid: ffe08c0fe5012bc448189df3b0e4c3f8, type: 3}
 --- !u!1 &387327823
@@ -9133,8 +9132,9 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 2033728776}
-        m_TargetAssemblyTypeName: UI.Customisation.FrameSelectionUI, Assembly-CSharp
-        m_MethodName: SelectNextFrameOption
+        m_TargetAssemblyTypeName: UI.Customisation.FrameSelection.FrameSelectionUI,
+          Assembly-CSharp
+        m_MethodName: PreviewNextFrame
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -10517,8 +10517,9 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 2033728776}
-        m_TargetAssemblyTypeName: UI.Customisation.FrameSelectionUI, Assembly-CSharp
-        m_MethodName: SelectPreviousFrameOption
+        m_TargetAssemblyTypeName: UI.Customisation.FrameSelection.FrameSelectionUI,
+          Assembly-CSharp
+        m_MethodName: PreviewPreviousFrame
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -12922,44 +12923,18 @@ MonoBehaviour:
   m_GameObject: {fileID: 1725991477}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Script: {fileID: 11500000, guid: b29e33449519d354e92951e868d2982b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Navigation:
-    m_Mode: 0
-    m_WrapAround: 0
-    m_SelectOnUp: {fileID: 0}
-    m_SelectOnDown: {fileID: 0}
-    m_SelectOnLeft: {fileID: 0}
-    m_SelectOnRight: {fileID: 0}
-  m_Transition: 1
-  m_Colors:
-    m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
-    m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
-    m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
-    m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
-    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
-    m_ColorMultiplier: 1
-    m_FadeDuration: 0.1
-  m_SpriteState:
-    m_HighlightedSprite: {fileID: 0}
-    m_PressedSprite: {fileID: 0}
-    m_SelectedSprite: {fileID: 0}
-    m_DisabledSprite: {fileID: 0}
-  m_AnimationTriggers:
-    m_NormalTrigger: Normal
-    m_HighlightedTrigger: Highlighted
-    m_PressedTrigger: Pressed
-    m_SelectedTrigger: Selected
-    m_DisabledTrigger: Disabled
-  m_Interactable: 1
-  m_TargetGraphic: {fileID: 1725991479}
-  m_OnClick:
+  _inputAction: {fileID: -7654808952092260052, guid: 832195adfe757804ab6ebd15233eab2e, type: 3}
+  _inputActionType: 0
+  _onButtonTriggered:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 2033728776}
-        m_TargetAssemblyTypeName: UI.Customisation.FrameSelectionUI, Assembly-CSharp
-        m_MethodName: SelectPreviousFramePressed
+        m_TargetAssemblyTypeName: UI.Customisation.FrameSelection.FrameSelectionUI,
+          Assembly-CSharp
+        m_MethodName: SetActiveFrameAsPrevious
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -13065,44 +13040,18 @@ MonoBehaviour:
   m_GameObject: {fileID: 1749832592}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Script: {fileID: 11500000, guid: b29e33449519d354e92951e868d2982b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Navigation:
-    m_Mode: 0
-    m_WrapAround: 0
-    m_SelectOnUp: {fileID: 0}
-    m_SelectOnDown: {fileID: 0}
-    m_SelectOnLeft: {fileID: 0}
-    m_SelectOnRight: {fileID: 0}
-  m_Transition: 1
-  m_Colors:
-    m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
-    m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
-    m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
-    m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
-    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
-    m_ColorMultiplier: 1
-    m_FadeDuration: 0.1
-  m_SpriteState:
-    m_HighlightedSprite: {fileID: 0}
-    m_PressedSprite: {fileID: 0}
-    m_SelectedSprite: {fileID: 0}
-    m_DisabledSprite: {fileID: 0}
-  m_AnimationTriggers:
-    m_NormalTrigger: Normal
-    m_HighlightedTrigger: Highlighted
-    m_PressedTrigger: Pressed
-    m_SelectedTrigger: Selected
-    m_DisabledTrigger: Disabled
-  m_Interactable: 1
-  m_TargetGraphic: {fileID: 1749832594}
-  m_OnClick:
+  _inputAction: {fileID: 8825438747314882121, guid: 832195adfe757804ab6ebd15233eab2e, type: 3}
+  _inputActionType: 0
+  _onButtonTriggered:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 2033728776}
-        m_TargetAssemblyTypeName: UI.Customisation.FrameSelectionUI, Assembly-CSharp
-        m_MethodName: SelectNextFramePressed
+        m_TargetAssemblyTypeName: UI.Customisation.FrameSelection.FrameSelectionUI,
+          Assembly-CSharp
+        m_MethodName: SetActiveFrameAsNext
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -13164,11 +13113,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _playerCustomisationManager: {fileID: 14889075}
-  _frameSelectionUI: {fileID: 2033728776}
   _tabButtonPrefab: {fileID: 401711318420102509, guid: 63e33541ccf1bbf42b324c34409056ef, type: 3}
   _tabButtonContainer: {fileID: 580338680}
   _selectionButtonPrefab: {fileID: 1098675253895633356, guid: a68ac370fc5350b4a85769fbfde1bda7, type: 3}
-  _selectionButtonContainer: {fileID: 247378320}
+  _buttonsScrollRect: {fileID: 387327825}
 --- !u!1 &1789413981
 GameObject:
   m_ObjectHideFlags: 0
@@ -15317,7 +15265,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 80e09c6dfab737a4e83a8297c496c623, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _playerCustomisationManager: {fileID: 14889075}
   _frameSelectionRoot: {fileID: 78803183}
   _frameOptionsContainer: {fileID: 471236090}
   _frameOptionSpacing: 200

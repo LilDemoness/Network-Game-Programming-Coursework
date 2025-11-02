@@ -1,10 +1,13 @@
-using Gameplay.GameplayObjects.Character.Customisation.Data;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
+using Gameplay.GameplayObjects.Character.Customisation.Data;
 
-namespace UI.Customisation
+namespace UI.Customisation.FrameSelection
 {
+    /// <summary>
+    ///     The data visuals for a given frame within the <see cref="FrameSelectionUI"/>.
+    /// </summary>
     public class FrameSelectionOption : MonoBehaviour
     {
         [Header("References")]
@@ -22,6 +25,9 @@ namespace UI.Customisation
         [SerializeField] private GameObject _isActiveFrameGO;
 
 
+        /// <summary>
+        ///     Setup this FrameSelectionOption with the parameters of the passed FrameData.
+        /// </summary>
         public void Setup(FrameData frameData)
         {
             this._frameNameText.text = frameData.Name;
@@ -32,7 +38,14 @@ namespace UI.Customisation
             _speedText.text = frameData.MovementSpeed.ToString() + Units.SPEED_UNITS;
             _heatCapText.text = frameData.HeatCapacity.ToString();
         }
-        public void SetSelectionState(bool isSelected) => _deselectedOverlayGO.SetActive(!isSelected);
+
+        /// <summary>
+        ///     Set whether this option currently previewed or not.
+        /// </summary>
+        public void SetIsPreviewedFrame(bool isPreviewedFrame) => _deselectedOverlayGO.SetActive(!isPreviewedFrame);
+        /// <summary>
+        ///     Set whether this element is the active frame or not.
+        /// </summary>
         public void SetIsActiveFrame(bool isActiveFrame) => _isActiveFrameGO.SetActive(isActiveFrame);
     }
 }

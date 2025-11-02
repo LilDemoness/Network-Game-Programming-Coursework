@@ -11,10 +11,6 @@ namespace UI.Lobby
     /// </summary>
     public class ReadyStateUI : MonoBehaviour
     {
-        [Tooltip("(Optional) The Overlay Menu this element is a child of")]
-            [SerializeField] private OverlayMenu _parentOverlayMenu = null;
-
-        [Space(10)]
         [SerializeField] private Transform _readyCheckMarkRoot;
         [SerializeField] private ReadyCheckMark _readyCheckMarkPrefab;
         private Dictionary<ulong, ReadyCheckMark> _readyCheckMarkInstances = new Dictionary<ulong, ReadyCheckMark>();
@@ -101,7 +97,7 @@ namespace UI.Lobby
         /// </summary>
         public void TogglePlayerReadyState()
         {
-            if (OverlayMenu.IsOverlayMenuOpen && (_parentOverlayMenu == null || _parentOverlayMenu == OverlayMenu.ActiveOverlayMenu))
+            if (!OverlayMenu.IsWithinActiveMenu(this.transform))
                 return; // An overlay menu is above this element and so our input shouldn't be counted.
 
             LobbyManager.Instance.ToggleReady();

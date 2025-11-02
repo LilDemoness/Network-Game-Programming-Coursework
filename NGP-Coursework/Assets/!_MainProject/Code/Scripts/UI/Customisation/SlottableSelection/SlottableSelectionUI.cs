@@ -1,18 +1,20 @@
-using System.Collections.Generic;
 using System.Linq;
-using Gameplay.GameplayObjects;
-using Gameplay.GameplayObjects.Character.Customisation.Data;
 using UnityEngine;
-using Gameplay.GameplayObjects.Character.Customisation;
+using UnityEngine.UI;
 using Unity.Netcode;
+using Gameplay.GameplayObjects;
+using Gameplay.GameplayObjects.Character.Customisation;
+using Gameplay.GameplayObjects.Character.Customisation.Data;
 using UserInput;
 
-namespace UI.Customisation
+namespace UI.Customisation.SlottableSelection
 {
+    /// <summary>
+    ///     Handles the display & processing of input for the Equipped and Previewed Slottables.
+    /// </summary>
     public class SlottableSelectionUI : MonoBehaviour
     {
         [SerializeField] private PlayerCustomisationManager _playerCustomisationManager;
-        [SerializeField] private FrameSelectionUI _frameSelectionUI;
         private FrameData _selectedFrameData;
         private SlotIndex _activeTab;
 
@@ -25,7 +27,8 @@ namespace UI.Customisation
 
         [Header("Buttons")]
         [SerializeField] private SlottableSelectionUIButton _selectionButtonPrefab;
-        [SerializeField] private Transform _selectionButtonContainer;
+        [SerializeField] private ScrollRect _buttonsScrollRect;
+        private RectTransform _selectionButtonContainer => _buttonsScrollRect.content;
         private SlottableSelectionUIButton[] _selectionButtons;
         private int _currentPreviewSlottableIndex;
 
@@ -53,15 +56,18 @@ namespace UI.Customisation
 
         private void ClientInput_OnNextTabPerformed()
         {
-            if (!_frameSelectionUI.IsFrameSelectionScreenActive)
+            if (!OverlayMenu.IsOverlayMenuOpen)
                 SelectNextTab();
         }
         private void ClientInput_OnPreviousTabPerformed()
         {
-            if (!_frameSelectionUI.IsFrameSelectionScreenActive)
+            if (!OverlayMenu.IsWithinActiveMenu(this.transform))
                 SelectPreviousTab();
         }
 
+        /// <summary>
+        ///     Generate <see cref="SlottableSelectionUIButton"/> for the maximum possible number of valid elements for the slottable datas.
+        /// </summary>
         private void GenerateButtons()
         {
             // Cleanup existing button instances.
@@ -76,7 +82,7 @@ namespace UI.Customisation
             for (int i = 0; i < maxOptionsCount; ++i)
             {
                 SlottableSelectionUIButton button = Instantiate(_selectionButtonPrefab, _selectionButtonContainer);
-                button.OnPressed += SlottableSelectionButton_OnPressed;
+                button.OnPressed += EquipSlottableDataByIndex;
 
                 // Setup the button.
                 button.SetupButton(CustomisationOptionsDatabase.AllOptionsDatabase.SlottableDatas[i]);
@@ -88,6 +94,11 @@ namespace UI.Customisation
                 button.Hide();
             }
         }
+
+
+        /// <summary>
+        ///     Remove all existing Attachment Point tab groups.
+        /// </summary>
         private void CleanupTabs()
         {
             // Cleanup existing button instances.
@@ -97,39 +108,47 @@ namespace UI.Customisation
             }
             _tabButtons = new SlottableSelectionUITab[0];   // Probably unneeded.
         }
+        /// <summary>
+        ///     Setup all the Attachment Point tab groups.
+        /// </summary>
         private void SetupTabs()
         {
             int currentTabCount = _tabButtons.Length;
             int desiredTabCount = _selectedFrameData.AttachmentPoints.Length;
-            if (currentTabCount >= desiredTabCount)
-                return;
 
-            // We don't have enough tab buttons.
-            // Resize our array to facilitate the addition of the new tabs.
-            System.Array.Resize(ref _tabButtons, desiredTabCount);
 
-            // Ensure we have enough
-            for(int i = currentTabCount; i < desiredTabCount; ++i)
+            if (currentTabCount < desiredTabCount)
             {
-                // We don't have enough tab buttons. Create a new one.
-                SlottableSelectionUITab slottableSelectionUITab = Instantiate<SlottableSelectionUITab>(_tabButtonPrefab, _tabButtonContainer);
-                slottableSelectionUITab.SetSlotIndex((SlotIndex)(i + 1));
+                // We don't have enough tab buttons.
+                // Resize our array to facilitate the addition of the new tabs.
+                System.Array.Resize(ref _tabButtons, desiredTabCount);
+
+                // Ensure we have enough tab buttons.
+                for(int i = currentTabCount; i < desiredTabCount; ++i)
+                {
+                    // We don't have enough tab buttons. Create a new one.
+                    SlottableSelectionUITab slottableSelectionUITab = Instantiate<SlottableSelectionUITab>(_tabButtonPrefab, _tabButtonContainer);
+                    slottableSelectionUITab.SetSlotIndex((SlotIndex)(i + 1));
 
 
-                // Setup the tab.
-                slottableSelectionUITab.OnPressed += SelectTab;
+                    // Setup the tab.
+                    slottableSelectionUITab.OnPressed += SelectTab;
 
-                // Cache a reference to our tab.
-                _tabButtons[i] = slottableSelectionUITab;
+                    // Cache a reference to our tab.
+                    _tabButtons[i] = slottableSelectionUITab;
+                }
+            }
+            
+            // Enable all the required tab buttons.
+            for(int i = 0; i < _tabButtons.Length; ++i)
+            {
+                if (i < desiredTabCount)
+                    _tabButtons[i].Show();
+                else
+                    _tabButtons[i].Hide();
             }
         }
 
-
-        [ContextMenu("Set Test Frame")]
-        private void SetTestFrame()
-        {
-            _playerCustomisationManager.SelectFrame(2);
-        }
 
         private void PlayerCustomisationManager_OnPlayerCustomisationStateChanged(ulong clientID, BuildData buildData)
         {
@@ -140,12 +159,15 @@ namespace UI.Customisation
             FrameData frameData = CustomisationOptionsDatabase.AllOptionsDatabase.GetFrame(buildData.ActiveFrameIndex);
             if (frameData != _selectedFrameData)
             {
-                // Set our selected frame.
+                // Set our selected tab.
                 SetSelectedFrame(frameData);
             }
         }
 
 
+        /// <summary>
+        ///     Update the selected frame to the passed one and ready our tabs groups to accomodate it.
+        /// </summary>
         public void SetSelectedFrame(FrameData frameData)
         {
             this._selectedFrameData = frameData;
@@ -153,11 +175,18 @@ namespace UI.Customisation
             SelectTab(SlotIndex.PrimaryWeapon);
         }
 
-        [ContextMenu("Select Next")]
+        /// <summary>
+        ///     Select the next tab group.
+        /// </summary>
         public void SelectNextTab() => SelectTab(MathUtils.Loop(_activeTab.GetSlotInteger() + 1, 0, _selectedFrameData.AttachmentPoints.Length).ToSlotIndex());
-        [ContextMenu("Select Prev")]
+        /// <summary>
+        ///     Select the previous tab group.
+        /// </summary>
         public void SelectPreviousTab() => SelectTab(MathUtils.Loop(_activeTab.GetSlotInteger() - 1, 0, _selectedFrameData.AttachmentPoints.Length).ToSlotIndex());
         
+        /// <summary>
+        ///     Select the tab with the given SlotIndex.
+        /// </summary>
         public void SelectTab(SlotIndex slotIndex)
         {
             if (slotIndex.GetSlotInteger() >= _selectedFrameData.AttachmentPoints.Length)
@@ -174,10 +203,10 @@ namespace UI.Customisation
 
             // Disable all buttons.
             // Can we compress this & enabling into a single loop so as to not disable neccessary buttons?
-            DisableAllButtons();
+            DisableAllSlottableButtons();
 
             // Enable the required buttons.
-            foreach(SlottableData slottableData in _selectedFrameData.AttachmentPoints[_activeTab.GetSlotInteger()].ValidSlottableDatas)
+            foreach (SlottableData slottableData in _selectedFrameData.AttachmentPoints[_activeTab.GetSlotInteger()].ValidSlottableDatas)
             {
                 int slottableIndex = CustomisationOptionsDatabase.AllOptionsDatabase.GetIndexForSlottableData(slottableData);
                 _selectionButtons[slottableIndex].Show();
@@ -188,17 +217,22 @@ namespace UI.Customisation
             OnSlottablePreviewSelectionChanged?.Invoke(selectedIndex);
             _selectionButtons[selectedIndex].MarkAsSelected();
         }
-
-        private void DisableAllButtons()
+        /// <summary>
+        ///     Disable all our <see cref="SlottableSelectionUIButton"/> instances.
+        /// </summary>
+        private void DisableAllSlottableButtons()
         {
-            for(int i = 0; i < _selectionButtons.Length; ++i)
+            for (int i = 0; i < _selectionButtons.Length; ++i)
             {
                 _selectionButtons[i].Hide();
             }
         }
 
 
-        private void SlottableSelectionButton_OnPressed(int slottableDataIndex)
+        /// <summary>
+        ///     Equip the Slottable Data with the corresponding index.
+        /// </summary>
+        private void EquipSlottableDataByIndex(int slottableDataIndex)
         {
             // Ensure the selected index is valid for the active slot.
             // Change to a check made by the PlayerCustomisationManager?
@@ -206,10 +240,15 @@ namespace UI.Customisation
                 throw new System.ArgumentException($"You are trying to select an invalid slottable index ({slottableDataIndex}) for slot {_activeTab}");
 
             OnSlottablePreviewSelectionChanged?.Invoke(slottableDataIndex);
+            // Ensure that the select element is within the visible area of the Scroll Rect.
+            _buttonsScrollRect.BringChildIntoView(_selectionButtons[slottableDataIndex].transform as RectTransform);
 
             _currentPreviewSlottableIndex = slottableDataIndex;
             EquipSelectedSlottable();
         }
+        /// <summary>
+        ///     Equip our selected slottable.
+        /// </summary>
         private void EquipSelectedSlottable()
         {
             Debug.Log($"Slottable {_currentPreviewSlottableIndex} Selected (Name: {CustomisationOptionsDatabase.AllOptionsDatabase.GetSlottableData(_currentPreviewSlottableIndex).Name})");

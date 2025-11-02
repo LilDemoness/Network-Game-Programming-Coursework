@@ -16,10 +16,10 @@ MonoBehaviour:
   <ShouldNotifyClient>k__BackingField: 1
   <ActivationStyle>k__BackingField: 2
   <ImmediateHeat>k__BackingField: 2
-  <ContinuousHeat>k__BackingField: 1
+  <ContinuousHeat>k__BackingField: 0
   <RetriggerHeat>k__BackingField: 0
   <ExecutionDelay>k__BackingField: 0
-  <ActionCooldown>k__BackingField: 0
+  <ActionCooldown>k__BackingField: 6
   <BlockingMode>k__BackingField: 1
   <MaxActiveDuration>k__BackingField: 0
   <CanCharge>k__BackingField: 0

@@ -1,11 +1,13 @@
-﻿using Gameplay.GameplayObjects;
-using Gameplay.GameplayObjects.Character.Customisation.Data;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using Gameplay.GameplayObjects.Character.Customisation.Data;
 
-namespace UI.Customisation
+namespace UI.Customisation.SlottableSelection
 {
+    /// <summary>
+    ///     A button corresponding to a <see cref="SlottableData"/>.
+    /// </summary>
     public class SlottableSelectionUIButton : Selectable
     {
         private static readonly Color DEFAULT_UNSELECTED_COLOR = new Color(0.2901f, 0.3607f, 0.4470f, 1.0f);
@@ -33,12 +35,16 @@ namespace UI.Customisation
         #endif
             ResetTransitionParameters();
         }
+
+        /// <summary>
+        ///     Reset this button's transition parameters to default.
+        /// </summary>
         private void ResetTransitionParameters()
         {
-            // Set Transition Type.
+            // Reset the Transition Type.
             this.transition = Transition.ColorTint;
 
-            // Set Transition Colours.
+            // Reset the Transition Colours.
             ColorBlock cb = new ColorBlock();
             cb.normalColor = DEFAULT_UNSELECTED_COLOR;
             cb.highlightedColor = DEFAULT_HIGHLIGHTED_COLOR;
@@ -48,17 +54,33 @@ namespace UI.Customisation
         }
 
 
+        /// <summary>
+        ///  Setup this button for the given <see cref="SlottableData"/>.
+        /// </summary>
         public void SetupButton(SlottableData slottableData)
         {
             //this._text.text = slottableData.Name;
             this._image.sprite = slottableData.Sprite;
             this._slottableDataIndex = CustomisationOptionsDatabase.AllOptionsDatabase.GetIndexForSlottableData(slottableData);
         }
+        /// <summary>
+        ///     Show this Button.
+        /// </summary>
         public void Show() => this.gameObject.SetActive(true);
+        /// <summary>
+        ///     Hide this button
+        /// </summary>
         public void Hide() => this.gameObject.SetActive(false);
+        /// <summary>
+        ///     Returns true if the button is Shown or false if it is Hidden.
+        /// </summary>
+        public bool IsShown() => this.gameObject.activeSelf;
 
 
         private bool _performingManualSelection = false;
+        /// <summary>
+        ///     Mark this button as selected manually (E.g. Swapping between tabs).
+        /// </summary>
         public void MarkAsSelected()
         {
             _performingManualSelection = true;

@@ -1,11 +1,14 @@
-using Gameplay.Actions.Definitions;
-using Gameplay.GameplayObjects.Character.Customisation.Data;
+using UnityEngine;
 using TMPro;
 using UI.Tables;
-using UnityEngine;
+using Gameplay.Actions.Definitions;
+using Gameplay.GameplayObjects.Character.Customisation.Data;
 
-namespace UI.Customisation
+namespace UI.Customisation.SlottableSelection
 {
+    /// <summary>
+    ///     Displays the relevant information for the currently previewed Slottable.
+    /// </summary>
     public class SlottableInformationDisplayUI : MonoBehaviour
     {
         [Header("References")]
@@ -17,21 +20,20 @@ namespace UI.Customisation
         private const int INFORMATION_TABLE_ROWS = 7;
 
 
-        private void Awake()
-        {
-            SlottableSelectionUI.OnSlottablePreviewSelectionChanged += SlottableSelectionUI_OnSlottablePreviewSelectionChanged;
-        }
-        private void OnDestroy()
-        {
-            SlottableSelectionUI.OnSlottablePreviewSelectionChanged -= SlottableSelectionUI_OnSlottablePreviewSelectionChanged;
-        }
+        private void Awake() => SlottableSelectionUI.OnSlottablePreviewSelectionChanged += SlottableSelectionUI_OnSlottablePreviewSelectionChanged;
+        private void OnDestroy() => SlottableSelectionUI.OnSlottablePreviewSelectionChanged -= SlottableSelectionUI_OnSlottablePreviewSelectionChanged;
+
 
 
         private void SlottableSelectionUI_OnSlottablePreviewSelectionChanged(int slottableDataIndex)
         {
-            SetupForSlottableData(CustomisationOptionsDatabase.AllOptionsDatabase.GetSlottableData(slottableDataIndex));
+            UpdateDisplayInformation(CustomisationOptionsDatabase.AllOptionsDatabase.GetSlottableData(slottableDataIndex));
         }
-        private void SetupForSlottableData(SlottableData slottableData)
+        /// <summary>
+        ///     Update the displayed information for the given SlottableData.
+        /// </summary>
+        /// <param name="slottableData"></param>
+        private void UpdateDisplayInformation(SlottableData slottableData)
         {
             // Basic Data.
             _nameText.text = slottableData.Name;
@@ -54,6 +56,8 @@ namespace UI.Customisation
             SetBurstCountRow(6, slottableData.AssociatedAction);
         }
 
+
+        #region Row Update Methods
 
         private void SetHeatRow(int rowIndex, ActionDefinition action) => _informationTable[rowIndex].SetText("Activation Heat:", action.ImmediateHeat.ToString());
         private void SetRangeRow(int rowIndex, ActionDefinition action)
@@ -85,9 +89,16 @@ namespace UI.Customisation
         }
         private void SetChargeTimeRow(int rowIndex, ActionDefinition action) => _informationTable[rowIndex].SetText("Charge Time: ", (action.CanCharge ? action.MaxChargeTime : 0.0f).ToString() + Units.TIME_UNITS);
         private void SetCooldownRow(int rowIndex, ActionDefinition action) => _informationTable[rowIndex].SetText("Cooldown: ", (action.HasCooldown ? action.ActionCooldown : 0.0f).ToString() + Units.TIME_UNITS);
-        private void SetBurstCountRow(int rowIndex, ActionDefinition action) => _informationTable[rowIndex].SetText("Burst Count: ", (action.Bursts.ToString() + " in " + (action.Bursts * action.BurstDelay) + Units.TIME_UNITS));
+        private void SetBurstCountRow(int rowIndex, ActionDefinition action)
+        {
+            string burstsText = action.Bursts > 0 ? (action.Bursts.ToString() + " in " + (action.Bursts * action.BurstDelay) + Units.TIME_UNITS) : "N/A";
+            _informationTable[rowIndex].SetText("Burst Count: ", burstsText);
+        }
 
 
+        /// <summary>
+        ///     Update the table with null values.
+        /// </summary>
         private void SetTableForInvalidData()
         {
             _informationTable[0].SetText("Heat: ", "null");
@@ -98,5 +109,7 @@ namespace UI.Customisation
             _informationTable[5].SetText("Cooldown: ", "null");
             _informationTable[6].SetText("Burst Count: ", "null");
         }
+
+        #endregion
     }
 }
