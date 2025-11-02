@@ -13,8 +13,6 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Sections
     {
         [SerializeField] private FrameData _associatedFrameData;
 
-        [SerializeField] private LegGFXSection[] _legDatas;
-
         [SerializeField] private SlottableDataSlot[] m_slottableDataSlotArray;
         private Dictionary<SlotIndex, List<SlottableDataSlot>> _slottableDataSlots = new Dictionary<SlotIndex, List<SlottableDataSlot>>();
         
@@ -29,7 +27,6 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Sections
             // Ensure Changes are Recorded.
             UnityEditor.Undo.RecordObject(this, "Setup FrameGFX Container References");
 
-            _legDatas = GetComponentsInChildren<LegGFXSection>();
             m_slottableDataSlotArray = GetComponentsInChildren<SlottableDataSlot>();
 
             // Ensure Changes are Recorded.
@@ -58,15 +55,6 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Sections
 
             return this;
         }
-        public FrameGFX OnSelectedLegChanged(LegData activeData)
-        {
-            for (int i = 0; i < _legDatas.Length; ++i)
-            {
-                _legDatas[i].Toggle(activeData);
-            }
-
-            return this;
-        }
         public FrameGFX OnSelectedSlottableDataChanged(SlotIndex slotIndex, SlottableData activeData)
         {
             if (_slottableDataSlots.TryGetValue(slotIndex, out List<SlottableDataSlot> slottableDataSlots))
@@ -77,7 +65,7 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Sections
             return this;
         }
 
-        public void OnCustomisationFinalised(FrameData activeFrame, LegData activeLeg, SlottableData[] activeSlottableDatas)
+        public void OnCustomisationFinalised(FrameData activeFrame, SlottableData[] activeSlottableDatas)
         {
             // Frame.
             if (activeFrame != _associatedFrameData)
@@ -85,14 +73,6 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Sections
                 this.gameObject.SetActive(false);
                 //Destroy(this.gameObject);
                 return;
-            }
-
-
-            // Legs.
-            for (int i = 0; i < _legDatas.Length; ++i)
-            {
-                _legDatas[i].Toggle(activeLeg);
-                //_legDatas[i].Finalise(activeLeg);
             }
 
 

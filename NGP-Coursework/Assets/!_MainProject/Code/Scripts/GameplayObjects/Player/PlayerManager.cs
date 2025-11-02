@@ -6,7 +6,7 @@ using Gameplay.GameplayObjects.Character.Customisation.Data;
 
 public class PlayerManager : NetworkBehaviour
 {
-    public void SetBuild(int frameIndex, int legIndex, int[] slottableDataIndicies)
+    public void SetBuild(int frameIndex, int[] slottableDataIndicies)
     {
         /*int index = 0;
         SlottableData[] slottableDatas = new SlottableData[weaponSlotIndicies.Length + abilitySlotIndicies.Length];
@@ -26,7 +26,6 @@ public class PlayerManager : NetworkBehaviour
         {
             childGFX.OnCustomisationFinalised(
                 activeFrame:            CustomisationOptionsDatabase.AllOptionsDatabase.GetFrame(frameIndex),
-                activeLeg:              CustomisationOptionsDatabase.AllOptionsDatabase.GetLeg(legIndex),
                 activeSlottableDatas:   slottableDatas
             );
         }

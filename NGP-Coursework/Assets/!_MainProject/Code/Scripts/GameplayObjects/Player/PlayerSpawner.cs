@@ -31,7 +31,7 @@ public class PlayerSpawner : NetworkBehaviour
     private void SetupPlayerClientRpc(ulong clientID, BuildData buildData)
     {
         PlayerManager playerInstance = NetworkManager.Singleton.ConnectedClients[clientID].PlayerObject.GetComponent<PlayerManager>();
-        playerInstance.SetBuild(buildData.ActiveFrameIndex, 0, buildData.ActiveSlottableIndicies);
+        playerInstance.SetBuild(buildData.ActiveFrameIndex, buildData.ActiveSlottableIndicies);
         OnPlayerCustomisationFinalised?.Invoke(clientID, buildData);
     }
 }

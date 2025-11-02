@@ -16,7 +16,6 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Data
 
 
         [field: SerializeField] public FrameData[] FrameDatas;
-        [field: SerializeField] public LegData[] LegDatas;
         [field: SerializeField] public SlottableData[] SlottableDatas;
         [System.NonSerialized] private Dictionary<SlottableData, int> _slottableDataToIndexDict;
 
@@ -33,7 +32,6 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Data
 
         // Getters with Null Fallback for out of range indicies.
         public FrameData GetFrame(int index) => IsWithinBounds(index, FrameDatas.Length) ? FrameDatas[index] : null;
-        public LegData GetLeg(int index) => IsWithinBounds(index, LegDatas.Length) ? LegDatas[index] : null;
         public SlottableData GetSlottableData(int index) => IsWithinBounds(index, SlottableDatas.Length) ? SlottableDatas[index] : null;
         public int GetIndexForSlottableData(SlottableData slottableData)
         {
