@@ -1,9 +1,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 using Unity.Netcode;
-using Gameplay.GameplayObjects;
+using Gameplay.GameplayObjects.Character;
 using Gameplay.Actions;
 
 namespace UI.Actions

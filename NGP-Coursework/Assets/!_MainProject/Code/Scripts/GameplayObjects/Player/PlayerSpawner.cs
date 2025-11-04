@@ -3,37 +3,40 @@ using Unity.Netcode;
 using Gameplay.GameplayObjects.Character.Customisation;
 using Gameplay.GameplayObjects.Character.Customisation.Data;
 
-public class PlayerSpawner : NetworkBehaviour
+namespace Gameplay.GameplayObjects.Character
 {
-    [SerializeField] private PlayerManager _playerPrefab;
-    public static event System.Action<ulong, Gameplay.GameplayObjects.Character.Customisation.Data.BuildData> OnPlayerCustomisationFinalised;
-
-
-    public override void OnNetworkSpawn()
+    public class PlayerSpawner : NetworkBehaviour
     {
-        if (!IsServer)
-            return;
+        [SerializeField] private PlayerManager _playerPrefab;
+        public static event System.Action<ulong, BuildData> OnPlayerCustomisationFinalised;
 
-        // This is the server.
-        // Setup our players, notifying clients once each has been spawned.
-        foreach (var kvp in PlayerCustomisationManager_Server.Instance.PlayerBuilds)
+
+        public override void OnNetworkSpawn()
         {
-            Vector3 spawnPosition = Vector3.right * Mathf.Floor(kvp.Key) * 2.0f;
+            if (!IsServer)
+                return;
 
-            PlayerManager playerInstance = Instantiate<PlayerManager>(_playerPrefab, spawnPosition, Quaternion.identity);
+            // This is the server.
+            // Setup our players, notifying clients once each has been spawned.
+            foreach (var kvp in PlayerCustomisationManager_Server.Instance.PlayerBuilds)
+            {
+                Vector3 spawnPosition = Vector3.right * Mathf.Floor(kvp.Key) * 2.0f;
 
-            playerInstance.GetComponent<Gameplay.GameplayObjects.Character.ServerCharacter>().BuildData = kvp.Value;
-            playerInstance.NetworkObject.SpawnAsPlayerObject(kvp.Key);
+                PlayerManager playerInstance = Instantiate<PlayerManager>(_playerPrefab, spawnPosition, Quaternion.identity);
 
-            SetupPlayerClientRpc(kvp.Key, kvp.Value);
+                playerInstance.NetworkObject.SpawnAsPlayerObject(kvp.Key);
+                playerInstance.GetComponent<ServerCharacter>().BuildData.Value = kvp.Value;
+
+                SetupPlayerClientRpc(kvp.Key, kvp.Value);
+            }
         }
-    }
 
-    [ClientRpc]
-    private void SetupPlayerClientRpc(ulong clientID, BuildData buildData)
-    {
-        PlayerManager playerInstance = NetworkManager.Singleton.ConnectedClients[clientID].PlayerObject.GetComponent<PlayerManager>();
-        playerInstance.SetBuild(buildData.ActiveFrameIndex, buildData.ActiveSlottableIndicies);
-        OnPlayerCustomisationFinalised?.Invoke(clientID, buildData);
+        [ClientRpc]
+        private void SetupPlayerClientRpc(ulong clientID, BuildData buildData)
+        {
+            PlayerManager playerInstance = NetworkManager.Singleton.ConnectedClients[clientID].PlayerObject.GetComponent<PlayerManager>();
+            playerInstance.SetBuild(buildData.ActiveFrameIndex, buildData.ActiveSlottableIndicies);
+            OnPlayerCustomisationFinalised?.Invoke(clientID, buildData);
+        }
     }
 }

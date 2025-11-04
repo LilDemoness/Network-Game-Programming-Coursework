@@ -374,11 +374,11 @@ namespace Gameplay.Actions
 
         private void Action_OnUpdateTriggered(Action action)
         {
-            Debug.Log("Action Triggered");
+            // If our action's retrigger delay exceeds its cooldown duration, then start a small cooldown
+            //      to prevent the player from being able to cancel and restart the action to activate it faster.
             if (action.Definition.RetriggerDelay > action.Definition.ActionCooldown)
             {
                 _timestampComparison.SetValues(action.ActionID, action.Data.SlotIndex);
-                Debug.Log("Retrigger Delay Exceeds Cooldown " + NetworkManager.Singleton.ServerTime.TimeAsFloat);
                 _actionCooldownCompleteTime[_timestampComparison] = NetworkManager.Singleton.ServerTime.TimeAsFloat + action.Definition.RetriggerDelay;
             }
         }

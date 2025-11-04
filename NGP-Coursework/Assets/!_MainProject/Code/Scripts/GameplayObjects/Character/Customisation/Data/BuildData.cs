@@ -1,8 +1,9 @@
+using System;
 using Unity.Netcode;
 
 namespace Gameplay.GameplayObjects.Character.Customisation.Data
 {
-    public class BuildData : INetworkSerializable
+    public class BuildData : INetworkSerializable, IEquatable<BuildData>
     {
         // Data.
         private int _activeFrameIndex = 0;
@@ -75,5 +76,7 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Data
                 }
             }
         }
+
+        public bool Equals(BuildData other) => (this.ActiveFrameIndex, this.ActiveSlottableIndicies) == (other.ActiveFrameIndex, other.ActiveSlottableIndicies);
     }
 }

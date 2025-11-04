@@ -17,13 +17,7 @@ namespace Gameplay.GameplayObjects.Character
         public ClientCharacter ClientCharacter => m_clientCharacter;
 
 
-        // Build Data?
-        private BuildData m_buildData;
-        public BuildData BuildData
-        {
-            get => m_buildData;
-            set => m_buildData = value;
-        }
+        public NetworkVariable<BuildData> BuildData { get; set; } = new NetworkVariable<BuildData>();
 
 
         /// <summary>
@@ -39,7 +33,7 @@ namespace Gameplay.GameplayObjects.Character
 
         // Networked State Variables.
         public NetworkVariable<float> CurrentHealth { get; private set; } = new NetworkVariable<float>();
-        public float MaxHealth => BuildData.GetFrameData()?.MaxHealth ?? 0.0f;
+        public float MaxHealth => BuildData.Value?.GetFrameData().MaxHealth ?? 0.0f;
 
         public NetworkVariable<bool> IsDead { get; private set; } = new NetworkVariable<bool>();
 
@@ -47,7 +41,7 @@ namespace Gameplay.GameplayObjects.Character
         // Heat.
 
         public NetworkVariable<float> CurrentHeat { get; private set; } = new NetworkVariable<float>();
-        public float MaxHeat => BuildData.GetFrameData()?.HeatCapacity ?? 0.0f;
+        public float MaxHeat => BuildData.Value.GetFrameData()?.HeatCapacity ?? 0.0f;
         private float _lastHeatIncreaseTime = 0.0f;
 
 
@@ -88,7 +82,8 @@ namespace Gameplay.GameplayObjects.Character
                 return;
             }
 
-            // Subscribe to Health/Life Events.
+            // Subscribe to NetworkVariable Events.
+            BuildData.OnValueChanged += OnBuildChanged;
             IsDead.OnValueChanged += OnLifeStateChanged;
 
             // Initialise all our stats (May not trigger OnValidChanged events if the initialisation values are equal).
@@ -97,7 +92,8 @@ namespace Gameplay.GameplayObjects.Character
         }
         public override void OnNetworkDespawn()
         {
-            // Unsubscribe from Health/Life Events.
+            // Unsubscribe from NetworkVariable Events.
+            BuildData.OnValueChanged -= OnBuildChanged;
             IsDead.OnValueChanged -= OnLifeStateChanged;
         }
 
@@ -340,6 +336,17 @@ namespace Gameplay.GameplayObjects.Character
             }
 
             CurrentHeat.Value = Mathf.Max(newValue, 0);
+        }
+
+        #endregion
+
+
+        #region Build
+
+        private void OnBuildChanged(BuildData oldValue, BuildData newValue)
+        {
+            InitialiseHealth();
+            InitialiseHeat();
         }
 
         #endregion
