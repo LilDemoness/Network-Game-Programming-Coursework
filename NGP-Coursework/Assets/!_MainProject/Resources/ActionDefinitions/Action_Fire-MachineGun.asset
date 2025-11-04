@@ -14,11 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   IsHostileAction: 1
   <ShouldNotifyClient>k__BackingField: 1
-  <Toggle>k__BackingField: 0
-  <CancelOnRelease>k__BackingField: 1
+  <ActivationStyle>k__BackingField: 0
   <ImmediateHeat>k__BackingField: 0
   <ContinuousHeat>k__BackingField: 0
-  <ActivationHeat>k__BackingField: 0.1
+  <RetriggerHeat>k__BackingField: 0
   <ExecutionDelay>k__BackingField: 0
   <ActionCooldown>k__BackingField: 0
   <BlockingMode>k__BackingField: 1
@@ -40,10 +39,10 @@ MonoBehaviour:
   TriggeringVisuals:
   - rid: 6632896607793709161
   HitVisuals: []
-  <MaxRange>k__BackingField: 0
+  <MaxRange>k__BackingField: 30
   <ValidLayers>k__BackingField:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 73
   <Pierces>k__BackingField: 0
   references:
     version: 2

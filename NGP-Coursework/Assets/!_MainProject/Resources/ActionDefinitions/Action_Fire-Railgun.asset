@@ -40,11 +40,11 @@ MonoBehaviour:
   - rid: 6632896609068777570
   - rid: 6632896607793709162
   HitVisuals: []
-  <MaxRange>k__BackingField: 0
+  <MaxRange>k__BackingField: 30
   <ValidLayers>k__BackingField:
     serializedVersion: 2
-    m_Bits: 0
-  <Pierces>k__BackingField: 0
+    m_Bits: 73
+  <Pierces>k__BackingField: 3
   references:
     version: 2
     RefIds:
