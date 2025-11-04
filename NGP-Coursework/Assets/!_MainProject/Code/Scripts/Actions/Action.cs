@@ -222,7 +222,7 @@ namespace Gameplay.Actions
             InitialiseDataParametersIfEmpty(owner);
 
             // Apply Heat.
-            owner.ReceiveHeatChange(_definition.ImmediateHeat);
+            owner.ReceiveHeatChange(owner, _definition.ImmediateHeat);
 
             // Call our OnStart function.
             return _definition.OnStart(owner, ref Data);
@@ -309,7 +309,7 @@ namespace Gameplay.Actions
         public virtual bool OnUpdate(ServerCharacter owner)
         {
             // Apply Heat.
-            owner.ReceiveHeatChange(_definition.ContinuousHeat * Time.deltaTime);
+            owner.ReceiveHeatChange(owner, _definition.ContinuousHeat * Time.deltaTime);
 
             // Check if we should update.
             if (_hasPerformedLastTrigger)
@@ -324,7 +324,7 @@ namespace Gameplay.Actions
             // We should update.
 
             // Apply Heat.
-            owner.ReceiveHeatChange(_definition.RetriggerHeat);
+            owner.ReceiveHeatChange(owner, _definition.RetriggerHeat);
             // Update.
             if (_definition.OnUpdate(owner, ref Data) == false)
                 return ActionConclusion.Stop;

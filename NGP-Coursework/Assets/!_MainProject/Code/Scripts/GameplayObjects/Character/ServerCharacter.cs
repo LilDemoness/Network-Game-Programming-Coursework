@@ -4,6 +4,8 @@ using Gameplay.Actions;
 using Gameplay.GameplayObjects.Health;
 using Gameplay.GameplayObjects.Character.Customisation.Data;
 using Gameplay.StatusEffects;
+using Newtonsoft.Json.Linq;
+using System.Collections;
 
 namespace Gameplay.GameplayObjects.Character
 {
@@ -11,7 +13,6 @@ namespace Gameplay.GameplayObjects.Character
     ///     Contains all NetworkVariables, RPCs, and Server-Side Logic of a Character.
     ///     Separated from the Client Logic so that it is always known whether a section of code is running on the server or the client.
     /// </summary>
-    [RequireComponent(typeof(NetworkLifeState), typeof(NetworkHealthState))]
     public class ServerCharacter : NetworkBehaviour, IDamageable
     {
         [SerializeField] private ClientCharacter m_clientCharacter;
@@ -38,45 +39,16 @@ namespace Gameplay.GameplayObjects.Character
         public NetworkVariable<bool> IsInStealth { get; } = new NetworkVariable<bool>();
 
 
-        // Health & Life.
-        public NetworkHealthState NetHealthState { get; private set; }
-        public NetworkLifeState NetLifeState { get; private set; }
-
-
-        public float CurrentHealth
-        {
-            get => NetHealthState.CurrentHealth.Value;
-            private set => NetHealthState.CurrentHealth.Value = value;
-        }
+        // Networked State Variables.
+        public NetworkVariable<float> CurrentHealth { get; private set; } = new NetworkVariable<float>();
         public float MaxHealth => BuildData.GetFrameData()?.MaxHealth ?? 0.0f;
-        public bool IsDead
-        {
-            get => NetLifeState.IsDead.Value;
-            private set => NetLifeState.IsDead.Value = value;
-        }
+
+        public NetworkVariable<bool> IsDead { get; private set; } = new NetworkVariable<bool>();
 
 
         // Heat.
 
-        private float m_currentHeat;
-        public float CurrentHeat
-        {
-            get => m_currentHeat;
-            set
-            {
-                if (m_currentHeat < value)
-                    _lastHeatIncreaseTime = NetworkManager.ServerTime.TimeAsFloat;
-
-                if (value > MaxHeat)
-                {
-                    // Exceeded Heat Cap.
-                    Debug.Log("Exceeded Heat Cap");
-                    m_currentHeat = 0.0f;
-                }
-                
-                m_currentHeat = Mathf.Max(value, 0);
-            }
-        }
+        public NetworkVariable<float> CurrentHeat { get; private set; } = new NetworkVariable<float>();
         public float MaxHeat => BuildData.GetFrameData()?.HeatCapacity ?? 0.0f;
         private float _lastHeatIncreaseTime = 0.0f;
 
@@ -89,7 +61,7 @@ namespace Gameplay.GameplayObjects.Character
         public ServerActionPlayer ActionPlayer => m_serverActionPlayer;
         private ServerActionPlayer m_serverActionPlayer;
 
-        public bool CanPerformActions => !IsDead;
+        public bool CanPerformActions => !IsDead.Value;
 
 
         /// <summary>
@@ -109,8 +81,6 @@ namespace Gameplay.GameplayObjects.Character
         {
             m_serverActionPlayer = new ServerActionPlayer(this);
             m_statusEffectPlayer = new ServerStatusEffectPlayer(this);
-            NetLifeState = GetComponent<NetworkLifeState>();
-            NetHealthState = GetComponent<NetworkHealthState>();
         }
         public override void OnNetworkSpawn()
         {
@@ -121,14 +91,16 @@ namespace Gameplay.GameplayObjects.Character
             }
 
             // Subscribe to Health/Life Events.
-            NetLifeState.IsDead.OnValueChanged += OnLifeStateChanged;
+            IsDead.OnValueChanged += OnLifeStateChanged;
 
+            // Initialise all our stats (May not trigger OnValidChanged events if the initialisation values are equal).
             InitialiseHealth();
+            InitialiseHeat();
         }
         public override void OnNetworkDespawn()
         {
             // Unsubscribe from Health/Life Events.
-            NetLifeState.IsDead.OnValueChanged -= OnLifeStateChanged;
+            IsDead.OnValueChanged -= OnLifeStateChanged;
         }
 
 
@@ -141,7 +113,7 @@ namespace Gameplay.GameplayObjects.Character
         public void SendCharacterMovementInputServerRpc(Vector2 movementInput)
         {
             // Check that we're not dead or currently experiencing forced movement (E.g. Knockback/Charge).
-            if (IsDead || _movement.IsPerformingForcedMovement())
+            if (IsDead.Value || _movement.IsPerformingForcedMovement())
                 return;
 
             // Check if our current action prevents movement.
@@ -238,7 +210,7 @@ namespace Gameplay.GameplayObjects.Character
             float heatDecreaseRate = 1.0f;
             if (NetworkManager.ServerTime.TimeAsFloat >= (_lastHeatIncreaseTime + heatDecreaseDelay))
             {
-                CurrentHeat -= heatDecreaseRate * Time.deltaTime;
+                ReceiveHeatChange(this, -heatDecreaseRate * Time.deltaTime);
             }
         }
 
@@ -246,11 +218,19 @@ namespace Gameplay.GameplayObjects.Character
 
         #region Health & Life
 
+        /// <summary>
+        ///     Initialise our Health value.
+        /// </summary>
         private void InitialiseHealth()
         {
-            CurrentHealth = MaxHealth;
+            CurrentHealth.Value = MaxHealth;
         }
 
+        /// <summary>
+        ///     Apply a change in health to this ServerCharacter. Handles adjustments for Healing and Damage, and the notification that we've recieved each.
+        /// </summary>
+        /// <param name="inflicter"> The ServerCharacter that afflicted the damage.</param>
+        /// <param name="healthChange"> The change in health to apply (Positive is Healing, Negative is Damage).</param>
         public void ReceiveHealthChange(ServerCharacter inflicter, float healthChange)
         {
             if (!IsDamageable())
@@ -274,16 +254,30 @@ namespace Gameplay.GameplayObjects.Character
                 // Take Damage Animation.
             }
 
-            CurrentHealth = Mathf.Clamp(CurrentHealth + healthChange, 0, MaxHealth);
-            Debug.Log($"New Health: {CurrentHealth}");
+            // Change the value of our health.
+            SetCurrentHealth(CurrentHealth.Value + healthChange);
+        }
+        /// <summary>
+        ///     Set the value of the character's health, clamped between 0 & MaxHealth.
+        /// </summary>
+        /// <param name="newValue"> The new value of CurrentHealth before clamping.</param>
+        /// <param name="excessBecomesOverhealth"> Should health above our maximum health become Overhealth?</param>
+        private void SetCurrentHealth(float newValue, bool excessBecomesOverhealth = false)
+        {
+            if (excessBecomesOverhealth)
+                throw new System.NotImplementedException();
 
-            if (CurrentHealth <= 0)
+            CurrentHealth.Value = Mathf.Clamp(newValue, 0, MaxHealth);
+            Debug.Log($"New Health: {CurrentHealth.Value}");
+
+            if (CurrentHealth.Value <= 0)
             {
                 // We've died.
-                IsDead = true;
+                IsDead.Value = true;
                 //m_serverActionPlayer.ClearActions(false);
             }
         }
+
         public float GetMissingHealth()
         {
             if (!IsDamageable())
@@ -291,9 +285,10 @@ namespace Gameplay.GameplayObjects.Character
                 return 0.0f;
             }
 
-            return Mathf.Max(0.0f, MaxHealth - CurrentHealth);
+            return Mathf.Max(0.0f, MaxHealth - CurrentHealth.Value);
         }
-        public bool IsDamageable() => !NetLifeState.IsDead.Value;
+        public bool IsDamageable() => !IsDead.Value;
+
 
         private void OnLifeStateChanged(bool previousValue, bool newValue)
         {
@@ -310,9 +305,43 @@ namespace Gameplay.GameplayObjects.Character
 
         #region Heat
 
-        public void ReceiveHeatChange(float heatChange)
+        /// <summary>
+        ///     Initialise our Heat.
+        /// </summary>
+        private void InitialiseHeat()
         {
-            CurrentHeat += heatChange;
+            CurrentHeat.Value = 0.0f;
+        }
+
+
+        /// <summary>
+        ///     Apply a heat change to the ServerCharacter.
+        /// </summary>
+        /// <param name="heatChange"> The heat to be applied (Negative values reduce heat).</param>
+        public void ReceiveHeatChange(ServerCharacter inflicter, float heatChange)
+        {
+            SetCurrentHeat(CurrentHeat.Value + heatChange);
+        }
+        
+        /// <summary>
+        ///     Set the value of CurrentHeat, clamping if below 0 and notifying if we exceed our heat cap.
+        /// </summary>
+        private void SetCurrentHeat(float newValue)
+        {
+            if (CurrentHeat.Value < newValue)
+            {
+                // Our heat is increasing. Cache this value so we know when we can next start cooling down.
+                _lastHeatIncreaseTime = NetworkManager.ServerTime.TimeAsFloat;
+            }
+
+            if (newValue > MaxHeat)
+            {
+                // Exceeded Heat Cap.
+                Debug.Log("Exceeded Heat Cap");
+                CurrentHeat.Value = 0.0f;
+            }
+
+            CurrentHeat.Value = Mathf.Max(newValue, 0);
         }
 
         #endregion
