@@ -13,24 +13,31 @@ MonoBehaviour:
   m_Name: Action_Fire-MissileLauncher
   m_EditorClassIdentifier: 
   IsHostileAction: 0
-  Cost: 0
   <ShouldNotifyClient>k__BackingField: 1
+  <ActivationStyle>k__BackingField: 0
+  <ImmediateHeat>k__BackingField: 0
+  <ContinuousHeat>k__BackingField: 0
+  <RetriggerHeat>k__BackingField: 0
   <ExecutionDelay>k__BackingField: 0
   <ActionCooldown>k__BackingField: 0
   <BlockingMode>k__BackingField: 1
   <MaxActiveDuration>k__BackingField: 0
   <CanCharge>k__BackingField: 0
   <MaxChargeTime>k__BackingField: 0
-  <ExecuteIfNotAtFullCharge>k__BackingField: 0
-  <TriggerType>k__BackingField: 1
+  <MinChargeActivationPercentage>k__BackingField: 1
+  <RetainChargeAfterFull>k__BackingField: 0
+  <MaxChargeDepletionTime>k__BackingField: 0
+  <UIChargeDepletionTime>k__BackingField: 0
+  <TriggerType>k__BackingField: 3
   <CancelOnLastTrigger>k__BackingField: 1
-  <RetriggerDelay>k__BackingField: 0
+  <RetriggerDelay>k__BackingField: 0.6
   <Bursts>k__BackingField: 3
   <BurstDelay>k__BackingField: 0.1
   <IsInterruptable>k__BackingField: 0
   ActionEffects:
   - rid: 6632896607793709163
-  TriggeringVisuals: []
+  TriggeringVisuals:
+  - rid: 5503895833102778504
   HitVisuals: []
   _projectileInfo:
     ProjectilePrefab: {fileID: 5177341952338766353, guid: 741492a3145316f46b46d7ee5febb43c, type: 3}
@@ -47,7 +54,13 @@ MonoBehaviour:
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
+    - rid: 5503895833102778504
+      type: {class: SpecialFXActionVisual, ns: Gameplay.Actions.Visuals, asm: Assembly-CSharp}
+      data:
+        _triggerTimes: 4
+        _specialFXGraphic: {fileID: 4037183185398935712, guid: de6513b59a0ab6e45827e1457b43a2b3, type: 3}
     - rid: 6632896607793709163
       type: {class: HealthChangeEffect, ns: Gameplay.Actions.Effects, asm: Assembly-CSharp}
       data:
         _healthChange: -3
+        _scaleValueWithCharge: 1

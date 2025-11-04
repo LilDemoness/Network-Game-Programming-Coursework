@@ -21,6 +21,7 @@ namespace Gameplay.Actions
         public ActionID ActionID { get => _definition.ActionID; }
 
         protected ActionRequestData m_data;
+        public bool IsGhost { get; set; }
 
 
         /// <summary>
@@ -67,7 +68,7 @@ namespace Gameplay.Actions
         /// <inheritdoc cref="ActionDefinition.HasCooldownCompleted"/>
         public bool HasCooldownCompleted(float lastActivatedTime) => _definition.HasCooldownCompleted(lastActivatedTime);
 
-        /// <inheritdoc cref="ActionDefinition.HasExpired"/>
+        /// <inheritdoc cref="ActionDefinition.GetHasExpired(float)"/>
         public bool HasExpired => _definition.GetHasExpired(this.TimeStarted);
 
 
@@ -80,6 +81,12 @@ namespace Gameplay.Actions
 
         /// <inheritdoc cref="ActionDefinition.ShouldCancelAction"/>
         public bool ShouldCancelAction(ref ActionRequestData thisData, ref ActionRequestData otherData) => _definition.ShouldCancelAction(ref thisData, ref otherData);
+
+        /// <summary>
+        ///     Returns true if this action is able to be cancelled, or false if the action should still persist past cancellation.
+        /// </summary>
+        public bool CanBeCancelled() => _burstsRemaining == 0 || _burstsRemaining == _definition.Bursts;
+        
 
 
         /// <inheritdoc cref="ActionDefinition.ShouldBecomeNonBlocking"/>
@@ -175,7 +182,8 @@ namespace Gameplay.Actions
         public virtual void ReturnToPool()
         {
             this.m_data = default;
-            //this.ActionID = default;
+            this.IsGhost = false;
+            
             this.TimeStarted = 0;
             this._nextUpdateTime = 0.0f;
             this._burstsRemaining = 0;

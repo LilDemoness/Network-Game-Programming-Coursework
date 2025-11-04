@@ -41,14 +41,8 @@ namespace Gameplay.Actions
             {
                 Action action = _playingActions[i];
 
-                // Calculate values for Ending the Action FX.
-                bool shouldKeepGoing = action.AnticipatedClient || action.OnUpdateClient(ClientCharacter);    // Only update the action if we are past anticipation.
-                bool hasExpired = action.HasExpired;
-                bool hasTimedOut = action.AnticipatedClient && action.TimeRunning >= ANTICIPATION_TIMEOUT_SECONDS;
-
-
                 // Determine if we should end the action.
-                if (!shouldKeepGoing || hasExpired || hasTimedOut)
+                if (!UpdateAction(action, out bool hasTimedOut))
                 {
                     // End the action.
                     if (hasTimedOut)
@@ -63,6 +57,20 @@ namespace Gameplay.Actions
                     ActionFactory.ReturnAction(action);
                 }
             }
+        }
+        /// <summary>
+        ///     Calls a given action's OnUpdateClient(), and decides if the action is still alive.
+        /// </summary>
+        /// <returns> True if the action is still alive, false if it's dead.</returns>
+        private bool UpdateAction(Action action, out bool hasTimedOut)
+        {
+            bool shouldKeepGoing = action.AnticipatedClient || action.OnUpdateClient(ClientCharacter);    // Only update the action if we are past anticipation.
+            hasTimedOut = action.AnticipatedClient && action.TimeRunning >= ANTICIPATION_TIMEOUT_SECONDS;
+
+            if (action.IsGhost)
+                return !action.CanBeCancelled();
+            
+            return shouldKeepGoing && !action.HasExpired && !hasTimedOut;
         }
 
         /// <summary> A helper wrapper for a FindIndex call on _playingActions.</summary>
@@ -137,29 +145,34 @@ namespace Gameplay.Actions
         /// <param name="actionID"> The <see cref="ActionID"/> of the action to cancel.</param>
         /// <param name="slotIndex"> The <see cref="SlotIndex"/> of the action to cancel.</param>
         /// <param name="exceptThis"> The action you don't wish to cancel.</param>
-        public void CancelRunningActionsByID(ActionID actionID, SlotIndex slotIndex = SlotIndex.Unset, Action exceptThis = null)
+        public void CancelRunningActionsByID(ActionID actionID, SlotIndex slotIndex = SlotIndex.Unset, Action exceptThis = null, bool forceCancel = false)
         {
             bool ShouldCancelFunc(Action action) => action.ActionID == actionID && action != exceptThis && (slotIndex == SlotIndex.Unset || action.Data.SlotIndex == slotIndex);
-            CancelActiveActions(ShouldCancelFunc);
+            CancelActiveActions(ShouldCancelFunc, forceCancel);
         }
         /// <summary>
         ///     Cancel all actions for the given <see cref="SlotIndex"/>.
         /// </summary>
-        public void CancelRunningActionsBySlotID(SlotIndex slotIndex)
+        public void CancelRunningActionsBySlotID(SlotIndex slotIndex, bool forceCancel = false)
         {
             bool ShouldCancelFunc(Action action) => action.Data.SlotIndex == slotIndex;
-            CancelActiveActions(ShouldCancelFunc);
+            CancelActiveActions(ShouldCancelFunc, forceCancel);
         }
 
         /// <summary>
         ///     Cancel all actions based on the passed condition function.
         /// </summary>
         /// <param name="cancelCondition"> The cancel condition we are checking against.</param>
-        private void CancelActiveActions(System.Func<Action, bool> cancelCondition)
+        private void CancelActiveActions(System.Func<Action, bool> cancelCondition, bool forceCancel)
         {
             for (int i = _playingActions.Count - 1; i >= 0; --i)
             {
                 Action action = _playingActions[i];
+                if (!forceCancel && !action.CanBeCancelled())
+                {
+                    action.IsGhost = true;
+                    continue;
+                }
                 if (!cancelCondition(action))
                     continue;
 
