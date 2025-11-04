@@ -263,7 +263,6 @@ namespace UI.Customisation.SlottableSelection
         /// </summary>
         private void EquipSelectedSlottable()
         {
-            Debug.Log($"Slottable {_currentPreviewSlottableIndex} Selected (Name: {CustomisationOptionsDatabase.AllOptionsDatabase.GetSlottableData(_currentPreviewSlottableIndex).Name})");
             _playerCustomisationManager.SelectSlottableData(_activeTab, _currentPreviewSlottableIndex);
         }
     }

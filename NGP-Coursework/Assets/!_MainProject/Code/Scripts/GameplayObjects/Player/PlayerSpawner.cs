@@ -14,7 +14,9 @@ public class PlayerSpawner : NetworkBehaviour
         if (!IsServer)
             return;
 
-        foreach (var kvp in PlayerCustomisationManager.Instance.BuildData)
+        // This is the server.
+        // Setup our players, notifying clients once each has been spawned.
+        foreach (var kvp in PlayerCustomisationManager_Server.Instance.PlayerBuilds)
         {
             Vector3 spawnPosition = Vector3.right * Mathf.Floor(kvp.Key) * 2.0f;
 

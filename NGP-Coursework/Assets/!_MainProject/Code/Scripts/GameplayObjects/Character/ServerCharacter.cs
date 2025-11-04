@@ -4,8 +4,6 @@ using Gameplay.Actions;
 using Gameplay.GameplayObjects.Health;
 using Gameplay.GameplayObjects.Character.Customisation.Data;
 using Gameplay.StatusEffects;
-using Newtonsoft.Json.Linq;
-using System.Collections;
 
 namespace Gameplay.GameplayObjects.Character
 {

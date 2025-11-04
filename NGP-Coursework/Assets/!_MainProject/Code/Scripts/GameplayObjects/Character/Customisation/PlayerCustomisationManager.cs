@@ -6,19 +6,19 @@ using Gameplay.GameplayObjects.Character.Customisation.Data;
 namespace Gameplay.GameplayObjects.Character.Customisation
 {
     /// <summary>
-    ///     Handles the processing, storing, and eventual relaying of player customisation data when in the customisation menu.
+    ///     Handles the processing, and caching of player customisation data when in the customisation menu for clients.
     /// </summary>
     public class PlayerCustomisationManager : NetworkSingleton<PlayerCustomisationManager>
     {
         [SerializeField] private CustomisationOptionsDatabase _optionsDatabase;
 
-        private BuildData _clientBuild
+        private BuildData _localPlayerBuild
         {
-            get => _syncedPlayerBuilds[NetworkManager.LocalClientId];
-            set => _syncedPlayerBuilds[NetworkManager.LocalClientId] = value;
+            get => _playerBuilds[NetworkManager.LocalClientId];
+            set => _playerBuilds[NetworkManager.LocalClientId] = value;
         }
-        private Dictionary<ulong, BuildData> _syncedPlayerBuilds;   // Synced by RPC calls.
-        public Dictionary<ulong, BuildData> BuildData => _syncedPlayerBuilds;
+        private Dictionary<ulong, BuildData> _playerBuilds;   // Synced by RPC calls.
+        public Dictionary<ulong, BuildData> BuildData => _playerBuilds;
 
         // Stores a client's current builds for a given frame type index.
         private Dictionary<int, BuildData> _clientCachedBuilds = new Dictionary<int, BuildData>();
@@ -28,52 +28,46 @@ namespace Gameplay.GameplayObjects.Character.Customisation
         public static event System.Action<ulong, BuildData> OnNonLocalClientPlayerBuildChanged;
         public static event System.Action<BuildData> OnLocalClientBuildChanged;
 
-        public static event System.Action<ulong, BuildData> OnPlayerConnected;     // Remove.
-        public static event System.Action<ulong> OnPlayerDisconnected;  // Remove.
+        public static event System.Action<ulong, BuildData> OnPlayerConnected;  // Remove?
+        public static event System.Action<ulong> OnPlayerDisconnected;          // Remove?
 
 
 
         protected override void Awake()
         {
             base.Awake();
-            _syncedPlayerBuilds = new Dictionary<ulong, BuildData>();
+            _playerBuilds = new Dictionary<ulong, BuildData>();
 
             DontDestroyOnLoad(this.gameObject);
         }
 
 
+        /// <summary>
+        ///     Sets the player's build to a random value.
+        /// </summary>
         [ContextMenu("Randomise Build")]
         private void RandomiseBuild()
         {
             int[] slottableDatas = new int[SlotIndexExtensions.GetMaxPossibleSlots()];
-            for(int i = 0; i < SlotIndexExtensions.GetMaxPossibleSlots(); ++i)
+            for (int i = 0; i < SlotIndexExtensions.GetMaxPossibleSlots(); ++i)
                 slottableDatas[i] = Random.Range(0, CustomisationOptionsDatabase.AllOptionsDatabase.SlottableDatas.Length);
 
-            _clientBuild.SetBuildData(
-                activeFrame: Random.Range(0, CustomisationOptionsDatabase.AllOptionsDatabase.FrameDatas.Length),
-                activeSlottableIndicies: slottableDatas);
+            _localPlayerBuild.ActiveFrameIndex =        Random.Range(0, CustomisationOptionsDatabase.AllOptionsDatabase.FrameDatas.Length);
+            _localPlayerBuild.ActiveSlottableIndicies = slottableDatas;
 
-            AlterPlayerBuildServerRpc(_clientBuild);
+            PlayerCustomisationManager_Server.Instance.SetBuildServerRpc(_localPlayerBuild);
         }
 
 
-        [Rpc(SendTo.Server)]
-        public void AlterPlayerBuildServerRpc(BuildData newBuild, RpcParams rpcParams = default)
-        {
-            // If we are ONLY the server (NOT the Host too), then update our cached value.
-            if (!IsHost)
-            {
-                if (_syncedPlayerBuilds.TryAdd(rpcParams.Receive.SenderClientId, newBuild))
-                {
-                    _syncedPlayerBuilds[rpcParams.Receive.SenderClientId] = newBuild;
-                }
-            }
-
-
-            AlterPlayerBuildClientRpc(rpcParams.Receive.SenderClientId, newBuild);
-        }
+        /// <summary>
+        ///     ClientRpc to update the local value of the corresponding player's build.
+        /// </summary>
         [Rpc(SendTo.ClientsAndHost)]
-        public void AlterPlayerBuildClientRpc(ulong clientID, BuildData newBuild)
+        public void UpdatePlayerBuildClientRpc(ulong clientID, BuildData newBuild) => UpdatePlayerBuild(clientID, newBuild);
+        /// <summary>
+        ///     Update the local value of the corresponding player's build.
+        /// </summary>
+        private void UpdatePlayerBuild(ulong clientID, BuildData newBuild)
         {
             if (clientID == NetworkManager.LocalClientId)
             {
@@ -88,63 +82,17 @@ namespace Gameplay.GameplayObjects.Character.Customisation
         }
 
 
-        private struct AllBuildSyncData : INetworkSerializable
-        {
-            private ulong[] _clientIDs;
-            private BuildData[] _buildDatas;
-
-            public AllBuildSyncData(Dictionary<ulong, BuildData> input)
-            {
-                _clientIDs = new ulong[input.Count];
-                _buildDatas = new BuildData[input.Count];
-
-                int index = 0;
-                foreach (var kvp in input)
-                {
-                    _clientIDs[index] = kvp.Key;
-                    _buildDatas[index] = kvp.Value;
-                    ++index;
-                }
-            }
-
-            public Dictionary<ulong, BuildData> ToDictionary()
-            {
-                Dictionary<ulong, BuildData> outputDictionary = new Dictionary<ulong, BuildData>(capacity: _clientIDs.Length);
-                for(int i = 0; i < _clientIDs.Length; ++i)
-                {
-                    outputDictionary.Add(_clientIDs[i], _buildDatas[i]);
-                }
-                return outputDictionary;
-            }
-
-            public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
-            {
-                serializer.SerializeValue(ref _clientIDs);
-                serializer.SerializeValue(ref _buildDatas);
-            }
-        }
-        [Rpc(SendTo.Server)]
-        private void RequestFullBuildDataSyncServerRpc(ulong targetClientID)
-        {
-            SyncAllBuildDataClientRpc(
-                syncedBuildData: new AllBuildSyncData(_syncedPlayerBuilds),
-                clientRpcParams: new RpcParams
-                    {
-                        Send = new RpcSendParams
-                        {
-                            Target = RpcTarget.Single(targetClientID, RpcTargetUse.Temp)
-                        }
-                    }
-            );
-        }
+        /// <summary>
+        ///     ClientRpc fully sync all data for a client.
+        /// </summary>
         [Rpc(SendTo.ClientsAndHost, AllowTargetOverride = true)]
-        private void SyncAllBuildDataClientRpc(AllBuildSyncData syncedBuildData, RpcParams clientRpcParams = default)
+        public void SyncAllBuildDataClientRpc(AllBuildSyncData syncedBuildData, RpcParams clientRpcParams = default)
         {
             Dictionary<ulong, BuildData> newSyncedDictionary = syncedBuildData.ToDictionary();
 
-            foreach(var kvp in newSyncedDictionary)
+            foreach (var kvp in newSyncedDictionary)
             {
-                if(kvp.Key == NetworkManager.LocalClientId)
+                if (kvp.Key == NetworkManager.LocalClientId)
                 {
                     HandleLocalPlayerStateChanged(kvp.Value);
                 }
@@ -154,138 +102,83 @@ namespace Gameplay.GameplayObjects.Character.Customisation
                 }
             }
 
-            Debug.Log("Received All Build Data: " + _syncedPlayerBuilds.Count);
+            Debug.Log("Received All Build Data: " + _playerBuilds.Count);
         }
-
-
-        public override void OnNetworkSpawn()
+        /// <summary>
+        ///     ClientRpc to initialise the build data of a client when they join.
+        /// </summary>
+        [Rpc(SendTo.ClientsAndHost, AllowTargetOverride = true)]
+        public void InitialiseBuildDataClientRpc(AllBuildSyncData syncedBuildData, RpcParams clientRpcParams = default)
         {
-            if (IsServer)
+            // Update our cached build data.
+            _playerBuilds = syncedBuildData.ToDictionary();
+
+            // Notify listeners that a new player has joined, and of their build data.
+            foreach (var kvp in _playerBuilds)
             {
-                NetworkManager.Singleton.OnClientConnectedCallback += Server_HandleClientConnected;
-                NetworkManager.Singleton.OnClientDisconnectCallback += Server_HandleClientDisconnected;
-
-                // Ensure that we're accounting for already connected clients.
-                foreach(NetworkClient client in NetworkManager.Singleton.ConnectedClientsList)
-                {
-                    Server_HandleClientConnected(client.ClientId);
-                }
+                Debug.Log("Adding client: " + kvp.Key);
+                OnPlayerConnected?.Invoke(kvp.Key, kvp.Value);
+                OnNonLocalClientPlayerBuildChanged?.Invoke(kvp.Key, kvp.Value);
             }
-        }
-        public override void OnNetworkDespawn()
-        {
-            if (IsServer)
-            {
-                NetworkManager.Singleton.OnClientConnectedCallback -= Server_HandleClientConnected;
-                NetworkManager.Singleton.OnClientDisconnectCallback -= Server_HandleClientDisconnected;
-            }
-        }
 
-
-        private void Server_HandleClientConnected(ulong clientID)
-        {
-            // Ensure we've not already added this client.
-            if (_syncedPlayerBuilds.ContainsKey(clientID))
-                return;
-
-            // Notify the New Client of Existing Clients (Called before adding to prevent duplicate addition of the new client).
-            RequestFullBuildDataSyncServerRpc(clientID);
-
-            // Add the client.
-            _syncedPlayerBuilds.Add(clientID, new BuildData());
-            Debug.Log("Players Count: " + _syncedPlayerBuilds.Count);
-
-            // Notify All Clients of the New Client.
-            AlterPlayerBuildClientRpc(clientID, _syncedPlayerBuilds[clientID]);
-            HandleClientConnectedClientRpc(clientID, _syncedPlayerBuilds[clientID]);
-        }
-        private void Server_HandleClientDisconnected(ulong clientID)
-        {
-            // Remove the player who just left from our dictionary.
-            _syncedPlayerBuilds.Remove(clientID);
-
-            // Notify the Clients of the disconnect.
-            HandleClientDisconnectClientRpc(clientID);
+            Debug.Log("Received All Build Data: " + _playerBuilds.Count);
         }
 
 
 
-    #region Changing Selected Elements
+        #region Changing Selected Elements
 
-    #region Frame
-
-        public void SelectNextFrame() => SelectFrame(MathUtils.Loop(_clientBuild.ActiveFrameIndex + 1, _optionsDatabase.FrameDatas.Length));
-        public void SelectPreviousFrame() => SelectFrame(MathUtils.Loop(_clientBuild.ActiveFrameIndex - 1, _optionsDatabase.FrameDatas.Length));
+        /// <summary>
+        ///     Update the local player's selected frame, anticipating on the client and notifying the server.
+        /// </summary>
         public void SelectFrame(int selectedFrameIndex)
         {
+            // Anticipate change locally.
             TrySetBuildToCachedValue(selectedFrameIndex);
-            SelectFrameServerRpc(_clientBuild.ActiveFrameIndex);
-        }
 
-        [Rpc(SendTo.Server, RequireOwnership = false)]
-        private void SelectFrameServerRpc(int selectedFrameIndex, RpcParams rpcParams = default)
+            // Notify server (We will sync build on receiving the subsequent ClientRpc call).
+            PlayerCustomisationManager_Server.Instance.SetBuildServerRpc(_localPlayerBuild);
+        }
+        /// <summary>
+        ///     Update the local player's selected slottable for the passed slot, anticipating on the client and notifying the server.
+        /// </summary>
+        public void SelectSlottableData(SlotIndex slotIndex, int slottableDataIndex)
         {
-            if (!_syncedPlayerBuilds.ContainsKey(rpcParams.Receive.SenderClientId))
-                throw new System.Exception($"We haven't set up a Customisation State for ClientID {rpcParams.Receive.SenderClientId}");
+            // Anticipate change locally.
+            _localPlayerBuild.ActiveSlottableIndicies[slotIndex.GetSlotInteger()] = slottableDataIndex;
 
-            _syncedPlayerBuilds[rpcParams.Receive.SenderClientId].ActiveFrameIndex = selectedFrameIndex;
-            AlterPlayerBuildClientRpc(rpcParams.Receive.SenderClientId, _syncedPlayerBuilds[rpcParams.Receive.SenderClientId]);
+            // Notify server (We will sync build on receiving the subsequent ClientRpc call).
+            PlayerCustomisationManager_Server.Instance.SetBuildServerRpc(_localPlayerBuild);
         }
+
 
         /// <summary>
         ///     Attempts to load the cached value of a build if the new index doesn't match the current build index.
         /// </summary>
-        private void TrySetBuildToCachedValue(int newFrameIndex)
+        private bool TrySetBuildToCachedValue(int newFrameIndex)
         {
-            if (_clientBuild.ActiveFrameIndex == newFrameIndex)
-                return;
+            if (_localPlayerBuild.ActiveFrameIndex == newFrameIndex)
+                return false;
 
             // We've changed our frame.
             if (_clientCachedBuilds.ContainsKey(newFrameIndex))
             {
                 // We have cached data, so load our cached data.
-                _clientBuild = _clientCachedBuilds[newFrameIndex];
+                Debug.Log("Loaded BuildData");
+                _localPlayerBuild = _clientCachedBuilds[newFrameIndex];
             }
             else
             {
                 // We've not used this frame before and so have nothing to load.
                 // Create a empty BuildData for this frame (Resets Slottables as desired).
-                _clientBuild = new BuildData(newFrameIndex);
+                Debug.Log("Created New BuildData");
+                _localPlayerBuild = new BuildData(newFrameIndex);
             }
+
+            return true;
         }
 
-    #endregion
-
-    #region Slottable Data (Weapons & Abilities)
-
-        public void SelectSlottableData(SlotIndex slotIndex, int slottableDataIndex) => SelectSlottableDataServerRpc(slotIndex, slottableDataIndex);
-
-        [Rpc(SendTo.Server, RequireOwnership = false)]
-        private void SelectSlottableDataServerRpc(SlotIndex slotIndex, int slottableDataIndex, RpcParams rpcParams = default)
-        {
-            if (!_syncedPlayerBuilds.ContainsKey(rpcParams.Receive.SenderClientId))
-                throw new System.Exception($"We haven't set up a Customisation State for ClientID {rpcParams.Receive.SenderClientId}");
-
-            // Remove once we've fixed our UI?
-            /*bool isValid = false;
-            foreach(SlottableData validSlottableData in _optionsDatabase.FrameDatas[customisationState.FrameIndex].AttachmentPoints[slotIndex.GetSlotInteger()].ValidSlottableDatas)
-            {
-                if (validSlottableData == _optionsDatabase.GetSlottableData(slottableDataIndex))
-                {
-                    isValid = true;
-                    break;
-                }
-            }
-            if (!isValid)
-                throw new System.ArgumentException($"Slottable Data Index {slottableDataIndex} isn't supported by \"{_optionsDatabase.FrameDatas[customisationState.FrameIndex].name}\"'s attach point {slotIndex.GetSlotInteger()}");*/
-
-            _syncedPlayerBuilds[rpcParams.Receive.SenderClientId].ActiveSlottableIndicies[slotIndex.GetSlotInteger()] = slottableDataIndex;
-            AlterPlayerBuildClientRpc(rpcParams.Receive.SenderClientId, _syncedPlayerBuilds[rpcParams.Receive.SenderClientId]);
-        }
-
-        public int GetClientSelectedSlottableIndex(SlotIndex slotIndex) => _clientBuild.GetSlottableDataIndex(slotIndex);
-
-#endregion
+        public int GetClientSelectedSlottableIndex(SlotIndex slotIndex) => _localPlayerBuild.GetSlottableDataIndex(slotIndex);
 
         #endregion
 
@@ -299,23 +192,24 @@ namespace Gameplay.GameplayObjects.Character.Customisation
             // Update our cached BuildData for this Frame Index.
             if (!_clientCachedBuilds.TryAdd(newBuild.ActiveFrameIndex, newBuild))
             {
-                Debug.Log("Updating Cached State");
                 _clientCachedBuilds[newBuild.ActiveFrameIndex] = newBuild;
             }
 
+            // Update our local player state to match the server's.
+            _localPlayerBuild = newBuild;
 
-            // Update the corresponding other player state.
-            _clientBuild = newBuild;
 
             // Notify listeners of the change.
             OnLocalClientBuildChanged?.Invoke(newBuild);
             OnNonLocalClientPlayerBuildChanged?.Invoke(NetworkManager.LocalClientId, newBuild);
         }
+        /// <summary>
+        ///     Handle the updating of a non-local player's build data.
+        /// </summary>
         private void HandlePlayersStateChanged(ulong clientID, BuildData newBuild)
         {
             // Update the corresponding player state.
-            if (!_syncedPlayerBuilds.TryAdd(clientID, newBuild))
-                _syncedPlayerBuilds[clientID] = newBuild;
+            _playerBuilds[clientID] = newBuild;
 
             // Update listeners (E.g. To update displayed graphics).
             OnNonLocalClientPlayerBuildChanged?.Invoke(clientID, newBuild);
@@ -323,13 +217,22 @@ namespace Gameplay.GameplayObjects.Character.Customisation
 
 
 
+        /// <summary>
+        ///     Called when a player joins the game.
+        /// </summary>
         [Rpc(SendTo.ClientsAndHost)]
-        private void HandleClientConnectedClientRpc(ulong clientID, BuildData initialBuild)
+        public void HandlePlayerConnectedClientRpc(ulong clientID, BuildData initialBuild)
         {
             OnPlayerConnected?.Invoke(clientID, initialBuild);
+
+            _playerBuilds.Add(clientID, initialBuild);
+            UpdatePlayerBuild(clientID, initialBuild);
         }
+        /// <summary>
+        ///     Called when a player leaves the game.
+        /// </summary>
         [Rpc(SendTo.ClientsAndHost)]
-        private void HandleClientDisconnectClientRpc(ulong clientID)
+        public void HandlePlayerDisconnectedClientRpc(ulong clientID)
         {
             OnPlayerDisconnected?.Invoke(clientID);
         }
