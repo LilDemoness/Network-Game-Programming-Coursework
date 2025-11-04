@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 using Gameplay.GameplayObjects.Character;
-using Gameplay.StatusEffects;
+using Gameplay.StatusEffects.Definitions;
 
 namespace Gameplay.Actions.Effects
 {
@@ -20,9 +20,10 @@ namespace Gameplay.Actions.Effects
 
         public override void ApplyEffect(ServerCharacter owner, in ActionHitInformation hitInfo, float chargePercentage)
         {
-            /*float valueChange = _newValue - Action.GetUnbuffedValue(_buffableValueType);
-            float buffValue = _scaleDurationWithCharge ? (Action.GetUnbuffedValue(_buffableValueType) + valueChange * chargePercentage) : _newValue;
-            float buffLifetime = _scaleDurationWithCharge ? _buffLifetime * chargePercentage : _buffLifetime;*/
+#if UNITY_EDITOR
+            if (chargePercentage > 0.0f)
+                Debug.LogWarning("No Charge Scaling Logic");
+#endif
 
             if (hitInfo.Target.TryGetComponent<ServerCharacter>(out ServerCharacter serverCharacter))
             {
@@ -30,11 +31,12 @@ namespace Gameplay.Actions.Effects
             }
         }
 
-        // We don't need to perform any cleanup as the buff is automatically removed by the character when its duration elapses.
+        // Unless we wish to cancel our status effect on end,
+        //  we don't need to perform any cleanup as the buff is automatically removed by the character when its duration elapses.
         public override void Cleanup(ServerCharacter owner)
         {
             if (!_cancelEffectOnEnd)
-                return; // Our StatusEffectPlayes wil automatically handle the clearing of this StatusEffect on the character.
+                return; // Our StatusEffectPlayes will automatically handle the clearing of this StatusEffect on the character.
             
             // Cancel the Effect.
             owner.StatusEffectPlayer.ClearAllStatusEffectsOfType(_statusEffectDefinition);

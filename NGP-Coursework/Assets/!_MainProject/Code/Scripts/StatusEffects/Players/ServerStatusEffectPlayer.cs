@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using UnityEngine;
-using Gameplay.GameplayObjects.Character;
 using Unity.Netcode;
-using System;
+using Gameplay.GameplayObjects.Character;
+using Gameplay.StatusEffects.Definitions;
 
 namespace Gameplay.StatusEffects
 {
@@ -10,6 +10,9 @@ namespace Gameplay.StatusEffects
     {
         private ServerCharacter _serverCharacter;
 
+        /// <summary>
+        ///     All active StatusEffects on this character.
+        /// </summary>
         private List<StatusEffect> _activeStatusEffects;
 
 
@@ -74,6 +77,9 @@ namespace Gameplay.StatusEffects
         }
 
 
+        /// <summary>
+        ///     Update all StatusEffects on this character.
+        /// </summary>
         public void OnUpdate()
         {
             // Update all existing status effects (Loop in reverse order for easier removal).
@@ -88,6 +94,10 @@ namespace Gameplay.StatusEffects
                 }
             }
         }
+        /// <summary>
+        ///     Update the passed StatusEffect.
+        /// </summary>
+        /// <returns> True if the StatusEffect should be removed, false if it persists.</returns>
         private bool UpdateStatusEffect(StatusEffect statusEffect)
         {
             if (statusEffect.EffectElapsedTime > 0 && statusEffect.EffectElapsedTime < NetworkManager.Singleton.ServerTime.TimeAsFloat)
@@ -101,6 +111,9 @@ namespace Gameplay.StatusEffects
 
         #region Status Effect Clearing
 
+        /// <summary>
+        ///     Clear all StatusEffects on this character.
+        /// </summary>
         public void ClearAllStatusEffects()
         {
             for (int i = _activeStatusEffects.Count - 1; i >= 0; --i)
@@ -108,6 +121,9 @@ namespace Gameplay.StatusEffects
                 ClearStatusEffect(i);
             }
         }
+        /// <summary>
+        ///     Clear all StatusEffects of type 'Buff' on this character.
+        /// </summary>
         public void ClearAllBuffs()
         {
             for (int i = _activeStatusEffects.Count - 1; i >= 0; --i)
@@ -118,6 +134,9 @@ namespace Gameplay.StatusEffects
                 }
             }
         }
+        /// <summary>
+        ///     Clear all StatusEffects of type 'Debuff' on this character.
+        /// </summary>
         public void ClearAllDebuffs()
         {
             for (int i = _activeStatusEffects.Count - 1; i >= 0; --i)
@@ -130,6 +149,9 @@ namespace Gameplay.StatusEffects
         }
 
 
+        /// <summary>
+        ///     Clear all StatusEffects with the passed definition.
+        /// </summary>
         public void ClearAllStatusEffectsOfType(StatusEffectDefinition typeToClear)
         {
             for (int i = _activeStatusEffects.Count - 1; i >= 0; --i)
@@ -140,9 +162,14 @@ namespace Gameplay.StatusEffects
                 }
             }
         }
-        public void ClearMostRecentBuff() => throw new System.NotImplementedException();
-        public void ClearMostRecentDebuff() => throw new System.NotImplementedException();
+        /// <summary>
+        ///     Clear the most recently applied StatusEffect of the given type.
+        /// </summary>
+        public void ClearMostRecentEffectOfType(StatusEffectType typeToCancel) => throw new System.NotImplementedException();
 
+        /// <summary>
+        ///     Clear the passed status effect.
+        /// </summary>
         private void ClearStatusEffect(StatusEffect statusEffect)
         {
             for (int i = _activeStatusEffects.Count - 1; i >= 0; --i)
@@ -154,6 +181,9 @@ namespace Gameplay.StatusEffects
                 }
             }
         }
+        /// <summary>
+        ///     Clear the status effect at the given index.
+        /// </summary>
         private void ClearStatusEffect(int index)
         {
             // Cancel the Effect.
