@@ -311,6 +311,24 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "SelectPreviousFrame",
+                    "type": "Button",
+                    "id": "deb8c566-4f21-4387-9964-596165b0ecdd",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "SelectNextFrame",
+                    "type": "Button",
+                    "id": "33c7e02f-cc1d-400f-8112-9fbe9b1e07ec",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -496,18 +514,7 @@
                     "path": "<Keyboard>/w",
                     "interactions": "",
                     "processors": "",
-                    "groups": "Keyboard&Mouse",
-                    "action": "Navigate",
-                    "isComposite": false,
-                    "isPartOfComposite": true
-                },
-                {
-                    "name": "up",
-                    "id": "bd7c317c-adf3-4ae5-a336-28e0ab8d46b2",
-                    "path": "<Keyboard>/upArrow",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "Keyboard&Mouse",
+                    "groups": "Keyboard&Mouse;Keyboard",
                     "action": "Navigate",
                     "isComposite": false,
                     "isPartOfComposite": true
@@ -518,18 +525,7 @@
                     "path": "<Keyboard>/s",
                     "interactions": "",
                     "processors": "",
-                    "groups": "Keyboard&Mouse",
-                    "action": "Navigate",
-                    "isComposite": false,
-                    "isPartOfComposite": true
-                },
-                {
-                    "name": "down",
-                    "id": "a0095a23-3c5f-4099-a306-28ac09e611e4",
-                    "path": "<Keyboard>/downArrow",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "Keyboard&Mouse",
+                    "groups": "Keyboard&Mouse;Keyboard",
                     "action": "Navigate",
                     "isComposite": false,
                     "isPartOfComposite": true
@@ -540,18 +536,7 @@
                     "path": "<Keyboard>/a",
                     "interactions": "",
                     "processors": "",
-                    "groups": "Keyboard&Mouse",
-                    "action": "Navigate",
-                    "isComposite": false,
-                    "isPartOfComposite": true
-                },
-                {
-                    "name": "left",
-                    "id": "1cbbfcab-0c9c-45e3-9de2-a79830da2c40",
-                    "path": "<Keyboard>/leftArrow",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "Keyboard&Mouse",
+                    "groups": "Keyboard&Mouse;Keyboard",
                     "action": "Navigate",
                     "isComposite": false,
                     "isPartOfComposite": true
@@ -562,18 +547,7 @@
                     "path": "<Keyboard>/d",
                     "interactions": "",
                     "processors": "",
-                    "groups": "Keyboard&Mouse",
-                    "action": "Navigate",
-                    "isComposite": false,
-                    "isPartOfComposite": true
-                },
-                {
-                    "name": "right",
-                    "id": "20f21b11-32da-4752-94c6-18db73732872",
-                    "path": "<Keyboard>/rightArrow",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "Keyboard&Mouse",
+                    "groups": "Keyboard&Mouse;Keyboard",
                     "action": "Navigate",
                     "isComposite": false,
                     "isPartOfComposite": true
@@ -602,30 +576,8 @@
                 },
                 {
                     "name": "",
-                    "id": "d3dcc3f0-e35a-4544-92dd-7e2e93d64b95",
-                    "path": "<Keyboard>/a",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": ";Keyboard",
-                    "action": "PreviousTab",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
                     "id": "86d3dd66-7458-46b4-b7d5-578f4a987c4d",
                     "path": "<Keyboard>/e",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": ";Keyboard",
-                    "action": "NextTab",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "5b537fb6-6c75-402f-983e-f2e0872cf315",
-                    "path": "<Keyboard>/d",
                     "interactions": "",
                     "processors": "",
                     "groups": ";Keyboard",
@@ -694,7 +646,7 @@
                     "path": "<Mouse>/leftButton",
                     "interactions": "",
                     "processors": "",
-                    "groups": ";Keyboard&Mouse",
+                    "groups": ";Keyboard&Mouse;Keyboard",
                     "action": "Click",
                     "isComposite": false,
                     "isPartOfComposite": false
@@ -749,7 +701,7 @@
                     "path": "<Mouse>/middleButton",
                     "interactions": "",
                     "processors": "",
-                    "groups": ";Keyboard&Mouse",
+                    "groups": ";Keyboard&Mouse;Keyboard",
                     "action": "MiddleClick",
                     "isComposite": false,
                     "isPartOfComposite": false
@@ -760,7 +712,7 @@
                     "path": "<Mouse>/rightButton",
                     "interactions": "",
                     "processors": "",
-                    "groups": ";Keyboard&Mouse",
+                    "groups": ";Keyboard&Mouse;Keyboard",
                     "action": "RightClick",
                     "isComposite": false,
                     "isPartOfComposite": false
@@ -795,6 +747,50 @@
                     "processors": "",
                     "groups": ";Keyboard",
                     "action": "Confirm",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "948c461f-adf2-45c5-b4be-d7bbc8915503",
+                    "path": "<Keyboard>/rightArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard",
+                    "action": "SelectNextFrame",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "50e7728b-e00b-422e-aeb7-06d4a9cdc395",
+                    "path": "<Gamepad>/rightTrigger",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "SelectNextFrame",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "1033d2cb-bb0d-4fb1-8443-9e9c3f12b422",
+                    "path": "<Keyboard>/leftArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard",
+                    "action": "SelectPreviousFrame",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "8846bd20-657e-46f1-9e95-31c3f0154aeb",
+                    "path": "<Gamepad>/leftTrigger",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "SelectPreviousFrame",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

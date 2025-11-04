@@ -28,42 +28,56 @@ namespace UI.Actions
             Action.OnClientStoppedCharging += Action_ClientStoppedCharging;
             Action.OnClientResetCharging += Action_ClientResetChargeDisplay;
         }
-        public static void Action_ClientStartedCharging(object sender, Action.StartedChargingEventArgs e)
+        /// <summary>
+        ///     Called when any client starts charging any action.
+        /// </summary>
+        private static void Action_ClientStartedCharging(object sender, Action.StartedChargingEventArgs e)
         {
             if (e.Client.OwnerClientId != NetworkManager.Singleton.LocalClientId)
-                return;
+                return; // Not the local client.
 
             if (!s_slotIndexToUIDictionary.TryGetValue((SlotIndex)e.SlotIndex, out List<PlayerActionChargeDisplayUI> chargeUIElements))
                 throw new System.ArgumentException($"No instances of {nameof(PlayerActionChargeDisplayUI)} exist for the Weapon Slot {(SlotIndex)e.SlotIndex}");
 
+
+            // Valid call. Update the charge UI.
             foreach (PlayerActionChargeDisplayUI chargeUI in chargeUIElements)
                 chargeUI.CalculateChargePercentageFunc = () => CalculateChargePercentage_StartedCharging(e.ChargeStartedTime, e.MaxChargeDuration);
         }
         private static float CalculateChargePercentage_StartedCharging(float chargeStartTime, float maxChargeDuration)
             => Mathf.Clamp01((NetworkManager.Singleton.ServerTime.TimeAsFloat - chargeStartTime) / maxChargeDuration);
 
-        public static void Action_ClientStoppedCharging(object sender, Action.StoppedChargingEventArgs e)
+        /// <summary>
+        ///     Called when any client stops charging any action.
+        /// </summary>
+        private static void Action_ClientStoppedCharging(object sender, Action.StoppedChargingEventArgs e)
         {
             if (e.Client.OwnerClientId != NetworkManager.Singleton.LocalClientId)
-                return;
+                return; // Not the local client.
 
             if (!s_slotIndexToUIDictionary.TryGetValue((SlotIndex)e.SlotIndex, out List<PlayerActionChargeDisplayUI> chargeUIElements))
                 throw new System.ArgumentException($"No instances of {nameof(PlayerActionChargeDisplayUI)} exist for the Weapon Slot {(SlotIndex)e.SlotIndex}");
 
+
+            // Valid call. Update the charge UI.
             foreach (PlayerActionChargeDisplayUI chargeUI in chargeUIElements)
                 chargeUI.CalculateChargePercentageFunc = () => CalculateChargePercentage_StoppedCharging(e.ChargeFullyDepletedTime, e.MaxChargeDepletionTime);
         }
         private static float CalculateChargePercentage_StoppedCharging(float chargeFullyDepletedTime, float maxChargeDepletionTime)
             => maxChargeDepletionTime > 0.0f ? Mathf.Clamp01((chargeFullyDepletedTime - NetworkManager.Singleton.ServerTime.TimeAsFloat) / maxChargeDepletionTime) : 0.0f;
 
-        public static void Action_ClientResetChargeDisplay(object sender, Action.ResetChargingEventArgs e)
+        /// <summary>
+        ///     Called when any client resets the charge percentage on any action.
+        /// </summary>
+        private static void Action_ClientResetChargeDisplay(object sender, Action.ResetChargingEventArgs e)
         {
             if (e.Client.OwnerClientId != NetworkManager.Singleton.LocalClientId)
-                return;
+                return; // Not the local client.
 
             if (!s_slotIndexToUIDictionary.TryGetValue((SlotIndex)e.SlotIndex, out List<PlayerActionChargeDisplayUI> chargeUIElements))
                 throw new System.ArgumentException($"No instances of {nameof(PlayerActionChargeDisplayUI)} exist for the Weapon Slot {(SlotIndex)e.SlotIndex}");
 
+            // Valid call. Update the charge UI.
             foreach (PlayerActionChargeDisplayUI chargeUI in chargeUIElements)
             {
                 // Prepare to reset our UI towards 0 via a lerp.

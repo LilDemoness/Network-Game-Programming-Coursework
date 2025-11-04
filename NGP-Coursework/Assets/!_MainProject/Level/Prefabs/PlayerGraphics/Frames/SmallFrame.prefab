@@ -83,7 +83,7 @@ GameObject:
   - component: {fileID: 4992763253428938330}
   - component: {fileID: 7743897256025411296}
   m_Layer: 0
-  m_Name: WeaponAttachPoint_1
+  m_Name: AttachPoint_1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -377,7 +377,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8470064080175480922}
   m_Layer: 3
-  m_Name: Weapons
+  m_Name: AttachPoints
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

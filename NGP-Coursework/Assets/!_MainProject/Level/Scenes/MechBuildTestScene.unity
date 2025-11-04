@@ -2159,6 +2159,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _inputAction: {fileID: 0}
   _inputActionType: 0
+  _allowInputWhenNotInFocus: 0
   _onButtonTriggered:
     m_PersistentCalls:
       m_Calls:
@@ -2256,8 +2257,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 869429556}
   m_HandleRect: {fileID: 869429555}
   m_Direction: 2
-  m_Value: 1.0000002
-  m_Size: 0.7747253
+  m_Value: 1
+  m_Size: 0.7747252
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -9128,6 +9129,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _inputAction: {fileID: -4654721369243161474, guid: 832195adfe757804ab6ebd15233eab2e, type: 3}
   _inputActionType: 2
+  _allowInputWhenNotInFocus: 0
   _onButtonTriggered:
     m_PersistentCalls:
       m_Calls:
@@ -10513,6 +10515,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _inputAction: {fileID: -4654721369243161474, guid: 832195adfe757804ab6ebd15233eab2e, type: 3}
   _inputActionType: 3
+  _allowInputWhenNotInFocus: 0
   _onButtonTriggered:
     m_PersistentCalls:
       m_Calls:
@@ -12337,6 +12340,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _inputAction: {fileID: 0}
   _inputActionType: 0
+  _allowInputWhenNotInFocus: 0
   _onButtonTriggered:
     m_PersistentCalls:
       m_Calls:
@@ -12900,8 +12904,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b29e33449519d354e92951e868d2982b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _inputAction: {fileID: -7654808952092260052, guid: 832195adfe757804ab6ebd15233eab2e, type: 3}
+  _inputAction: {fileID: -610913900546510988, guid: 832195adfe757804ab6ebd15233eab2e, type: 3}
   _inputActionType: 0
+  _allowInputWhenNotInFocus: 0
   _onButtonTriggered:
     m_PersistentCalls:
       m_Calls:
@@ -13017,8 +13022,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b29e33449519d354e92951e868d2982b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _inputAction: {fileID: 8825438747314882121, guid: 832195adfe757804ab6ebd15233eab2e, type: 3}
+  _inputAction: {fileID: 7291365496769820105, guid: 832195adfe757804ab6ebd15233eab2e, type: 3}
   _inputActionType: 0
+  _allowInputWhenNotInFocus: 0
   _onButtonTriggered:
     m_PersistentCalls:
       m_Calls:

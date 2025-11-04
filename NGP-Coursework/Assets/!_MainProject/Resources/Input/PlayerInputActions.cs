@@ -397,6 +397,24 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""SelectPreviousFrame"",
+                    ""type"": ""Button"",
+                    ""id"": ""deb8c566-4f21-4387-9964-596165b0ecdd"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""SelectNextFrame"",
+                    ""type"": ""Button"",
+                    ""id"": ""33c7e02f-cc1d-400f-8112-9fbe9b1e07ec"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -582,18 +600,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""path"": ""<Keyboard>/w"",
                     ""interactions"": """",
                     ""processors"": """",
-                    ""groups"": ""Keyboard&Mouse"",
-                    ""action"": ""Navigate"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": true
-                },
-                {
-                    ""name"": ""up"",
-                    ""id"": ""bd7c317c-adf3-4ae5-a336-28e0ab8d46b2"",
-                    ""path"": ""<Keyboard>/upArrow"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": ""Keyboard&Mouse"",
+                    ""groups"": ""Keyboard&Mouse;Keyboard"",
                     ""action"": ""Navigate"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": true
@@ -604,18 +611,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""path"": ""<Keyboard>/s"",
                     ""interactions"": """",
                     ""processors"": """",
-                    ""groups"": ""Keyboard&Mouse"",
-                    ""action"": ""Navigate"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": true
-                },
-                {
-                    ""name"": ""down"",
-                    ""id"": ""a0095a23-3c5f-4099-a306-28ac09e611e4"",
-                    ""path"": ""<Keyboard>/downArrow"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": ""Keyboard&Mouse"",
+                    ""groups"": ""Keyboard&Mouse;Keyboard"",
                     ""action"": ""Navigate"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": true
@@ -626,18 +622,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""path"": ""<Keyboard>/a"",
                     ""interactions"": """",
                     ""processors"": """",
-                    ""groups"": ""Keyboard&Mouse"",
-                    ""action"": ""Navigate"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": true
-                },
-                {
-                    ""name"": ""left"",
-                    ""id"": ""1cbbfcab-0c9c-45e3-9de2-a79830da2c40"",
-                    ""path"": ""<Keyboard>/leftArrow"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": ""Keyboard&Mouse"",
+                    ""groups"": ""Keyboard&Mouse;Keyboard"",
                     ""action"": ""Navigate"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": true
@@ -648,18 +633,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""path"": ""<Keyboard>/d"",
                     ""interactions"": """",
                     ""processors"": """",
-                    ""groups"": ""Keyboard&Mouse"",
-                    ""action"": ""Navigate"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": true
-                },
-                {
-                    ""name"": ""right"",
-                    ""id"": ""20f21b11-32da-4752-94c6-18db73732872"",
-                    ""path"": ""<Keyboard>/rightArrow"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": ""Keyboard&Mouse"",
+                    ""groups"": ""Keyboard&Mouse;Keyboard"",
                     ""action"": ""Navigate"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": true
@@ -688,30 +662,8 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
-                    ""id"": ""d3dcc3f0-e35a-4544-92dd-7e2e93d64b95"",
-                    ""path"": ""<Keyboard>/a"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": "";Keyboard"",
-                    ""action"": ""PreviousTab"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
                     ""id"": ""86d3dd66-7458-46b4-b7d5-578f4a987c4d"",
                     ""path"": ""<Keyboard>/e"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": "";Keyboard"",
-                    ""action"": ""NextTab"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""5b537fb6-6c75-402f-983e-f2e0872cf315"",
-                    ""path"": ""<Keyboard>/d"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": "";Keyboard"",
@@ -780,7 +732,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""path"": ""<Mouse>/leftButton"",
                     ""interactions"": """",
                     ""processors"": """",
-                    ""groups"": "";Keyboard&Mouse"",
+                    ""groups"": "";Keyboard&Mouse;Keyboard"",
                     ""action"": ""Click"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
@@ -835,7 +787,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""path"": ""<Mouse>/middleButton"",
                     ""interactions"": """",
                     ""processors"": """",
-                    ""groups"": "";Keyboard&Mouse"",
+                    ""groups"": "";Keyboard&Mouse;Keyboard"",
                     ""action"": ""MiddleClick"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
@@ -846,7 +798,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""path"": ""<Mouse>/rightButton"",
                     ""interactions"": """",
                     ""processors"": """",
-                    ""groups"": "";Keyboard&Mouse"",
+                    ""groups"": "";Keyboard&Mouse;Keyboard"",
                     ""action"": ""RightClick"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
@@ -881,6 +833,50 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": "";Keyboard"",
                     ""action"": ""Confirm"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""948c461f-adf2-45c5-b4be-d7bbc8915503"",
+                    ""path"": ""<Keyboard>/rightArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Keyboard"",
+                    ""action"": ""SelectNextFrame"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""50e7728b-e00b-422e-aeb7-06d4a9cdc395"",
+                    ""path"": ""<Gamepad>/rightTrigger"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""SelectNextFrame"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""1033d2cb-bb0d-4fb1-8443-9e9c3f12b422"",
+                    ""path"": ""<Keyboard>/leftArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Keyboard"",
+                    ""action"": ""SelectPreviousFrame"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""8846bd20-657e-46f1-9e95-31c3f0154aeb"",
+                    ""path"": ""<Gamepad>/leftTrigger"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""SelectPreviousFrame"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -921,6 +917,8 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         m_UI_PreviousTab = m_UI.FindAction("PreviousTab", throwIfNotFound: true);
         m_UI_OpenFrameSelection = m_UI.FindAction("OpenFrameSelection", throwIfNotFound: true);
         m_UI_Confirm = m_UI.FindAction("Confirm", throwIfNotFound: true);
+        m_UI_SelectPreviousFrame = m_UI.FindAction("SelectPreviousFrame", throwIfNotFound: true);
+        m_UI_SelectNextFrame = m_UI.FindAction("SelectNextFrame", throwIfNotFound: true);
     }
 
     ~@PlayerInputActions()
@@ -1253,6 +1251,8 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
     private readonly InputAction m_UI_PreviousTab;
     private readonly InputAction m_UI_OpenFrameSelection;
     private readonly InputAction m_UI_Confirm;
+    private readonly InputAction m_UI_SelectPreviousFrame;
+    private readonly InputAction m_UI_SelectNextFrame;
     /// <summary>
     /// Provides access to input actions defined in input action map "UI".
     /// </summary>
@@ -1321,6 +1321,14 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         /// </summary>
         public InputAction @Confirm => m_Wrapper.m_UI_Confirm;
         /// <summary>
+        /// Provides access to the underlying input action "UI/SelectPreviousFrame".
+        /// </summary>
+        public InputAction @SelectPreviousFrame => m_Wrapper.m_UI_SelectPreviousFrame;
+        /// <summary>
+        /// Provides access to the underlying input action "UI/SelectNextFrame".
+        /// </summary>
+        public InputAction @SelectNextFrame => m_Wrapper.m_UI_SelectNextFrame;
+        /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
         public InputActionMap Get() { return m_Wrapper.m_UI; }
@@ -1388,6 +1396,12 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
             @Confirm.started += instance.OnConfirm;
             @Confirm.performed += instance.OnConfirm;
             @Confirm.canceled += instance.OnConfirm;
+            @SelectPreviousFrame.started += instance.OnSelectPreviousFrame;
+            @SelectPreviousFrame.performed += instance.OnSelectPreviousFrame;
+            @SelectPreviousFrame.canceled += instance.OnSelectPreviousFrame;
+            @SelectNextFrame.started += instance.OnSelectNextFrame;
+            @SelectNextFrame.performed += instance.OnSelectNextFrame;
+            @SelectNextFrame.canceled += instance.OnSelectNextFrame;
         }
 
         /// <summary>
@@ -1441,6 +1455,12 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
             @Confirm.started -= instance.OnConfirm;
             @Confirm.performed -= instance.OnConfirm;
             @Confirm.canceled -= instance.OnConfirm;
+            @SelectPreviousFrame.started -= instance.OnSelectPreviousFrame;
+            @SelectPreviousFrame.performed -= instance.OnSelectPreviousFrame;
+            @SelectPreviousFrame.canceled -= instance.OnSelectPreviousFrame;
+            @SelectNextFrame.started -= instance.OnSelectNextFrame;
+            @SelectNextFrame.performed -= instance.OnSelectNextFrame;
+            @SelectNextFrame.canceled -= instance.OnSelectNextFrame;
         }
 
         /// <summary>
@@ -1650,5 +1670,19 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnConfirm(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "SelectPreviousFrame" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnSelectPreviousFrame(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "SelectNextFrame" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnSelectNextFrame(InputAction.CallbackContext context);
     }
 }

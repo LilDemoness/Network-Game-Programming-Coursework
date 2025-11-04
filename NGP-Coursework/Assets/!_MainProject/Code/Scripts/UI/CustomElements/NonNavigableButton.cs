@@ -36,6 +36,7 @@ namespace UI
             [SerializeField] private InputActionReference _inputAction;
         [Tooltip("The type of check that will be run when the input action is performed.")]
             [SerializeField] private InputActionType _inputActionType;
+        [SerializeField] private bool _allowInputWhenNotInFocus = false;
 
         [Space(10)]
         [SerializeField] private UnityEvent _onButtonTriggered;
@@ -55,6 +56,9 @@ namespace UI
 
         private void Action_performed(InputAction.CallbackContext ctx)
         {
+            if (!_allowInputWhenNotInFocus && !OverlayMenu.IsWithinActiveMenu(this.transform))
+                return; // We are not in focus and aren't allowing out-of-focus input.
+
             if (!IsValidActionInput(ref ctx))
                 return; // Invalid input for the action trigger type.
 

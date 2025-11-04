@@ -43,26 +43,40 @@ namespace UI.Customisation.SlottableSelection
             GenerateButtons();
             CleanupTabs();
 
+            ClientInput.OnNavigatePerformed += ClientInput_OnNavigatePerformed;
             ClientInput.OnNextTabPerformed += ClientInput_OnNextTabPerformed;
             ClientInput.OnPreviousTabPerformed += ClientInput_OnPreviousTabPerformed;
-            PlayerCustomisationManager.OnNonLocalClientPlayerBuildChanged += PlayerCustomisationManager_OnPlayerCustomisationStateChanged; ;
+            PlayerCustomisationManager.OnLocalClientBuildChanged += PlayerCustomisationManager_OnPlayerCustomisationStateChanged;
         }
         private void OnDestroy()
         {
+            ClientInput.OnNavigatePerformed -= ClientInput_OnNavigatePerformed;
             ClientInput.OnNextTabPerformed -= ClientInput_OnNextTabPerformed;
             ClientInput.OnPreviousTabPerformed -= ClientInput_OnPreviousTabPerformed;
-            PlayerCustomisationManager.OnNonLocalClientPlayerBuildChanged -= PlayerCustomisationManager_OnPlayerCustomisationStateChanged;
+            PlayerCustomisationManager.OnLocalClientBuildChanged -= PlayerCustomisationManager_OnPlayerCustomisationStateChanged;
         }
 
+        private void ClientInput_OnNavigatePerformed(Vector2 value)
+        {
+            if (!OverlayMenu.IsWithinActiveMenu(this.transform))
+                return; // We aren't within the active menu, and so our input shouldn't be counted.
+
+            if (value.x > 0.0f)
+                SelectNextTab();
+            else if (value.x < 0.0f)
+                SelectPreviousTab();
+        }
         private void ClientInput_OnNextTabPerformed()
         {
-            if (!OverlayMenu.IsOverlayMenuOpen)
-                SelectNextTab();
+            if (!OverlayMenu.IsWithinActiveMenu(this.transform))
+                return; // We aren't within the active menu, and so our input shouldn't be counted.
+            SelectNextTab();
         }
         private void ClientInput_OnPreviousTabPerformed()
         {
             if (!OverlayMenu.IsWithinActiveMenu(this.transform))
-                SelectPreviousTab();
+                return; // We aren't within the active menu, and so our input shouldn't be counted.
+            SelectPreviousTab();
         }
 
         /// <summary>
@@ -150,11 +164,8 @@ namespace UI.Customisation.SlottableSelection
         }
 
 
-        private void PlayerCustomisationManager_OnPlayerCustomisationStateChanged(ulong clientID, BuildData buildData)
+        private void PlayerCustomisationManager_OnPlayerCustomisationStateChanged(BuildData buildData)
         {
-            if (clientID != NetworkManager.Singleton.LocalClientId)
-                return; // Not the client.
-
             // Check if our selected frame has changed, and if it has update our cached data.
             FrameData frameData = CustomisationOptionsDatabase.AllOptionsDatabase.GetFrame(buildData.ActiveFrameIndex);
             if (frameData != _selectedFrameData)
@@ -172,6 +183,7 @@ namespace UI.Customisation.SlottableSelection
         {
             this._selectedFrameData = frameData;
             SetupTabs();
+            Debug.Log("Select Tab");
             SelectTab(SlotIndex.PrimaryWeapon);
         }
 

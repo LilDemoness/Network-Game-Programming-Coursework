@@ -79,6 +79,9 @@ namespace UI
         /// </summary>
         public virtual void Close(bool selectPreviousSelectable = true)
         {
+            if (!IsOpen)
+                return; // We were not open to begin with.
+
             if (selectPreviousSelectable)
                 EventSystem.current.SetSelectedGameObject(_previousSelectable); // Add a check for if this menu isn't the only overlay menu, and instead select from the menu beneath?
             

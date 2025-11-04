@@ -20,6 +20,9 @@ namespace UserInput
 
         #region UI Events
 
+
+        public static event System.Action<Vector2> OnNavigatePerformed;
+        
         // Tabs.
         public static event System.Action OnNextTabPerformed;
         public static event System.Action OnPreviousTabPerformed;
@@ -181,7 +184,7 @@ namespace UserInput
 
         #region UI Event Functions
 
-        private void Navigate_performed(InputAction.CallbackContext obj) { }
+        private void Navigate_performed(InputAction.CallbackContext obj) => OnNavigatePerformed?.Invoke(obj.ReadValue<Vector2>());
         private void NextTab_performed(InputAction.CallbackContext obj) => OnNextTabPerformed?.Invoke();
         private void PreviousTab_performed(InputAction.CallbackContext obj) => OnPreviousTabPerformed?.Invoke();
 
