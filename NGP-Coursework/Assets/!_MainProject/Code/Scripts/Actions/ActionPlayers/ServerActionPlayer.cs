@@ -31,7 +31,7 @@ namespace Gameplay.Actions
             }
             public bool Equals(ActionIDSlotIndexWrapper other) => ActionID == other.ActionID && SlotIndex == other.SlotIndex;
         }
-        private Dictionary<ActionIDSlotIndexWrapper, float> _actionLastUsedTimestamps;  // Stores when the Action with the associated ActionID & Slot Identifier was last used.
+        private Dictionary<ActionIDSlotIndexWrapper, float> _actionCooldownCompleteTime;  // Stores when the Action with the associated ActionID & Slot Identifier will finish its cooldown.
         private ActionIDSlotIndexWrapper _timestampComparison;
 
 
@@ -47,7 +47,7 @@ namespace Gameplay.Actions
 
             _actionQueue = new List<Action>();
             _nonBlockingActions = new List<Action>();
-            _actionLastUsedTimestamps = new Dictionary<ActionIDSlotIndexWrapper, float>();
+            _actionCooldownCompleteTime = new Dictionary<ActionIDSlotIndexWrapper, float>();
             _hasPendingSynthesisedAction = false;
         }
 
@@ -66,6 +66,7 @@ namespace Gameplay.Actions
 
             // Create our action.
             var newAction = ActionFactory.CreateActionFromData(ref action);
+            newAction.OnUpdateTriggered += Action_OnUpdateTriggered;
             
             if (CancelExistingActionsForToggle(newAction))
             {
@@ -193,9 +194,16 @@ namespace Gameplay.Actions
         /// <summary>
         ///     Figures out if an action can be played now, or if it would automatically fail because it was used too recently.
         /// </summary>
-        /// <param name="actionID"> The action we want to run.</param>
-        /// <returns> True if the action can be run now, false if more time must elapse before this action can be run.</returns>
-        public bool IsReuseTimeElapsed(ActionID actionID) => throw new System.NotImplementedException();
+        /// <returns> True if the action is still on cooldown, false if it can be triggered.</returns>
+        public bool IsActionOnCooldown(ActionID actionID, SlotIndex slotIndex)
+        {
+            _timestampComparison.SetValues(actionID, slotIndex);
+
+            return _actionCooldownCompleteTime.TryGetValue(_timestampComparison, out float cooldownCompleteTime)    // True if we have a cooldown time.
+                && NetworkManager.Singleton.ServerTime.TimeAsFloat <= cooldownCompleteTime;                                                               // True if our cooldown time hasn't yet passed.
+        }
+        /// <inheritdoc cref=" IsActionOnCooldown(ActionID, SlotIndex)"/>
+        private bool IsActionOnCooldown(Action action) => IsActionOnCooldown(action.ActionID, action.Data.SlotIndex);
 
 
         /// <summary>
@@ -212,10 +220,7 @@ namespace Gameplay.Actions
             if (_actionQueue.Count <= 0)
                 return;
 
-            _timestampComparison.SetValues(_actionQueue[0].ActionID, _actionQueue[0].Data.SlotIndex);
-            if (_actionQueue[0].HasCooldown
-                && _actionLastUsedTimestamps.TryGetValue(_timestampComparison, out float lastTimeUsed)
-                && !_actionQueue[0].HasCooldownCompleted(lastTimeUsed))
+            if (IsActionOnCooldown(_actionQueue[0]))
             {
                 // We've used this action too recently.
                 Debug.Log("Action on Cooldown");
@@ -241,9 +246,6 @@ namespace Gameplay.Actions
                 AdvanceQueue(false);    // Note: This calls 'StartAction()' recursively if there is more stuff in the queue.
                 return;
             }
-
-            _timestampComparison.SetValues(_actionQueue[0].ActionID, _actionQueue[0].Data.SlotIndex);
-            _actionLastUsedTimestamps[_timestampComparison] = Time.time;
 
             if (_actionQueue[0].ShouldBecomeNonBlocking())
             {
@@ -309,6 +311,7 @@ namespace Gameplay.Actions
             if (_nonBlockingActions.Contains(action))
                 return;
 
+            action.OnUpdateTriggered -= Action_OnUpdateTriggered;
             ActionFactory.ReturnAction(action);
         }
 
@@ -321,6 +324,10 @@ namespace Gameplay.Actions
                 PlayAction(ref _pendingSynthesisedAction);
             }
 
+            UpdateRunningActions();
+        }
+        private void UpdateRunningActions()
+        {
             if (_actionQueue.Count > 0 && _actionQueue[0].ShouldBecomeNonBlocking())
             {
                 // The active action is no longer blocking, meaning that it should be moved out of the blocking queue and into the non-blocking one.
@@ -363,6 +370,19 @@ namespace Gameplay.Actions
 
             return shouldKeepGoing && !action.HasExpired;
         }
+
+
+        private void Action_OnUpdateTriggered(Action action)
+        {
+            Debug.Log("Action Triggered");
+            if (action.Definition.RetriggerDelay > action.Definition.ActionCooldown)
+            {
+                _timestampComparison.SetValues(action.ActionID, action.Data.SlotIndex);
+                Debug.Log("Retrigger Delay Exceeds Cooldown " + NetworkManager.Singleton.ServerTime.TimeAsFloat);
+                _actionCooldownCompleteTime[_timestampComparison] = NetworkManager.Singleton.ServerTime.TimeAsFloat + action.Definition.RetriggerDelay;
+            }
+        }
+
 
         /// <summary>
         ///     How much time will it take for all remaining blocking Actions in the queue to play out?
@@ -533,6 +553,27 @@ namespace Gameplay.Actions
             if (!_slotIndexToChargeDepletedTimeDict.TryAdd(actionToCancel.Data.SlotIndex, chargeDepletedTime))
             {
                 _slotIndexToChargeDepletedTimeDict[actionToCancel.Data.SlotIndex] = chargeDepletedTime;
+            }
+
+            // Action Cooldown.
+            if (actionToCancel.HasCooldown)
+            {
+                _timestampComparison.SetValues(actionToCancel.ActionID, actionToCancel.Data.SlotIndex);
+
+                // Calculate the desired cooldown time.
+                float cooldownCompleteTime = NetworkManager.Singleton.ServerTime.TimeAsFloat + actionToCancel.Definition.ActionCooldown;
+                if (_actionCooldownCompleteTime.TryGetValue(_timestampComparison, out float currentCooldownCompleteTime))
+                {
+                    // Our current cooldown time may be greater than our desired one (Such as if our retrigger delay is larger than our cooldown time).
+                    // Use the larger value.
+                    if (currentCooldownCompleteTime > cooldownCompleteTime)
+                        Debug.Log("Current Value exceeds desired");
+                    cooldownCompleteTime = Mathf.Max(currentCooldownCompleteTime, cooldownCompleteTime);
+                }
+
+                // Set our cooldown complete time.
+                if (!_actionCooldownCompleteTime.TryAdd(_timestampComparison, cooldownCompleteTime))
+                    _actionCooldownCompleteTime[_timestampComparison] = cooldownCompleteTime;
             }
         }
     }

@@ -14,7 +14,8 @@ namespace Gameplay.GameplayObjects.Character
         [SerializeField] private ServerCharacter _serverCharacter;
 
         
-        private SlotGFXSection[] _activationSlots;
+        private SlotGFXSection[] _activationSlots = new SlotGFXSection[0];
+        private bool[] _activationRequests = new bool[0];
 
 
         private void Awake()
@@ -71,6 +72,8 @@ namespace Gameplay.GameplayObjects.Character
                 }
             }
 
+            _activationRequests = new bool[activeSlots];
+
             // Initialise Weapons (Or their Actions) on Client too?
         }
 
@@ -119,16 +122,40 @@ namespace Gameplay.GameplayObjects.Character
             actionRequestData.Direction = weapon.GetAbilityLocalDirection();
             actionRequestData.SlotIndex = slotIndex;
 
-            // Request to play our action.
-            _serverCharacter.PlayActionServerRpc(actionRequestData);
+
+            if (_serverCharacter.ActionPlayer.IsActionOnCooldown(actionRequestData.ActionID, actionRequestData.SlotIndex))
+            {
+                // Our action is currently on cooldown. Cache our desire to activate this action.
+                _activationRequests[slotIndex.GetSlotInteger()] = true;
+            }
+            else
+            {
+                // Request to play our action.
+                _activationRequests[slotIndex.GetSlotInteger()] = false;
+                _serverCharacter.PlayActionServerRpc(actionRequestData);
+            }
         }
         private void StopUsingSlottable(SlotIndex slotIndex)
         {
+            _activationRequests[slotIndex.GetSlotInteger()] = false;
             if (_activationSlots[slotIndex.GetSlotInteger()].SlottableData.AssociatedAction.ActivationStyle != ActionActivationStyle.Held)
                 return; // Don't cancel this action on release.
 
+
             // Cancel the action triggered from this slot.
             _serverCharacter.CancelActionBySlotServerRpc(slotIndex);
+        }
+
+
+        private void Update()
+        {
+            for(int i = 0; i < _activationRequests.Length; ++i)
+            {
+                if (_activationRequests[i] == true)
+                {
+                    StartUsingSlottable(_activationSlots[i], i.ToSlotIndex());
+                }
+            }
         }
     }
 }

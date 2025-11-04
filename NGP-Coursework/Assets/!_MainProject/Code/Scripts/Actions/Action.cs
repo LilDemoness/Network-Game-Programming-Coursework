@@ -144,6 +144,8 @@ namespace Gameplay.Actions
 
         #endregion
 
+        public event System.Action<Action> OnUpdateTriggered;
+
 
         public bool IsChaseAction => ActionID == GameDataSource.Instance.GeneralChaseActionDefinition.ActionID;
         public bool IsStunAction => ActionID == GameDataSource.Instance.StunnedActionDefinition.ActionID;
@@ -329,6 +331,7 @@ namespace Gameplay.Actions
             // Apply Heat.
             owner.ReceiveHeatChange(owner, _definition.RetriggerHeat);
             // Update.
+            OnUpdateTriggered?.Invoke(this);
             if (_definition.OnUpdate(owner, ref Data) == false)
                 return ActionConclusion.Stop;
 
@@ -531,6 +534,7 @@ namespace Gameplay.Actions
 
             // We should update.
 
+            OnUpdateTriggered?.Invoke(this);
             if (_definition.OnUpdateClient(clientCharacter, ref Data) == false)
                 return ActionConclusion.Stop;
 
