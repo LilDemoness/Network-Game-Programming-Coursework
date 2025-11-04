@@ -98,9 +98,10 @@ namespace Gameplay.Actions
         /// <param name="serverTimeStarted"> The time on the server that this action was started.<br/>Used for synchronisation.</param>
         public void PlayAction(ref ActionRequestData data, float serverTimeStarted)
         {
+            // If the action was anticipated and is therefore already playing, use the existing action instance rather than creating a new one.
             int anticipatedActionIndex = FindAction(data.ActionID, true);
 
-            Action action = anticipatedActionIndex>= 0 ? _playingActions[anticipatedActionIndex] : ActionFactory.CreateActionFromData(ref data);
+            Action action = anticipatedActionIndex >= 0 ? _playingActions[anticipatedActionIndex] : ActionFactory.CreateActionFromData(ref data);
             _slotIndexToChargeDepletedTimeDict.TryGetValue(action.Data.SlotIndex, out float chargeDepletedTime);
             if (action.OnStartClient(ClientCharacter, chargeDepletedTime, serverTimeStarted))
             {

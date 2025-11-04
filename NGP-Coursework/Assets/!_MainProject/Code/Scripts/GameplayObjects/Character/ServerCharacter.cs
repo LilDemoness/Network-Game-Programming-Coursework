@@ -144,8 +144,8 @@ namespace Gameplay.GameplayObjects.Character
                 ActionPlayer.OnGameplayActivity(Action.GameplayActivity.UsingHostileAction);
             }
 
-            if (GameDataSource.Instance.GetActionDefinitionByID(data1.ActionID).ShouldNotifyClient)
-                m_clientCharacter.PlayActionClientRpc(data, NetworkManager.Singleton.ServerTime.TimeAsFloat);
+            //if (GameDataSource.Instance.GetActionDefinitionByID(data1.ActionID).ShouldNotifyClient)
+            //    m_clientCharacter.PlayActionClientRpc(data, NetworkManager.Singleton.ServerTime.TimeAsFloat);
 
             PlayAction(ref data1);
         }

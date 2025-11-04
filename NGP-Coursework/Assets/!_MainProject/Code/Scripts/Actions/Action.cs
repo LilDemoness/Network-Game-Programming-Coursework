@@ -210,13 +210,16 @@ namespace Gameplay.Actions
         /// <returns> False if the Action decided it doesn't want to run. True otherwise.</returns>
         public virtual bool OnStart(ServerCharacter owner, float chargeDepletedTime)
         {
+            if (Definition.ShouldNotifyClient)
+                owner.ClientCharacter.PlayActionClientRpc(Data, TimeStarted);
+
             _nextUpdateTime = TimeStarted + _definition.ExecutionDelay;
 
             // Initialise Charging Time.
             float startingChargePercentage = _definition.MaxChargeDepletionTime > 0.0f ? Mathf.Max((chargeDepletedTime - TimeStarted) / _definition.MaxChargeDepletionTime, 0.0f) : 0.0f;
             _chargeStartTime = _nextUpdateTime - (_definition.MaxChargeTime * startingChargePercentage);
             _isFirstCharge = true;
-            
+
             // Initialise other parameters.
             this._burstsRemaining = _definition.Bursts;
             InitialiseDataParametersIfEmpty(owner);
