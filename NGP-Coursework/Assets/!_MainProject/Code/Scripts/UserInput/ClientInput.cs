@@ -10,6 +10,8 @@ namespace UserInput
         public static event System.Action OnMovementInputChanged;
         private static Vector2 s_previousMovementInput;
 
+        public static Vector2 LookInput { get; private set; }
+
 
         #region Combat Events
 
@@ -163,6 +165,8 @@ namespace UserInput
                 OnMovementInputChanged?.Invoke();
                 s_previousMovementInput = MovementInput;
             }
+
+            LookInput = _inputActions.General.LookInput.ReadValue<Vector2>();
         }
 
 

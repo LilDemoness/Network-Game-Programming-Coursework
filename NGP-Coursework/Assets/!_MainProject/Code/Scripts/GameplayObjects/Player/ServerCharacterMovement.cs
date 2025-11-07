@@ -16,6 +16,7 @@ namespace Gameplay.GameplayObjects.Character
         private MovementStatus _previousState;
 
         [SerializeField] private ServerCharacter _characterLogic;
+        [SerializeField] private Transform _rotationPivot;
 
 
         private void Awake()
@@ -80,7 +81,8 @@ namespace Gameplay.GameplayObjects.Character
             else if (_movementState == MovementState.DirectInput)
             {
                 // Input-based movement.
-                movementVector = transform.right * _movementInput.x + transform.forward * _movementInput.y;
+                movementVector = _rotationPivot.right * _movementInput.x + _rotationPivot.forward * _movementInput.y;
+                movementVector = Vector3.ProjectOnPlane(movementVector, Vector3.up).normalized * movementVector.magnitude;
                 movementVector *= GetBaseMovementSpeed() * Time.fixedDeltaTime;
             }
 

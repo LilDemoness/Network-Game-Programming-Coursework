@@ -109,6 +109,15 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""LookInput"",
+                    ""type"": ""Value"",
+                    ""id"": ""3b2a746e-c828-4136-95c4-ec2a40ea6d48"",
+                    ""expectedControlType"": ""Vector2"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
                 }
             ],
             ""bindings"": [
@@ -175,6 +184,17 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""Jump"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""142af594-0902-4d72-9e91-e25ec4904555"",
+                    ""path"": ""<Mouse>/delta"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Keyboard"",
+                    ""action"": ""LookInput"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -895,6 +915,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         m_General = asset.FindActionMap("General", throwIfNotFound: true);
         m_General_Movement = m_General.FindAction("Movement", throwIfNotFound: true);
         m_General_Jump = m_General.FindAction("Jump", throwIfNotFound: true);
+        m_General_LookInput = m_General.FindAction("LookInput", throwIfNotFound: true);
         // Combat
         m_Combat = asset.FindActionMap("Combat", throwIfNotFound: true);
         m_Combat_ActivateSlot0 = m_Combat.FindAction("ActivateSlot0", throwIfNotFound: true);
@@ -1003,6 +1024,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
     private List<IGeneralActions> m_GeneralActionsCallbackInterfaces = new List<IGeneralActions>();
     private readonly InputAction m_General_Movement;
     private readonly InputAction m_General_Jump;
+    private readonly InputAction m_General_LookInput;
     /// <summary>
     /// Provides access to input actions defined in input action map "General".
     /// </summary>
@@ -1022,6 +1044,10 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "General/Jump".
         /// </summary>
         public InputAction @Jump => m_Wrapper.m_General_Jump;
+        /// <summary>
+        /// Provides access to the underlying input action "General/LookInput".
+        /// </summary>
+        public InputAction @LookInput => m_Wrapper.m_General_LookInput;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -1054,6 +1080,9 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
             @Jump.started += instance.OnJump;
             @Jump.performed += instance.OnJump;
             @Jump.canceled += instance.OnJump;
+            @LookInput.started += instance.OnLookInput;
+            @LookInput.performed += instance.OnLookInput;
+            @LookInput.canceled += instance.OnLookInput;
         }
 
         /// <summary>
@@ -1071,6 +1100,9 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
             @Jump.started -= instance.OnJump;
             @Jump.performed -= instance.OnJump;
             @Jump.canceled -= instance.OnJump;
+            @LookInput.started -= instance.OnLookInput;
+            @LookInput.performed -= instance.OnLookInput;
+            @LookInput.canceled -= instance.OnLookInput;
         }
 
         /// <summary>
@@ -1528,6 +1560,13 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnJump(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "LookInput" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnLookInput(InputAction.CallbackContext context);
     }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "Combat" which allows adding and removing callbacks.
