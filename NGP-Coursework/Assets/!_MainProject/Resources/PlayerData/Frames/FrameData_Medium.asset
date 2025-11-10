@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fae5635a396dd094fbc4b68f3f279ba1, type: 3}
   m_Name: FrameData_Medium
   m_EditorClassIdentifier: 
-  <Name>k__BackingField: Medium Chassis
-  <FrameSize>k__BackingField: 0
+  <Name>k__BackingField: Swallowtail (Change)
+  <FrameSize>k__BackingField: 1
   <MaxHealth>k__BackingField: 9
   <HeatCapacity>k__BackingField: 10
   <MovementSpeed>k__BackingField: 5
