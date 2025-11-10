@@ -4,6 +4,7 @@ using UnityEngine;
 using Unity.Netcode;
 using Gameplay.GameplayObjects.Character;
 using Gameplay.Actions.Effects;
+using UnityEngine.UIElements;
 
 namespace Gameplay.Actions.Definitions
 {
@@ -20,6 +21,15 @@ namespace Gameplay.Actions.Definitions
         [field: Space(5)]
         [field: SerializeField, Min(0)] public int Pierces { get; private set; } = 0;
         public bool CanPierce => Pierces > 0;
+
+
+        public override Vector3 GetTargetPosition(Vector3 originPosition, Vector3 originDirection)
+        {
+            if (Physics.Raycast(originPosition, originDirection, out RaycastHit hitInfo, MaxRange, ValidLayers, QueryTriggerInteraction.Ignore))
+                return hitInfo.point;   // Hit: Target Position is the raycast hit position.
+            else
+                return originPosition + originDirection * MaxRange; // No hit: Target Position is max range.
+        }
 
 
 

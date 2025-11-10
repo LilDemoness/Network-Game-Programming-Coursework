@@ -21,6 +21,16 @@ namespace Gameplay.Actions.Definitions
         public float MaxRange => _projectileInfo.MaxRange > 0 ? _projectileInfo.MaxRange : _projectileInfo.MaxLifetime * _projectileInfo.Speed;
 
 
+        public override Vector3 GetTargetPosition(Vector3 originPosition, Vector3 originDirection)
+        {
+            throw new System.NotImplementedException();
+            // To account for:
+            //  - Default Projectiles.
+            //  - Arcing Projectiles
+            //  - Seeking Projectiles
+        }
+
+
         public override bool OnStart(ServerCharacter owner, ref ActionRequestData data) => ActionConclusion.Continue;
         public override bool OnUpdate(ServerCharacter owner, ref ActionRequestData data, float chargePercentage = 1.0f)
         {

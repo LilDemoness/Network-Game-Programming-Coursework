@@ -15,13 +15,61 @@ namespace Gameplay.Actions.Definitions
         [SerializeReference, SubclassSelector] private AoETargeting _targetingMethod;
         public string RangeString => _targetingMethod.RangeString;
 
+        [Space(10)]
+        [SerializeField] private bool _startAoEFromRaycast = false;
+        [SerializeField] private float _raycastRange;
+        [SerializeField] private LayerMask _raycastLayerMask;
+
+        [SerializeField] private bool _useMaxRangeOnRaycastFailure = false;
+
+
+        public override Vector3 GetTargetPosition(Vector3 originPosition, Vector3 originDirection)
+        {
+            DetermineOriginPositionAndDirection(ref originPosition, ref originDirection);
+            return originPosition;
+        }
+
 
         public override bool OnStart(ServerCharacter owner, ref ActionRequestData data) => ActionConclusion.Continue;
         public override bool OnUpdate(ServerCharacter owner, ref ActionRequestData data, float chargePercentage = 1.0f)
         {
-            _targetingMethod.GetTargets(owner, base.GetActionOrigin(ref data), base.GetActionDirection(ref data), chargePercentage, callback: (ServerCharacter owner, ActionHitInformation hitInfo) => ProcessTarget(owner, hitInfo, chargePercentage));
+            // Determine our desired origin & direction.
+            Vector3 actionOrigin = base.GetActionOrigin(ref data);
+            Vector3 actionDirection = base.GetActionDirection(ref data);
+            DetermineOriginPositionAndDirection(ref actionOrigin, ref actionDirection);
+
+            _targetingMethod.GetTargets(owner, actionOrigin, actionDirection, chargePercentage, callback: (ServerCharacter owner, ActionHitInformation hitInfo) => ProcessTarget(owner, hitInfo, chargePercentage));
 
             return ActionConclusion.Continue;
+        }
+
+        /// <summary>
+        ///     Updates the passed position & direction vectors to be correct for the action's settings.
+        /// </summary>
+        private void DetermineOriginPositionAndDirection(ref Vector3 originPosition, ref Vector3 originDirection)
+        {
+            if (!_startAoEFromRaycast)
+                return; // Our AoE origin should match the action origin.
+
+            if (Physics.Raycast(originPosition, originDirection, out RaycastHit hitInfo, _raycastRange, _raycastLayerMask))
+            {
+                // We hit something with our raycast. Update our origin & direction with our hit info.
+                originPosition = hitInfo.point;
+                originDirection = hitInfo.normal;
+                return;
+            }
+            else
+            {
+                // No hit with our raycast.
+                if (_useMaxRangeOnRaycastFailure)
+                {
+                    // Our AoE origin should be at the maximum distance (Same direction).
+                    originPosition = originPosition + originDirection * _raycastRange;
+                    return;
+                }
+                else
+                    return; // Our AoE origin should match the action origin.
+            }
         }
         private void ProcessTarget(ServerCharacter owner, in ActionHitInformation hitInfo, float chargePercentage)
         {

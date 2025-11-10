@@ -30,6 +30,10 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Sections
         public Vector3 GetAbilityLocalDirection() => _parentNetworkObject.transform.InverseTransformDirection(_abilityOrigin.forward);
 
 
+        public Vector3 GetAbilityWorldOrigin() => _abilityOrigin.position;
+        public Vector3 GetAbilityWorldDirection() => _abilityOrigin.forward;
+
+
 #if UNITY_EDITOR
         private bool Editor_IsThisOrChildSelected()
         {

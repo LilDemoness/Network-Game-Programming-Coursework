@@ -14,6 +14,9 @@ namespace Gameplay.Actions.Definitions
         [SerializeField] private bool _requireSharedSlotIdentifier = false;
 
 
+        public override Vector3 GetTargetPosition(Vector3 originPosition, Vector3 originDirection) => throw new System.Exception($"Unexpected Behaviour: You are trying to get the Target Position of a {nameof(CancelAction)}");
+
+
         public override bool OnStart(ServerCharacter owner, ref ActionRequestData data)
         {
             //foreach (ActionDefinition actionDefinition in OtherActionsThisCancels)
