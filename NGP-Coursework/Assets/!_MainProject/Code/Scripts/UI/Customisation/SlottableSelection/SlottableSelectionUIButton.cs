@@ -77,25 +77,16 @@ namespace UI.Customisation.SlottableSelection
         public bool IsShown() => this.gameObject.activeSelf;
 
 
-        private bool _performingManualSelection = false;
         /// <summary>
         ///     Mark this button as selected manually (E.g. Swapping between tabs).
         /// </summary>
         public void MarkAsSelected()
         {
-            _performingManualSelection = true;
             EventSystem.current.SetSelectedGameObject(this.gameObject);
         }
         public override void OnSelect(BaseEventData eventData)
         {
             base.OnSelect(eventData);
-
-            if (_performingManualSelection)
-            {
-                _performingManualSelection = false;
-                return;
-            }
-
             OnPressed?.Invoke(_slottableDataIndex);
         }
     }
