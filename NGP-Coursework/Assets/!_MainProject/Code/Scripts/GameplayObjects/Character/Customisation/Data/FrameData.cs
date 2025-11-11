@@ -16,6 +16,12 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Data
 
 
         [field: SerializeField] public AttachmentPoint[] AttachmentPoints { get; private set; }
+
+
+        [field: Header("Frame Camera Settings")]
+        [field: SerializeField] public Vector3 ThirdPersonCameraOffset { get; private set; }
+        [field: SerializeField] public float CameraVerticalArmLength { get; private set; }
+        [field: SerializeField] public float CameraDistance { get; private set; }
     }
 
     [System.Serializable]

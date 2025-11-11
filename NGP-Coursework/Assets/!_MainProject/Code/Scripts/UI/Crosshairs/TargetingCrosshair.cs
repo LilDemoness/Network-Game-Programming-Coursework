@@ -32,7 +32,6 @@ namespace UI.Crosshairs
                 return;
             }
 
-
             // Build Change Event (Enable/Disable State of this UI element).
             PlayerManager.OnLocalPlayerBuildUpdated += PlayerManager_OnLocalPlayerBuildUpdated;
         }

@@ -22,3 +22,6 @@ MonoBehaviour:
   - _dataPlaceholder: 
   - _dataPlaceholder: 
   - _dataPlaceholder: 
+  <ThirdPersonCameraOffset>k__BackingField: {x: 3.75, y: -0.4, z: 0}
+  <CameraVerticalArmLength>k__BackingField: 6
+  <CameraDistance>k__BackingField: 12
