@@ -14,10 +14,8 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Sections
         [SerializeField] private FrameData _associatedFrameData;
 
         [SerializeField] private SlottableDataSlot[] m_slottableDataSlotArray;
-        private Dictionary<SlotIndex, List<SlottableDataSlot>> _slottableDataSlots = new Dictionary<SlotIndex, List<SlottableDataSlot>>();
+        private Dictionary<SlotIndex, SlottableDataSlot> _slottableDataSlots = new Dictionary<SlotIndex, SlottableDataSlot>();
         
-        //public bool TryGetAttachmentSlot(SlotIndex slotIndex, out SlottableDataSlot weaponAttachmentSlot) => _slottableDataSlots.TryGetValue(slotIndex, out weaponAttachmentSlot);
-
 
         #if UNITY_EDITOR
 
@@ -38,14 +36,23 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Sections
 
         private void Awake()
         {
-            _slottableDataSlots = new Dictionary<SlotIndex, List<SlottableDataSlot>>(SlotIndexExtensions.GetMaxPossibleSlots());
+            _slottableDataSlots = new Dictionary<SlotIndex, SlottableDataSlot>(SlotIndexExtensions.GetMaxPossibleSlots());
             foreach(SlottableDataSlot attachmentSlot in m_slottableDataSlotArray)
             {
-                if (!_slottableDataSlots.TryAdd(attachmentSlot.SlotIndex, new List<SlottableDataSlot>() { attachmentSlot }))
+                if (!_slottableDataSlots.TryAdd(attachmentSlot.SlotIndex, attachmentSlot))
                 {
-                    _slottableDataSlots[attachmentSlot.SlotIndex].Add(attachmentSlot);
+                    // We should only have 1 attachment slot for each SlotIndex, however reaching here means that we don't. Throw an exception so we know about this.
+                    throw new System.Exception($"We have multiple Attachment Slots with the same Slot Index ({attachmentSlot.SlotIndex}).\n" +
+                        $"Duplicates: '{_slottableDataSlots[attachmentSlot.SlotIndex].name}' & '{attachmentSlot.name}'");
                 }
             }
+        }
+
+        public bool Toggle(FrameData frameData)
+        {
+            bool newActive = _associatedFrameData.Equals(frameData);
+            this.gameObject.SetActive(newActive);
+            return newActive;
         }
 
 
@@ -57,37 +64,15 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Sections
         }
         public FrameGFX OnSelectedSlottableDataChanged(SlotIndex slotIndex, SlottableData activeData)
         {
-            if (_slottableDataSlots.TryGetValue(slotIndex, out List<SlottableDataSlot> slottableDataSlots))
+            if (_slottableDataSlots.TryGetValue(slotIndex, out SlottableDataSlot slottableDataSlot))
             {
-                for(int i = 0; i < slottableDataSlots.Count; ++i)
-                    slottableDataSlots[i].Toggle(activeData);
+                slottableDataSlot.Toggle(activeData);
             }
             return this;
         }
 
-        public void OnCustomisationFinalised(FrameData activeFrame, SlottableData[] activeSlottableDatas)
-        {
-            // Frame.
-            if (activeFrame != _associatedFrameData)
-            {
-                this.gameObject.SetActive(false);
-                //Destroy(this.gameObject);
-                return;
-            }
 
-
-            // Slottables (Weapons & Abilities).
-            for(int i = 0; i < _slottableDataSlots.Count; ++i)
-            {
-                if (_slottableDataSlots.TryGetValue((SlotIndex)(i + 1), out List<SlottableDataSlot> slottableDataSlots))
-                {
-                    for (int j = 0; j < slottableDataSlots.Count; ++j)
-                    {
-                        slottableDataSlots[j].Toggle(activeSlottableDatas[i]);
-                        //slottableDataSlots[j].Finalise(activeSlottableDatas[i]);
-                    }
-                }
-            }
-        }
+        public FrameData GetAssociatedData() => _associatedFrameData;
+        public SlottableDataSlot[] GetSlottableDataSlotArray() => m_slottableDataSlotArray;
     }
 }

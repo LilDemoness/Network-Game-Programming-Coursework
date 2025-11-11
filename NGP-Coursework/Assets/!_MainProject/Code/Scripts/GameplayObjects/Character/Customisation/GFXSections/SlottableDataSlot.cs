@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using Gameplay.GameplayObjects.Character.Customisation.Data;
 
@@ -13,10 +14,16 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Sections
         [SerializeField] private SlotGFXSection[] _slotGFXs;
 
 
-        public void Toggle(SlottableData activeData)
+        public SlotGFXSection[] Toggle(SlottableData activeData)
         {
+            List<SlotGFXSection> activeSlots = new List<SlotGFXSection>(_slotGFXs.Length);
             for (int i = 0; i < _slotGFXs.Length; ++i)
-                _slotGFXs[i].Toggle(activeData);
+            {
+                if (_slotGFXs[i].Toggle(activeData))
+                    activeSlots.Add(_slotGFXs[i]);
+            }
+
+            return activeSlots.ToArray();
         }
     }
 }

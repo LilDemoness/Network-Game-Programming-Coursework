@@ -41,11 +41,12 @@ namespace UserInput
         private PlayerInputActions _inputActions;
         public override void OnNetworkSpawn()
         {
-            if (!IsClient || !IsOwner)
+            if (!IsLocalPlayer)
             {
                 this.enabled = false;
                 return;
             }
+
             CreateInputActions();
         }
         public override void OnNetworkDespawn()

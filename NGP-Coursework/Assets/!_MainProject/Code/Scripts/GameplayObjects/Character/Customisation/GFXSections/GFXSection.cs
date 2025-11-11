@@ -8,7 +8,6 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Sections
         [SerializeField] protected T AssociatedValue;
 
 
-        public void Toggle(T activeData) => this.gameObject.SetActive(activeData != null && activeData.Equals(AssociatedValue));
         [SerializeField] private Transform _abilityOrigin;
         private NetworkObject _parentNetworkObject;
 
@@ -22,6 +21,14 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Sections
                 this.enabled = false;
                 return;
             }
+        }
+
+
+        public bool Toggle(T activeData)
+        {
+            bool newActive = activeData != null && activeData.Equals(AssociatedValue);
+            this.gameObject.SetActive(newActive);
+            return newActive;
         }
 
 

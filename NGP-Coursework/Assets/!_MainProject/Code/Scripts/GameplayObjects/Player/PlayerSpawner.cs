@@ -35,7 +35,7 @@ namespace Gameplay.GameplayObjects.Character
         private void SetupPlayerClientRpc(ulong clientID, BuildData buildData)
         {
             PlayerManager playerInstance = NetworkManager.Singleton.ConnectedClients[clientID].PlayerObject.GetComponent<PlayerManager>();
-            playerInstance.SetBuild(buildData.ActiveFrameIndex, buildData.ActiveSlottableIndicies);
+            playerInstance.SetBuild(clientID, buildData);
             OnPlayerCustomisationFinalised?.Invoke(clientID, buildData);
         }
     }

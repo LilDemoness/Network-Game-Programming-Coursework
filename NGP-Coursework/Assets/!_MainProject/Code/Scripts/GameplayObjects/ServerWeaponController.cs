@@ -1,10 +1,7 @@
-using Gameplay.Actions.Definitions;
-using Gameplay.Actions;
 using System.Collections;
 using Unity.Netcode;
 using UnityEngine;
-using Gameplay.GameplayObjects.Character.Customisation;
-using Gameplay.GameplayObjects.Character.Customisation.Data;
+using Gameplay.Actions;
 using Gameplay.GameplayObjects.Character.Customisation.Sections;
 
 namespace Gameplay.GameplayObjects.Character
@@ -12,6 +9,7 @@ namespace Gameplay.GameplayObjects.Character
     public class ServerWeaponController : NetworkBehaviour
     {
         [SerializeField] private ServerCharacter _serverCharacter;
+        [SerializeField] private PlayerManager _playerManager;
 
         
         private SlotGFXSection[] _activationSlots = new SlotGFXSection[0];
@@ -20,12 +18,12 @@ namespace Gameplay.GameplayObjects.Character
 
         private void Awake()
         {
-            PlayerCustomisationManager.OnNonLocalClientPlayerBuildChanged += OnPlayerBuildChanged;
+            _playerManager.OnThisPlayerBuildUpdated += OnPlayerBuildChanged;
         }
         public override void OnDestroy()
         {
             base.OnDestroy();
-            PlayerCustomisationManager.OnNonLocalClientPlayerBuildChanged -= OnPlayerBuildChanged;
+            _playerManager.OnThisPlayerBuildUpdated -= OnPlayerBuildChanged;
         }
         public override void OnNetworkSpawn()
         {
@@ -34,57 +32,16 @@ namespace Gameplay.GameplayObjects.Character
                 this.enabled = false;
                 return;
             }
-
-            // Initialise our Weapons (To-do: Improve this pls).
-            StartCoroutine(InitialiseWeaponsAfterFrame());
         }
-        private IEnumerator InitialiseWeaponsAfterFrame()
+
+        private void OnPlayerBuildChanged() => OnPlayerBuildChanged(_playerManager.GetActivationSlots());
+        private void OnPlayerBuildChanged(SlotGFXSection[] activationSlots)
         {
-            // Wait for Setup.
-            yield return null;
-
-            // Get our Attachment Slots
-            SlottableDataSlot[] attachmentSlots = GetComponentsInChildren<SlottableDataSlot>();
-
-            // Determine the number of active attachment slots.
-            int activeSlots = 0;
-            for(int i = 0; i < attachmentSlots.Length; ++i)
-            {
-                if (attachmentSlots[i].isActiveAndEnabled)
-                    ++activeSlots;
-            }
-
             // Populate our Attachment Slots
-            _activationSlots = new SlotGFXSection[activeSlots];
-            foreach (var attachmentSlot in attachmentSlots)
-            {
-                if (!attachmentSlot.isActiveAndEnabled)
-                    continue;   // The attachment slot is inactive.
+            _activationSlots = activationSlots;
 
-                foreach (SlotGFXSection slotSection in attachmentSlot.GetComponentsInChildren<SlotGFXSection>())
-                {
-                    if (!slotSection.isActiveAndEnabled)
-                        continue;   // The slot section is inactive.
-
-                    Debug.Log(attachmentSlot.name + " is equipped in Slot " + attachmentSlot.SlotIndex + ". Data Data: " + slotSection.SlottableData.Name);
-                    _activationSlots[attachmentSlot.SlotIndex.GetSlotInteger()] = slotSection;
-                    break;  // Fails to account for duplicates.
-                }
-            }
-
-            _activationRequests = new bool[activeSlots];
-
-            // Initialise Weapons (Or their Actions) on Client too?
-        }
-
-
-        private void OnPlayerBuildChanged(ulong clientID, BuildData newBuild)
-        {
-            if (clientID != _serverCharacter.OwnerClientId)
-                return;
-
-            // To-do: Improve this (E.g. Having it be not tied to activation state).
-            StartCoroutine(InitialiseWeaponsAfterFrame());
+            // We use a bool[] to track our activation requests.
+            _activationRequests = new bool[_activationSlots.Length];
         }
 
 
@@ -93,10 +50,10 @@ namespace Gameplay.GameplayObjects.Character
         {
             if (rpcParams.Receive.SenderClientId != this.OwnerClientId)
                 return; // Not sent by the correct client.
-
             if (slotIndex >= _activationSlots.Length)
                 return; // Outwith our slot count.
 
+            // Valid activation input.
             StartUsingSlottable(_activationSlots[slotIndex], slotIndex.ToSlotIndex());
         }
         [Rpc(SendTo.Server)]
@@ -104,13 +61,12 @@ namespace Gameplay.GameplayObjects.Character
         {
             if (rpcParams.Receive.SenderClientId != this.OwnerClientId)
                 return; // Not sent by the correct client.
-
             if (slotIndex >= _activationSlots.Length)
                 return; // Outwith our slot count.
 
+            // Valid deactivation input.
             StopUsingSlottable(slotIndex.ToSlotIndex());
         }
-
 
         private void StartUsingSlottable(SlotGFXSection weapon, SlotIndex slotIndex)
         {
@@ -157,5 +113,8 @@ namespace Gameplay.GameplayObjects.Character
                 }
             }
         }
+
+
+        public SlotGFXSection[] GetActivationSlots() => _activationSlots;
     }
 }

@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 856204490126727606}
   - component: {fileID: 1189479451218648122}
   m_Layer: 3
-  m_Name: PlayerLobbyGFX
+  m_Name: PlayerCustomisationDummy
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
