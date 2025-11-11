@@ -35,7 +35,7 @@ namespace Gameplay.Actions.Definitions
 
         public override bool ShouldCancelAction(ref ActionRequestData thisData, ref ActionRequestData otherData)
         {
-            return CanCancelAction(otherData.ActionID) && (!_requireSharedSlotIdentifier || thisData.SlotIndex == otherData.SlotIndex);
+            return CanCancelAction(otherData.ActionID) && (!_requireSharedSlotIdentifier || thisData.AttachmentSlotIndex == otherData.AttachmentSlotIndex);
         }
         private bool CanCancelAction(ActionID otherActionID)
         {

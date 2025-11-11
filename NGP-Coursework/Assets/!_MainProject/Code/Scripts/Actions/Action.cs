@@ -101,15 +101,15 @@ namespace Gameplay.Actions
         public class StartedChargingEventArgs : System.EventArgs
         {
             public ClientCharacter Client { get; set; }
-            public SlotIndex SlotIndex { get; set; }
+            public AttachmentSlotIndex AttachmentSlotIndex { get; set; }
             public float ChargeStartedTime { get; set; }
             public float MaxChargeDuration { get; set; }
 
             private StartedChargingEventArgs() { }
-            public StartedChargingEventArgs(ClientCharacter client, SlotIndex slotIndex, float chargeStartedTime, float maxChargeTime)
+            public StartedChargingEventArgs(ClientCharacter client, AttachmentSlotIndex attachmentSlotIndex, float chargeStartedTime, float maxChargeTime)
             {
                 this.Client = client;
-                this.SlotIndex = slotIndex;
+                this.AttachmentSlotIndex = attachmentSlotIndex;
                 this.ChargeStartedTime = chargeStartedTime;
                 this.MaxChargeDuration = maxChargeTime;
             }
@@ -118,15 +118,15 @@ namespace Gameplay.Actions
         public class StoppedChargingEventArgs : System.EventArgs
         {
             public ClientCharacter Client { get; set; }
-            public SlotIndex SlotIndex { get; set; }
+            public AttachmentSlotIndex AttachmentSlotIndex { get; set; }
             public float ChargeFullyDepletedTime { get; set; }
             public float MaxChargeDepletionTime { get; set; }
 
             private StoppedChargingEventArgs() { }
-            public StoppedChargingEventArgs(ClientCharacter client, SlotIndex slotIndex, float chargeFullyDepletedTime, float maxChargeDepletionTime)
+            public StoppedChargingEventArgs(ClientCharacter client, AttachmentSlotIndex attachmentSlotIndex, float chargeFullyDepletedTime, float maxChargeDepletionTime)
             {
                 this.Client = client;
-                this.SlotIndex = slotIndex;
+                this.AttachmentSlotIndex = attachmentSlotIndex;
                 this.ChargeFullyDepletedTime = chargeFullyDepletedTime;
                 this.MaxChargeDepletionTime = maxChargeDepletionTime;
             }
@@ -135,15 +135,15 @@ namespace Gameplay.Actions
         public class ResetChargingEventArgs : System.EventArgs
         {
             public ClientCharacter Client { get; set; }
-            public SlotIndex SlotIndex { get; set; }
+            public AttachmentSlotIndex AttachmentSlotIndex { get; set; }
             public float CurrentChargePercentage { get; set; }
             public float TimeToReset { get; set; }
 
             private ResetChargingEventArgs() { }
-            public ResetChargingEventArgs(ClientCharacter client, SlotIndex slotIndex, float currentChargePercentage, float timeToReset)
+            public ResetChargingEventArgs(ClientCharacter client, AttachmentSlotIndex attachmentSlotIndex, float currentChargePercentage, float timeToReset)
             {
                 this.Client = client;
-                this.SlotIndex = slotIndex;
+                this.AttachmentSlotIndex = attachmentSlotIndex;
                 this.CurrentChargePercentage = currentChargePercentage;
                 this.TimeToReset = timeToReset;
             }
@@ -530,14 +530,14 @@ namespace Gameplay.Actions
                 if (justStartedCharging)
                 {
                     _definition.OnStartChargingClient(clientCharacter, ref Data);
-                    OnClientStartedCharging?.Invoke(this, new StartedChargingEventArgs(clientCharacter, Data.SlotIndex, _chargeStartTime, _definition.MaxChargeTime));
+                    OnClientStartedCharging?.Invoke(this, new StartedChargingEventArgs(clientCharacter, Data.AttachmentSlotIndex, _chargeStartTime, _definition.MaxChargeTime));
                 }
                 return ActionConclusion.Continue;
             }
 
             // Reset the charge UI smoothly if this is the first shot within a burst/the only shot.
             if (_burstsRemaining == _definition.Bursts)
-                OnClientResetCharging?.Invoke(this, new ResetChargingEventArgs(clientCharacter, Data.SlotIndex, CalculateChargePercentage(out _), _definition.UIChargeDepletionTime));
+                OnClientResetCharging?.Invoke(this, new ResetChargingEventArgs(clientCharacter, Data.AttachmentSlotIndex, CalculateChargePercentage(out _), _definition.UIChargeDepletionTime));
 
 
             // We should update.
@@ -580,7 +580,7 @@ namespace Gameplay.Actions
             if (_definition.CanCharge && _isCharging)
             {
                 float chargePercentage = CalculateChargePercentage(out chargeLostTime);
-                OnClientStoppedCharging?.Invoke(this, new StoppedChargingEventArgs(clientCharacter, Data.SlotIndex, chargeLostTime, _definition.MaxChargeDepletionTime));
+                OnClientStoppedCharging?.Invoke(this, new StoppedChargingEventArgs(clientCharacter, Data.AttachmentSlotIndex, chargeLostTime, _definition.MaxChargeDepletionTime));
 
 
                 if (chargePercentage > _definition.MinChargeActivationPercentage)
@@ -595,7 +595,7 @@ namespace Gameplay.Actions
             else
             {
                 chargeLostTime = 0.0f;
-                OnClientStoppedCharging?.Invoke(this, new StoppedChargingEventArgs(clientCharacter, Data.SlotIndex, 0.0f, _definition.MaxChargeDepletionTime));
+                OnClientStoppedCharging?.Invoke(this, new StoppedChargingEventArgs(clientCharacter, Data.AttachmentSlotIndex, 0.0f, _definition.MaxChargeDepletionTime));
             }
 
             _definition.OnCancelClient(clientCharacter, ref Data);

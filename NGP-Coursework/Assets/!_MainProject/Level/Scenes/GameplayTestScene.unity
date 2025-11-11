@@ -2710,7 +2710,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 820bf0c7072bd8d41ad4af2379bd67ad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _slotIndex: 3
+  _attachmentSlotIndex: 3
   _camera: {fileID: 271995401}
   _obstructionLayers:
     serializedVersion: 2
@@ -3166,7 +3166,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 820bf0c7072bd8d41ad4af2379bd67ad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _slotIndex: 1
+  _attachmentSlotIndex: 1
   _camera: {fileID: 271995401}
   _obstructionLayers:
     serializedVersion: 2
@@ -3721,7 +3721,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 820bf0c7072bd8d41ad4af2379bd67ad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _slotIndex: 4
+  _attachmentSlotIndex: 4
   _camera: {fileID: 271995401}
   _obstructionLayers:
     serializedVersion: 2
@@ -4015,7 +4015,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 820bf0c7072bd8d41ad4af2379bd67ad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _slotIndex: 2
+  _attachmentSlotIndex: 2
   _camera: {fileID: 271995401}
   _obstructionLayers:
     serializedVersion: 2

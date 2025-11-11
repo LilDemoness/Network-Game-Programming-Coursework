@@ -9,8 +9,8 @@ namespace UI.Actions
 {
     public class PlayerActionChargeDisplayUI : MonoBehaviour
     {
-        private static Dictionary<SlotIndex, List<PlayerActionChargeDisplayUI>> s_slotIndexToUIDictionary = new Dictionary<SlotIndex, List<PlayerActionChargeDisplayUI>>();
-        [SerializeField] private SlotIndex _slotIndex = SlotIndex.Unset;
+        private static Dictionary<AttachmentSlotIndex, List<PlayerActionChargeDisplayUI>> s_slotIndexToUIDictionary = new Dictionary<AttachmentSlotIndex, List<PlayerActionChargeDisplayUI>>();
+        [SerializeField] private AttachmentSlotIndex _slotIndex = AttachmentSlotIndex.Unset;
 
 
         [Header("UI References")]
@@ -35,8 +35,8 @@ namespace UI.Actions
             if (e.Client.OwnerClientId != NetworkManager.Singleton.LocalClientId)
                 return; // Not the local client.
 
-            if (!s_slotIndexToUIDictionary.TryGetValue((SlotIndex)e.SlotIndex, out List<PlayerActionChargeDisplayUI> chargeUIElements))
-                throw new System.ArgumentException($"No instances of {nameof(PlayerActionChargeDisplayUI)} exist for the Weapon Slot {(SlotIndex)e.SlotIndex}");
+            if (!s_slotIndexToUIDictionary.TryGetValue(e.AttachmentSlotIndex, out List<PlayerActionChargeDisplayUI> chargeUIElements))
+                throw new System.ArgumentException($"No instances of {nameof(PlayerActionChargeDisplayUI)} exist for the Weapon Slot {e.AttachmentSlotIndex}");
 
 
             // Valid call. Update the charge UI.
@@ -54,8 +54,8 @@ namespace UI.Actions
             if (e.Client.OwnerClientId != NetworkManager.Singleton.LocalClientId)
                 return; // Not the local client.
 
-            if (!s_slotIndexToUIDictionary.TryGetValue((SlotIndex)e.SlotIndex, out List<PlayerActionChargeDisplayUI> chargeUIElements))
-                throw new System.ArgumentException($"No instances of {nameof(PlayerActionChargeDisplayUI)} exist for the Weapon Slot {(SlotIndex)e.SlotIndex}");
+            if (!s_slotIndexToUIDictionary.TryGetValue(e.AttachmentSlotIndex, out List<PlayerActionChargeDisplayUI> chargeUIElements))
+                throw new System.ArgumentException($"No instances of {nameof(PlayerActionChargeDisplayUI)} exist for the Weapon Slot {e.AttachmentSlotIndex}");
 
 
             // Valid call. Update the charge UI.
@@ -73,8 +73,8 @@ namespace UI.Actions
             if (e.Client.OwnerClientId != NetworkManager.Singleton.LocalClientId)
                 return; // Not the local client.
 
-            if (!s_slotIndexToUIDictionary.TryGetValue((SlotIndex)e.SlotIndex, out List<PlayerActionChargeDisplayUI> chargeUIElements))
-                throw new System.ArgumentException($"No instances of {nameof(PlayerActionChargeDisplayUI)} exist for the Weapon Slot {(SlotIndex)e.SlotIndex}");
+            if (!s_slotIndexToUIDictionary.TryGetValue(e.AttachmentSlotIndex, out List<PlayerActionChargeDisplayUI> chargeUIElements))
+                throw new System.ArgumentException($"No instances of {nameof(PlayerActionChargeDisplayUI)} exist for the Weapon Slot {e.AttachmentSlotIndex}");
 
             // Valid call. Update the charge UI.
             foreach (PlayerActionChargeDisplayUI chargeUI in chargeUIElements)
@@ -93,7 +93,7 @@ namespace UI.Actions
 
         private void Awake()
         {
-            if (_slotIndex == SlotIndex.Unset)
+            if (_slotIndex == AttachmentSlotIndex.Unset)
             {
                 Debug.LogError($"Error: {this.name} has an unset Slot Index", this);
                 return;

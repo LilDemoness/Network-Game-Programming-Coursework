@@ -13,7 +13,7 @@ namespace Gameplay.Actions.Definitions
 
         public override bool OnStart(ServerCharacter owner, ref ActionRequestData data)
         {
-            Debug.Log($"{this.name} {(data.SlotIndex != 0 ? $"in slot {data.SlotIndex}" : "")} says: {_debugMessage}");
+            Debug.Log($"{this.name} {(data.AttachmentSlotIndex != 0 ? $"in slot {data.AttachmentSlotIndex}" : "")} says: {_debugMessage}");
             return ActionConclusion.Stop;
         }
 

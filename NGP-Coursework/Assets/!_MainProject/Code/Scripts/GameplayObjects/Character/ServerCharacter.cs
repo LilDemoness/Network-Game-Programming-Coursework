@@ -148,15 +148,15 @@ namespace Gameplay.GameplayObjects.Character
         ///     ServerRPC to cancel the actions with the given ActionID.
         /// </summary>
         /// <param name="actionID"> The ActionID of the actions we wish to cancel.</param>
-        /// <param name="slotIndex"> The slotIndex that the cancelled actions should be in.</param>
+        /// <param name="slotIndex"> The AttachmentSlot that the cancelled actions should be in.</param>
         [Rpc(SendTo.Server)]
-        public void CancelActionByIDServerRpc(ActionID actionID, SlotIndex slotIndex = SlotIndex.Unset) => CancelAction(actionID, slotIndex);
+        public void CancelActionByIDServerRpc(ActionID actionID, AttachmentSlotIndex slotIndex = AttachmentSlotIndex.Unset) => CancelAction(actionID, slotIndex);
 
         /// <summary>
-        ///     ServerRPC to cancel all actions in a given Slot.
+        ///     ServerRPC to cancel all actions in a given Attachment Slot.
         /// </summary>
         [Rpc(SendTo.Server)]
-        public void CancelActionBySlotServerRpc(SlotIndex slotIndex) => CancelAction(slotIndex);
+        public void CancelActionBySlotServerRpc(AttachmentSlotIndex slotIndex) => CancelAction(slotIndex);
 
 
         /// <summary>
@@ -176,7 +176,7 @@ namespace Gameplay.GameplayObjects.Character
         ///     Cancel the actions with the given ActionID.
         /// </summary>
         /// <remarks> Called on the Server.</remarks>
-        private void CancelAction(ActionID actionID, SlotIndex slotIndex = SlotIndex.Unset)
+        private void CancelAction(ActionID actionID, AttachmentSlotIndex slotIndex = AttachmentSlotIndex.Unset)
         {
             if (GameDataSource.Instance.GetActionDefinitionByID(actionID).ShouldNotifyClient)
                 m_clientCharacter.CancelRunningActionsByIDClientRpc(actionID, slotIndex);
@@ -184,10 +184,10 @@ namespace Gameplay.GameplayObjects.Character
             ActionPlayer.CancelRunningActionsByID(actionID, slotIndex, true);
         }
         /// <summary>
-        ///     Cancel all actions in a given Slot.
+        ///     Cancel all actions in a given Attachment Slot.
         /// </summary>
         /// <remarks> Called on the Server.</remarks>
-        private void CancelAction(SlotIndex slotIndex)
+        private void CancelAction(AttachmentSlotIndex slotIndex)
         {
             m_clientCharacter.CancelRunningActionsBySlotIDClientRpc(slotIndex);
             ActionPlayer.CancelRunningActionsBySlotID(slotIndex, true);

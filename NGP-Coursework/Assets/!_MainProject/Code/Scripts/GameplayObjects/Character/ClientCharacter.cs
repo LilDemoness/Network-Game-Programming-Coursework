@@ -51,7 +51,7 @@ namespace Gameplay.GameplayObjects.Character
         ///     RPC invoked to cancel all Action FXs of a certain type (E.g. When a Stealth Action ends).
         /// </summary>
         [ClientRpc]
-        public void CancelRunningActionsByIDClientRpc(ActionID actionID, SlotIndex slotIndex = SlotIndex.Unset)
+        public void CancelRunningActionsByIDClientRpc(ActionID actionID, AttachmentSlotIndex slotIndex = AttachmentSlotIndex.Unset)
         {
             _clientActionPlayer.CancelRunningActionsByID(actionID, slotIndex);
         }
@@ -59,7 +59,7 @@ namespace Gameplay.GameplayObjects.Character
         ///     RPC invoked to cancel all Action FXs of a certain type (E.g. When a Stealth Action ends).
         /// </summary>
         [ClientRpc]
-        public void CancelRunningActionsBySlotIDClientRpc(SlotIndex slotIndex)
+        public void CancelRunningActionsBySlotIDClientRpc(AttachmentSlotIndex slotIndex)
         {
             _clientActionPlayer.CancelRunningActionsBySlotID(slotIndex);
         }

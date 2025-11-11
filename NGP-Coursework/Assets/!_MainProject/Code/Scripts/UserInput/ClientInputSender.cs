@@ -28,7 +28,7 @@ namespace UserInput
 
             public Vector3 Origin;
             public Vector3 Direction;
-            public SlotIndex SlotIndex;
+            public AttachmentSlotIndex AttachmentSlotIndex;
         }
 
         /// <summary>
@@ -119,7 +119,7 @@ namespace UserInput
                         ActionRequestData data = ActionRequestData.Create(actionDefinition);
                         data.Position = _actionRequests[i].Origin;
                         data.Direction = _actionRequests[i].Direction;
-                        data.SlotIndex = _actionRequests[i].SlotIndex;
+                        data.AttachmentSlotIndex = _actionRequests[i].AttachmentSlotIndex;
 
                         // Send our Input.
                         SendInput(data);

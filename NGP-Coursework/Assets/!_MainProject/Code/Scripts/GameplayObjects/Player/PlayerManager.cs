@@ -10,7 +10,7 @@ public class PlayerManager : NetworkBehaviour
 
     [SerializeField] private FrameGFX[] m_playerFrames;
     private PlayerGFXWrapper[] _playerGFXWrappers;
-    private Dictionary<SlotIndex, SlotGFXSection[]> _slotIndexToActiveGFXDict = new Dictionary<SlotIndex, SlotGFXSection[]>();
+    private Dictionary<AttachmentSlotIndex, SlotGFXSection> _slotIndexToActiveGFXDict = new Dictionary<AttachmentSlotIndex, SlotGFXSection>();
 
 
     /// <summary>
@@ -82,58 +82,58 @@ public class PlayerManager : NetworkBehaviour
     {
         SlotGFXSection[] slotGFXSections = new SlotGFXSection[_slotIndexToActiveGFXDict.Count];
         foreach (var kvp in _slotIndexToActiveGFXDict)
-            slotGFXSections[kvp.Key.GetSlotInteger()] = kvp.Value[0];
+            slotGFXSections[kvp.Key.GetSlotInteger()] = kvp.Value;
         return slotGFXSections;
     }
-    public SlotGFXSection[] GetSlotGFXForIndex(SlotIndex index) => _slotIndexToActiveGFXDict[index];
-    public bool TryGetSlotGFXForIndex(SlotIndex index, out SlotGFXSection[] slotGFXSections) => _slotIndexToActiveGFXDict.TryGetValue(index, out slotGFXSections);
+    public SlotGFXSection GetSlotGFXForIndex(AttachmentSlotIndex index) => _slotIndexToActiveGFXDict[index];
+    public bool TryGetSlotGFXForIndex(AttachmentSlotIndex index, out SlotGFXSection slotGFXSections) => _slotIndexToActiveGFXDict.TryGetValue(index, out slotGFXSections);
     public int GetActivationSlotCount() => _slotIndexToActiveGFXDict.Count;
-}
 
 
-struct PlayerGFXWrapper
-{
-    FrameGFX _frameGFX;
-    Dictionary<SlotIndex, SlottableDataSlot> _attachmentSlots;
-
-
-    public PlayerGFXWrapper(FrameGFX frameGFX)
+    struct PlayerGFXWrapper
     {
-        this._frameGFX = frameGFX;
-        
-        this._attachmentSlots = new Dictionary<SlotIndex, SlottableDataSlot>(SlotIndexExtensions.GetMaxPossibleSlots());
-        foreach (SlottableDataSlot attachmentSlot in frameGFX.GetSlottableDataSlotArray())
+        FrameGFX _frameGFX;
+        Dictionary<AttachmentSlotIndex, SlottableDataSlot> _attachmentSlots;
+
+
+        public PlayerGFXWrapper(FrameGFX frameGFX)
         {
-            if (!_attachmentSlots.TryAdd(attachmentSlot.SlotIndex, attachmentSlot))
+            this._frameGFX = frameGFX;
+        
+            this._attachmentSlots = new Dictionary<AttachmentSlotIndex, SlottableDataSlot>(AttachmentSlotIndexExtensions.GetMaxPossibleSlots());
+            foreach (SlottableDataSlot attachmentSlot in frameGFX.GetSlottableDataSlotArray())
             {
-                // We should only have 1 attachment slot for each SlotIndex, however reaching here means that we don't. Throw an exception so we know about this.
-                throw new System.Exception($"We have multiple Attachment Slots with the same Slot Index ({attachmentSlot.SlotIndex}).\n" +
-                    $"Duplicates: '{_attachmentSlots[attachmentSlot.SlotIndex].name}' & '{attachmentSlot.name}'");
+                if (!_attachmentSlots.TryAdd(attachmentSlot.AttachmentSlotIndex, attachmentSlot))
+                {
+                    // We should only have 1 attachment slot for each AttachmentSlotIndex, however reaching here means that we don't. Throw an exception so we know about this.
+                    throw new System.Exception($"We have multiple Attachment Slots with the same Slot Index ({attachmentSlot.AttachmentSlotIndex}).\n" +
+                        $"Duplicates: '{_attachmentSlots[attachmentSlot.AttachmentSlotIndex].name}' & '{attachmentSlot.name}'");
+                }
             }
         }
-    }
 
 
-    public bool Toggle(BuildData buildData, ref Dictionary<SlotIndex, SlotGFXSection[]> slottables)
-    {
-        if (_frameGFX.Toggle(buildData.GetFrameData()) == false)
+        public bool Toggle(BuildData buildData, ref Dictionary<AttachmentSlotIndex, SlotGFXSection> slottables)
         {
-            // This wrapper's frame isn't the correct frame for this build.
-            return false;
+            if (_frameGFX.Toggle(buildData.GetFrameData()) == false)
+            {
+                // This wrapper's frame isn't the correct frame for this build.
+                return false;
+            }
+
+            // This wrapper's frame is the desired one.
+            // Update slottables.
+            slottables.Clear();
+            for (int i = 0; i < buildData.ActiveSlottableIndicies.Length; ++i)
+            {
+                if (_attachmentSlots.TryGetValue(i.ToSlotIndex(), out SlottableDataSlot attachmentSlot) == false)
+                    continue;   // No AttachmentSlot for this index.
+
+                slottables.Add(i.ToSlotIndex(), attachmentSlot.Toggle(buildData.GetSlottableData(i.ToSlotIndex())));
+            }
+
+            return true;
         }
-
-        // This wrapper's frame is the desired one.
-        // Update slottables.
-        slottables.Clear();
-        for (int i = 0; i < buildData.ActiveSlottableIndicies.Length; ++i)
-        {
-            if (_attachmentSlots.TryGetValue(i.ToSlotIndex(), out SlottableDataSlot attachmentSlot) == false)
-                continue;   // No AttachmentSlot for this index.
-
-            slottables.Add(i.ToSlotIndex(), attachmentSlot.Toggle(buildData.GetSlottableData(i.ToSlotIndex())));
-        }
-
-        return true;
+        public void Disable() => _frameGFX.Toggle(null);
     }
-    public void Disable() => _frameGFX.Toggle(null);
 }

@@ -44,8 +44,8 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Data
 
 
         public FrameData GetFrameData() => CustomisationOptionsDatabase.AllOptionsDatabase.GetFrame(ActiveFrameIndex);
-        public SlottableData GetSlottableData(SlotIndex slotIndex) => slotIndex.GetSlotInteger() < ActiveSlottableIndicies.Length ? CustomisationOptionsDatabase.AllOptionsDatabase.GetSlottableData(ActiveSlottableIndicies[slotIndex.GetSlotInteger()]) : null;
-        public int GetSlottableDataIndex(SlotIndex slotIndex) => slotIndex.GetSlotInteger() < ActiveSlottableIndicies.Length ? ActiveSlottableIndicies[slotIndex.GetSlotInteger()] : throw new System.ArgumentOutOfRangeException("");
+        public SlottableData GetSlottableData(AttachmentSlotIndex slotIndex) => slotIndex.GetSlotInteger() < ActiveSlottableIndicies.Length ? CustomisationOptionsDatabase.AllOptionsDatabase.GetSlottableData(ActiveSlottableIndicies[slotIndex.GetSlotInteger()]) : null;
+        public int GetSlottableDataIndex(AttachmentSlotIndex slotIndex) => slotIndex.GetSlotInteger() < ActiveSlottableIndicies.Length ? ActiveSlottableIndicies[slotIndex.GetSlotInteger()] : throw new System.ArgumentOutOfRangeException("");
 
 
 

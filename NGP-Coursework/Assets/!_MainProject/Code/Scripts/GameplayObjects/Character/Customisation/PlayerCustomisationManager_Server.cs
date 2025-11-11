@@ -134,7 +134,7 @@ namespace Gameplay.GameplayObjects.Character.Customisation
         #region Build Validation
 
         private bool ValidateFrameIndex(int frameIndex) => true;
-        private bool ValidateSlottableIndex(SlotIndex slotIndex, int slottableIndex) => true;
+        private bool ValidateSlottableIndex(AttachmentSlotIndex slotIndex, int slottableIndex) => true;
         private bool ValidateBuild(BuildData buildData) 
         {
             if (!ValidateFrameIndex(buildData.ActiveFrameIndex))

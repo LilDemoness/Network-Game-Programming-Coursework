@@ -48,8 +48,8 @@ namespace Gameplay.GameplayObjects.Character.Customisation
         [ContextMenu("Randomise Build")]
         private void RandomiseBuild()
         {
-            int[] slottableDatas = new int[SlotIndexExtensions.GetMaxPossibleSlots()];
-            for (int i = 0; i < SlotIndexExtensions.GetMaxPossibleSlots(); ++i)
+            int[] slottableDatas = new int[AttachmentSlotIndexExtensions.GetMaxPossibleSlots()];
+            for (int i = 0; i < AttachmentSlotIndexExtensions.GetMaxPossibleSlots(); ++i)
                 slottableDatas[i] = Random.Range(0, CustomisationOptionsDatabase.AllOptionsDatabase.SlottableDatas.Length);
 
             _localPlayerBuild.ActiveFrameIndex =        Random.Range(0, CustomisationOptionsDatabase.AllOptionsDatabase.FrameDatas.Length);
@@ -140,9 +140,9 @@ namespace Gameplay.GameplayObjects.Character.Customisation
             PlayerCustomisationManager_Server.Instance.SetBuildServerRpc(_localPlayerBuild);
         }
         /// <summary>
-        ///     Update the local player's selected slottable for the passed slot, anticipating on the client and notifying the server.
+        ///     Update the local player's selected slottable for the passed attachment slot, anticipating on the client and notifying the server.
         /// </summary>
-        public void SelectSlottableData(SlotIndex slotIndex, int slottableDataIndex)
+        public void SelectSlottableData(AttachmentSlotIndex slotIndex, int slottableDataIndex)
         {
             // Anticipate change locally.
             _localPlayerBuild.ActiveSlottableIndicies[slotIndex.GetSlotInteger()] = slottableDataIndex;
@@ -178,7 +178,7 @@ namespace Gameplay.GameplayObjects.Character.Customisation
             return true;
         }
 
-        public int GetClientSelectedSlottableIndex(SlotIndex slotIndex) => _localPlayerBuild.GetSlottableDataIndex(slotIndex);
+        public int GetClientSelectedSlottableIndex(AttachmentSlotIndex slotIndex) => _localPlayerBuild.GetSlottableDataIndex(slotIndex);
 
         #endregion
 

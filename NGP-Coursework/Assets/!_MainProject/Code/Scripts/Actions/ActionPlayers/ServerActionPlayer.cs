@@ -17,19 +17,19 @@ namespace Gameplay.Actions
         private List<Action> _actionQueue;
         private List<Action> _nonBlockingActions;
 
-        private Dictionary<SlotIndex, float> _slotIndexToChargeDepletedTimeDict = new Dictionary<SlotIndex, float>();
+        private Dictionary<AttachmentSlotIndex, float> _slotIndexToChargeDepletedTimeDict = new Dictionary<AttachmentSlotIndex, float>();
 
         private struct ActionIDSlotIndexWrapper : System.IEquatable<ActionIDSlotIndexWrapper>
         {
             public ActionID ActionID;
-            public SlotIndex SlotIndex;
+            public AttachmentSlotIndex AttachmentSlotIndex;
 
-            public void SetValues(ActionID id, SlotIndex slotIndex)
+            public void SetValues(ActionID id, AttachmentSlotIndex slotIndex)
             {
                 this.ActionID = id;
-                this.SlotIndex = slotIndex;
+                this.AttachmentSlotIndex = slotIndex;
             }
-            public bool Equals(ActionIDSlotIndexWrapper other) => ActionID == other.ActionID && SlotIndex == other.SlotIndex;
+            public bool Equals(ActionIDSlotIndexWrapper other) => ActionID == other.ActionID && AttachmentSlotIndex == other.AttachmentSlotIndex;
         }
         private Dictionary<ActionIDSlotIndexWrapper, float> _actionCooldownCompleteTime;  // Stores when the Action with the associated ActionID & Slot Identifier will finish its cooldown.
         private ActionIDSlotIndexWrapper _timestampComparison;
@@ -91,7 +91,7 @@ namespace Gameplay.Actions
                 return false; // The action is not a toggleable action, so we shouldn't cancel existing ones.
             
             // Cancel all actions that match our action's ID and Slot ID.
-            bool ShouldCancelFunc(Action action) => action.ActionID == action.ActionID && (action.Data.SlotIndex == 0 || action.Data.SlotIndex == action.Data.SlotIndex);
+            bool ShouldCancelFunc(Action action) => action.ActionID == action.ActionID && (action.Data.AttachmentSlotIndex == 0 || action.Data.AttachmentSlotIndex == action.Data.AttachmentSlotIndex);
             return CancelActions(ShouldCancelFunc, true, true, true);
         }
 
@@ -195,15 +195,15 @@ namespace Gameplay.Actions
         ///     Figures out if an action can be played now, or if it would automatically fail because it was used too recently.
         /// </summary>
         /// <returns> True if the action is still on cooldown, false if it can be triggered.</returns>
-        public bool IsActionOnCooldown(ActionID actionID, SlotIndex slotIndex)
+        public bool IsActionOnCooldown(ActionID actionID, AttachmentSlotIndex slotIndex)
         {
             _timestampComparison.SetValues(actionID, slotIndex);
 
             return _actionCooldownCompleteTime.TryGetValue(_timestampComparison, out float cooldownCompleteTime)    // True if we have a cooldown time.
                 && NetworkManager.Singleton.ServerTime.TimeAsFloat <= cooldownCompleteTime;                                                               // True if our cooldown time hasn't yet passed.
         }
-        /// <inheritdoc cref=" IsActionOnCooldown(ActionID, SlotIndex)"/>
-        private bool IsActionOnCooldown(Action action) => IsActionOnCooldown(action.ActionID, action.Data.SlotIndex);
+        /// <inheritdoc cref=" IsActionOnCooldown(ActionID, AttachmentSlotIndex)"/>
+        private bool IsActionOnCooldown(Action action) => IsActionOnCooldown(action.ActionID, action.Data.AttachmentSlotIndex);
 
 
         /// <summary>
@@ -236,7 +236,7 @@ namespace Gameplay.Actions
             // Cancel any actions that this action should cancel when being played.
             CancelInterruptedActions(_actionQueue[0]);
 
-            _slotIndexToChargeDepletedTimeDict.TryGetValue(_actionQueue[0].Data.SlotIndex, out float chargeDepletedTime);
+            _slotIndexToChargeDepletedTimeDict.TryGetValue(_actionQueue[0].Data.AttachmentSlotIndex, out float chargeDepletedTime);
 
             _actionQueue[0].TimeStarted = NetworkManager.Singleton.ServerTime.TimeAsFloat;
             bool play = _actionQueue[0].OnStart(_serverCharacter, chargeDepletedTime);
@@ -380,7 +380,7 @@ namespace Gameplay.Actions
             //      to prevent the player from being able to cancel and restart the action to activate it faster.
             if (action.Definition.RetriggerDelay > action.Definition.ActionCooldown)
             {
-                _timestampComparison.SetValues(action.ActionID, action.Data.SlotIndex);
+                _timestampComparison.SetValues(action.ActionID, action.Data.AttachmentSlotIndex);
                 _actionCooldownCompleteTime[_timestampComparison] = NetworkManager.Singleton.ServerTime.TimeAsFloat + action.Definition.RetriggerDelay;
             }
         }
@@ -460,21 +460,21 @@ namespace Gameplay.Actions
         ///     Cancel all playing actions that match the given parameters.
         /// </summary>
         /// <param name="actionID"> The <see cref="ActionID"/> of the action to cancel.</param>
-        /// <param name="slotIndex"> The <see cref="SlotIndex"/> of the action to cancel.</param>
+        /// <param name="slotIndex"> The <see cref="AttachmentSlotIndex"/> of the action to cancel.</param>
         /// <param name="cancelNonBlocking"> Should we also cancel non-blocking actions?</param>
         /// <param name="exceptThis"> The action you don't wish to cancel.</param>
-        public void CancelRunningActionsByID(ActionID actionID, SlotIndex slotIndex = SlotIndex.Unset, bool cancelNonBlocking = true, Action exceptThis = null, bool forceCancel = false)
+        public void CancelRunningActionsByID(ActionID actionID, AttachmentSlotIndex slotIndex = AttachmentSlotIndex.Unset, bool cancelNonBlocking = true, Action exceptThis = null, bool forceCancel = false)
         {
-            bool ShouldCancelFunc(Action action) => action.ActionID == actionID && action != exceptThis && (slotIndex == SlotIndex.Unset || action.Data.SlotIndex == slotIndex);
+            bool ShouldCancelFunc(Action action) => action.ActionID == actionID && action != exceptThis && (slotIndex == AttachmentSlotIndex.Unset || action.Data.AttachmentSlotIndex == slotIndex);
             CancelActions(ShouldCancelFunc, false, cancelNonBlocking, forceCancel);
         }
         /// <summary>
-        ///     Cancel all actions for the given <see cref="SlotIndex"/>.
+        ///     Cancel all actions for the given <see cref="AttachmentSlotIndex"/>.
         /// </summary>
         /// <param name="cancelNonBlocking"> Should we also cancel non-blocking actions?</param>
-        public void CancelRunningActionsBySlotID(SlotIndex slotIndex, bool cancelNonBlocking, bool forceCancel = false)
+        public void CancelRunningActionsBySlotID(AttachmentSlotIndex slotIndex, bool cancelNonBlocking, bool forceCancel = false)
         {
-            bool ShouldCancelFunc(Action action) => action.Data.SlotIndex == slotIndex;
+            bool ShouldCancelFunc(Action action) => action.Data.AttachmentSlotIndex == slotIndex;
             CancelActions(ShouldCancelFunc, false, cancelNonBlocking, forceCancel);
         }
 
@@ -568,15 +568,15 @@ namespace Gameplay.Actions
             actionToCancel.Cancel(_serverCharacter, out float chargeDepletedTime);
 
             // Charge Reduction Time.
-            if (!_slotIndexToChargeDepletedTimeDict.TryAdd(actionToCancel.Data.SlotIndex, chargeDepletedTime))
+            if (!_slotIndexToChargeDepletedTimeDict.TryAdd(actionToCancel.Data.AttachmentSlotIndex, chargeDepletedTime))
             {
-                _slotIndexToChargeDepletedTimeDict[actionToCancel.Data.SlotIndex] = chargeDepletedTime;
+                _slotIndexToChargeDepletedTimeDict[actionToCancel.Data.AttachmentSlotIndex] = chargeDepletedTime;
             }
 
             // Action Cooldown.
             if (actionToCancel.HasCooldown)
             {
-                _timestampComparison.SetValues(actionToCancel.ActionID, actionToCancel.Data.SlotIndex);
+                _timestampComparison.SetValues(actionToCancel.ActionID, actionToCancel.Data.AttachmentSlotIndex);
 
                 // Calculate the desired cooldown time.
                 float cooldownCompleteTime = NetworkManager.Singleton.ServerTime.TimeAsFloat + actionToCancel.Definition.ActionCooldown;

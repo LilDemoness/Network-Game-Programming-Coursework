@@ -14,9 +14,9 @@ namespace UI.Customisation.SlottableSelection
         [SerializeField] private Color _unselectedColor = new Color(0.0f, 0.0f, 0.0f, 0.0f);
         [SerializeField] private Color _selectedColor = new Color(0.247f, 0.3137f, 0.3921f, 1.0f);
 
-        private SlotIndex _slotIndex;
+        private AttachmentSlotIndex _slotIndex;
 
-        public event System.Action<SlotIndex> OnPressed;
+        public event System.Action<AttachmentSlotIndex> OnPressed;
 
 
         /// <summary>
@@ -32,7 +32,7 @@ namespace UI.Customisation.SlottableSelection
         /// <summary>
         ///     Set our active slot index.
         /// </summary>
-        public void SetSlotIndex(SlotIndex slotIndex) => _slotIndex = slotIndex;
+        public void SetAttachmentSlotIndex(AttachmentSlotIndex slotIndex) => _slotIndex = slotIndex;
         /// <summary>
         ///     Set our selected state and alter the corresponding visuals.
         /// </summary>

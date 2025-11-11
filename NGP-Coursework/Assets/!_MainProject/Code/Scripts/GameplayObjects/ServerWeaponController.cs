@@ -68,7 +68,7 @@ namespace Gameplay.GameplayObjects.Character
             StopUsingSlottable(slotIndex.ToSlotIndex());
         }
 
-        private void StartUsingSlottable(SlotGFXSection weapon, SlotIndex slotIndex)
+        private void StartUsingSlottable(SlotGFXSection weapon, AttachmentSlotIndex attachmentSlotIndex)
         {
             ActionRequestData actionRequestData = ActionRequestData.Create(weapon.SlottableData.AssociatedAction);
 
@@ -76,30 +76,30 @@ namespace Gameplay.GameplayObjects.Character
             actionRequestData.OriginTransformID = weapon.GetAbilityOriginTransformID();
             actionRequestData.Position = weapon.GetAbilityLocalOffset();
             actionRequestData.Direction = weapon.GetAbilityLocalDirection();
-            actionRequestData.SlotIndex = slotIndex;
+            actionRequestData.AttachmentSlotIndex = attachmentSlotIndex;
 
 
-            if (_serverCharacter.ActionPlayer.IsActionOnCooldown(actionRequestData.ActionID, actionRequestData.SlotIndex))
+            if (_serverCharacter.ActionPlayer.IsActionOnCooldown(actionRequestData.ActionID, actionRequestData.AttachmentSlotIndex))
             {
                 // Our action is currently on cooldown. Cache our desire to activate this action.
-                _activationRequests[slotIndex.GetSlotInteger()] = true;
+                _activationRequests[attachmentSlotIndex.GetSlotInteger()] = true;
             }
             else
             {
                 // Request to play our action.
-                _activationRequests[slotIndex.GetSlotInteger()] = false;
+                _activationRequests[attachmentSlotIndex.GetSlotInteger()] = false;
                 _serverCharacter.PlayActionServerRpc(actionRequestData);
             }
         }
-        private void StopUsingSlottable(SlotIndex slotIndex)
+        private void StopUsingSlottable(AttachmentSlotIndex attachmentSlotIndex)
         {
-            _activationRequests[slotIndex.GetSlotInteger()] = false;
-            if (_activationSlots[slotIndex.GetSlotInteger()].SlottableData.AssociatedAction.ActivationStyle != ActionActivationStyle.Held)
+            _activationRequests[attachmentSlotIndex.GetSlotInteger()] = false;
+            if (_activationSlots[attachmentSlotIndex.GetSlotInteger()].SlottableData.AssociatedAction.ActivationStyle != ActionActivationStyle.Held)
                 return; // Don't cancel this action on release.
 
 
             // Cancel the action triggered from this slot.
-            _serverCharacter.CancelActionBySlotServerRpc(slotIndex);
+            _serverCharacter.CancelActionBySlotServerRpc(attachmentSlotIndex);
         }
 
 

@@ -22,9 +22,9 @@ namespace Gameplay.Actions
 
 
         /// <summary>
-        ///     Maps a SlotIndex to the time when the charge percentage will reach 0%.
+        ///     Maps an AttachmentSlotIndex to the time when the charge percentage will reach 0%.
         /// </summary>
-        private Dictionary<SlotIndex, float> _slotIndexToChargeDepletedTimeDict = new Dictionary<SlotIndex, float>();
+        private Dictionary<AttachmentSlotIndex, float> _slotIndexToChargeDepletedTimeDict = new Dictionary<AttachmentSlotIndex, float>();
 
         public ClientCharacter ClientCharacter { get; private set;}
 
@@ -110,7 +110,7 @@ namespace Gameplay.Actions
             int anticipatedActionIndex = FindAction(data.ActionID, true);
 
             Action action = anticipatedActionIndex >= 0 ? _playingActions[anticipatedActionIndex] : ActionFactory.CreateActionFromData(ref data);
-            _slotIndexToChargeDepletedTimeDict.TryGetValue(action.Data.SlotIndex, out float chargeDepletedTime);
+            _slotIndexToChargeDepletedTimeDict.TryGetValue(action.Data.AttachmentSlotIndex, out float chargeDepletedTime);
             if (action.OnStartClient(ClientCharacter, chargeDepletedTime, serverTimeStarted))
             {
                 if (anticipatedActionIndex < 0)
@@ -145,17 +145,17 @@ namespace Gameplay.Actions
         /// <param name="actionID"> The <see cref="ActionID"/> of the action to cancel.</param>
         /// <param name="slotIndex"> The <see cref="SlotIndex"/> of the action to cancel.</param>
         /// <param name="exceptThis"> The action you don't wish to cancel.</param>
-        public void CancelRunningActionsByID(ActionID actionID, SlotIndex slotIndex = SlotIndex.Unset, Action exceptThis = null, bool forceCancel = false)
+        public void CancelRunningActionsByID(ActionID actionID, AttachmentSlotIndex slotIndex = AttachmentSlotIndex.Unset, Action exceptThis = null, bool forceCancel = false)
         {
-            bool ShouldCancelFunc(Action action) => action.ActionID == actionID && action != exceptThis && (slotIndex == SlotIndex.Unset || action.Data.SlotIndex == slotIndex);
+            bool ShouldCancelFunc(Action action) => action.ActionID == actionID && action != exceptThis && (slotIndex == AttachmentSlotIndex.Unset || action.Data.AttachmentSlotIndex == slotIndex);
             CancelActiveActions(ShouldCancelFunc, forceCancel);
         }
         /// <summary>
-        ///     Cancel all actions for the given <see cref="SlotIndex"/>.
+        ///     Cancel all actions for the given <see cref="AttachmentSlotIndex"/>.
         /// </summary>
-        public void CancelRunningActionsBySlotID(SlotIndex slotIndex, bool forceCancel = false)
+        public void CancelRunningActionsBySlotID(AttachmentSlotIndex slotIndex, bool forceCancel = false)
         {
-            bool ShouldCancelFunc(Action action) => action.Data.SlotIndex == slotIndex;
+            bool ShouldCancelFunc(Action action) => action.Data.AttachmentSlotIndex == slotIndex;
             CancelActiveActions(ShouldCancelFunc, forceCancel);
         }
 
@@ -192,9 +192,9 @@ namespace Gameplay.Actions
             actionToCancel.CancelClient(ClientCharacter, out float chargeDepletedTime);
 
             // Charge Reduction Time.
-            if (!_slotIndexToChargeDepletedTimeDict.TryAdd(actionToCancel.Data.SlotIndex, chargeDepletedTime))
+            if (!_slotIndexToChargeDepletedTimeDict.TryAdd(actionToCancel.Data.AttachmentSlotIndex, chargeDepletedTime))
             {
-                _slotIndexToChargeDepletedTimeDict[actionToCancel.Data.SlotIndex] = chargeDepletedTime;
+                _slotIndexToChargeDepletedTimeDict[actionToCancel.Data.AttachmentSlotIndex] = chargeDepletedTime;
             }
         }
     }

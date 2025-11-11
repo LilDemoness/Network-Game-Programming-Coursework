@@ -17,7 +17,7 @@ namespace UI.Crosshairs
         //  - Charge Percentage Bar
 
 
-        [SerializeField] private SlotIndex _slotIndex;
+        [SerializeField] private AttachmentSlotIndex _attachmentSlotIndex;
 
         private SlotGFXSection _slotGFXSection;
         [SerializeField] private Camera _camera;
@@ -26,9 +26,9 @@ namespace UI.Crosshairs
 
         private void Awake()
         {
-            if (_slotIndex == SlotIndex.Unset)
+            if (_attachmentSlotIndex == AttachmentSlotIndex.Unset)
             {
-                Debug.LogError($"Error: {this.name} has an unset Slot Index", this);
+                Debug.LogError($"Error: {this.name} has an unset {nameof(AttachmentSlotIndex)}", this);
                 return;
             }
 
@@ -44,7 +44,7 @@ namespace UI.Crosshairs
 
         private void PlayerManager_OnLocalPlayerBuildUpdated(BuildData buildData)
         {
-            if (buildData.GetFrameData().AttachmentPoints.Length < (int)_slotIndex)
+            if (buildData.GetFrameData().AttachmentPoints.Length < (int)_attachmentSlotIndex)
                 DisableCrosshair();
             else
                 EnableCrosshair();
@@ -57,7 +57,7 @@ namespace UI.Crosshairs
             this.gameObject.SetActive(true);
 
             // Cache a reference to our slot section.
-            _slotGFXSection = PlayerManager.LocalClientInstance.GetSlotGFXForIndex(_slotIndex)[0];
+            _slotGFXSection = PlayerManager.LocalClientInstance.GetSlotGFXForIndex(_attachmentSlotIndex);
 
             // Update our Crosshair Settings (Reticule Type, Seeking Radius, Charging Bar, etc).
         }

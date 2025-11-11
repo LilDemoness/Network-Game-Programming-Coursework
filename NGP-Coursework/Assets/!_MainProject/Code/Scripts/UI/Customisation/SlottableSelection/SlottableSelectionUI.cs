@@ -16,7 +16,7 @@ namespace UI.Customisation.SlottableSelection
     {
         [SerializeField] private PlayerCustomisationManager _playerCustomisationManager;
         private FrameData _selectedFrameData;
-        private SlotIndex _activeTab;
+        private AttachmentSlotIndex _activeTab;
 
 
         [Header("Tabs")]
@@ -142,7 +142,7 @@ namespace UI.Customisation.SlottableSelection
                 {
                     // We don't have enough tab buttons. Create a new one.
                     SlottableSelectionUITab slottableSelectionUITab = Instantiate<SlottableSelectionUITab>(_tabButtonPrefab, _tabButtonContainer);
-                    slottableSelectionUITab.SetSlotIndex((SlotIndex)(i + 1));
+                    slottableSelectionUITab.SetAttachmentSlotIndex(i.ToSlotIndex());
 
 
                     // Setup the tab.
@@ -184,7 +184,7 @@ namespace UI.Customisation.SlottableSelection
             this._selectedFrameData = frameData;
             SetupTabs();
             Debug.Log("Select Tab");
-            SelectTab(SlotIndex.PrimaryWeapon);
+            SelectTab(AttachmentSlotIndex.Primary);
         }
 
         /// <summary>
@@ -195,11 +195,11 @@ namespace UI.Customisation.SlottableSelection
         ///     Select the previous tab group.
         /// </summary>
         public void SelectPreviousTab() => SelectTab(MathUtils.Loop(_activeTab.GetSlotInteger() - 1, 0, _selectedFrameData.AttachmentPoints.Length).ToSlotIndex());
-        
+
         /// <summary>
-        ///     Select the tab with the given SlotIndex.
+        ///     Select the tab with the given AttachmentSlotIndex.
         /// </summary>
-        public void SelectTab(SlotIndex slotIndex)
+        public void SelectTab(AttachmentSlotIndex slotIndex)
         {
             if (slotIndex.GetSlotInteger() >= _selectedFrameData.AttachmentPoints.Length)
                 throw new System.ArgumentException($"Active Frame '{_selectedFrameData.name}' has no Attachment Point for SlotIndex {slotIndex}");

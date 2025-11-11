@@ -14,7 +14,7 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Sections
         [SerializeField] private FrameData _associatedFrameData;
 
         [SerializeField] private SlottableDataSlot[] m_slottableDataSlotArray;
-        private Dictionary<SlotIndex, SlottableDataSlot> _slottableDataSlots = new Dictionary<SlotIndex, SlottableDataSlot>();
+        private Dictionary<AttachmentSlotIndex, SlottableDataSlot> _slottableDataSlots = new Dictionary<AttachmentSlotIndex, SlottableDataSlot>();
         
 
         #if UNITY_EDITOR
@@ -36,14 +36,14 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Sections
 
         private void Awake()
         {
-            _slottableDataSlots = new Dictionary<SlotIndex, SlottableDataSlot>(SlotIndexExtensions.GetMaxPossibleSlots());
+            _slottableDataSlots = new Dictionary<AttachmentSlotIndex, SlottableDataSlot>(AttachmentSlotIndexExtensions.GetMaxPossibleSlots());
             foreach(SlottableDataSlot attachmentSlot in m_slottableDataSlotArray)
             {
-                if (!_slottableDataSlots.TryAdd(attachmentSlot.SlotIndex, attachmentSlot))
+                if (!_slottableDataSlots.TryAdd(attachmentSlot.AttachmentSlotIndex, attachmentSlot))
                 {
                     // We should only have 1 attachment slot for each SlotIndex, however reaching here means that we don't. Throw an exception so we know about this.
-                    throw new System.Exception($"We have multiple Attachment Slots with the same Slot Index ({attachmentSlot.SlotIndex}).\n" +
-                        $"Duplicates: '{_slottableDataSlots[attachmentSlot.SlotIndex].name}' & '{attachmentSlot.name}'");
+                    throw new System.Exception($"We have multiple Attachment Slots with the same Slot Index ({attachmentSlot.AttachmentSlotIndex}).\n" +
+                        $"Duplicates: '{_slottableDataSlots[attachmentSlot.AttachmentSlotIndex].name}' & '{attachmentSlot.name}'");
                 }
             }
         }
@@ -62,7 +62,7 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Sections
 
             return this;
         }
-        public FrameGFX OnSelectedSlottableDataChanged(SlotIndex slotIndex, SlottableData activeData)
+        public FrameGFX OnSelectedSlottableDataChanged(AttachmentSlotIndex slotIndex, SlottableData activeData)
         {
             if (_slottableDataSlots.TryGetValue(slotIndex, out SlottableDataSlot slottableDataSlot))
             {

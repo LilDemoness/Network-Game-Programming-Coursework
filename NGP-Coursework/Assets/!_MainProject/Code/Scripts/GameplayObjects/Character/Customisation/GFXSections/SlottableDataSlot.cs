@@ -6,24 +6,26 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Sections
 {
     public class SlottableDataSlot : MonoBehaviour
     {
-        [SerializeField] private SlotIndex _slotIndex = SlotIndex.PrimaryWeapon;
-        public SlotIndex SlotIndex => _slotIndex;
+        [SerializeField] private AttachmentSlotIndex _slotIndex = AttachmentSlotIndex.Primary;
+        public AttachmentSlotIndex AttachmentSlotIndex => _slotIndex;
 
 
         [Header("GFX")]
         [SerializeField] private SlotGFXSection[] _slotGFXs;
 
 
-        public SlotGFXSection[] Toggle(SlottableData activeData)
+        public SlotGFXSection Toggle(SlottableData activeData)
         {
-            List<SlotGFXSection> activeSlots = new List<SlotGFXSection>(_slotGFXs.Length);
+            SlotGFXSection activeSlot = null;
             for (int i = 0; i < _slotGFXs.Length; ++i)
             {
                 if (_slotGFXs[i].Toggle(activeData))
-                    activeSlots.Add(_slotGFXs[i]);
+                {
+                    activeSlot = _slotGFXs[i];
+                }
             }
 
-            return activeSlots.ToArray();
+            return activeSlot;
         }
     }
 }
