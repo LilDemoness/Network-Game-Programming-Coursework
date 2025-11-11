@@ -13,8 +13,8 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Sections
     {
         [SerializeField] private FrameData _associatedFrameData;
 
-        [SerializeField] private SlottableDataSlot[] m_slottableDataSlotArray;
-        private Dictionary<AttachmentSlotIndex, SlottableDataSlot> _slottableDataSlots = new Dictionary<AttachmentSlotIndex, SlottableDataSlot>();
+        [SerializeField] private AttachmentSlot[] m_slottableDataSlotArray;
+        private Dictionary<AttachmentSlotIndex, AttachmentSlot> _slottableDataSlots = new Dictionary<AttachmentSlotIndex, AttachmentSlot>();
         
 
         #if UNITY_EDITOR
@@ -25,7 +25,7 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Sections
             // Ensure Changes are Recorded.
             UnityEditor.Undo.RecordObject(this, "Setup FrameGFX Container References");
 
-            m_slottableDataSlotArray = GetComponentsInChildren<SlottableDataSlot>();
+            m_slottableDataSlotArray = GetComponentsInChildren<AttachmentSlot>();
 
             // Ensure Changes are Recorded.
             UnityEditor.EditorUtility.SetDirty(this);
@@ -36,8 +36,8 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Sections
 
         private void Awake()
         {
-            _slottableDataSlots = new Dictionary<AttachmentSlotIndex, SlottableDataSlot>(AttachmentSlotIndexExtensions.GetMaxPossibleSlots());
-            foreach(SlottableDataSlot attachmentSlot in m_slottableDataSlotArray)
+            _slottableDataSlots = new Dictionary<AttachmentSlotIndex, AttachmentSlot>(AttachmentSlotIndexExtensions.GetMaxPossibleSlots());
+            foreach(AttachmentSlot attachmentSlot in m_slottableDataSlotArray)
             {
                 if (!_slottableDataSlots.TryAdd(attachmentSlot.AttachmentSlotIndex, attachmentSlot))
                 {
@@ -64,7 +64,7 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Sections
         }
         public FrameGFX OnSelectedSlottableDataChanged(AttachmentSlotIndex slotIndex, SlottableData activeData)
         {
-            if (_slottableDataSlots.TryGetValue(slotIndex, out SlottableDataSlot slottableDataSlot))
+            if (_slottableDataSlots.TryGetValue(slotIndex, out AttachmentSlot slottableDataSlot))
             {
                 slottableDataSlot.Toggle(activeData);
             }
@@ -73,6 +73,6 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Sections
 
 
         public FrameData GetAssociatedData() => _associatedFrameData;
-        public SlottableDataSlot[] GetSlottableDataSlotArray() => m_slottableDataSlotArray;
+        public AttachmentSlot[] GetSlottableDataSlotArray() => m_slottableDataSlotArray;
     }
 }

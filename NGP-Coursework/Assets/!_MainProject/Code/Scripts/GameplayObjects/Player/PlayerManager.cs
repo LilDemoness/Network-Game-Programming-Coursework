@@ -93,15 +93,15 @@ public class PlayerManager : NetworkBehaviour
     struct PlayerGFXWrapper
     {
         FrameGFX _frameGFX;
-        Dictionary<AttachmentSlotIndex, SlottableDataSlot> _attachmentSlots;
+        Dictionary<AttachmentSlotIndex, AttachmentSlot> _attachmentSlots;
 
 
         public PlayerGFXWrapper(FrameGFX frameGFX)
         {
             this._frameGFX = frameGFX;
         
-            this._attachmentSlots = new Dictionary<AttachmentSlotIndex, SlottableDataSlot>(AttachmentSlotIndexExtensions.GetMaxPossibleSlots());
-            foreach (SlottableDataSlot attachmentSlot in frameGFX.GetSlottableDataSlotArray())
+            this._attachmentSlots = new Dictionary<AttachmentSlotIndex, AttachmentSlot>(AttachmentSlotIndexExtensions.GetMaxPossibleSlots());
+            foreach (AttachmentSlot attachmentSlot in frameGFX.GetSlottableDataSlotArray())
             {
                 if (!_attachmentSlots.TryAdd(attachmentSlot.AttachmentSlotIndex, attachmentSlot))
                 {
@@ -126,7 +126,7 @@ public class PlayerManager : NetworkBehaviour
             slottables.Clear();
             for (int i = 0; i < buildData.ActiveSlottableIndicies.Length; ++i)
             {
-                if (_attachmentSlots.TryGetValue(i.ToSlotIndex(), out SlottableDataSlot attachmentSlot) == false)
+                if (_attachmentSlots.TryGetValue(i.ToSlotIndex(), out AttachmentSlot attachmentSlot) == false)
                     continue;   // No AttachmentSlot for this index.
 
                 slottables.Add(i.ToSlotIndex(), attachmentSlot.Toggle(buildData.GetSlottableData(i.ToSlotIndex())));
