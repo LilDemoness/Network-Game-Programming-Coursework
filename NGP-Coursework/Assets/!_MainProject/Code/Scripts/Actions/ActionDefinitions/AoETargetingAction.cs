@@ -25,7 +25,7 @@ namespace Gameplay.Actions.Definitions
 
         public override Vector3 GetTargetPosition(Vector3 originPosition, Vector3 originDirection)
         {
-            DetermineOriginPositionAndDirection(ref originPosition, ref originDirection);
+            DetermineOriginPositionAndDirection(ref originPosition, ref originDirection, Constants.TARGET_ESTIMATION_RANGE);
             return originPosition;
         }
 
@@ -36,7 +36,7 @@ namespace Gameplay.Actions.Definitions
             // Determine our desired origin & direction.
             Vector3 actionOrigin = base.GetActionOrigin(ref data);
             Vector3 actionDirection = base.GetActionDirection(ref data);
-            DetermineOriginPositionAndDirection(ref actionOrigin, ref actionDirection);
+            DetermineOriginPositionAndDirection(ref actionOrigin, ref actionDirection, _raycastRange);
 
             _targetingMethod.GetTargets(owner, actionOrigin, actionDirection, chargePercentage, callback: (ServerCharacter owner, ActionHitInformation hitInfo) => ProcessTarget(owner, hitInfo, chargePercentage));
 
@@ -46,12 +46,12 @@ namespace Gameplay.Actions.Definitions
         /// <summary>
         ///     Updates the passed position & direction vectors to be correct for the action's settings.
         /// </summary>
-        private void DetermineOriginPositionAndDirection(ref Vector3 originPosition, ref Vector3 originDirection)
+        private void DetermineOriginPositionAndDirection(ref Vector3 originPosition, ref Vector3 originDirection, float maximumDistance)
         {
             if (!_startAoEFromRaycast)
                 return; // Our AoE origin should match the action origin.
 
-            if (Physics.Raycast(originPosition, originDirection, out RaycastHit hitInfo, _raycastRange, _raycastLayerMask))
+            if (Physics.Raycast(originPosition, originDirection, out RaycastHit hitInfo, maximumDistance, _raycastLayerMask))
             {
                 // We hit something with our raycast. Update our origin & direction with our hit info.
                 originPosition = hitInfo.point;
@@ -64,7 +64,7 @@ namespace Gameplay.Actions.Definitions
                 if (_useMaxRangeOnRaycastFailure)
                 {
                     // Our AoE origin should be at the maximum distance (Same direction).
-                    originPosition = originPosition + originDirection * _raycastRange;
+                    originPosition = originPosition + originDirection * maximumDistance;
                     return;
                 }
                 else

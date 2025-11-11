@@ -25,7 +25,7 @@ namespace Gameplay.Actions.Definitions
 
         public override Vector3 GetTargetPosition(Vector3 originPosition, Vector3 originDirection)
         {
-            if (Physics.Raycast(originPosition, originDirection, out RaycastHit hitInfo, MaxRange, ValidLayers, QueryTriggerInteraction.Ignore))
+            if (Physics.Raycast(originPosition, originDirection, out RaycastHit hitInfo, Constants.TARGET_ESTIMATION_RANGE, ValidLayers, QueryTriggerInteraction.Ignore))
                 return hitInfo.point;   // Hit: Target Position is the raycast hit position.
             else
                 return originPosition + originDirection * MaxRange; // No hit: Target Position is max range.

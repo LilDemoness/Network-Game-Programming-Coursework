@@ -22,7 +22,6 @@ public class CameraControllerTest : NetworkBehaviour
 	
 	[Space(5)]
     [SerializeField] private LayerMask _targetingLayers;
-    [SerializeField] private float _cameraRaycastLength = 30.0f;
     [SerializeField] private float _rotationRate = 360.0f;
     private NetworkVariable<Vector2> _graphicsRotationDirection = new NetworkVariable<Vector2>(writePerm: NetworkVariableWritePermission.Owner);
 
@@ -75,7 +74,7 @@ public class CameraControllerTest : NetworkBehaviour
 	///	</summary>
     private void UpdateGraphicsTargetRotation()
     {
-        Vector3 targetPosition = Camera.main.transform.position + Camera.main.transform.forward * _cameraRaycastLength;
+        Vector3 targetPosition = Camera.main.transform.position + Camera.main.transform.forward * Constants.TARGET_ESTIMATION_RANGE;
         Vector3 targetDirection;
         if (Physics.Linecast(Camera.main.transform.position, targetPosition, out RaycastHit hitInfo, _targetingLayers))
         {

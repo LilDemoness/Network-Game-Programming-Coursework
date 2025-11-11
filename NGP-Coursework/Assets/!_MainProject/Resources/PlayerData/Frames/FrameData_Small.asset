@@ -19,6 +19,6 @@ MonoBehaviour:
   <MovementSpeed>k__BackingField: 5
   <AttachmentPoints>k__BackingField:
   - _dataPlaceholder: 
-  <ThirdPersonCameraOffset>k__BackingField: {x: 1.5, y: -0.4, z: 0}
-  <CameraVerticalArmLength>k__BackingField: 3
+  <ThirdPersonCameraOffset>k__BackingField: {x: 1.5, y: 3, z: 0}
+  <CameraVerticalArmLength>k__BackingField: -0.4
   <CameraDistance>k__BackingField: 8
