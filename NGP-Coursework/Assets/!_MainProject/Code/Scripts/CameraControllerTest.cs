@@ -4,6 +4,11 @@ using UserInput;
 
 public class CameraControllerTest : NetworkBehaviour
 {
+    // Note: Directly using a property for the Plane means that we cannot use Plane.SetNormalAndPosition() because it's a struct. However, using a Property to expose it and directly setting the plane works.
+    private static Plane s_maxTargetDistancePlane = new Plane();
+    public static Plane MaxTargetDistancePlane { get => s_maxTargetDistancePlane; }
+
+
     [Header("Rotation Settings")]
 	[SerializeField] private Transform _rotationPivot;
 	
@@ -85,6 +90,7 @@ public class CameraControllerTest : NetworkBehaviour
                 targetPosition = hitInfo.point;
             }
         }
+        s_maxTargetDistancePlane.SetNormalAndPosition(-Camera.main.transform.forward, targetPosition);
 
         targetDirection = (targetPosition - _graphicsRoot.position).normalized;
         _graphicsRotationDirection.Value = new Vector2(targetDirection.x, targetDirection.z);

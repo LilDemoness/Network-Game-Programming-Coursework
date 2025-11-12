@@ -76,7 +76,16 @@ namespace UI.Crosshairs
             Vector3 targetWorldPosition = _slotGFXSection.SlottableData.AssociatedAction.GetTargetPosition(crosshairOriginPosition, _slotGFXSection.GetAbilityWorldDirection());
             if (Physics.Linecast(crosshairOriginPosition, targetWorldPosition, out RaycastHit hitInfo, _obstructionLayers))
             {
+                // There is an obstruction. The hit pos is our crosshair's pos.
                 targetWorldPosition = hitInfo.point;
+            }
+            else
+            {
+                // There are no obstructions for the ray. Set our crosshair to the default position on the screen).
+                //  We are using a Plane so that it always appears aligned to the camera, no matter the rotation offset of the weapon.
+                Ray ray = new Ray(crosshairOriginPosition, (crosshairOriginPosition - targetWorldPosition).normalized);
+                CameraControllerTest.MaxTargetDistancePlane.Raycast(ray, out float enter);
+                targetWorldPosition = ray.GetPoint(enter);
             }
 
             // Translate targeted position from world space to screen space.
