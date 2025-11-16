@@ -12,22 +12,42 @@ namespace Gameplay.Actions
     //      Note: The outcomes of the action event don't ride along with this object when it is broadcast to clients; that information is instead synced separately (E.g. By NetworkVariables).
     public struct ActionRequestData : INetworkSerializeByMemcpy
     {
+        #region Network Synced Data
+
         public ActionID ActionID;       // The index of the action in the list of all actions in the game (Used to recover the reference to the instance at runtime).
-        public ulong OriginTransformID; // NetworkObjectID of the transform where this skill originates. (If set, Position and Direction become local to this transform).
-        public Vector3 Position;        // Centre position of the skill (E.g. The source of an explosion). May Remove
-        public Vector3 Direction;       // Direction of a skill, if not inferrable from the character's facing direction.
+
+        public ulong IActionSourceObjectID;   // NetworkObjectID of the IActionSource that triggered this source. (If unset, Position and Direction are used for determining the origin position & direction of the action instead).
+        public Vector3 Position;        // Origin position of the skill. (Unset if IActionSourceObjectID is set).
+        public Vector3 Direction;       // Direction of a skill. (Unset if IActionSourceObjectID is set).
+
         public ulong[] TargetIDs;       // NetworkObjectIds of the targets (E.g. A homing attack), or null if it is untargeted (E.g. A standard projectile)
-        public float Amount;            // Means different things based on the action. (E.g. For a charge, this would be the target range;)
         public AttachmentSlotIndex AttachmentSlotIndex;      // If non-zero, represents the identifier of the attachment slot that this action was triggered from.
+        public bool PreventMovement;    // If true, movement is cancelled before playing this action, and isn't allowed during it's runtime.
         public bool ShouldQueue;        // If true, the action should queue. If false, it clears all other actions and plays immediately
         public bool ShouldClose;        // If true, the server should synthesise a ChaseAction to reach the target before playing the Action (Used for AI entities)
-        public bool PreventMovement;    // If true, movement is cancelled before playing this action, and isn't allowed during it's runtime.
-        
+
+        #endregion
+
+
+        #region Non-Synchronised Data
+
+        private Transform _originTransform;
+        public Transform OriginTransform
+        {
+            get
+            {
+                _originTransform ??= NetworkManager.Singleton.SpawnManager.SpawnedObjects[IActionSourceObjectID].GetComponent<IActionSource>().GetOriginTransform(AttachmentSlotIndex);
+                return _originTransform;
+            }
+        }
+
+        #endregion
+
 
         public static ActionRequestData Default => Create(actionID: default);
         public static ActionRequestData Create(ActionDefinition definition) => Create(actionID: definition.ActionID);
         private static ActionRequestData Create(ActionID actionID) => new ActionRequestData()
-            {
+        {
                 ActionID = actionID
             };
 
@@ -40,15 +60,14 @@ namespace Gameplay.Actions
         private enum PackFlags
         {
             None = 0,
-            HasOriginTransform  = 1 << 1,
+            HasActionSourceObjectID = 1 << 1,
             HasPosition         = 1 << 2,
             HasDirection        = 1 << 3,
             HasTargetIds        = 1 << 4,
-            HasAmount           = 1 << 5,
-            HasSlotIdentifier   = 1 << 6,
-            ShouldQueue         = 1 << 7,
-            ShouldClose         = 1 << 8,
-            PreventMovement     = 1 << 9,
+            HasSlotIdentifier   = 1 << 5,
+            ShouldQueue         = 1 << 6,
+            ShouldClose         = 1 << 7,
+            PreventMovement     = 1 << 8,
         }
 
 
@@ -59,7 +78,7 @@ namespace Gameplay.Actions
         /// </summary>
         public bool Compare(ref ActionRequestData rhs)
         {
-            bool areScalarParamsEqual = (ActionID, OriginTransformID, Position, Direction, Amount, AttachmentSlotIndex) == (rhs.ActionID, rhs.OriginTransformID, rhs.Position, rhs.Direction, rhs.Amount, rhs.AttachmentSlotIndex);
+            bool areScalarParamsEqual = (ActionID, IActionSourceObjectID, Position, Direction, AttachmentSlotIndex, PreventMovement) == (rhs.ActionID, rhs.IActionSourceObjectID, rhs.Position, rhs.Direction, rhs.AttachmentSlotIndex, rhs.PreventMovement);
             if (!areScalarParamsEqual) { return false; }
 
             if (TargetIDs == rhs.TargetIDs) { return true; }    // Also covers the case of both being null.
@@ -76,11 +95,14 @@ namespace Gameplay.Actions
         private PackFlags GetPackFlags()
         {
             PackFlags flags = PackFlags.None;
-            if (OriginTransformID != 0)     { flags |= PackFlags.HasOriginTransform; }
-            if (Position != Vector3.zero)   { flags |= PackFlags.HasPosition; }
-            if (Direction != Vector3.zero)  { flags |= PackFlags.HasDirection; }
+            if (IActionSourceObjectID != 0)     { flags |= PackFlags.HasActionSourceObjectID; }
+            else
+            {
+                // Don't sync Position or Direction if we have an ActionSource Object Id.
+                if (Position != Vector3.zero)   { flags |= PackFlags.HasPosition; }
+                if (Direction != Vector3.zero)  { flags |= PackFlags.HasDirection; }
+            }
             if (TargetIDs != null)          { flags |= PackFlags.HasTargetIds; }
-            if (Amount != 0)                { flags |= PackFlags.HasAmount; }
             if (AttachmentSlotIndex != 0)   { flags |= PackFlags.HasSlotIdentifier; }
             if (ShouldQueue)                { flags |= PackFlags.ShouldQueue; }
             if (ShouldClose)                { flags |= PackFlags.ShouldClose; }
@@ -108,11 +130,10 @@ namespace Gameplay.Actions
                 ShouldClose =       flags.HasFlag(PackFlags.ShouldClose);
             }
 
-            if (flags.HasFlag(PackFlags.HasOriginTransform)){ serializer.SerializeValue(ref OriginTransformID); }
+            if (flags.HasFlag(PackFlags.HasActionSourceObjectID)){ serializer.SerializeValue(ref IActionSourceObjectID); }
             if (flags.HasFlag(PackFlags.HasPosition))       { serializer.SerializeValue(ref Position); }
             if (flags.HasFlag(PackFlags.HasDirection))      { serializer.SerializeValue(ref Direction); }
             if (flags.HasFlag(PackFlags.HasTargetIds))      { serializer.SerializeValue(ref TargetIDs); }
-            if (flags.HasFlag(PackFlags.HasAmount))         { serializer.SerializeValue(ref Amount); }
             if (flags.HasFlag(PackFlags.HasSlotIdentifier)) { serializer.SerializeValue(ref AttachmentSlotIndex); }
         }
     }

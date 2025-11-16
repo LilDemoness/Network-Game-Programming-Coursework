@@ -3,8 +3,9 @@ using UnityEngine;
 using Unity.Netcode;
 using Gameplay.GameplayObjects.Character.Customisation.Sections;
 using Gameplay.GameplayObjects.Character.Customisation.Data;
+using Gameplay.Actions;
 
-public class PlayerManager : NetworkBehaviour
+public class PlayerManager : NetworkBehaviour, IActionSource
 {
     public static PlayerManager LocalClientInstance { get; private set; }
 
@@ -94,6 +95,9 @@ public class PlayerManager : NetworkBehaviour
     public SlotGFXSection GetSlotGFXForIndex(AttachmentSlotIndex index) => _slotIndexToActiveGFXDict[index];
     public bool TryGetSlotGFXForIndex(AttachmentSlotIndex index, out SlotGFXSection slotGFXSections) => _slotIndexToActiveGFXDict.TryGetValue(index, out slotGFXSections);
     public int GetActivationSlotCount() => _slotIndexToActiveGFXDict.Count;
+
+
+    public Transform GetOriginTransform(AttachmentSlotIndex attachmentSlotIndex) => _slotIndexToActiveGFXDict[attachmentSlotIndex].GetAbilityOriginTransform();
 
 
     struct PlayerGFXWrapper

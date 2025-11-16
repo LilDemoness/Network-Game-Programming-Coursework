@@ -46,7 +46,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 699c5d4152bb8674095f251802f7c6d2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  AssociatedValue: {fileID: 11400000, guid: 6d86d74cc927741488860aea43d34f98, type: 2}
+  <SlottableData>k__BackingField: {fileID: 11400000, guid: 6d86d74cc927741488860aea43d34f98, type: 2}
   _abilityOrigin: {fileID: 2854506927164998321}
 --- !u!1 &2153377155135808606
 GameObject:

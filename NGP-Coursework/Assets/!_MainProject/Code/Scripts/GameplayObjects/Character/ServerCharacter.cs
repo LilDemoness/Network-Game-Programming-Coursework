@@ -1,7 +1,6 @@
 using UnityEngine;
 using Unity.Netcode;
 using Gameplay.Actions;
-using Gameplay.GameplayObjects.Health;
 using Gameplay.GameplayObjects.Character.Customisation.Data;
 using Gameplay.StatusEffects;
 
@@ -192,7 +191,7 @@ namespace Gameplay.GameplayObjects.Character
             m_clientCharacter.CancelRunningActionsBySlotIDClientRpc(slotIndex);
             ActionPlayer.CancelRunningActionsBySlotID(slotIndex, true);
         }
-        
+
 
 
         private void Update()

@@ -73,9 +73,7 @@ namespace Gameplay.GameplayObjects.Character
             ActionRequestData actionRequestData = ActionRequestData.Create(weapon.SlottableData.AssociatedAction);
 
             // Setup the ActionRequestData.
-            actionRequestData.OriginTransformID = weapon.GetAbilityOriginTransformID();
-            actionRequestData.Position = weapon.GetAbilityLocalOffset();
-            actionRequestData.Direction = weapon.GetAbilityLocalDirection();
+            actionRequestData.IActionSourceObjectID = weapon.GetAbilitySourceObjectId();
             actionRequestData.AttachmentSlotIndex = attachmentSlotIndex;
 
 

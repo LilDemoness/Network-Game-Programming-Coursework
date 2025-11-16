@@ -185,5 +185,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 699c5d4152bb8674095f251802f7c6d2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  AssociatedValue: {fileID: 11400000, guid: 7185a6b1497f49e489dade294a6d052e, type: 2}
+  <SlottableData>k__BackingField: {fileID: 11400000, guid: 7185a6b1497f49e489dade294a6d052e, type: 2}
   _abilityOrigin: {fileID: 3988238998462500084}

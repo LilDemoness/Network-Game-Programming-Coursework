@@ -189,8 +189,8 @@ namespace Gameplay.Actions.Definitions
         #endregion
 
 
-        protected Vector3 GetActionOrigin(ref ActionRequestData data) => data.OriginTransformID != 0 ? NetworkManager.Singleton.SpawnManager.SpawnedObjects[data.OriginTransformID].transform.TransformPoint(data.Position) : data.Position;
-        protected Vector3 GetActionDirection(ref ActionRequestData data) => (data.OriginTransformID != 0 ? NetworkManager.Singleton.SpawnManager.SpawnedObjects[data.OriginTransformID].transform.TransformDirection(data.Direction) : data.Direction).normalized;
+        protected Vector3 GetActionOrigin(ref ActionRequestData data) => data.OriginTransform != null ? data.OriginTransform.position : data.Position;
+        protected Vector3 GetActionDirection(ref ActionRequestData data) => (data.OriginTransform != null ? data.OriginTransform.forward : data.Direction).normalized;
 
         /// <summary>
         ///     Get the estimated target position from a given origin position and direction.

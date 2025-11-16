@@ -1200,7 +1200,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 699c5d4152bb8674095f251802f7c6d2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  AssociatedValue: {fileID: 11400000, guid: 6d86d74cc927741488860aea43d34f98, type: 2}
+  <SlottableData>k__BackingField: {fileID: 11400000, guid: 6d86d74cc927741488860aea43d34f98, type: 2}
   _abilityOrigin: {fileID: 6248052431135635144}
 --- !u!1 &1175187007420217021 stripped
 GameObject:
@@ -1219,7 +1219,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 699c5d4152bb8674095f251802f7c6d2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  AssociatedValue: {fileID: 11400000, guid: 15e9871e445d63e438b6cacbdfe5ec66, type: 2}
+  <SlottableData>k__BackingField: {fileID: 11400000, guid: 15e9871e445d63e438b6cacbdfe5ec66, type: 2}
   _abilityOrigin: {fileID: 2519607555332425173}
 --- !u!4 &2519607555332425173 stripped
 Transform:
@@ -1248,7 +1248,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 699c5d4152bb8674095f251802f7c6d2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  AssociatedValue: {fileID: 11400000, guid: 15e9871e445d63e438b6cacbdfe5ec66, type: 2}
+  <SlottableData>k__BackingField: {fileID: 11400000, guid: 15e9871e445d63e438b6cacbdfe5ec66, type: 2}
   _abilityOrigin: {fileID: 6345067557859629118}
 --- !u!1 &3631422800109253573 stripped
 GameObject:
@@ -1312,7 +1312,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 699c5d4152bb8674095f251802f7c6d2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  AssociatedValue: {fileID: 11400000, guid: 85eeda226bebd8e428b979ab2eb42013, type: 2}
+  <SlottableData>k__BackingField: {fileID: 11400000, guid: 85eeda226bebd8e428b979ab2eb42013, type: 2}
   _abilityOrigin: {fileID: 8788341070176241220}
 --- !u!1 &4393052587645743543 stripped
 GameObject:
@@ -1379,7 +1379,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 699c5d4152bb8674095f251802f7c6d2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  AssociatedValue: {fileID: 11400000, guid: 7185a6b1497f49e489dade294a6d052e, type: 2}
+  <SlottableData>k__BackingField: {fileID: 11400000, guid: 7185a6b1497f49e489dade294a6d052e, type: 2}
   _abilityOrigin: {fileID: 1032630681700691862}
 --- !u!1 &5591413967519110158 stripped
 GameObject:
@@ -1398,7 +1398,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 699c5d4152bb8674095f251802f7c6d2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  AssociatedValue: {fileID: 11400000, guid: 7185a6b1497f49e489dade294a6d052e, type: 2}
+  <SlottableData>k__BackingField: {fileID: 11400000, guid: 7185a6b1497f49e489dade294a6d052e, type: 2}
   _abilityOrigin: {fileID: 8040872330250902136}
 --- !u!1 &5983756612003035933 stripped
 GameObject:
@@ -1417,7 +1417,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 699c5d4152bb8674095f251802f7c6d2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  AssociatedValue: {fileID: 11400000, guid: 21e4d85d0a2461e45ba54594f0e3e797, type: 2}
+  <SlottableData>k__BackingField: {fileID: 11400000, guid: 21e4d85d0a2461e45ba54594f0e3e797, type: 2}
   _abilityOrigin: {fileID: 1904341227994456658}
 --- !u!1 &6085478235612915673 stripped
 GameObject:
@@ -1436,7 +1436,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 699c5d4152bb8674095f251802f7c6d2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  AssociatedValue: {fileID: 11400000, guid: 21e4d85d0a2461e45ba54594f0e3e797, type: 2}
+  <SlottableData>k__BackingField: {fileID: 11400000, guid: 21e4d85d0a2461e45ba54594f0e3e797, type: 2}
   _abilityOrigin: {fileID: 551144279328721115}
 --- !u!4 &6345067557859629118 stripped
 Transform:
@@ -1460,7 +1460,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 699c5d4152bb8674095f251802f7c6d2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  AssociatedValue: {fileID: 11400000, guid: 85eeda226bebd8e428b979ab2eb42013, type: 2}
+  <SlottableData>k__BackingField: {fileID: 11400000, guid: 85eeda226bebd8e428b979ab2eb42013, type: 2}
   _abilityOrigin: {fileID: 8245925626541920789}
 --- !u!4 &8150363216899649719 stripped
 Transform:
@@ -1489,7 +1489,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 699c5d4152bb8674095f251802f7c6d2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  AssociatedValue: {fileID: 11400000, guid: 6d86d74cc927741488860aea43d34f98, type: 2}
+  <SlottableData>k__BackingField: {fileID: 11400000, guid: 6d86d74cc927741488860aea43d34f98, type: 2}
   _abilityOrigin: {fileID: 330590761077568377}
 --- !u!4 &8788341070176241220 stripped
 Transform:

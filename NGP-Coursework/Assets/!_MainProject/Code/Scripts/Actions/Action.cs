@@ -3,6 +3,7 @@ using Unity.Netcode;
 using Gameplay.GameplayObjects;
 using Gameplay.GameplayObjects.Character;
 using Gameplay.Actions.Definitions;
+using Unity.Mathematics;
 
 namespace Gameplay.Actions
 {
@@ -22,6 +23,8 @@ namespace Gameplay.Actions
 
         protected ActionRequestData m_data;
         public bool IsGhost { get; set; }
+
+        public Transform OriginTransform;
 
 
         /// <summary>
@@ -194,25 +197,6 @@ namespace Gameplay.Actions
             this._chargeStartTime = 0.0f;
         }
 
-        /// <summary>
-        ///     Initialise our Data's required Parameters (If they aren't already set-up).
-        /// </summary>
-        private void InitialiseDataParametersIfEmpty(ServerCharacter owner)
-        {
-            if (Data.OriginTransformID != 0)
-            {
-                if (Data.Direction == Vector3.zero)
-                    Data.Direction = Vector3.forward;
-            }
-            else
-            {
-                if (Data.Direction == Vector3.zero)
-                    Data.Direction = owner.transform.forward;
-                if (Data.Position == Vector3.zero)
-                    Data.Position = owner.transform.position;
-            }
-        }
-
 
         /// <summary>
         ///     Called when the Action starts actually playing (Which may be after it is created, due to queueing).
@@ -232,7 +216,6 @@ namespace Gameplay.Actions
 
             // Initialise other parameters.
             this._burstsRemaining = _definition.Bursts;
-            InitialiseDataParametersIfEmpty(owner);
 
             // Apply Heat.
             owner.ReceiveHeatChange(owner, _definition.ImmediateHeat);
@@ -413,10 +396,6 @@ namespace Gameplay.Actions
         ///     Cleans up any ongoing effects.
         /// </summary>
         public virtual void Cleanup(ServerCharacter owner) { }
-
-
-        protected Vector3 GetActionOrigin() => Data.OriginTransformID != 0 ? NetworkManager.Singleton.SpawnManager.SpawnedObjects[Data.OriginTransformID].transform.TransformPoint(Data.Position) : Data.Position;
-        protected Vector3 GetActionDirection() => (Data.OriginTransformID != 0 ? NetworkManager.Singleton.SpawnManager.SpawnedObjects[Data.OriginTransformID].transform.TransformDirection(Data.Direction) : Data.Direction).normalized;
 
 
 
