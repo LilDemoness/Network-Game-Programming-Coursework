@@ -10,6 +10,7 @@ public class PlayerManager : NetworkBehaviour
 
     [SerializeField] private FrameGFX[] m_playerFrames;
     private PlayerGFXWrapper[] _playerGFXWrappers;
+    private FrameGFX _activeFrame;
     private Dictionary<AttachmentSlotIndex, SlotGFXSection> _slotIndexToActiveGFXDict = new Dictionary<AttachmentSlotIndex, SlotGFXSection>();
 
 
@@ -56,12 +57,11 @@ public class PlayerManager : NetworkBehaviour
         {
             if (!hasFoundActiveFrame)
             {
-                // We haven't yet found our active frame. Perform a full check toggle (Also sets our ActiveGFX Dict if we find our active frame).
-                if (_playerGFXWrappers[i].Toggle(buildData, ref _slotIndexToActiveGFXDict))
+                // We haven't yet found our active frame. Perform a full check toggle (Also sets our ActiveGFX references if we find our active frame).
+                if (_playerGFXWrappers[i].Toggle(buildData, ref _activeFrame, ref _slotIndexToActiveGFXDict))
                 {
                     // This is our active frame.
-                    Debug.Log("Found Build" + _slotIndexToActiveGFXDict.Count);
-                    hasFoundActiveFrame = true;
+                    hasFoundActiveFrame = true; // All other frames should be disabled without a toggle check.
                 }
             }
             else
@@ -75,6 +75,12 @@ public class PlayerManager : NetworkBehaviour
         if (IsLocalPlayer)
             OnLocalPlayerBuildUpdated?.Invoke(buildData);
     }
+
+
+    /// <summary>
+    ///     Returns the currently active FrameGFX instance.
+    /// </summary>
+    public FrameGFX GetActiveFrame() => _activeFrame;
 
 
     // Doesn't account for multiple GFXSlotSections for a single SlotIndex.
@@ -113,13 +119,15 @@ public class PlayerManager : NetworkBehaviour
         }
 
 
-        public bool Toggle(BuildData buildData, ref Dictionary<AttachmentSlotIndex, SlotGFXSection> slottables)
+        public bool Toggle(BuildData buildData, ref FrameGFX activeFrameGFX, ref Dictionary<AttachmentSlotIndex, SlotGFXSection> slottables)
         {
             if (_frameGFX.Toggle(buildData.GetFrameData()) == false)
             {
                 // This wrapper's frame isn't the correct frame for this build.
                 return false;
             }
+
+            activeFrameGFX = this._frameGFX;
 
             // This wrapper's frame is the desired one.
             // Update slottables.

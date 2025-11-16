@@ -17,6 +17,24 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Sections
         private Dictionary<AttachmentSlotIndex, AttachmentSlot> _slottableDataSlots = new Dictionary<AttachmentSlotIndex, AttachmentSlot>();
         
 
+        [Header("Rotation")]
+        [SerializeField] private Transform _verticalRotationPivot;
+        [Tooltip("An offset from the Vertical Rotation Pivot applied when calculating the desired rotation.\nUsed to align the average position of all weapons to the estimated target position.")]
+            [SerializeField] private Vector3 _verticalRotationPivotOffset;
+        [Tooltip("Does this frame use the X-axis for vertical rotation (True), or the Z-axis (False).")]
+            [SerializeField] private bool _usesXRotationForVertical;
+
+        public Transform VerticalRotationPivot => _verticalRotationPivot;
+        /// <summary>
+        ///     An offset from the Vertical Rotation Pivot applied when calculating the desired rotation.<br/>Used to align the average position of all weapons to the estimated target position.
+        /// </summary>
+        public Vector3 VerticalRotationPivotOffset => _verticalRotationPivotOffset;
+        /// <summary>
+        ///     True if this frame uses the X-Axis for Vertical Rotation, or False if it uses the Z-Axis.
+        /// </summary>
+        public bool UsesXRotationForVertical => _usesXRotationForVertical;
+
+
         #if UNITY_EDITOR
 
         [ContextMenu(itemName: "Setup/Auto Setup Container References")]

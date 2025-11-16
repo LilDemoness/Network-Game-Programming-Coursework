@@ -2943,6 +2943,30 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 3
       objectReference: {fileID: 0}
+    - target: {fileID: -6702067012661744371, guid: 9cf6527ff6f5adf4aaa1f2ba67588946, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.48761413
+      objectReference: {fileID: 0}
+    - target: {fileID: -6702067012661744371, guid: 9cf6527ff6f5adf4aaa1f2ba67588946, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.5121859
+      objectReference: {fileID: 0}
+    - target: {fileID: -6702067012661744371, guid: 9cf6527ff6f5adf4aaa1f2ba67588946, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0.48984894
+      objectReference: {fileID: 0}
+    - target: {fileID: -6702067012661744371, guid: 9cf6527ff6f5adf4aaa1f2ba67588946, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0.50984913
+      objectReference: {fileID: 0}
+    - target: {fileID: -6702067012661744371, guid: 9cf6527ff6f5adf4aaa1f2ba67588946, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 90.262
+      objectReference: {fileID: 0}
+    - target: {fileID: -6702067012661744371, guid: 9cf6527ff6f5adf4aaa1f2ba67588946, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: -92.554
+      objectReference: {fileID: 0}
     - target: {fileID: -6547199505753490671, guid: 9cf6527ff6f5adf4aaa1f2ba67588946, type: 3}
       propertyPath: m_Layer
       value: 3
@@ -4931,6 +4955,8 @@ MonoBehaviour:
   - {fileID: 901893775161519306}
   - {fileID: 4165221648398267034}
   - {fileID: 5123465347947276157}
+  _verticalRotationPivot: {fileID: 1949449541525747365}
+  _verticalRotationPivotOffset: {x: 0, y: 1.248, z: 0}
 --- !u!65 &3126339173228677516
 BoxCollider:
   m_ObjectHideFlags: 0

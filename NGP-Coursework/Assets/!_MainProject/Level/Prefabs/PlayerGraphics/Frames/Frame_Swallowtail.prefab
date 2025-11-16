@@ -1271,6 +1271,9 @@ MonoBehaviour:
   m_slottableDataSlotArray:
   - {fileID: 741826673391865543}
   - {fileID: 838368080554969514}
+  _verticalRotationPivot: {fileID: 8150363216899649719}
+  _verticalRotationPivotOffset: {x: 0, y: 1.67, z: 0}
+  _usesXRotationForVertical: 0
 --- !u!65 &339472818784677811
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1459,6 +1462,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   AssociatedValue: {fileID: 11400000, guid: 85eeda226bebd8e428b979ab2eb42013, type: 2}
   _abilityOrigin: {fileID: 8245925626541920789}
+--- !u!4 &8150363216899649719 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5746564759562468899, guid: 91447a04551c2f14e894791dc2eb3415, type: 3}
+  m_PrefabInstance: {fileID: 4513748231528189588}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &8245925626541920789 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5533630577860369537, guid: 91447a04551c2f14e894791dc2eb3415, type: 3}

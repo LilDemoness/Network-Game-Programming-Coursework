@@ -235,10 +235,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
+  _playerManager: {fileID: 3329371058562629056}
   _rotationPivot: {fileID: 5073869110366271365}
   _horizontalSensitivity: 17.5
   _verticalSensitivity: 15
-  _graphicsRoot: {fileID: 856204490126727606}
+  _horizontalRotationPivot: {fileID: 8009618316867091801}
+  _verticalRotationPivot: {fileID: 0}
   _targetingLayers:
     serializedVersion: 2
     m_Bits: 73

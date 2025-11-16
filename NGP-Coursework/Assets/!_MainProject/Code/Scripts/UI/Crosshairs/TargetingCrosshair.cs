@@ -71,28 +71,31 @@ namespace UI.Crosshairs
         }
         private void UpdateCrosshairPosition()
         {
-            // Get targeted position.
+            // Set our position to the screen-space position of our target world position.
+            transform.position = _camera.WorldToScreenPoint(CalculateTargetWorldPosition());
+        }
+
+        /// <summary>
+        ///     Calculates the world position of the crosshair, taking into account obstructions and camera offset alignment.
+        /// </summary>
+        private Vector3 CalculateTargetWorldPosition()
+        {
             Vector3 crosshairOriginPosition = _slotGFXSection.GetAbilityWorldOrigin();
-            Vector3 targetWorldPosition = _slotGFXSection.SlottableData.AssociatedAction.GetTargetPosition(crosshairOriginPosition, _slotGFXSection.GetAbilityWorldDirection());
-            if (Physics.Linecast(crosshairOriginPosition, targetWorldPosition, out RaycastHit hitInfo, _obstructionLayers))
+            Vector3 naiveCrosshairWorldPosition = crosshairOriginPosition + _slotGFXSection.GetAbilityWorldDirection() * Constants.TARGET_ESTIMATION_RANGE;    // Crosshair position assuming no obstacles or camera offset.
+            if (Physics.Linecast(crosshairOriginPosition, naiveCrosshairWorldPosition, out RaycastHit hitInfo, _obstructionLayers))
             {
-                // There is an obstruction. The hit pos is our crosshair's pos.
-                targetWorldPosition = hitInfo.point;
+                // There is an obstruction between our origin and furthest position.
+                // Our hit position will be the world position of our crosshair.
+                return hitInfo.point;
             }
             else
             {
-                // There are no obstructions for the ray. Set our crosshair to the default position on the screen).
-                //  We are using a Plane so that it always appears aligned to the camera, no matter the rotation offset of the weapon.
-                Ray ray = new Ray(crosshairOriginPosition, (crosshairOriginPosition - targetWorldPosition).normalized);
+                // There are no obstructions between our origin and furthest position.
+                // Our hit position will be the furthest position, but adjusted to account for the horizontal offset of the player's camera.
+                Ray ray = new Ray(crosshairOriginPosition, (crosshairOriginPosition - naiveCrosshairWorldPosition).normalized);
                 CameraControllerTest.MaxTargetDistancePlane.Raycast(ray, out float enter);
-                targetWorldPosition = ray.GetPoint(enter);
+                return ray.GetPoint(enter);
             }
-
-            // Translate targeted position from world space to screen space.
-            Vector3 targetScreenPosition = _camera.WorldToScreenPoint(targetWorldPosition);
-
-            // Set our position to the screen space targeted position.
-            transform.position = targetScreenPosition;
         }
     }
 }
