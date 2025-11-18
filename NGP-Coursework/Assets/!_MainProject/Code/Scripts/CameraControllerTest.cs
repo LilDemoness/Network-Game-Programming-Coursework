@@ -15,6 +15,7 @@ public class CameraControllerTest : NetworkBehaviour
 
     [Header("Rotation Settings")]
 	[SerializeField] private Transform _rotationPivot;
+    [SerializeField] private float _graphicsRotationRate = 720.0f;
 	
 	[Space(5)]
     [SerializeField] private float _horizontalSensitivity = 35.0f;
@@ -62,7 +63,7 @@ public class CameraControllerTest : NetworkBehaviour
     { }
 
 
-    private void LateUpdate()
+    private void Update()
     {
         if (IsOwner)
         {
@@ -75,18 +76,19 @@ public class CameraControllerTest : NetworkBehaviour
 
 			// Update the graphic's target position.
             UpdateGraphicsTargetRotation();
-            SetGraphicsRotation();
 
-			// Update our rotation pivot's rotation.
+            // Update our rotation pivot's rotation.
             _rotationPivot.rotation = Quaternion.Euler(_rotation);
             _rotationPivotYRotation.Value = _rotationPivot.localRotation.eulerAngles.y;  // Sync the rotation pivot's local rotation for the server movement script to use.
         }
         else
         {
-			// Update our rotations on non-owners.
-            LerpGraphicsRotation();
+			// Update our pivot's rotation on non-owners (Server: For Action Logic; Clients: For Action FX).
             _rotationPivot.localRotation = Quaternion.Euler(0.0f, _rotationPivotYRotation.Value, 0.0f);
         }
+        
+        // Lerp our graphics to their target position.
+        LerpGraphicsRotation();
     }
 
 
@@ -140,8 +142,10 @@ public class CameraControllerTest : NetworkBehaviour
 	///	</summary>
 	private void LerpGraphicsRotation()
     {
-        _horizontalRotationPivot.rotation = Quaternion.Lerp(_horizontalRotationPivot.rotation, GetHorizontalRotationTarget(), 0.5f);
-        _verticalRotationPivot.localRotation = Quaternion.Lerp(_verticalRotationPivot.localRotation, GetVerticalLocalRotationTarget(), 0.5f);
+        //_horizontalRotationPivot.rotation = Quaternion.Lerp(_horizontalRotationPivot.rotation, GetHorizontalRotationTarget(), 0.5f);
+        //_verticalRotationPivot.localRotation = Quaternion.Lerp(_verticalRotationPivot.localRotation, GetVerticalLocalRotationTarget(), 0.5f);
+        _horizontalRotationPivot.rotation = Quaternion.RotateTowards(_horizontalRotationPivot.rotation, GetHorizontalRotationTarget(), _graphicsRotationRate * Time.deltaTime);
+        _verticalRotationPivot.localRotation = Quaternion.RotateTowards(_verticalRotationPivot.localRotation, GetVerticalLocalRotationTarget(), _graphicsRotationRate * Time.deltaTime);
     }
 
 
