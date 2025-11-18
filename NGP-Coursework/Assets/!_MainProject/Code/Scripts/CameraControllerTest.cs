@@ -6,8 +6,8 @@ using Gameplay.GameplayObjects.Character.Customisation.Sections;
 public class CameraControllerTest : NetworkBehaviour
 {
     // Note: Directly using a property for the Plane means that we cannot use Plane.SetNormalAndPosition() because it's a struct. However, using a Property to expose it and directly setting the plane works.
-    private static Plane s_maxTargetDistancePlane = new Plane();
-    public static Plane MaxTargetDistancePlane { get => s_maxTargetDistancePlane; }
+    private static Plane s_crosshairAdjustmentPlane = new Plane();
+    public static Plane CrosshairAdjustmentPlane { get => s_crosshairAdjustmentPlane; }
 
 
     [SerializeField] private PlayerManager _playerManager;
@@ -40,7 +40,10 @@ public class CameraControllerTest : NetworkBehaviour
     private NetworkVariable<float> _verticalPivotLocalVerticalRotation = new NetworkVariable<float>(writePerm: NetworkVariableWritePermission.Owner);   // Syncs the vertical rotation of the character (Either the X or Z axis depending on setup).
 
 
-    private void Awake() => _playerManager.OnThisPlayerBuildUpdated += PlayerManager_OnThisPlayerBuildUpdated;
+    private void Awake()
+    {
+        _playerManager.OnThisPlayerBuildUpdated += PlayerManager_OnThisPlayerBuildUpdated;
+    }
     public override void OnDestroy()
     {
         base.OnDestroy();
@@ -114,7 +117,8 @@ public class CameraControllerTest : NetworkBehaviour
                 targetPosition = hitInfo.point;
             }
         }
-        s_maxTargetDistancePlane.SetNormalAndPosition(-Camera.main.transform.forward, targetPosition);
+        s_crosshairAdjustmentPlane.SetNormalAndPosition(-Camera.main.transform.forward, targetPosition);
+        
 
         // Calculate our rotations for the vertical & horizontal rotation pivots.
         // Horizontal Pivot Rotation.

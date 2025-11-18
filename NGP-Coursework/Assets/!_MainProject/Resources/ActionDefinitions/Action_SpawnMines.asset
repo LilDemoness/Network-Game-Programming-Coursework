@@ -38,6 +38,7 @@ MonoBehaviour:
   - rid: 9030112632148066304
   TriggeringVisuals: []
   HitVisuals: []
+  <ActionCrosshairPrefab>k__BackingField: {fileID: 0}
   _overrideOriginToOwnerPosition: 1
   _overrideDirectionToOwnerUp: 1
   references:
@@ -61,7 +62,7 @@ MonoBehaviour:
         _randomisationAngle: 0
         _randomiseOnlyDefaultVector: 1
         _forceToGround: 1
-        _forceToGroundDistance: 1
+        _forceToGroundDistance: 10
         _groundLayers:
           serializedVersion: 2
           m_Bits: 65

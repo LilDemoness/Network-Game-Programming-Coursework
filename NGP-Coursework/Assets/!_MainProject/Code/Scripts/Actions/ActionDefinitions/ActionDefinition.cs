@@ -107,6 +107,9 @@ namespace Gameplay.Actions.Definitions
         [SerializeReference, SubclassSelector] public ActionVisual[] HitVisuals;
         // Animation Triggers.
 
+        [field: Space(5)]
+        [field: SerializeField] public UI.Crosshairs.Crosshair ActionCrosshairPrefab { get; private set; }
+
         #endregion
 
 
@@ -191,11 +194,6 @@ namespace Gameplay.Actions.Definitions
 
         protected Vector3 GetActionOrigin(ref ActionRequestData data) => data.OriginTransform != null ? data.OriginTransform.position : data.Position;
         protected Vector3 GetActionDirection(ref ActionRequestData data) => (data.OriginTransform != null ? data.OriginTransform.forward : data.Direction).normalized;
-
-        /// <summary>
-        ///     Get the estimated target position from a given origin position and direction.
-        /// </summary>
-        public abstract Vector3 GetTargetPosition(Vector3 originPosition, Vector3 originDirection);
 
 
         #region Overridable Methods

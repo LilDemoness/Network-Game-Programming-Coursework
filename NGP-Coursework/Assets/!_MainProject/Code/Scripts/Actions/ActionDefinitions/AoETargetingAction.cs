@@ -23,13 +23,6 @@ namespace Gameplay.Actions.Definitions
         [SerializeField] private bool _useMaxRangeOnRaycastFailure = false;
 
 
-        public override Vector3 GetTargetPosition(Vector3 originPosition, Vector3 originDirection)
-        {
-            DetermineOriginPositionAndDirection(ref originPosition, ref originDirection, Constants.TARGET_ESTIMATION_RANGE);
-            return originPosition;
-        }
-
-
         public override bool OnStart(ServerCharacter owner, ref ActionRequestData data) => ActionConclusion.Continue;
         public override bool OnUpdate(ServerCharacter owner, ref ActionRequestData data, float chargePercentage = 1.0f)
         {

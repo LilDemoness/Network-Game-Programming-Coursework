@@ -8,9 +8,6 @@ namespace Gameplay.Actions.Definitions
     {
         [SerializeField] private string _debugMessage;
 
-
-        public override Vector3 GetTargetPosition(Vector3 originPosition, Vector3 originDirection) => throw new System.Exception($"Unexpected Behaviour: You are trying to get the Target Position of a {nameof(LogAction)}");
-
         public override bool OnStart(ServerCharacter owner, ref ActionRequestData data)
         {
             Debug.Log($"{this.name} {(data.AttachmentSlotIndex != 0 ? $"in slot {data.AttachmentSlotIndex}" : "")} says: {_debugMessage}");

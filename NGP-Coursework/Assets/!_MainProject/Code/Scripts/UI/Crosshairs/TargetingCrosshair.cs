@@ -23,6 +23,8 @@ namespace UI.Crosshairs
         [SerializeField] private Camera _camera;
         [SerializeField] private LayerMask _obstructionLayers;
 
+        private Crosshair _crosshair;
+
 
         private void Awake()
         {
@@ -59,6 +61,7 @@ namespace UI.Crosshairs
             _slotGFXSection = PlayerManager.LocalClientInstance.GetSlotGFXForIndex(_attachmentSlotIndex);
 
             // Update our Crosshair Settings (Reticule Type, Seeking Radius, Charging Bar, etc).
+            SetCrosshairFromPrefab(_slotGFXSection.SlottableData.AssociatedAction.ActionCrosshairPrefab);
         }
 
 
@@ -67,35 +70,38 @@ namespace UI.Crosshairs
             if (_slotGFXSection == null)
                 return;
 
-            UpdateCrosshairPosition();
-        }
-        private void UpdateCrosshairPosition()
-        {
-            // Set our position to the screen-space position of our target world position.
-            transform.position = _camera.WorldToScreenPoint(CalculateTargetWorldPosition());
+            _crosshair.UpdateCrosshairPosition(_camera);
         }
 
-        /// <summary>
-        ///     Calculates the world position of the crosshair, taking into account obstructions and camera offset alignment.
-        /// </summary>
-        private Vector3 CalculateTargetWorldPosition()
+        public void SetCrosshairFromPrefab(Crosshair crosshairPrefab)
         {
-            Vector3 crosshairOriginPosition = _slotGFXSection.GetAbilityWorldOrigin();
-            Vector3 naiveCrosshairWorldPosition = crosshairOriginPosition + _slotGFXSection.GetAbilityWorldDirection() * Constants.TARGET_ESTIMATION_RANGE;    // Crosshair position assuming no obstacles or camera offset.
-            if (Physics.Linecast(crosshairOriginPosition, naiveCrosshairWorldPosition, out RaycastHit hitInfo, _obstructionLayers))
+            if (_crosshair != null)
             {
-                // There is an obstruction between our origin and furthest position.
-                // Our hit position will be the world position of our crosshair.
-                return hitInfo.point;
+                // Remove the current crosshair.
+                Destroy(_crosshair.gameObject);
             }
-            else
+
+            if (crosshairPrefab == null)
             {
-                // There are no obstructions between our origin and furthest position.
-                // Our hit position will be the furthest position, but adjusted to account for the horizontal offset of the player's camera.
-                Ray ray = new Ray(crosshairOriginPosition, (crosshairOriginPosition - naiveCrosshairWorldPosition).normalized);
-                CameraControllerTest.MaxTargetDistancePlane.Raycast(ray, out float enter);
-                return ray.GetPoint(enter);
-            }
+                DisableCrosshair();
+                return;
+            }    
+
+            // Create and cache the new crosshair.
+            _crosshair = Instantiate<Crosshair>(crosshairPrefab, this.transform);
+            _crosshair.SetupCrosshair(_camera, _slotGFXSection, _attachmentSlotIndex, _obstructionLayers);
         }
+
+
+#if UNITY_EDITOR
+        [ContextMenu(itemName: "Debug/Setup Crosshair Again")]
+        private void Editor_ReSetupCrosshair()
+        {
+            if (_crosshair == null)
+                return;
+
+            _crosshair.SetupCrosshair(_camera, _slotGFXSection, _attachmentSlotIndex, _obstructionLayers);
+        }
+#endif
     }
 }

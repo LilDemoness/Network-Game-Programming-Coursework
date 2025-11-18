@@ -39,6 +39,7 @@ MonoBehaviour:
   TriggeringVisuals:
   - rid: 6632896607793709161
   HitVisuals: []
+  <ActionCrosshairPrefab>k__BackingField: {fileID: 830966631555543426, guid: 9d14fbeb532b8d64a99f11ce9df584f9, type: 3}
   <MaxRange>k__BackingField: 30
   <ValidLayers>k__BackingField:
     serializedVersion: 2

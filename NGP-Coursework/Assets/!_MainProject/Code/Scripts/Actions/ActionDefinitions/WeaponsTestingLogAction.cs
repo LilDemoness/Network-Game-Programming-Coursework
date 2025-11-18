@@ -12,10 +12,6 @@ namespace Gameplay.Actions.Definitions
         [SerializeField] private bool _displayEndLog = true;
         [SerializeField] private bool _displayCancelLog = true;
 
-
-        public override Vector3 GetTargetPosition(Vector3 originPosition, Vector3 originDirection) => throw new System.Exception($"Unexpected Behaviour: You are trying to get the Target Position of a {nameof(WeaponsTestingLogAction)}");
-
-
         public override bool OnStart(ServerCharacter owner, ref ActionRequestData data)
         {
             Debug.Log($"{this.name} {(data.AttachmentSlotIndex != 0 ? $"in slot {data.AttachmentSlotIndex}" : "")} says: Started Firing \"{_weaponName}\"");

@@ -23,15 +23,6 @@ namespace Gameplay.Actions.Definitions
         public bool CanPierce => Pierces > 0;
 
 
-        public override Vector3 GetTargetPosition(Vector3 originPosition, Vector3 originDirection)
-        {
-            if (Physics.Raycast(originPosition, originDirection, out RaycastHit hitInfo, Constants.TARGET_ESTIMATION_RANGE, ValidLayers, QueryTriggerInteraction.Ignore))
-                return hitInfo.point;   // Hit: Target Position is the raycast hit position.
-            else
-                return originPosition + originDirection * MaxRange; // No hit: Target Position is max range.
-        }
-
-
 
         public override bool OnStart(ServerCharacter owner, ref ActionRequestData data) => ActionConclusion.Continue;
         public override bool OnUpdate(ServerCharacter owner, ref ActionRequestData data, float chargePercentage = 1.0f)

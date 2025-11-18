@@ -99,18 +99,15 @@ namespace UI.Actions
                 return;
             }
 
-            // Add ourselves (Or create then add ourselves) to the instances of weapon UI for this slot.
-            if (s_slotIndexToUIDictionary.TryGetValue(_slotIndex, out List<PlayerActionChargeDisplayUI> chargeUIElements))
-                chargeUIElements.Add(this);
-            else
-                s_slotIndexToUIDictionary.Add(_slotIndex, new List<PlayerActionChargeDisplayUI>() { this });
-
+            AddSelfToDictionary();
 
             // Build Change Event (Enable/Disable State of this UI element).
             PlayerSpawner.OnPlayerCustomisationFinalised += PlayerSpawner_OnPlayerCustomisationFinalised;
         }
         private void OnDestroy()
         {
+            RemoveSelfFromDictionary();
+
             PlayerSpawner.OnPlayerCustomisationFinalised -= PlayerSpawner_OnPlayerCustomisationFinalised;
         }
 
@@ -158,6 +155,30 @@ namespace UI.Actions
             // Update our UI.
             //_chargePercentageText.text = (_currentChargePercentage * 100.0f).ToString("00.0") + "%";
             _chargeRadialImage.fillAmount = _currentChargePercentage;
+        }
+
+
+        public void SetAttachmentSlotIndex(AttachmentSlotIndex attachmentSlot)
+        {
+            RemoveSelfFromDictionary();
+            this._slotIndex = attachmentSlot;
+            AddSelfToDictionary();
+        }
+
+        private void AddSelfToDictionary()
+        {
+            // Add ourselves (Or create then add ourselves) to the instances of weapon UI for this slot.
+            if (s_slotIndexToUIDictionary.TryGetValue(_slotIndex, out List<PlayerActionChargeDisplayUI> chargeUIElements))
+                chargeUIElements.Add(this);
+            else
+                s_slotIndexToUIDictionary.Add(_slotIndex, new List<PlayerActionChargeDisplayUI>() { this });
+        }
+        private void RemoveSelfFromDictionary()
+        {
+            if (s_slotIndexToUIDictionary.TryGetValue(_slotIndex, out List<PlayerActionChargeDisplayUI> chargeActionDisplays))
+            {
+                chargeActionDisplays.Remove(this);
+            }
         }
     }
 }

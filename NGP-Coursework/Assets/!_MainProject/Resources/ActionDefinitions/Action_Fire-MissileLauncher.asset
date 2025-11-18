@@ -39,6 +39,7 @@ MonoBehaviour:
   TriggeringVisuals:
   - rid: 5503895833102778504
   HitVisuals: []
+  <ActionCrosshairPrefab>k__BackingField: {fileID: 830966631555543426, guid: 21aa4ea43f3904f43936b285a584e850, type: 3}
   _projectileInfo:
     ProjectilePrefab: {fileID: 5177341952338766353, guid: 741492a3145316f46b46d7ee5febb43c, type: 3}
     Speed: 15
