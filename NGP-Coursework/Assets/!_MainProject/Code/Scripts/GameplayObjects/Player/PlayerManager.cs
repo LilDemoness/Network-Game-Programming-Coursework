@@ -141,7 +141,12 @@ public class PlayerManager : NetworkBehaviour, IActionSource
                 if (_attachmentSlots.TryGetValue(i.ToSlotIndex(), out AttachmentSlot attachmentSlot) == false)
                     continue;   // No AttachmentSlot for this index.
 
-                slottables.Add(i.ToSlotIndex(), attachmentSlot.Toggle(buildData.GetSlottableData(i.ToSlotIndex())));
+                if (attachmentSlot.Toggle(buildData.GetSlottableData(i.ToSlotIndex())))
+                {
+                    slottables.Add(i.ToSlotIndex(), attachmentSlot.GetActiveGFXSlot());
+                }
+                else
+                    throw new System.Exception($"No valid Slottable GFX Instances within '{attachmentSlot.name}' for '{buildData.GetSlottableData(i.ToSlotIndex()).name}'");
             }
 
             return true;

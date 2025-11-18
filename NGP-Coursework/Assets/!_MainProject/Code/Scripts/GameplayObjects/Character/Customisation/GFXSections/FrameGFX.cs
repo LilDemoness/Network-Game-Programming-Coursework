@@ -19,8 +19,6 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Sections
 
         [Header("Rotation")]
         [SerializeField] private Transform _verticalRotationPivot;
-        [Tooltip("An offset from the Vertical Rotation Pivot applied when calculating the desired rotation.\nUsed to align the average position of all weapons to the estimated target position.")]
-            [SerializeField] private Vector3 _verticalRotationPivotOffset;
         [Tooltip("Does this frame use the X-axis for vertical rotation (True), or the Z-axis (False).")]
             [SerializeField] private bool _usesXRotationForVertical;
 
@@ -28,7 +26,34 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Sections
         /// <summary>
         ///     An offset from the Vertical Rotation Pivot applied when calculating the desired rotation.<br/>Used to align the average position of all weapons to the estimated target position.
         /// </summary>
-        public Vector3 VerticalRotationPivotOffset => _verticalRotationPivotOffset;
+        /// <remarks> Calculated upon each request.</remarks>
+        public Vector3 VerticalRotationPivotOffset
+        {
+            get
+            {
+                // Calculate our average weapon position.
+                Vector3 averageWeaponPosition = Vector3.zero;
+                int activeSlots = 0;
+                foreach (AttachmentSlot slot in m_slottableDataSlotArray)
+                {
+                    if (slot.HasActiveGFXSlot())
+                    {
+                        averageWeaponPosition += slot.GetActiveGFXSlot().GetAbilityWorldOrigin();
+                        ++activeSlots;
+                    }
+                }
+                if (activeSlots == 0)
+                    return Vector3.zero;
+                averageWeaponPosition /= activeSlots;
+
+                Debug.Log("Average Weapon Pos: " + averageWeaponPosition);
+                Debug.Log("Vertical Rotation Pivot Offset (AvgPos - Pos): " + (averageWeaponPosition - _verticalRotationPivot.position));
+                Debug.Log("Vertical Rotation Pivot Offset (Pos - AvgPos): " + (_verticalRotationPivot.position - averageWeaponPosition));
+
+                // Calculate our offset based on our vertical pivot position & average weapon position.
+                return averageWeaponPosition - _verticalRotationPivot.position;
+            }
+        }
         /// <summary>
         ///     True if this frame uses the X-Axis for Vertical Rotation, or False if it uses the Z-Axis.
         /// </summary>

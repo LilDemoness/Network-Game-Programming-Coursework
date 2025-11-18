@@ -237,6 +237,7 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   _playerManager: {fileID: 3329371058562629056}
   _rotationPivot: {fileID: 5073869110366271365}
+  _graphicsRotationRate: 180
   _horizontalSensitivity: 17.5
   _verticalSensitivity: 15
   _horizontalRotationPivot: {fileID: 8009618316867091801}

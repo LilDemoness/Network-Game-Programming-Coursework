@@ -58,8 +58,7 @@ namespace UI.Crosshairs
                 // There are no obstructions between our origin and furthest position.
                 // Our hit position will be our naive position, but adjusted to account for the horizontal offset of the player's camera.
                 Ray ray = new Ray(crosshairOriginPosition, (naiveCrosshairWorldPosition - crosshairOriginPosition).normalized);
-                if (!CameraControllerTest.CrosshairAdjustmentPlane.Raycast(ray, out float enter))
-                    Debug.LogWarning("Failed to cast to plane");
+                CameraControllerTest.CrosshairAdjustmentPlane.Raycast(ray, out float enter);
                 return ray.GetPoint(enter);
             }
         }
