@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fae5635a396dd094fbc4b68f3f279ba1, type: 3}
   m_Name: FrameData_Small
   m_EditorClassIdentifier: 
-  <Name>k__BackingField: Small Chassis
+  <Name>k__BackingField: Small Boi
   <FrameSize>k__BackingField: 0
   <MaxHealth>k__BackingField: 6
   <HeatCapacity>k__BackingField: 10

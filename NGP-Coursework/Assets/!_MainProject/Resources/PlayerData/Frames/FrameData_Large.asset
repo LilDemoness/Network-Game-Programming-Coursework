@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: FrameData_Large
   m_EditorClassIdentifier: 
   <Name>k__BackingField: Large Chassis
-  <FrameSize>k__BackingField: 0
+  <FrameSize>k__BackingField: 2
   <MaxHealth>k__BackingField: 12
   <HeatCapacity>k__BackingField: 10
   <MovementSpeed>k__BackingField: 5
