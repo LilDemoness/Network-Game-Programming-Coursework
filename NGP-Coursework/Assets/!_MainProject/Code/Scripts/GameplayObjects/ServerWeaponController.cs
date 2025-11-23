@@ -2,6 +2,7 @@ using System.Collections;
 using Unity.Netcode;
 using UnityEngine;
 using Gameplay.Actions;
+using Gameplay.GameplayObjects.Players;
 using Gameplay.GameplayObjects.Character.Customisation.Sections;
 
 namespace Gameplay.GameplayObjects.Character
@@ -9,7 +10,7 @@ namespace Gameplay.GameplayObjects.Character
     public class ServerWeaponController : NetworkBehaviour
     {
         [SerializeField] private ServerCharacter _serverCharacter;
-        [SerializeField] private PlayerManager _playerManager;
+        [SerializeField] private Player _playerManager;
 
         
         private SlotGFXSection[] _activationSlots = new SlotGFXSection[0];

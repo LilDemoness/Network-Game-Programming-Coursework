@@ -92,7 +92,7 @@ public class ServerManager : MonoBehaviour
     }
 
 
-    public void SetBuild(ulong clientID, BuildData newBuildData)
+    public void SetBuild(ulong clientID, BuildDataReference newBuildData)
     {
         if (ClientData.TryGetValue(clientID, out ClientData data))
         {

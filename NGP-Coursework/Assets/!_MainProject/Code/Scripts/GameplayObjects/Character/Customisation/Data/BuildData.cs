@@ -3,43 +3,57 @@ using Unity.Netcode;
 
 namespace Gameplay.GameplayObjects.Character.Customisation.Data
 {
-    public class BuildData : INetworkSerializable, IEquatable<BuildData>
+    public class BuildDataReference
     {
         // Data.
-        private int _activeFrameIndex = 0;
-        private int[] _activeSlottableIndicies = new int[0];
+        private BuildDataState _data;
 
         // Accessors.
         public int ActiveFrameIndex
         {
-            get => _activeFrameIndex;
-            set => _activeFrameIndex = value;
+            get => _data.ActiveFrameIndex;
+            set => _data.ActiveFrameIndex = value;
         }
         public int[] ActiveSlottableIndicies    // Check if this causes duplication in memory.
         {
-            get => _activeSlottableIndicies;
-            set => _activeSlottableIndicies = value;
+            get => _data.ActiveSlottableIndicies;
+            set => _data.ActiveSlottableIndicies = value;
         }
 
 
-        public BuildData() : this(0) { }
-        public BuildData(int activeFrame)
-        {
-            this.ActiveFrameIndex = activeFrame;
-            this.ActiveSlottableIndicies = new int[GetFrameData().AttachmentPoints.Length];
-        }
-        public BuildData(int activeFrame, int[] activeSlottableIndicies)
-        {
-            SetBuildData(activeFrame, activeSlottableIndicies);
-        }
-        public BuildData SetBuildData(int activeFrame, int[] activeSlottableIndicies)
-        {
-            // Set our build data.
-            this.ActiveFrameIndex = activeFrame;
-            this.ActiveSlottableIndicies = activeSlottableIndicies;
+        public BuildDataReference() : this(0) { }
+        public BuildDataReference(int activeFrame) : this(new BuildDataState(activeFrame))
+        { }
+        public BuildDataReference(int activeFrame, int[] activeSlottableIndicies) : this(new BuildDataState(activeFrame, activeSlottableIndicies))
+        { }
+        public BuildDataReference(BuildDataState data) => this._data = data;
 
-            // Return for fluent interface.
-            return this;
+
+        public void SetBuildData(ref BuildDataState data) => this._data = data;
+
+
+        public FrameData GetFrameData() => _data.GetFrameData();
+        public SlottableData GetSlottableData(AttachmentSlotIndex slotIndex) => _data.GetSlottableData(slotIndex);
+        public int GetSlottableDataIndex(AttachmentSlotIndex slotIndex) => _data.GetSlottableDataIndex(slotIndex);
+
+
+        public ref BuildDataState GetBuildDataState() => ref this._data;
+    }
+
+    public struct BuildDataState : INetworkSerializable, IEquatable<BuildDataState>
+    {
+        public int ActiveFrameIndex;
+        public int[] ActiveSlottableIndicies;
+
+        public BuildDataState(int initialFrame)
+        {
+            this.ActiveFrameIndex = initialFrame;
+            this.ActiveSlottableIndicies = new int[CustomisationOptionsDatabase.AllOptionsDatabase.GetFrame(initialFrame).AttachmentPoints.Length];
+        }
+        public BuildDataState(int initialFrame, int[] initialSlottables)
+        {
+            this.ActiveFrameIndex = initialFrame;
+            this.ActiveSlottableIndicies = initialSlottables;
         }
 
 
@@ -48,19 +62,18 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Data
         public int GetSlottableDataIndex(AttachmentSlotIndex slotIndex) => slotIndex.GetSlotInteger() < ActiveSlottableIndicies.Length ? ActiveSlottableIndicies[slotIndex.GetSlotInteger()] : throw new System.ArgumentOutOfRangeException("");
 
 
-
         public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
         {
-            serializer.SerializeValue(ref _activeFrameIndex);
+            serializer.SerializeValue(ref ActiveFrameIndex);
 
-            if (serializer.IsWriter)
+            if (serializer.IsWriter && ActiveSlottableIndicies != null)
             {
                 FastBufferWriter writer = serializer.GetFastBufferWriter();
 
-                writer.WriteValueSafe(_activeSlottableIndicies.Length);
-                for (int i = 0; i < _activeSlottableIndicies.Length; ++i)
+                writer.WriteValueSafe(ActiveSlottableIndicies.Length);
+                for (int i = 0; i < ActiveSlottableIndicies.Length; ++i)
                 {
-                    writer.WriteValueSafe(_activeSlottableIndicies[i]);
+                    writer.WriteValueSafe(ActiveSlottableIndicies[i]);
                 }
             }
             if (serializer.IsReader)
@@ -68,15 +81,15 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Data
                 FastBufferReader reader = serializer.GetFastBufferReader();
 
                 reader.ReadValueSafe(out int length);
-                _activeSlottableIndicies = new int[length];
+                ActiveSlottableIndicies = new int[length];
 
                 for (int i = 0; i < length; ++i)
                 {
-                    reader.ReadValueSafe(out _activeSlottableIndicies[i]);
+                    reader.ReadValueSafe(out ActiveSlottableIndicies[i]);
                 }
             }
         }
 
-        public bool Equals(BuildData other) => (this.ActiveFrameIndex, this.ActiveSlottableIndicies) == (other.ActiveFrameIndex, other.ActiveSlottableIndicies);
+        public bool Equals(BuildDataState other) => (this.ActiveFrameIndex, this.ActiveSlottableIndicies) == (other.ActiveFrameIndex, other.ActiveSlottableIndicies);
     }
 }

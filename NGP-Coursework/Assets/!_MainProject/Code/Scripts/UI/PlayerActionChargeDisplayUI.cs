@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Unity.Netcode;
 using Gameplay.GameplayObjects.Character;
+using Gameplay.GameplayObjects.Players;
 using Gameplay.Actions;
 
 namespace UI.Actions
@@ -102,20 +103,17 @@ namespace UI.Actions
             AddSelfToDictionary();
 
             // Build Change Event (Enable/Disable State of this UI element).
-            PlayerSpawner.OnPlayerCustomisationFinalised += PlayerSpawner_OnPlayerCustomisationFinalised;
+            Player.OnLocalPlayerBuildUpdated += Player_OnLocalPlayerBuildUpdated;
         }
         private void OnDestroy()
         {
             RemoveSelfFromDictionary();
 
-            PlayerSpawner.OnPlayerCustomisationFinalised -= PlayerSpawner_OnPlayerCustomisationFinalised;
+            Player.OnLocalPlayerBuildUpdated -= Player_OnLocalPlayerBuildUpdated;
         }
 
-        private void PlayerSpawner_OnPlayerCustomisationFinalised(ulong clientID, Gameplay.GameplayObjects.Character.Customisation.Data.BuildData buildData)
+        private void Player_OnLocalPlayerBuildUpdated(Gameplay.GameplayObjects.Character.Customisation.Data.BuildDataReference buildData)
         {
-            if (clientID != NetworkManager.Singleton.LocalClientId)
-                return;
-
             if (buildData.GetFrameData().AttachmentPoints.Length < (int)_slotIndex)
             {
                 this.gameObject.SetActive(false);

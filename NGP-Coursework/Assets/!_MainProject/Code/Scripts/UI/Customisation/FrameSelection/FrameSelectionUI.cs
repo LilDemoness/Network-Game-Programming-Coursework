@@ -43,12 +43,12 @@ namespace UI.Customisation.FrameSelection
             Close(false);
 
             SubscribeToInput();
-            PlayerCustomisationManager.OnNonLocalClientPlayerBuildChanged += PlayerCustomisationManager_OnPlayerCustomisationStateChanged;
+            PlayerCustomisationManager.OnPlayerBuildChanged += PlayerCustomisationManager_OnPlayerCustomisationStateChanged;
         }
         private void OnDestroy()
         {
             UnsubscribeFromInput();
-            PlayerCustomisationManager.OnNonLocalClientPlayerBuildChanged -= PlayerCustomisationManager_OnPlayerCustomisationStateChanged;   
+            PlayerCustomisationManager.OnPlayerBuildChanged -= PlayerCustomisationManager_OnPlayerCustomisationStateChanged;   
         }
 
 
@@ -104,7 +104,7 @@ namespace UI.Customisation.FrameSelection
         #endregion
 
 
-        private void PlayerCustomisationManager_OnPlayerCustomisationStateChanged(ulong clientID, BuildData buildData)
+        private void PlayerCustomisationManager_OnPlayerCustomisationStateChanged(ulong clientID, BuildDataReference buildData)
         {
             if (clientID != NetworkManager.Singleton.LocalClientId)
                 return; // Not the client.

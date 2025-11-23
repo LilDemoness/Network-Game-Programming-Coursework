@@ -2,44 +2,47 @@ using Gameplay.GameplayObjects.Character.Customisation.Data;
 using Unity.Cinemachine;
 using UnityEngine;
 
-public class PlayerCamera : MonoBehaviour
+namespace Gameplay.GameplayObjects.Players
 {
-    private static CinemachineCamera s_cinemachineCamera;
-    private static Transform s_trackingTarget;
-    private static Transform TrackingTarget
+    public class PlayerCamera : MonoBehaviour
     {
-        get => s_trackingTarget;
-        set
+        private static CinemachineCamera s_cinemachineCamera;
+        private static Transform s_trackingTarget;
+        private static Transform TrackingTarget
         {
-            s_trackingTarget = value;
+            get => s_trackingTarget;
+            set
+            {
+                s_trackingTarget = value;
 
-            if (s_cinemachineCamera != null)
-                s_cinemachineCamera.Target = new CameraTarget() { TrackingTarget = s_trackingTarget };
+                if (s_cinemachineCamera != null)
+                    s_cinemachineCamera.Target = new CameraTarget() { TrackingTarget = s_trackingTarget };
+            }
         }
-    }
-    public static void SetCameraTarget(Transform cameraTarget) => TrackingTarget = cameraTarget;
+        public static void SetCameraTarget(Transform cameraTarget) => TrackingTarget = cameraTarget;
     
 
 
-    private void Awake()
-    {
-        s_cinemachineCamera = this.GetComponent<CinemachineCamera>();
-        s_cinemachineCamera.Target = new CameraTarget() { TrackingTarget = s_trackingTarget };
-        PlayerManager.OnLocalPlayerBuildUpdated += PlayerManager_OnLocalPlayerBuildUpdated;
-    }
-    private void OnDestroy()
-    {
-        PlayerManager.OnLocalPlayerBuildUpdated -= PlayerManager_OnLocalPlayerBuildUpdated;
-    }
+        private void Awake()
+        {
+            s_cinemachineCamera = this.GetComponent<CinemachineCamera>();
+            s_cinemachineCamera.Target = new CameraTarget() { TrackingTarget = s_trackingTarget };
+            Player.OnLocalPlayerBuildUpdated += PlayerManager_OnLocalPlayerBuildUpdated;
+        }
+        private void OnDestroy()
+        {
+            Player.OnLocalPlayerBuildUpdated -= PlayerManager_OnLocalPlayerBuildUpdated;
+        }
 
-    private void PlayerManager_OnLocalPlayerBuildUpdated(BuildData buildData) => SetupCameraForFrame(buildData.GetFrameData());
+        private void PlayerManager_OnLocalPlayerBuildUpdated(BuildDataReference buildData) => SetupCameraForFrame(buildData.GetFrameData());
 
 
-    private void SetupCameraForFrame(FrameData frameData)
-    {
-        CinemachineThirdPersonFollow thirdPersonFollow = s_cinemachineCamera.GetComponent<CinemachineThirdPersonFollow>();
-        thirdPersonFollow.ShoulderOffset = frameData.ThirdPersonCameraOffset;
-        thirdPersonFollow.VerticalArmLength = frameData.CameraVerticalArmLength;
-        thirdPersonFollow.CameraDistance = frameData.CameraDistance;
+        private void SetupCameraForFrame(FrameData frameData)
+        {
+            CinemachineThirdPersonFollow thirdPersonFollow = s_cinemachineCamera.GetComponent<CinemachineThirdPersonFollow>();
+            thirdPersonFollow.ShoulderOffset = frameData.ThirdPersonCameraOffset;
+            thirdPersonFollow.VerticalArmLength = frameData.CameraVerticalArmLength;
+            thirdPersonFollow.CameraDistance = frameData.CameraDistance;
+        }
     }
 }

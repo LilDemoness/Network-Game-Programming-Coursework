@@ -11,12 +11,12 @@ namespace Gameplay.GameplayObjects.Character.Customisation
     // Note: All functions should be server-only.
     public class PlayerCustomisationManager_Server : NetworkSingleton<PlayerCustomisationManager_Server>
     {
-        private Dictionary<ulong, BuildData> _playerBuilds = new Dictionary<ulong, BuildData>();    // Elements are created when players join and removed when they leave.
+        private Dictionary<ulong, BuildDataReference> _playerBuilds = new Dictionary<ulong, BuildDataReference>();    // Elements are created when players join and removed when they leave.
         /// <summary>
         ///     All player builds as synced on the server.
         /// </summary>
         /// <remarks> Will be empty on non-server clients.</remarks>
-        public Dictionary<ulong, BuildData> PlayerBuilds => _playerBuilds;
+        public Dictionary<ulong, BuildDataReference> PlayerBuilds => _playerBuilds;
 
 
         public override void OnNetworkSpawn()
@@ -64,7 +64,7 @@ namespace Gameplay.GameplayObjects.Character.Customisation
             _playerBuilds.Add(clientId, GetDefaultValidBuild());
             
             // Notify all clients (Including the new one) of the new client.
-            PlayerCustomisationManager.Instance.HandlePlayerConnectedClientRpc(clientId, _playerBuilds[clientId]);
+            PlayerCustomisationManager.Instance.HandlePlayerConnectedClientRpc(clientId, _playerBuilds[clientId].GetBuildDataState());
         }
         /// <summary>
         ///     Removes the player from our builds and notifies all clients of their disconnect.
@@ -111,17 +111,17 @@ namespace Gameplay.GameplayObjects.Character.Customisation
         /// <param name="newBuild"> The build we are wishing to validate and set.</param>
         /// <remarks> Assumes that an entry in <see cref="_playerBuilds"/> exists for the sender's clientID</remarks>
         [Rpc(SendTo.Server, RequireOwnership = false)]
-        public void SetBuildServerRpc(BuildData newBuild, RpcParams rpcParams = default) => SetBuild(rpcParams.Receive.SenderClientId, newBuild);
+        public void SetBuildServerRpc(BuildDataState newBuild, RpcParams rpcParams = default) => SetBuild(rpcParams.Receive.SenderClientId, newBuild);
 
         /// <inheritdoc cref="SetBuildServerRpc(BuildData, RpcParams)"/>
         /// <remarks> Assumes that an entry in <see cref="_playerBuilds"/> exists for the passed clientID.</remarks>
-        private void SetBuild(ulong clientId, BuildData newBuild)
+        private void SetBuild(ulong clientId, BuildDataState newBuild)
         {
             // Only update the build if it is valid.
             //  If it is invalid, we will still update the clients to put them back into line with the server.
             if (ValidateBuild(newBuild))
             {
-                _playerBuilds[clientId] = newBuild;
+                _playerBuilds[clientId].SetBuildData(ref newBuild);
             }
 
             // Update clients.
@@ -135,7 +135,7 @@ namespace Gameplay.GameplayObjects.Character.Customisation
 
         private bool ValidateFrameIndex(int frameIndex) => true;
         private bool ValidateSlottableIndex(AttachmentSlotIndex slotIndex, int slottableIndex) => true;
-        private bool ValidateBuild(BuildData buildData) 
+        private bool ValidateBuild(BuildDataState buildData) 
         {
             if (!ValidateFrameIndex(buildData.ActiveFrameIndex))
                 return false;
@@ -154,7 +154,7 @@ namespace Gameplay.GameplayObjects.Character.Customisation
         /// <summary>
         ///     Determines and returns the first possible valid build.
         /// </summary>
-        private BuildData GetDefaultValidBuild() => new BuildData();
+        private BuildDataReference GetDefaultValidBuild() => new BuildDataReference();
 
         #endregion
     }
@@ -166,37 +166,37 @@ namespace Gameplay.GameplayObjects.Character.Customisation
     /// </summary>
     public struct AllBuildSyncData : INetworkSerializable
     {
-        private ulong[] _clientIDs;
-        private BuildData[] _buildDatas;
+        private ulong[] _clientIds;
+        private BuildDataState[] _buildDataStates;
+        private int _length;
 
-        public AllBuildSyncData(Dictionary<ulong, BuildData> input)
+
+        public ulong GetClientId(int index) => _clientIds[index];
+        public ref BuildDataState GetBuildDataState(int index) => ref _buildDataStates[index];
+
+        public int Length => _length;
+
+
+        public AllBuildSyncData(Dictionary<ulong, BuildDataReference> input)
         {
-            _clientIDs = new ulong[input.Count];
-            _buildDatas = new BuildData[input.Count];
+            _clientIds = new ulong[input.Count];
+            _buildDataStates = new BuildDataState[input.Count];
+            _length = input.Count;
 
             int index = 0;
             foreach (var kvp in input)
             {
-                _clientIDs[index] = kvp.Key;
-                _buildDatas[index] = kvp.Value;
+                _clientIds[index] = kvp.Key;
+                _buildDataStates[index] = kvp.Value.GetBuildDataState();
                 ++index;
             }
         }
 
-        public Dictionary<ulong, BuildData> ToDictionary()
-        {
-            Dictionary<ulong, BuildData> outputDictionary = new Dictionary<ulong, BuildData>(capacity: _clientIDs.Length);
-            for (int i = 0; i < _clientIDs.Length; ++i)
-            {
-                outputDictionary.Add(_clientIDs[i], _buildDatas[i]);
-            }
-            return outputDictionary;
-        }
-
         public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
         {
-            serializer.SerializeValue(ref _clientIDs);
-            serializer.SerializeValue(ref _buildDatas);
+            serializer.SerializeValue(ref _clientIds);
+            serializer.SerializeValue(ref _buildDataStates);
+            serializer.SerializeValue(ref _length);
         }
     }
 }

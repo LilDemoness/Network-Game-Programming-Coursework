@@ -16,7 +16,9 @@ namespace Gameplay.GameplayObjects.Character
         public ClientCharacter ClientCharacter => m_clientCharacter;
 
 
-        public NetworkVariable<BuildData> BuildData { get; set; } = new NetworkVariable<BuildData>();
+        public NetworkVariable<BuildDataState> BuildData { get; set; } = new NetworkVariable<BuildDataState>();
+
+        public event System.Action<BuildDataReference> OnBuildDataChanged;
 
 
         /// <summary>
@@ -30,11 +32,21 @@ namespace Gameplay.GameplayObjects.Character
         public NetworkVariable<bool> IsInStealth { get; } = new NetworkVariable<bool>();
 
 
-        // Networked State Variables.
-        public NetworkVariable<float> CurrentHealth { get; private set; } = new NetworkVariable<float>();
-        public float MaxHealth => BuildData.Value?.GetFrameData().MaxHealth ?? 0.0f;
+        #region Health & Life State
 
-        public NetworkVariable<bool> IsDead { get; private set; } = new NetworkVariable<bool>();
+        public NetworkVariable<float> CurrentHealth { get; private set; } = new NetworkVariable<float>();
+        public float MaxHealth => BuildData.Value.GetFrameData()?.MaxHealth ?? 0.0f;
+
+        /// <summary>
+        ///     Should only be set in the 'SetLifeState()' functions.
+        /// </summary>
+        private bool m_isDead { get; set; }
+        public bool IsDead => m_isDead;
+
+
+        public event System.EventHandler<CharacterDeadEventArgs> OnCharacterDied;
+
+        #endregion
 
 
         // Heat.
@@ -52,7 +64,7 @@ namespace Gameplay.GameplayObjects.Character
         public ServerActionPlayer ActionPlayer => m_serverActionPlayer;
         private ServerActionPlayer m_serverActionPlayer;
 
-        public bool CanPerformActions => !IsDead.Value;
+        public bool CanPerformActions => !IsDead;
 
 
         /// <summary>
@@ -75,25 +87,22 @@ namespace Gameplay.GameplayObjects.Character
         }
         public override void OnNetworkSpawn()
         {
+            // We're subscribing to this event on clients too in order to relay our BuildData through the class reference as opposed to duplicating the struct.
+            BuildData.OnValueChanged += NetworkedBuildDataChanged;
+
             if (!IsServer)
             {
                 this.enabled = false;
                 return;
             }
 
-            // Subscribe to NetworkVariable Events.
-            BuildData.OnValueChanged += OnBuildChanged;
-            IsDead.OnValueChanged += OnLifeStateChanged;
-
-            // Initialise all our stats (May not trigger OnValidChanged events if the initialisation values are equal).
-            InitialiseHealth();
-            InitialiseHeat();
+            OnBuildDataChanged += ServerCharacter_OnBuildDataChanged;
         }
         public override void OnNetworkDespawn()
         {
             // Unsubscribe from NetworkVariable Events.
-            BuildData.OnValueChanged -= OnBuildChanged;
-            IsDead.OnValueChanged -= OnLifeStateChanged;
+            BuildData.OnValueChanged -= NetworkedBuildDataChanged;
+            OnBuildDataChanged += ServerCharacter_OnBuildDataChanged;
         }
 
 
@@ -106,7 +115,7 @@ namespace Gameplay.GameplayObjects.Character
         public void SendCharacterMovementInputServerRpc(Vector2 movementInput)
         {
             // Check that we're not dead or currently experiencing forced movement (E.g. Knockback/Charge).
-            if (IsDead.Value || _movement.IsPerformingForcedMovement())
+            if (IsDead || _movement.IsPerformingForcedMovement())
                 return;
 
             // Check if our current action prevents movement.
@@ -217,6 +226,7 @@ namespace Gameplay.GameplayObjects.Character
         private void InitialiseHealth()
         {
             CurrentHealth.Value = MaxHealth;
+            SetLifeState(this, LifeState.Alive);    // Change to InitialiseLifeState() or directly setting?
         }
 
         /// <summary>
@@ -248,14 +258,14 @@ namespace Gameplay.GameplayObjects.Character
             }
 
             // Change the value of our health.
-            SetCurrentHealth(CurrentHealth.Value + healthChange);
+            SetCurrentHealth(inflicter, CurrentHealth.Value + healthChange);
         }
         /// <summary>
         ///     Set the value of the character's health, clamped between 0 & MaxHealth.
         /// </summary>
         /// <param name="newValue"> The new value of CurrentHealth before clamping.</param>
         /// <param name="excessBecomesOverhealth"> Should health above our maximum health become Overhealth?</param>
-        private void SetCurrentHealth(float newValue, bool excessBecomesOverhealth = false)
+        private void SetCurrentHealth(ServerCharacter inflicter, float newValue, bool excessBecomesOverhealth = false)
         {
             if (excessBecomesOverhealth)
                 throw new System.NotImplementedException();
@@ -266,8 +276,7 @@ namespace Gameplay.GameplayObjects.Character
             if (CurrentHealth.Value <= 0)
             {
                 // We've died.
-                IsDead.Value = true;
-                //m_serverActionPlayer.ClearActions(false);
+                SetLifeState(inflicter, LifeState.Dead);
             }
         }
 
@@ -280,16 +289,22 @@ namespace Gameplay.GameplayObjects.Character
 
             return Mathf.Max(0.0f, MaxHealth - CurrentHealth.Value);
         }
-        public bool IsDamageable() => !IsDead.Value;
+        public bool IsDamageable() => !IsDead;
 
 
-        private void OnLifeStateChanged(bool previousValue, bool newValue)
+        private void SetLifeState(ServerCharacter inflicter, LifeState lifeState)
         {
-            if (newValue == true)
+            m_isDead = lifeState == LifeState.Dead;
+
+            if (IsDead)
             {
-                // We have died. Cancel active actions.
+                // We have just died.
+                // Cancel active actions.
                 m_serverActionPlayer.ClearActions(true);
                 _movement.CancelMove();
+
+                // Notify Listeners.
+                OnCharacterDied?.Invoke(this, new CharacterDeadEventArgs(inflicter));
             }
         }
 
@@ -342,10 +357,37 @@ namespace Gameplay.GameplayObjects.Character
 
         #region Build
 
-        private void OnBuildChanged(BuildData oldValue, BuildData newValue)
+        private void NetworkedBuildDataChanged(BuildDataState oldValue, BuildDataState newValue)
+        {
+            OnBuildDataChanged?.Invoke(new BuildDataReference(newValue));
+        }
+
+        private void ServerCharacter_OnBuildDataChanged(BuildDataReference buildData)
         {
             InitialiseHealth();
             InitialiseHeat();
+        }
+
+        #endregion
+
+
+        private enum LifeState
+        {
+            Alive = 0,
+            Dead = 1,
+        }
+
+
+        #region ServerCharacter Event Args
+
+        public class CharacterDeadEventArgs : System.EventArgs
+        {
+            public ServerCharacter Inflicter;
+
+            public CharacterDeadEventArgs(ServerCharacter inflicter)
+            {
+                this.Inflicter = inflicter;
+            }
         }
 
         #endregion

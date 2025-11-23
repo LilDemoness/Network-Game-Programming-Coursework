@@ -164,7 +164,7 @@ namespace UI.Customisation.SlottableSelection
         }
 
 
-        private void PlayerCustomisationManager_OnPlayerCustomisationStateChanged(BuildData buildData)
+        private void PlayerCustomisationManager_OnPlayerCustomisationStateChanged(BuildDataReference buildData)
         {
             // Check if our selected frame has changed, and if it has update our cached data.
             FrameData frameData = CustomisationOptionsDatabase.AllOptionsDatabase.GetFrame(buildData.ActiveFrameIndex);

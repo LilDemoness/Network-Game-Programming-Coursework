@@ -35,7 +35,7 @@ namespace Gameplay.GameplayObjects.Character.Customisation
         }
 
 
-        private void HandlePlayerConnected(ulong clientID, BuildData initialBuild)
+        private void HandlePlayerConnected(ulong clientID, BuildDataReference initialBuild)
         {
             if (_playerLobbyInstances.ContainsKey(clientID))
             {
@@ -49,7 +49,7 @@ namespace Gameplay.GameplayObjects.Character.Customisation
         private void HandlePlayerDisconnected(ulong clientID) => RemovePlayerInstance(clientID);
 
 
-        private void AddPlayerInstance(ulong clientIDToAdd, BuildData initialBuild)
+        private void AddPlayerInstance(ulong clientIDToAdd, BuildDataReference initialBuild)
         {
             // Get our desired spawn position.
             LobbySpawnPositions lobbySpawnPosition = null;

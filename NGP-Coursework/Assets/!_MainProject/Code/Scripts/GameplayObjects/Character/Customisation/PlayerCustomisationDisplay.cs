@@ -18,23 +18,23 @@ namespace Gameplay.GameplayObjects.Character.Customisation
     
 
         public void Setup(ulong ownerClientID) => this.ownerClientID = ownerClientID;
-        public void Setup(ulong ownerClientID, BuildData initialState)
+        public void Setup(ulong ownerClientID, BuildDataReference initialState)
         {
             this.ownerClientID = ownerClientID;
             PlayerCustomisationManager_OnPlayerCustomisationStateChanged(ownerClientID, initialState);
         }
         private void Awake()
         {
-            PlayerCustomisationManager.OnNonLocalClientPlayerBuildChanged += PlayerCustomisationManager_OnPlayerCustomisationStateChanged;
+            PlayerCustomisationManager.OnPlayerBuildChanged += PlayerCustomisationManager_OnPlayerCustomisationStateChanged;
 
             _gfxElements = GetComponentsInChildren<FrameGFX>();
         }
         private void OnDestroy()
         {
-            PlayerCustomisationManager.OnNonLocalClientPlayerBuildChanged -= PlayerCustomisationManager_OnPlayerCustomisationStateChanged;
+            PlayerCustomisationManager.OnPlayerBuildChanged -= PlayerCustomisationManager_OnPlayerCustomisationStateChanged;
         }
 
-        private void PlayerCustomisationManager_OnPlayerCustomisationStateChanged(ulong clientID, BuildData buildData)
+        private void PlayerCustomisationManager_OnPlayerCustomisationStateChanged(ulong clientID, BuildDataReference buildData)
         {
             if (clientID != ownerClientID)
                 return; // Not the owning client.

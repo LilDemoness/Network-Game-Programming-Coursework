@@ -1,4 +1,4 @@
-using Gameplay.GameplayObjects.Character;
+using Gameplay.GameplayObjects.Players;
 using Gameplay.GameplayObjects.Character.Customisation.Data;
 using Gameplay.GameplayObjects.Character.Customisation.Sections;
 using System.Collections.Generic;
@@ -35,15 +35,15 @@ namespace UI.Crosshairs
             }
 
             // Build Change Event (Enable/Disable State of this UI element).
-            PlayerManager.OnLocalPlayerBuildUpdated += PlayerManager_OnLocalPlayerBuildUpdated;
+            Player.OnLocalPlayerBuildUpdated += PlayerManager_OnLocalPlayerBuildUpdated;
         }
         private void OnDestroy()
         {
-            PlayerManager.OnLocalPlayerBuildUpdated -= PlayerManager_OnLocalPlayerBuildUpdated;
+            Player.OnLocalPlayerBuildUpdated -= PlayerManager_OnLocalPlayerBuildUpdated;
         }
 
 
-        private void PlayerManager_OnLocalPlayerBuildUpdated(BuildData buildData)
+        private void PlayerManager_OnLocalPlayerBuildUpdated(BuildDataReference buildData)
         {
             if (buildData.GetFrameData().AttachmentPoints.Length < (int)_attachmentSlotIndex)
                 DisableCrosshair();
@@ -58,7 +58,7 @@ namespace UI.Crosshairs
             this.gameObject.SetActive(true);
 
             // Cache a reference to our slot section.
-            _slotGFXSection = PlayerManager.LocalClientInstance.GetSlotGFXForIndex(_attachmentSlotIndex);
+            _slotGFXSection = Player.LocalClientInstance.GetSlotGFXForIndex(_attachmentSlotIndex);
 
             // Update our Crosshair Settings (Reticule Type, Seeking Radius, Charging Bar, etc).
             SetCrosshairFromPrefab(_slotGFXSection.SlottableData.AssociatedAction.ActionCrosshairPrefab);

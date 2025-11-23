@@ -1,6 +1,7 @@
 using UnityEngine;
 using Unity.Netcode;
 using UserInput;
+using Gameplay.GameplayObjects.Players;
 using Gameplay.GameplayObjects.Character.Customisation.Sections;
 
 public class CameraControllerTest : NetworkBehaviour
@@ -10,7 +11,7 @@ public class CameraControllerTest : NetworkBehaviour
     public static Plane CrosshairAdjustmentPlane { get => s_crosshairAdjustmentPlane; }
 
 
-    [SerializeField] private PlayerManager _playerManager;
+    [SerializeField] private Player _playerManager;
 
 
     [Header("Rotation Settings")]
@@ -43,12 +44,12 @@ public class CameraControllerTest : NetworkBehaviour
 
     private void Awake()
     {
-        _playerManager.OnThisPlayerBuildUpdated += PlayerManager_OnThisPlayerBuildUpdated;
+        _playerManager.OnThisPlayerBuildUpdated += Player_OnLocalPlayerBuildUpdated;
     }
     public override void OnDestroy()
     {
         base.OnDestroy();
-        _playerManager.OnThisPlayerBuildUpdated -= PlayerManager_OnThisPlayerBuildUpdated;
+        _playerManager.OnThisPlayerBuildUpdated -= Player_OnLocalPlayerBuildUpdated;
     }
     public override void OnNetworkSpawn()
     {
@@ -65,6 +66,9 @@ public class CameraControllerTest : NetworkBehaviour
 
     private void Update()
     {
+        if (_verticalRotationPivot == null)
+            return;
+
         if (IsOwner)
         {
             // Determine our desired rotation on the owner.
@@ -92,7 +96,7 @@ public class CameraControllerTest : NetworkBehaviour
     }
 
 
-    private void PlayerManager_OnThisPlayerBuildUpdated() => OnFrameChanged(_playerManager.GetActiveFrame());
+    private void Player_OnLocalPlayerBuildUpdated() => OnFrameChanged(_playerManager.GetActiveFrame());
     private void OnFrameChanged(FrameGFX newFrame)
     {
         // Our frame has changed. Cache frame-specific data that we require for the camera (Vertical Pivot, Offsets, Rotation Axis, etc).
