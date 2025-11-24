@@ -6,6 +6,7 @@ using Gameplay.GameplayObjects.Character.Customisation.Sections;
 using Gameplay.GameplayObjects.Character.Customisation.Data;
 using Gameplay.Actions;
 using UserInput;
+using Unity.Netcode.Components;
 
 namespace Gameplay.GameplayObjects.Players
 {
@@ -17,6 +18,7 @@ namespace Gameplay.GameplayObjects.Players
 
         [field: Header("Player Component References")]
         [field: SerializeField] public ServerCharacter ServerCharacter { get; private set; }
+        [field: SerializeField] public NetworkTransform NetworkTransform { get; private set; }
 
 
 
@@ -35,6 +37,17 @@ namespace Gameplay.GameplayObjects.Players
         ///     Called when we've updated the local player's build.
         /// </summary>
         public static event System.Action<BuildDataReference> OnLocalPlayerBuildUpdated;
+
+
+        /// <summary>
+        ///     Called when any player is killed.
+        /// </summary>
+        public static event System.EventHandler<PlayerDeathEventArgs> OnPlayerDeath;
+        /// <summary>
+        ///     Called when the local player is killed.
+        /// </summary>
+        // Client-side.
+        public static event System.EventHandler<PlayerDeathEventArgs> OnLocalPlayerDeath;
 
 
         private void Awake()
@@ -99,15 +112,71 @@ namespace Gameplay.GameplayObjects.Players
                 OnLocalPlayerBuildUpdated?.Invoke(buildData);
         }
 
-        private void ServerCharacter_OnCharacterDied(object sender, ServerCharacter.CharacterDeadEventArgs e)
+        private void ServerCharacter_OnCharacterDied(object sender, CharacterDeadEventArgs e)
         {
             Debug.Log("Player Died");
-            ClientInput.PreventActions(typeof(Player), ClientInput.ActionTypes.Respawning);
+
+            NotifyOwnerOfDeath(e);
+            OnPlayerDeath?.Invoke(this, new PlayerDeathEventArgs(e));
         }
-        public void PerformRespawn()
+
+
+        /// <summary>
+        ///     Notify the owning client that their player has died.<br/>
+        ///     Argument passing choice is handled within this function.
+        /// </summary>
+        private void NotifyOwnerOfDeath(CharacterDeadEventArgs args)
+        {
+            if (args.Inflicter == null)
+                OnPlayerDiedByGameOwnerRpc();
+            else
+                OnPlayerDiedOwnerRpc(args.Inflicter.NetworkObjectId);
+        }
+        /// <summary>
+        ///     Called on the owning client when the player dies.
+        /// </summary>
+        /// <remarks> If there is no Inflicter Object (Such as if the change was caused by the server), instead use <see cref="OnPlayerDiedByGameOwnerRpc()"/></remarks>
+        [Rpc(SendTo.Owner)]
+        public void OnPlayerDiedOwnerRpc(ulong inflicterObjectId) => OnLocalPlayerDied(NetworkManager.Singleton.SpawnManager.SpawnedObjects[inflicterObjectId].GetComponent<ServerCharacter>());
+        /// <summary>
+        ///     Called on the owning client when the player dies from an unknown source, such as the Game itself.
+        /// </summary>
+        [Rpc(SendTo.Owner)]
+        public void OnPlayerDiedByGameOwnerRpc() => OnLocalPlayerDied(null);
+        /// <summary>
+        ///     Handles player-specific client-side death logic (Input, Notifying the Respawn Screen, etc).<br/>
+        ///     Called when the local player has died.
+        /// </summary>
+        /// <param name="inflicter"> The ServerCharacter that caused this player to die.</param>
+        private void OnLocalPlayerDied(ServerCharacter inflicter)
+        {
+            ClientInput.PreventActions(typeof(Player), ClientInput.ActionTypes.Respawning);         // Prevent Input.
+            OnLocalPlayerDeath?.Invoke(this, new PlayerDeathEventArgs(ServerCharacter, inflicter)); // Notify Listeners (Respawn Screen, etc).
+        }
+
+
+
+        public void PerformRespawn(Vector3 respawnPosition)
+        {
+            // Notify the owner of the respawn.
+            NotifyOwnerOfRespawn();
+
+            // Revive the character.
+            ServerCharacter.ReviveCharacter(null);  // Revive the character from the Game System.
+            NetworkTransform.Teleport(respawnPosition, Quaternion.LookRotation(Vector3.forward, Vector3.up), this.transform.localScale);    // Note: Doesn't actually change rotation as the CameraControllerTest instantly overrides it.
+        }
+
+        /// <summary>
+        ///     Notify the owning client that their player has been respawned.
+        /// </summary>
+        private void NotifyOwnerOfRespawn() => OnPlayerRespawnPerformedOwnerRpc();
+        /// <summary>
+        ///     Called on the owning client when the player has been respawned.
+        /// </summary>
+        [Rpc(SendTo.Owner)]
+        private void OnPlayerRespawnPerformedOwnerRpc()
         {
             ClientInput.RemoveActionPrevention(typeof(Player), ClientInput.ActionTypes.Respawning);
-
         }
 
 
@@ -190,5 +259,26 @@ namespace Gameplay.GameplayObjects.Players
         }
 
         #endregion
+
+
+
+        public class PlayerDeathEventArgs : CharacterDeadEventArgs
+        {
+            public PlayerDeathEventArgs(CharacterDeadEventArgs baseArgs) : base(baseArgs.Character, baseArgs.Inflicter)
+            { }
+            public PlayerDeathEventArgs(ServerCharacter character, ServerCharacter inflicter) : base(character, inflicter)
+            { }
+        }
+        /*
+        public class PlayerDeathEventArgs : System.EventArgs
+        {
+            ServerCharacter.CharacterDeadEventArgs CharacterDeathArgs;
+
+            public PlayerDeathEventArgs(ServerCharacter.CharacterDeadEventArgs characterDeathArgs)
+            {
+                this.CharacterDeathArgs = characterDeathArgs;
+            }
+        }
+        */
     }
 }

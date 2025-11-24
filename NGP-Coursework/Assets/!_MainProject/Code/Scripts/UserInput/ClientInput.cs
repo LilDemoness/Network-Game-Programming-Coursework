@@ -298,6 +298,18 @@ namespace UserInput
                 RemoveCombatActionPrevention(lockingType);
             if (actionsToUnlock.HasFlag(ActionTypes.UI))
                 RemoveUIActionPrevention(lockingType);
+
+            LogPreventionCount();
+            Debug.Log("Movement Enabled: " + s_inputActions.Movement.enabled);
+        }
+
+
+        private static void LogPreventionCount()
+        {
+            Debug.Log("Movement: " + s_movementPreventionDictionary.Count);
+            Debug.Log("Camera: " + s_cameraPreventionDictionary.Count);
+            Debug.Log("Combat: " + s_combatPreventionDictionary.Count);
+            Debug.Log("UI: " + s_uiPreventionDictionary.Count);
         }
 
 

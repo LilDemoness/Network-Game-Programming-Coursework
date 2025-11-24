@@ -26,7 +26,7 @@ namespace Gameplay.GameplayObjects.Character
         [SerializeField] private GameObject _graphicsRoot;  // Temp.
 
 
-        #region Client RPCs
+        #region Action Client RPCs
 
         /// <summary>
         ///     RPC to start playing an Action's FX on all clients.

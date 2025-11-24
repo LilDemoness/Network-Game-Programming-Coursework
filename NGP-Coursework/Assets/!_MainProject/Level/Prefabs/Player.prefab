@@ -190,6 +190,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
   <ServerCharacter>k__BackingField: {fileID: 8374713656994953261}
+  <NetworkTransform>k__BackingField: {fileID: 5290714058095919189}
   m_playerFrames:
   - {fileID: 6679786903879756933}
   - {fileID: 8469485533711114925}

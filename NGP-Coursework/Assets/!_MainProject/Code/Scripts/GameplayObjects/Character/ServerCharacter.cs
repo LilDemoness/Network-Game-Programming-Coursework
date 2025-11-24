@@ -40,8 +40,8 @@ namespace Gameplay.GameplayObjects.Character
         /// <summary>
         ///     Should only be set in the 'SetLifeState()' functions.
         /// </summary>
-        private bool m_isDead { get; set; }
-        public bool IsDead => m_isDead;
+        private LifeState m_currentLifeState { get; set; } = LifeState.Alive;
+        public bool IsDead => m_currentLifeState == LifeState.Dead;
 
 
         public event System.EventHandler<CharacterDeadEventArgs> OnCharacterDied;
@@ -102,7 +102,7 @@ namespace Gameplay.GameplayObjects.Character
         {
             // Unsubscribe from NetworkVariable Events.
             BuildData.OnValueChanged -= NetworkedBuildDataChanged;
-            OnBuildDataChanged += ServerCharacter_OnBuildDataChanged;
+            OnBuildDataChanged -= ServerCharacter_OnBuildDataChanged;
         }
 
 
@@ -295,9 +295,25 @@ namespace Gameplay.GameplayObjects.Character
         public bool IsDamageable() => !IsDead;
 
 
+        public void ReviveCharacter(ServerCharacter inflicter)
+        {
+            if (inflicter == null)  // Revived by the Game System.
+            { }
+            else if (inflicter != this) // Revived by Another Player.
+            { }
+            else    // Revied by ourself.
+            { }
+
+            // Set our Life State.
+            SetLifeState(inflicter, LifeState.Alive);
+
+            // Reset Health & Heat. (Change from initialisation functions?)
+            InitialiseHealth();
+            InitialiseHeat();
+        }
         private void SetLifeState(ServerCharacter inflicter, LifeState lifeState)
         {
-            m_isDead = lifeState == LifeState.Dead;
+            m_currentLifeState = lifeState;
 
             if (IsDead)
             {
@@ -307,7 +323,7 @@ namespace Gameplay.GameplayObjects.Character
                 _movement.CancelMove();
 
                 // Notify Listeners.
-                OnCharacterDied?.Invoke(this, new CharacterDeadEventArgs(inflicter));
+                OnCharacterDied?.Invoke(this, new CharacterDeadEventArgs(this, inflicter));
             }
         }
 
@@ -374,28 +390,6 @@ namespace Gameplay.GameplayObjects.Character
         #endregion
 
 
-        private enum LifeState
-        {
-            Alive = 0,
-            Dead = 1,
-        }
-
-
-        #region ServerCharacter Event Args
-
-        public class CharacterDeadEventArgs : System.EventArgs
-        {
-            public ServerCharacter Inflicter;
-
-            public CharacterDeadEventArgs(ServerCharacter inflicter)
-            {
-                this.Inflicter = inflicter;
-            }
-        }
-
-        #endregion
-
-
 
         #region Editor Testing Functions
 #if UNITY_EDITOR
@@ -408,5 +402,23 @@ namespace Gameplay.GameplayObjects.Character
 
 #endif
         #endregion
+    }
+
+
+    public enum LifeState
+    {
+        Alive = 0,
+        Dead = 1,
+    }
+    public class CharacterDeadEventArgs : System.EventArgs
+    {
+        public ServerCharacter Character;
+        public ServerCharacter Inflicter;
+
+        public CharacterDeadEventArgs(ServerCharacter character, ServerCharacter inflicter)
+        {
+            this.Character = character;
+            this.Inflicter = inflicter;
+        }
     }
 }
