@@ -5,6 +5,7 @@ using Gameplay.GameplayObjects.Character;
 using Gameplay.GameplayObjects.Character.Customisation.Sections;
 using Gameplay.GameplayObjects.Character.Customisation.Data;
 using Gameplay.Actions;
+using UserInput;
 
 namespace Gameplay.GameplayObjects.Players
 {
@@ -47,6 +48,7 @@ namespace Gameplay.GameplayObjects.Players
             Debug.Log("Player Wrapper Count: " + _playerGFXWrappers.Length);
 
             ServerCharacter.OnBuildDataChanged += OnBuildChanged;
+            ServerCharacter.OnCharacterDied += ServerCharacter_OnCharacterDied;
         }
         public override void OnNetworkSpawn()
         {
@@ -61,6 +63,7 @@ namespace Gameplay.GameplayObjects.Players
             base.OnDestroy();
 
             ServerCharacter.OnBuildDataChanged -= OnBuildChanged;
+            ServerCharacter.OnCharacterDied -= ServerCharacter_OnCharacterDied;
         }
 
 
@@ -96,6 +99,19 @@ namespace Gameplay.GameplayObjects.Players
                 OnLocalPlayerBuildUpdated?.Invoke(buildData);
         }
 
+        private void ServerCharacter_OnCharacterDied(object sender, ServerCharacter.CharacterDeadEventArgs e)
+        {
+            Debug.Log("Player Died");
+            ClientInput.PreventActions(typeof(Player), ClientInput.ActionTypes.Respawning);
+        }
+        public void PerformRespawn()
+        {
+            ClientInput.RemoveActionPrevention(typeof(Player), ClientInput.ActionTypes.Respawning);
+
+        }
+
+
+        #region GFX
 
         /// <summary>
         ///     Returns the currently active FrameGFX instance.
@@ -172,5 +188,7 @@ namespace Gameplay.GameplayObjects.Players
             }
             public void Disable() => _frameGFX.Toggle(null);
         }
+
+        #endregion
     }
 }

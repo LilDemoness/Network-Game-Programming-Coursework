@@ -3,13 +3,13 @@
     "name": "PlayerInputActions",
     "maps": [
         {
-            "name": "General",
-            "id": "4a1eedba-bfaf-4aa0-8bef-0967a8e1ee42",
+            "name": "Movement",
+            "id": "c1699997-ad6d-4dad-bcc1-9fd6ec4bb729",
             "actions": [
                 {
                     "name": "Movement",
                     "type": "Value",
-                    "id": "a41804a0-0214-4e03-a696-f59e2bf99522",
+                    "id": "8a957303-12c6-4a3c-907d-cc5ff6fe558f",
                     "expectedControlType": "Vector2",
                     "processors": "",
                     "interactions": "",
@@ -18,26 +18,17 @@
                 {
                     "name": "Jump",
                     "type": "Button",
-                    "id": "accf7844-fd72-473e-8acc-f35afe6cb25e",
+                    "id": "701ca081-a103-4bc9-8042-e8f75b7665a6",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
-                },
-                {
-                    "name": "LookInput",
-                    "type": "Value",
-                    "id": "3b2a746e-c828-4136-95c4-ec2a40ea6d48",
-                    "expectedControlType": "Vector2",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": true
                 }
             ],
             "bindings": [
                 {
                     "name": "WASD",
-                    "id": "1077648d-6aa8-4b82-b3ef-15d5f3e61768",
+                    "id": "76f35709-6457-484e-9e27-033e2a43ee3a",
                     "path": "2DVector",
                     "interactions": "",
                     "processors": "",
@@ -48,7 +39,7 @@
                 },
                 {
                     "name": "up",
-                    "id": "465b41c1-0d77-4b29-bb4b-612c80e96544",
+                    "id": "ecbe016b-279c-4b86-9fe5-4ae6f4b6988e",
                     "path": "<Keyboard>/w",
                     "interactions": "",
                     "processors": "",
@@ -59,7 +50,7 @@
                 },
                 {
                     "name": "left",
-                    "id": "786c7ce0-fd60-470c-ab25-944a375b11d9",
+                    "id": "b12b9999-0568-4737-8836-735b0e00b7fd",
                     "path": "<Keyboard>/a",
                     "interactions": "",
                     "processors": "",
@@ -70,7 +61,7 @@
                 },
                 {
                     "name": "down",
-                    "id": "8a08a80a-3bf8-4f41-bf3a-ed63180954b1",
+                    "id": "60aebe6b-1088-4125-8e65-100f58d89bd5",
                     "path": "<Keyboard>/s",
                     "interactions": "",
                     "processors": "",
@@ -81,7 +72,7 @@
                 },
                 {
                     "name": "right",
-                    "id": "5490f70c-a15c-45df-826d-52ff025aad85",
+                    "id": "24290271-bf35-4af7-b5e8-68e14850fe4a",
                     "path": "<Keyboard>/d",
                     "interactions": "",
                     "processors": "",
@@ -92,7 +83,7 @@
                 },
                 {
                     "name": "",
-                    "id": "474b959a-d07d-460a-b47a-d4d893a86e6c",
+                    "id": "d9c51578-07fa-424c-bd11-18fd14209f91",
                     "path": "<Keyboard>/space",
                     "interactions": "",
                     "processors": "",
@@ -100,10 +91,27 @@
                     "action": "Jump",
                     "isComposite": false,
                     "isPartOfComposite": false
-                },
+                }
+            ]
+        },
+        {
+            "name": "Camera",
+            "id": "a599240b-141e-439a-8ecc-469e70fcb5e0",
+            "actions": [
+                {
+                    "name": "LookInput",
+                    "type": "Value",
+                    "id": "0b48b836-d29e-45eb-8b28-cccf8e9c8a11",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                }
+            ],
+            "bindings": [
                 {
                     "name": "",
-                    "id": "142af594-0902-4d72-9e91-e25ec4904555",
+                    "id": "dfe647d6-1a41-4ce6-ac70-cf8d7a3bcdba",
                     "path": "<Mouse>/delta",
                     "interactions": "",
                     "processors": "",

@@ -115,7 +115,7 @@ namespace Gameplay.GameplayObjects.Character
         public void SendCharacterMovementInputServerRpc(Vector2 movementInput)
         {
             // Check that we're not dead or currently experiencing forced movement (E.g. Knockback/Charge).
-            if (IsDead || _movement.IsPerformingForcedMovement())
+            if (!CanPerformActions || _movement.IsPerformingForcedMovement())
                 return;
 
             // Check if our current action prevents movement.
@@ -138,6 +138,9 @@ namespace Gameplay.GameplayObjects.Character
         [Rpc(SendTo.Server)]
         public void PlayActionServerRpc(ActionRequestData data)
         {
+            if (!CanPerformActions)
+                return;
+
             ActionRequestData data1 = data;
             if (GameDataSource.Instance.GetActionDefinitionByID(data1.ActionID).IsHostileAction)
             {
@@ -171,7 +174,7 @@ namespace Gameplay.GameplayObjects.Character
         ///     Play a sequence of actions.
         /// </summary>
         /// <param name="action"></param>
-        public void PlayAction(ref ActionRequestData action)
+        private void PlayAction(ref ActionRequestData action)
         {
             if (action.PreventMovement)
             {
@@ -273,7 +276,7 @@ namespace Gameplay.GameplayObjects.Character
             CurrentHealth.Value = Mathf.Clamp(newValue, 0, MaxHealth);
             Debug.Log($"New Health: {CurrentHealth.Value}");
 
-            if (CurrentHealth.Value <= 0)
+            if (CurrentHealth.Value <= 0.0f)
             {
                 // We've died.
                 SetLifeState(inflicter, LifeState.Dead);
@@ -390,6 +393,20 @@ namespace Gameplay.GameplayObjects.Character
             }
         }
 
+        #endregion
+
+
+
+        #region Editor Testing Functions
+#if UNITY_EDITOR
+
+        [ContextMenu("Kill Character")]
+        private void Editor_KillCharacter()
+        {
+            SetCurrentHealth(this, 0.0f);
+        }
+
+#endif
         #endregion
     }
 }

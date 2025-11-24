@@ -13,7 +13,6 @@ GameObject:
   - component: {fileID: 5290714058095919189}
   - component: {fileID: 8374713656994953261}
   - component: {fileID: 5193017226030722943}
-  - component: {fileID: 420464249908361988}
   - component: {fileID: 6339476480414985111}
   - component: {fileID: 3943280201037405906}
   - component: {fileID: 3329371058562629056}
@@ -145,19 +144,6 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   _serverCharacter: {fileID: 8374713656994953261}
   _serverWeaponController: {fileID: 2215872362936695194}
---- !u!114 &420464249908361988
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4284907619315406047}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ab56a91d9eb63f94a9c1f81457b0fcca, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ShowTopMostFoldoutHeaderGroup: 1
 --- !u!114 &6339476480414985111
 MonoBehaviour:
   m_ObjectHideFlags: 0
