@@ -1,0 +1,106 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d32af3017e46e94192ee8632a2d136f, type: 3}
+  m_Name: InputIconData
+  m_EditorClassIdentifier: 
+  _spriteAssetWithDS4: {fileID: 11400000, guid: e4a4f9ba03379e1429eacd7ebc8a98a6, type: 2}
+  _spriteAssetWithoutDS4: {fileID: 11400000, guid: 1b726a3c35ef5a0458a3a91ee99358bc, type: 2}
+  _keyboardIcons:
+    _q: {fileID: 1714766786, guid: db810887608b04641bccf5d4c0b8ad1a, type: 3}
+    _w: {fileID: 1906017106, guid: db810887608b04641bccf5d4c0b8ad1a, type: 3}
+    _e: {fileID: -481891988, guid: db810887608b04641bccf5d4c0b8ad1a, type: 3}
+    _r: {fileID: -1838683066, guid: db810887608b04641bccf5d4c0b8ad1a, type: 3}
+    _t: {fileID: -1564204205, guid: db810887608b04641bccf5d4c0b8ad1a, type: 3}
+    _y: {fileID: -499339745, guid: db810887608b04641bccf5d4c0b8ad1a, type: 3}
+    _u: {fileID: -1889779494, guid: db810887608b04641bccf5d4c0b8ad1a, type: 3}
+    _i: {fileID: 559514836, guid: db810887608b04641bccf5d4c0b8ad1a, type: 3}
+    _o: {fileID: 1915974186, guid: db810887608b04641bccf5d4c0b8ad1a, type: 3}
+    _p: {fileID: 264794967, guid: db810887608b04641bccf5d4c0b8ad1a, type: 3}
+    _a: {fileID: 145300290, guid: db810887608b04641bccf5d4c0b8ad1a, type: 3}
+    _s: {fileID: -474079231, guid: db810887608b04641bccf5d4c0b8ad1a, type: 3}
+    _d: {fileID: -2058876074, guid: db810887608b04641bccf5d4c0b8ad1a, type: 3}
+    _f: {fileID: -1373464365, guid: db810887608b04641bccf5d4c0b8ad1a, type: 3}
+    _g: {fileID: 271371258, guid: db810887608b04641bccf5d4c0b8ad1a, type: 3}
+    _h: {fileID: -1856580642, guid: db810887608b04641bccf5d4c0b8ad1a, type: 3}
+    _j: {fileID: 606150636, guid: db810887608b04641bccf5d4c0b8ad1a, type: 3}
+    _k: {fileID: 1364782458, guid: db810887608b04641bccf5d4c0b8ad1a, type: 3}
+    _l: {fileID: 22232001, guid: db810887608b04641bccf5d4c0b8ad1a, type: 3}
+    _z: {fileID: -406433060, guid: db810887608b04641bccf5d4c0b8ad1a, type: 3}
+    _x: {fileID: -1867976058, guid: db810887608b04641bccf5d4c0b8ad1a, type: 3}
+    _c: {fileID: 880261961, guid: db810887608b04641bccf5d4c0b8ad1a, type: 3}
+    _v: {fileID: 446954945, guid: db810887608b04641bccf5d4c0b8ad1a, type: 3}
+    _b: {fileID: -662810599, guid: db810887608b04641bccf5d4c0b8ad1a, type: 3}
+    _n: {fileID: -1035543859, guid: db810887608b04641bccf5d4c0b8ad1a, type: 3}
+    _m: {fileID: -436881631, guid: db810887608b04641bccf5d4c0b8ad1a, type: 3}
+    _1: {fileID: -275153297, guid: db810887608b04641bccf5d4c0b8ad1a, type: 3}
+    _2: {fileID: -1161579512, guid: db810887608b04641bccf5d4c0b8ad1a, type: 3}
+    _3: {fileID: 2100825159, guid: db810887608b04641bccf5d4c0b8ad1a, type: 3}
+    _4: {fileID: -1952973462, guid: db810887608b04641bccf5d4c0b8ad1a, type: 3}
+    _5: {fileID: -1239820292, guid: db810887608b04641bccf5d4c0b8ad1a, type: 3}
+    _6: {fileID: -495587832, guid: db810887608b04641bccf5d4c0b8ad1a, type: 3}
+    _7: {fileID: 1578670897, guid: db810887608b04641bccf5d4c0b8ad1a, type: 3}
+    _8: {fileID: 1747497920, guid: db810887608b04641bccf5d4c0b8ad1a, type: 3}
+    _9: {fileID: -2127303354, guid: db810887608b04641bccf5d4c0b8ad1a, type: 3}
+    _0: {fileID: -1206579178, guid: db810887608b04641bccf5d4c0b8ad1a, type: 3}
+    _upArrow: {fileID: 1096405749, guid: db810887608b04641bccf5d4c0b8ad1a, type: 3}
+    _downArrow: {fileID: -1559958642, guid: db810887608b04641bccf5d4c0b8ad1a, type: 3}
+    _leftArrow: {fileID: -930956633, guid: db810887608b04641bccf5d4c0b8ad1a, type: 3}
+    _rightArrow: {fileID: 85982086, guid: db810887608b04641bccf5d4c0b8ad1a, type: 3}
+    _space: {fileID: 2084908843, guid: db810887608b04641bccf5d4c0b8ad1a, type: 3}
+    _shift: {fileID: 1004466449, guid: db810887608b04641bccf5d4c0b8ad1a, type: 3}
+    _control: {fileID: 1870475402, guid: db810887608b04641bccf5d4c0b8ad1a, type: 3}
+    _return: {fileID: 0}
+    _backspace: {fileID: 0}
+    _escape: {fileID: -809905285, guid: db810887608b04641bccf5d4c0b8ad1a, type: 3}
+    _lmb: {fileID: 0}
+    _rmb: {fileID: 0}
+    _mmb: {fileID: 0}
+  _xboxIcons:
+    _buttonNorth: {fileID: 1580661106, guid: 56bcab096aaa96041918f6c0bd3d8e43, type: 3}
+    _buttonSouth: {fileID: -1729129668, guid: 56bcab096aaa96041918f6c0bd3d8e43, type: 3}
+    _buttonEast: {fileID: 579562206, guid: 56bcab096aaa96041918f6c0bd3d8e43, type: 3}
+    _buttonWest: {fileID: -138886864, guid: 56bcab096aaa96041918f6c0bd3d8e43, type: 3}
+    _leftTrigger: {fileID: 1540010818, guid: 56bcab096aaa96041918f6c0bd3d8e43, type: 3}
+    _rightTrigger: {fileID: -406710639, guid: 56bcab096aaa96041918f6c0bd3d8e43, type: 3}
+    _leftShoulder: {fileID: -607452445, guid: 56bcab096aaa96041918f6c0bd3d8e43, type: 3}
+    _rightShoulder: {fileID: 1917931919, guid: 56bcab096aaa96041918f6c0bd3d8e43, type: 3}
+    _dpad: {fileID: 125895286, guid: 56bcab096aaa96041918f6c0bd3d8e43, type: 3}
+    _dpadUp: {fileID: 481620720, guid: 56bcab096aaa96041918f6c0bd3d8e43, type: 3}
+    _dpadDown: {fileID: -928660077, guid: 56bcab096aaa96041918f6c0bd3d8e43, type: 3}
+    _dpadLeft: {fileID: -648692203, guid: 56bcab096aaa96041918f6c0bd3d8e43, type: 3}
+    _dpadRight: {fileID: 1300110417, guid: 56bcab096aaa96041918f6c0bd3d8e43, type: 3}
+    _leftStick: {fileID: 966506041, guid: 56bcab096aaa96041918f6c0bd3d8e43, type: 3}
+    _rightStick: {fileID: 2078175697, guid: 56bcab096aaa96041918f6c0bd3d8e43, type: 3}
+    _leftStickPress: {fileID: -2046989246, guid: 56bcab096aaa96041918f6c0bd3d8e43, type: 3}
+    _rightStickPress: {fileID: -140324703, guid: 56bcab096aaa96041918f6c0bd3d8e43, type: 3}
+    _startButton: {fileID: -1243594359, guid: 56bcab096aaa96041918f6c0bd3d8e43, type: 3}
+    _selectButton: {fileID: -333623753, guid: 56bcab096aaa96041918f6c0bd3d8e43, type: 3}
+  _ds4Icons:
+    _buttonNorth: {fileID: -630518220, guid: abe80507f507f9c49b3d8da64a19cf79, type: 3}
+    _buttonSouth: {fileID: -2093352930, guid: abe80507f507f9c49b3d8da64a19cf79, type: 3}
+    _buttonEast: {fileID: 27271173, guid: abe80507f507f9c49b3d8da64a19cf79, type: 3}
+    _buttonWest: {fileID: 1776042251, guid: abe80507f507f9c49b3d8da64a19cf79, type: 3}
+    _leftTrigger: {fileID: -1288934535, guid: abe80507f507f9c49b3d8da64a19cf79, type: 3}
+    _rightTrigger: {fileID: 542599136, guid: abe80507f507f9c49b3d8da64a19cf79, type: 3}
+    _leftShoulder: {fileID: 30004194, guid: abe80507f507f9c49b3d8da64a19cf79, type: 3}
+    _rightShoulder: {fileID: 1578728473, guid: abe80507f507f9c49b3d8da64a19cf79, type: 3}
+    _dpad: {fileID: -854244931, guid: abe80507f507f9c49b3d8da64a19cf79, type: 3}
+    _dpadUp: {fileID: 2065253585, guid: abe80507f507f9c49b3d8da64a19cf79, type: 3}
+    _dpadDown: {fileID: -1167213490, guid: abe80507f507f9c49b3d8da64a19cf79, type: 3}
+    _dpadLeft: {fileID: -1408633714, guid: abe80507f507f9c49b3d8da64a19cf79, type: 3}
+    _dpadRight: {fileID: 1698082512, guid: abe80507f507f9c49b3d8da64a19cf79, type: 3}
+    _leftStick: {fileID: 162588448, guid: abe80507f507f9c49b3d8da64a19cf79, type: 3}
+    _rightStick: {fileID: -293745415, guid: abe80507f507f9c49b3d8da64a19cf79, type: 3}
+    _leftStickPress: {fileID: 428230549, guid: abe80507f507f9c49b3d8da64a19cf79, type: 3}
+    _rightStickPress: {fileID: -2067677511, guid: abe80507f507f9c49b3d8da64a19cf79, type: 3}
+    _startButton: {fileID: -1807124974, guid: abe80507f507f9c49b3d8da64a19cf79, type: 3}
+    _selectButton: {fileID: 614161653, guid: abe80507f507f9c49b3d8da64a19cf79, type: 3}

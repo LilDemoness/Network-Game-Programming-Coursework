@@ -1792,7 +1792,7 @@ MonoBehaviour:
       m_Calls: []
   m_text: 'Customise Frame
 
-    [A]'
+    <sprite name="Mouse_Simple">'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -1811,7 +1811,7 @@ MonoBehaviour:
     bottomLeft: {r: 1, g: 1, b: 1, a: 1}
     bottomRight: {r: 1, g: 1, b: 1, a: 1}
   m_fontColorGradientPreset: {fileID: 0}
-  m_spriteAsset: {fileID: 0}
+  m_spriteAsset: {fileID: 11400000, guid: e4a4f9ba03379e1429eacd7ebc8a98a6, type: 2}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
   m_TextStyleHashCode: -1183493901
@@ -5529,12 +5529,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b29e33449519d354e92951e868d2982b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _inputAction: {fileID: 0}
+  _inputAction: {fileID: 6555333593948997949, guid: 832195adfe757804ab6ebd15233eab2e, type: 3}
   _inputActionType: 0
   _allowInputWhenNotInFocus: 0
   _onButtonTriggered:
     m_PersistentCalls:
       m_Calls: []
+  _iconDisplayText: {fileID: 510843063}
+  _textFormattingString: 'Customise Frame
+
+    {0}'
 --- !u!114 &1807852750
 MonoBehaviour:
   m_ObjectHideFlags: 0

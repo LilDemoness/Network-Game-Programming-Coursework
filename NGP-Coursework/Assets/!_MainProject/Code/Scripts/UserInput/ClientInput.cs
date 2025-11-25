@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.Users;
 
 namespace UserInput
 {
@@ -43,6 +45,22 @@ namespace UserInput
         #endregion
 
 
+        #region Input Device Type
+
+        private const string MOUSE_AND_KEYBOARD_CONTROL_SCHEME_NAME = "MnK";
+        private const string GAMEPAD_CONTROL_SCHEME_NAME = "Gamepad";
+
+        private static InputControlScheme s_currentControlScheme = default;
+        public static InputControl CurrentInputDevice {  get; private set; }
+        public static event Action OnInputDeviceChanged;
+
+        public enum DeviceType { MnK, Gamepad }
+        public static DeviceType LastUsedDevice => s_currentControlScheme.name == MOUSE_AND_KEYBOARD_CONTROL_SCHEME_NAME ? DeviceType.MnK : DeviceType.Gamepad;
+        public static string LastUsedDeviceName => s_currentControlScheme.name;
+
+        #endregion
+
+
         static ClientInput()
         {
             InitialiseInputPrevention();
@@ -64,14 +82,21 @@ namespace UserInput
             }
 
             CreateInputActions();
+
+            InputSystem.onDeviceChange += InputSystem_onDeviceChange;
+            InputUser.onUnpairedDeviceUsed += InputUser_onUnpairedDeviceUsed;
+            InputUser.listenForUnpairedDeviceActivity = 1;
         }
         private void OnDestroy()
         {
-            if (s_instance == this && s_inputActions != null)
-            {
-                // Dispose of our InputActionMap.
-                DestroyInputActions();
-            }
+            if (s_instance != this)
+                return; // Not the instance.
+            
+            if (s_inputActions != null)
+                DestroyInputActions();  // Dispose of our InputActionMap.
+
+            InputSystem.onDeviceChange -= InputSystem_onDeviceChange;
+            InputUser.onUnpairedDeviceUsed -= InputUser_onUnpairedDeviceUsed;
         }
         private void CreateInputActions()
         {
@@ -111,7 +136,7 @@ namespace UserInput
             s_inputActions.Enable();
 
             // Ensure that the correct maps are enabled based on toggles.
-            //EnsureCorrectInputMapActivation();
+            EnsureCorrectInputMapActivation();
         }
         private void DestroyInputActions()
         {
@@ -298,19 +323,28 @@ namespace UserInput
                 RemoveCombatActionPrevention(lockingType);
             if (actionsToUnlock.HasFlag(ActionTypes.UI))
                 RemoveUIActionPrevention(lockingType);
-
-            LogPreventionCount();
-            Debug.Log("Movement Enabled: " + s_inputActions.Movement.enabled);
         }
 
 
-        private static void LogPreventionCount()
+#if UNITY_EDITOR
+
+        [ContextMenu(itemName: "Display Active Locks")]
+        private void DisplayLocks()
         {
-            Debug.Log("Movement: " + s_movementPreventionDictionary.Count);
-            Debug.Log("Camera: " + s_cameraPreventionDictionary.Count);
-            Debug.Log("Combat: " + s_combatPreventionDictionary.Count);
-            Debug.Log("UI: " + s_uiPreventionDictionary.Count);
+            string movementPreventingTypes = string.Concat(s_movementPreventionDictionary.Keys);
+            Debug.Log(s_movementPreventionDictionary.Count + "\n" + movementPreventingTypes);
+
+            string cameraPreventingTypes = string.Concat(s_cameraPreventionDictionary.Keys);
+            Debug.Log(s_cameraPreventionDictionary.Count + "\n" + cameraPreventingTypes);
+
+            string combatPreventingTypes = string.Join(", ", s_combatPreventionDictionary.Keys);
+            Debug.Log(s_combatPreventionDictionary.Count + "\n" + combatPreventingTypes);
+
+            string uiPreventingTypes = string.Join(", ", s_uiPreventionDictionary.Keys);
+            Debug.Log(s_uiPreventionDictionary.Count + "\n" + uiPreventingTypes);
         }
+
+#endif
 
 
 
@@ -509,6 +543,36 @@ namespace UserInput
         }
 
         #endregion
+
+        #endregion
+
+
+        #region Active Device Detection
+
+        private void InputSystem_onDeviceChange(InputDevice inputDevice, InputDeviceChange inputDeviceChange)
+        {
+            switch (inputDeviceChange)
+            {
+                case InputDeviceChange.Disconnected:
+                    Debug.Log("User's device was disconnected");
+                    break;
+            }
+        }
+        private void InputUser_onUnpairedDeviceUsed(InputControl inputControl, UnityEngine.InputSystem.LowLevel.InputEventPtr inputEventPtr)
+        {
+            // Get the control scheme associated with the used device.
+            InputControlScheme deviceControlScheme = s_inputActions.controlSchemes.Where(t => t.SupportsDevice(inputControl.device)).FirstOrDefault();
+            CurrentInputDevice = inputControl.device;
+
+            if (deviceControlScheme != default && deviceControlScheme != s_currentControlScheme)
+            {
+                // A input device belonging to a different control scheme has been used.
+                s_currentControlScheme = deviceControlScheme;
+                Debug.Log("New Used. Scheme Name: " + deviceControlScheme.name);
+
+                OnInputDeviceChanged?.Invoke();
+            }
+        }
 
         #endregion
     }

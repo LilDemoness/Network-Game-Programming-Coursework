@@ -1,3 +1,5 @@
+using TMPro;
+using UI.Icons;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
@@ -33,15 +35,30 @@ namespace UI
 
 
         [Tooltip("(Optional) The input action that this button will be triggered by.")]
-            [SerializeField] private InputActionReference _inputAction;
+        [SerializeField] private InputActionReference _inputAction;
         [Tooltip("The type of check that will be run when the input action is performed.")]
-            [SerializeField] private InputActionType _inputActionType;
+        [SerializeField] private InputActionType _inputActionType;
         [SerializeField] private bool _allowInputWhenNotInFocus = false;
 
         [Space(10)]
         [SerializeField] private UnityEvent _onButtonTriggered;
 
 
+        [Header("Text Updating")]
+        [SerializeField] private TMP_Text _iconDisplayText;
+        [SerializeField][TextArea] private string _textFormattingString = "{0}";
+
+
+        private void Awake()
+        {
+            if (_iconDisplayText != null && _inputAction != null)
+            {
+                InputIconManager.OnShouldUpdateSpriteIdentifiers += UpdateIconDisplayText;
+                InputIconManager.OnSpriteAssetChanged += UpdateIconDisplayText;
+
+                UpdateIconDisplayText();
+            }
+        }
         private void OnEnable()
         {
             if (_inputAction != null)
@@ -51,6 +68,11 @@ namespace UI
         {
             if (_inputAction != null)
                 _inputAction.action.performed -= Action_performed;
+        }
+        private void OnDestroy()
+        {
+            InputIconManager.OnShouldUpdateSpriteIdentifiers -= UpdateIconDisplayText;
+            InputIconManager.OnSpriteAssetChanged -= UpdateIconDisplayText;
         }
 
 
@@ -85,5 +107,37 @@ namespace UI
 
             _ => throw new System.NotImplementedException()
         };
+
+
+        private void UpdateIconDisplayText()
+        {
+            _iconDisplayText.text = InputIconManager.FormatTextForIconFromInputAction(_textFormattingString, _inputAction);
+            _iconDisplayText.spriteAsset = InputIconManager.GetSpriteAsset();
+        }
+
+
+#if UNITY_EDITOR
+
+        private void OnValidate()
+        {
+            if (_iconDisplayText != null && _inputAction != null)
+            {
+                if (Editor_IsFormattingStringValid())
+                {
+                    _iconDisplayText.text = _textFormattingString;
+                }
+                else
+                {
+                    _iconDisplayText.text = "!INVALID!";
+                }
+            }
+        }
+
+        private bool Editor_IsFormattingStringValid()
+        {
+            return _textFormattingString.Contains("{0}");
+        }
+
+#endif
     }
 }

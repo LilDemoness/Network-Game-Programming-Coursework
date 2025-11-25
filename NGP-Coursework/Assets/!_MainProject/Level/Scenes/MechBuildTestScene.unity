@@ -2220,6 +2220,8 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  _iconDisplayText: {fileID: 0}
+  _textFormattingString: '{0}'
 --- !u!1 &274084828
 GameObject:
   m_ObjectHideFlags: 0
@@ -9136,6 +9138,8 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  _iconDisplayText: {fileID: 0}
+  _textFormattingString: '{0}'
 --- !u!1 &1203109806
 GameObject:
   m_ObjectHideFlags: 0
@@ -10495,6 +10499,8 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  _iconDisplayText: {fileID: 0}
+  _textFormattingString: '{0}'
 --- !u!1 &1460774996
 GameObject:
   m_ObjectHideFlags: 0
@@ -12320,6 +12326,8 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  _iconDisplayText: {fileID: 0}
+  _textFormattingString: '{0}'
 --- !u!1 &1689185219
 GameObject:
   m_ObjectHideFlags: 0
@@ -12886,6 +12894,8 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  _iconDisplayText: {fileID: 0}
+  _textFormattingString: '{0}'
 --- !u!114 &1734422242 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 3138438156073710422, guid: bdf3258e198d2fe4fad1684d9e7f1b6a, type: 3}
@@ -13004,6 +13014,8 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  _iconDisplayText: {fileID: 0}
+  _textFormattingString: '{0}'
 --- !u!1 &1776732079
 GameObject:
   m_ObjectHideFlags: 0
