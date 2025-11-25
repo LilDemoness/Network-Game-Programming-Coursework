@@ -7,6 +7,7 @@ using Gameplay.GameplayObjects.Character.Customisation.Data;
 using Gameplay.Actions;
 using UserInput;
 using Unity.Netcode.Components;
+using Netcode.ConnectionManagement;
 
 namespace Gameplay.GameplayObjects.Players
 {
@@ -76,6 +77,28 @@ namespace Gameplay.GameplayObjects.Players
             {
                 LocalClientInstance = this;
                 Debug.Log("Local Player", this);
+            }
+        }
+        public override void OnNetworkDespawn()
+        {
+            if (IsServer)
+            {
+                // Update our Player Data (If there is one).
+                Transform movementTransform = ServerCharacter.Movement.transform;
+                SessionPlayerData? sessionPlayerData = SessionManager<SessionPlayerData>.Instance.GetPlayerData(OwnerClientId);
+                if (sessionPlayerData.HasValue)
+                {
+                    // Update the Player Data struct.
+                    SessionPlayerData playerData = sessionPlayerData.Value;
+                    playerData.PlayerPosition = movementTransform.position;
+                    playerData.PlayerRotation = movementTransform.rotation;
+                    playerData.BuildData = ServerCharacter.BuildData.Value;
+                    playerData.CurrentHealth = ServerCharacter.CurrentHealth.Value;
+                    playerData.HasCharacterSpawned = true;
+
+                    // Set the player data to its updated value.
+                    SessionManager<SessionPlayerData>.Instance.SetPlayerData(OwnerClientId, playerData);
+                }
             }
         }
         public override void OnDestroy()
