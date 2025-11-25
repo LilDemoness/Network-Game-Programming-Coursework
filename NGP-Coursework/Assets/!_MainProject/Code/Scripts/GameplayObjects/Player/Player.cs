@@ -43,11 +43,18 @@ namespace Gameplay.GameplayObjects.Players
         ///     Called when any player is killed.
         /// </summary>
         public static event System.EventHandler<PlayerDeathEventArgs> OnPlayerDeath;
+
         /// <summary>
         ///     Called when the local player is killed.
         /// </summary>
         // Client-side.
         public static event System.EventHandler<PlayerDeathEventArgs> OnLocalPlayerDeath;
+
+        /// <summary>
+        ///     Called when the local player is revived.
+        /// </summary>
+        // Client-side.
+        public static event System.EventHandler OnLocalPlayerRevived;
 
 
         private void Awake()
@@ -177,6 +184,7 @@ namespace Gameplay.GameplayObjects.Players
         private void OnPlayerRespawnPerformedOwnerRpc()
         {
             ClientInput.RemoveActionPrevention(typeof(Player), ClientInput.ActionTypes.Respawning);
+            OnLocalPlayerRevived?.Invoke(this, System.EventArgs.Empty);
         }
 
 

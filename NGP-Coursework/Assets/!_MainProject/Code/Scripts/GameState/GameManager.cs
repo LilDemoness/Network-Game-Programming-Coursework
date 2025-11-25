@@ -59,5 +59,7 @@ namespace GameState
             yield return new WaitForSeconds(delay);
             player.PerformRespawn(respawnPosition);
         }
+
+        public float GetRespawnTimeEstimate() => 3.0f;
     }
 }
