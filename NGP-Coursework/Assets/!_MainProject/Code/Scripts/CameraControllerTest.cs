@@ -170,13 +170,18 @@ public class CameraControllerTest : NetworkBehaviour
         s_crosshairAdjustmentPlane.SetNormalAndPosition(-Camera.main.transform.forward, targetPosition);
         Debug.DrawRay(targetPosition, Vector3.back);
 
+
         // Calculate our rotations for the vertical & horizontal rotation pivots.
+
         // Horizontal Pivot Rotation.
         _horizontalPivotYRotation.Value = Quaternion.LookRotation((targetPosition - _horizontalRotationPivot.position).normalized, Vector3.up).eulerAngles.y;
+
         // Vertical Pivot Rotation.
-        Vector3 verticalPivotOffset = Camera.main.transform.TransformDirection(_verticalPivotOffset);   // Account for Camera Rotation (Not properly working, see Debug Visualisation drawn below for visualisation of the issue).
-        Debug.DrawLine(targetPosition, (_verticalRotationPivot.position + verticalPivotOffset));
-        _verticalPivotLocalVerticalRotation.Value = Quaternion.LookRotation((targetPosition - (_verticalRotationPivot.position + verticalPivotOffset)).normalized, Vector3.up).eulerAngles.x;
+        Vector3 verticalPivotOffset = _verticalRotationPivot.position + _verticalRotationPivot.TransformDirection(_verticalPivotOffset);   // Account for Camera Rotation (Not properly working, see Debug Visualisation drawn below for visualisation of the issue).
+        Debug.DrawLine(targetPosition, verticalPivotOffset);
+        //_verticalRotationPivot.position += Vector3.one;
+        _verticalPivotLocalVerticalRotation.Value = Quaternion.LookRotation((targetPosition - verticalPivotOffset).normalized, Vector3.up).eulerAngles.x;
+        //_verticalRotationPivot.position -= Vector3.one;
     }
 	/// <summary>
 	///		Instantly set the rotation of our graphics transform to face its target rotation.

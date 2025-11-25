@@ -961,6 +961,7 @@ MonoBehaviour:
   - {fileID: 19464694868760508}
   _verticalRotationPivot: {fileID: 8369126255379694835}
   _usesXRotationForVertical: 0
+  <VerticalRotationPivotOffset>k__BackingField: {x: 0, y: 1, z: 0}
 --- !u!65 &5645849910652857224
 BoxCollider:
   m_ObjectHideFlags: 0
