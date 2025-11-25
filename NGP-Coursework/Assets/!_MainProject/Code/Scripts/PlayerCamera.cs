@@ -20,7 +20,7 @@ namespace Gameplay.GameplayObjects.Players
             }
         }
         public static void SetCameraTarget(Transform cameraTarget) => TrackingTarget = cameraTarget;
-    
+
 
 
         private void Awake()

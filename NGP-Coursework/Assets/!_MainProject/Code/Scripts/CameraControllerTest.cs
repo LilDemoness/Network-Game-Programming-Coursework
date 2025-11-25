@@ -33,7 +33,7 @@ public class CameraControllerTest : NetworkBehaviour
     [SerializeField] private Transform _verticalRotationPivot;  // Note: Needs to be a child of the HorizontalRotationPivot.
     // Replace these three with a single FrameGFX reference?
     private Vector3 _verticalDefaultRotation;
-    private Vector3 _verticalPivotOffset;
+    [SerializeField] private Vector3 _verticalPivotOffset;
     private bool _useXRotationForVertical;
 	
 	[Space(5)]
@@ -45,11 +45,15 @@ public class CameraControllerTest : NetworkBehaviour
     private void Awake()
     {
         _playerManager.OnThisPlayerBuildUpdated += Player_OnLocalPlayerBuildUpdated;
+        Player.OnLocalPlayerDeath += OnPlayerDeath;
+        Player.OnLocalPlayerRevived += OnPlayerRevived;
     }
     public override void OnDestroy()
     {
         base.OnDestroy();
         _playerManager.OnThisPlayerBuildUpdated -= Player_OnLocalPlayerBuildUpdated;
+        Player.OnLocalPlayerDeath -= OnPlayerDeath;
+        Player.OnLocalPlayerRevived -= OnPlayerRevived;
     }
     public override void OnNetworkSpawn()
     {
@@ -90,9 +94,40 @@ public class CameraControllerTest : NetworkBehaviour
 			// Update our pivot's rotation on non-owners (Server: For Action Logic; Clients: For Action FX).
             _rotationPivot.localRotation = Quaternion.Euler(0.0f, _rotationPivotYRotation.Value, 0.0f);
         }
-        
+
         // Lerp our graphics to their target position.
         LerpGraphicsRotation();
+    }
+
+
+    private void OnPlayerDeath(object sender, Player.PlayerDeathEventArgs e)
+    {
+        this.enabled = false;
+    }
+    private void OnPlayerRevived(object sender, System.EventArgs e)
+    {
+        SetRotation(0.0f, 0.0f);
+        this.enabled = true;
+    }
+
+    private void SetRotation(float horizontalRotation, float verticalRotation)
+    {
+        Debug.Log(IsOwner);
+        _rotation = new Vector2(horizontalRotation, verticalRotation);
+        _rotationPivot.rotation = Quaternion.Euler(_rotation);  // Ensure instant update.
+
+        // Update Synced Values.
+        _rotationPivotYRotation.Value = verticalRotation;
+        _horizontalPivotYRotation.Value = horizontalRotation;
+        _verticalPivotLocalVerticalRotation.Value = verticalRotation;
+
+        // Instantly Set Graphics Rotation.
+        SnapRotationClientRpc();
+    }
+    [Rpc(SendTo.ClientsAndHost)]
+    private void SnapRotationClientRpc()
+    {
+        SetGraphicsRotation();
     }
 
 
@@ -107,30 +142,41 @@ public class CameraControllerTest : NetworkBehaviour
     }
 
 
+    private RaycastHit[] _graphicsHitCache = new RaycastHit[2];
 	/// <summary>
 	///		Calculate and update the target direction of our Graphics transform.
 	///	</summary>
     private void UpdateGraphicsTargetRotation()
     {
         Vector3 targetPosition = Camera.main.transform.position + Camera.main.transform.forward * Constants.TARGET_ESTIMATION_RANGE;
-        if (Physics.Linecast(Camera.main.transform.position, targetPosition, out RaycastHit hitInfo, _targetingLayers))
+        int hits = Physics.RaycastNonAlloc(Camera.main.transform.position, Camera.main.transform.forward, _graphicsHitCache, Constants.TARGET_ESTIMATION_RANGE, _targetingLayers);
+        if (hits > 0)
         {
-            Vector3 targetDirection = (hitInfo.point - _horizontalRotationPivot.position).normalized;
-            if (Vector3.Dot(targetDirection, _rotationPivot.forward) > 0.0f)    // Don't aim at things between the camera & player graphics.
+            // Check that we've not only hit this player.
+            bool isFirstHitThis = _graphicsHitCache[0].transform.HasParent(this.transform);
+            if (!isFirstHitThis || hits != 1)
             {
-                // There is an obstruction between the camera and the naive target position that isn't behind the graphics.
-                // Our target position is the hit position.
-                targetPosition = hitInfo.point;
+                // We've hit something other than this player. Use that as our obstruction.
+                int validIndex = isFirstHitThis ? 1 : 0;
+                Vector3 targetDirection = (_graphicsHitCache[validIndex].point - _horizontalRotationPivot.position).normalized;
+                if (Vector3.Dot(targetDirection, _rotationPivot.forward) > 0.0f)    // Don't aim at things between the camera & player graphics.
+                {
+                    // There is an obstruction between the camera and the naive target position that isn't behind the graphics.
+                    // Our target position is the hit position.
+                    targetPosition = _graphicsHitCache[validIndex].point;
+                }
             }
         }
         s_crosshairAdjustmentPlane.SetNormalAndPosition(-Camera.main.transform.forward, targetPosition);
-        
+        Debug.DrawRay(targetPosition, Vector3.back);
 
         // Calculate our rotations for the vertical & horizontal rotation pivots.
         // Horizontal Pivot Rotation.
         _horizontalPivotYRotation.Value = Quaternion.LookRotation((targetPosition - _horizontalRotationPivot.position).normalized, Vector3.up).eulerAngles.y;
         // Vertical Pivot Rotation.
-        _verticalPivotLocalVerticalRotation.Value = Quaternion.LookRotation((targetPosition - (_verticalRotationPivot.position + _verticalPivotOffset)).normalized, Vector3.up).eulerAngles.x;
+        Vector3 verticalPivotOffset = Camera.main.transform.TransformDirection(_verticalPivotOffset);   // Account for Camera Rotation (Not properly working, see Debug Visualisation drawn below for visualisation of the issue).
+        Debug.DrawLine(targetPosition, (_verticalRotationPivot.position + verticalPivotOffset));
+        _verticalPivotLocalVerticalRotation.Value = Quaternion.LookRotation((targetPosition - (_verticalRotationPivot.position + verticalPivotOffset)).normalized, Vector3.up).eulerAngles.x;
     }
 	/// <summary>
 	///		Instantly set the rotation of our graphics transform to face its target rotation.
