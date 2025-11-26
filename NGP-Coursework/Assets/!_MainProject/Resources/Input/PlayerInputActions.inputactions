@@ -823,6 +823,34 @@
                     "isPartOfComposite": false
                 }
             ]
+        },
+        {
+            "name": "Global",
+            "id": "4ac300b3-a308-4453-8ce0-3725919a0073",
+            "actions": [
+                {
+                    "name": "ToggleNetworkStats",
+                    "type": "Button",
+                    "id": "009c7a82-06a3-4519-81b9-e11fb954a8ac",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "c7478dc6-502d-4934-bef2-601b8abf3a95",
+                    "path": "<Keyboard>/rightBracket",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";MnK",
+                    "action": "ToggleNetworkStats",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
         }
     ],
     "controlSchemes": [

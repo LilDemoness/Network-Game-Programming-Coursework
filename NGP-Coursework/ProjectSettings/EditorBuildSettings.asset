@@ -6,6 +6,12 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/!_MainProject/Level/Scenes/Startup.unity
+    guid: 555d25aa4f5c8634c92dc80e66d9623c
+  - enabled: 1
+    path: Assets/!_MainProject/Level/Scenes/MainMenu.unity
+    guid: 83d58c755e5bf7e45a01820a73d4cf95
+  - enabled: 1
     path: Assets/!_MainProject/Level/Scenes/MechBuildTestScene.unity
     guid: 6cfd2266a07d7954cb6569d8283fd081
   - enabled: 1
