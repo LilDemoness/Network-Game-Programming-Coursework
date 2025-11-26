@@ -176,7 +176,7 @@ namespace UnityServices.Sessions
         /// <summary>
         ///     Attempt to join an existing session by name.
         /// </summary>
-        public async Task<(bool Success, ISession Session)> JoinSessionByNameAsync(string sessionName)
+        public async Task<(bool Success, ISession Session)> TryJoinSessionByNameAsync(string sessionName)
         {
             if (!_rateLimitJoin.CanCall)
             {

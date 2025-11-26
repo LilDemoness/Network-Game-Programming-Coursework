@@ -1,7 +1,9 @@
 using Gameplay.Configuration;
 using Infrastructure;
 using Netcode.ConnectionManagement;
+using System.Text.RegularExpressions;
 using TMPro;
+using Unity.Networking.Transport;
 using UnityEngine;
 using VContainer;
 
@@ -73,7 +75,7 @@ namespace Gameplay.UI.MainMenu
             ValidateIpAndPort(ref ip, port, out int portInteger);
 
             // Perform the Host attempt.
-            _signInSpinner.SetActive(true);
+            EnableSignInSpinner();
             _connectionManager.StartHostIP(_playerNameLabel.text, ip, portInteger);
         }
         public void JoinWithIP(string ip, string port)
@@ -81,9 +83,9 @@ namespace Gameplay.UI.MainMenu
             ValidateIpAndPort(ref ip, port, out int portInteger);
 
             // Perform the Join attempt.
-            _signInSpinner.SetActive(true);
+            EnableSignInSpinner();
             _connectionManager.StartClientIP(_playerNameLabel.text, ip, portInteger);
-            _ipConnectionWindow.ShowConnectingWindow();
+            _ipConnectionWindow.ShowConnectionWindow();
         }
 
 
@@ -99,6 +101,109 @@ namespace Gameplay.UI.MainMenu
 
             // IP Address Validation.
             ip = string.IsNullOrEmpty(ip) ? DEFAULT_IP : ip;
+        }
+
+
+        public void JoiningWindowCancelled()
+        {
+            DisableSignInSpinner();
+            RequestShutdown();
+        }
+
+        public void EnableSignInSpinner() => _signInSpinner.SetActive(true);
+        public void DisableSignInSpinner() => _signInSpinner.SetActive(false);
+        
+        private void RequestShutdown()
+        {
+            if (_connectionManager != null && _connectionManager.NetworkManager != null)
+            {
+                _connectionManager.RequestShutdown();
+            }
+        }
+
+        /// <summary>
+        ///     Randomise the player's name.
+        /// </summary>
+        public void RegenerateName()
+        {
+            _playerNameLabel.text = _nameGenerationData.GenerateRandomName();
+        }
+
+        public void ToggleJoinIPUI()
+        {
+            _ipJoiningUI.Show();
+            _ipHostingUI.Hide();
+
+            _joinTabButtonHighlightTinter.SetToColour(1);
+            _joinTabButtonBlockerTinter.SetToColour(1);
+            _hostTabButtonHighlightTinter.SetToColour(0);
+            _hostTabButtonBlockerTinter.SetToColour(0);
+        }
+        public void ToggleCreateIPUI()
+        {
+            _ipJoiningUI.Hide();
+            _ipHostingUI.Show();
+
+            _joinTabButtonHighlightTinter.SetToColour(0);
+            _joinTabButtonBlockerTinter.SetToColour(0);
+            _hostTabButtonHighlightTinter.SetToColour(1);
+            _hostTabButtonBlockerTinter.SetToColour(1);
+        }
+
+
+        public void Show()
+        {
+            // Show the UI.
+            _canvasGroup.alpha = 1.0f;
+            _canvasGroup.interactable = true;
+            _canvasGroup.blocksRaycasts = true;
+
+            // Ensure that the Sign-in Spinner starts hidden.
+            DisableSignInSpinner();
+        }
+        public void Hide()
+        {
+            // Hide the UI.
+            _canvasGroup.alpha = 0.0f;
+            _canvasGroup.interactable = false;
+            _canvasGroup.blocksRaycasts = false;
+        }
+
+
+        // To be called from the back/close UI button.
+        public void CancelConnectingWindow()
+        {
+            RequestShutdown();
+            _ipConnectionWindow.CancelConnectionWindow();
+        }
+
+
+        /// <summary>
+        ///     Sanitize user IP address InputField box allowing only numbers and periods.<br/>
+        ///     This also prevents undesirable invisible characters from being copy-pased accidentally.
+        /// </summary>
+        /// <param name="dirtyString"> The string to sanitize.</param>
+        /// <returns> Sanitized text string.</returns>
+        public static string SanitizeIP(string dirtyString)
+        {
+            return Regex.Replace(dirtyString, "[^0-9.]", "");
+        }
+
+        /// <summary>
+        ///     Sanitize user port InputField box by allowing only numbers.<br/>
+        ///     This also prevents undesirable invisible characters from being copy-pased accidentally.
+        /// </summary>
+        /// <param name="dirtyString"> The string to sanitize.</param>
+        /// <returns> Sanitized text string.</returns>
+        public static string SanitizePort(string dirtyString)
+        {
+            return Regex.Replace(dirtyString, "[^0-9]", "");
+        }
+
+        public static bool AreIPAddressAndPortValid(string ipAddress, string port)
+        {
+            bool portValid = ushort.TryParse(ipAddress, out ushort portNumber);
+            return portValid && NetworkEndpoint.TryParse(ipAddress, portNumber, out NetworkEndpoint _);
         }
     }
 }

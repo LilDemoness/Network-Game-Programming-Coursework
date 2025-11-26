@@ -3,6 +3,7 @@ using Unity.Netcode;
 using Gameplay.GameplayObjects.Character;
 using Gameplay.Actions.Effects;
 using Gameplay.Actions.Visuals;
+using UI.Crosshairs;
 
 namespace Gameplay.Actions.Definitions
 {
@@ -108,7 +109,7 @@ namespace Gameplay.Actions.Definitions
         // Animation Triggers.
 
         [field: Space(5)]
-        [field: SerializeField] public UI.Crosshairs.Crosshair ActionCrosshairPrefab { get; private set; }
+        [field: SerializeField] public Crosshair ActionCrosshairPrefab { get; private set; }
 
         #endregion
 

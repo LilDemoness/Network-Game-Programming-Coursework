@@ -8,6 +8,9 @@ using UnityServices.Sessions;
 using Utils;
 using VContainer;
 using VContainer.Unity;
+using Gameplay.UI.MainMenu;
+using Gameplay.UI.MainMenu.Session;
+using Gameplay.UI.Tooltips;
 
 namespace Gameplay.GameState
 {
@@ -139,7 +142,7 @@ namespace Gameplay.GameState
 
         public void OnStartClicked()
         {
-            _sessionUIMediator.ToggleJoinSessionUI();
+            _sessionUIMediator.OpenJoinSessionUI();
             _sessionUIMediator.Show();
         }
         public void OnDirectIPClicked()
