@@ -1,4 +1,6 @@
 using UnityEngine;
+using UnityServices.Sessions;
+using VContainer;
 
 namespace Netcode.ConnectionManagement
 {
@@ -8,7 +10,7 @@ namespace Netcode.ConnectionManagement
     /// </summary>
     public class ClientConnectedState : OnlineState
     {
-        //[Inject]
+        [Inject]
         protected MultiplayerServicesFacade MultiplayerServicesFacade;
 
 

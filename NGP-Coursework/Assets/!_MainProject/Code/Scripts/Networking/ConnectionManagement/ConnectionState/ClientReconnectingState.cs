@@ -1,6 +1,7 @@
 using System.Collections;
 using Infrastructure;
 using UnityEngine;
+using VContainer;
 
 namespace Netcode.ConnectionManagement
 {
@@ -12,7 +13,7 @@ namespace Netcode.ConnectionManagement
     /// </summary>
     public class ClientReconnectingState : ClientConnectingState
     {
-        //[Inject]
+        [Inject]
         IPublisher<ReconnectMessage> ReconnectMessagePublisher;
 
         Coroutine _reconnectCoroutine;
@@ -133,7 +134,7 @@ namespace Netcode.ConnectionManagement
 
 
             // Determine if we successfully connected or not.
-            if (!reconnectingSetupTask.IsFaulted && reconnectingSetupTask.Result.success)
+            if (!reconnectingSetupTask.IsFaulted && reconnectingSetupTask.Result.Success)
             {
                 // Successful reconnection attempt.
                 // If this connection attempt fails, the OnClientDisconnect callback will be invoked by Netcode.
@@ -142,7 +143,7 @@ namespace Netcode.ConnectionManagement
             else
             {
                 // Failed reconnection attempt.
-                if (!reconnectingSetupTask.Result.shouldTryAgain)
+                if (!reconnectingSetupTask.Result.ShouldTryAgain)
                 {
                     // We don't want to try again. Set our number of attempts to the max so that none new are made.
                     _reconnectionAttemptsMade = ConnectionManager.MaxReconnectAttempts;

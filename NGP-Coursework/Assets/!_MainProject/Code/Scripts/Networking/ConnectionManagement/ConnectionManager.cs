@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 using Utils;
+using VContainer;
 
 namespace Netcode.ConnectionManagement
 {
@@ -56,7 +57,7 @@ namespace Netcode.ConnectionManagement
     {
         private ConnectionState _currentState;
 
-        //[Inject]
+        [Inject]
         private NetworkManager _networkManager;
         public NetworkManager NetworkManager => _networkManager;
 
@@ -65,7 +66,7 @@ namespace Netcode.ConnectionManagement
         public int MaxReconnectAttempts => _maxReconnectAttempts;
 
 
-        //[Inject]
+        [Inject]
         private IObjectResolver _resolver;
 
         public int MaxConnectedPlayers = 8;

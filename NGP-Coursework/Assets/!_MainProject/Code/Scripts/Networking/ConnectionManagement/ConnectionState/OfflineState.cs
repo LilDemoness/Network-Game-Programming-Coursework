@@ -1,5 +1,9 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityServices.Sessions;
+using VContainer;
+using Utils;
+
 
 namespace Netcode.ConnectionManagement
 {
@@ -9,12 +13,12 @@ namespace Netcode.ConnectionManagement
     /// </summary>
     public class OfflineState : ConnectionState
     {
-        //[Inject]
+        [Inject]
         private MultiplayerServicesFacade _multiplayerServicesFacade;
-        //[Inject]
+        [Inject]
         private ProfileManager _profileManager;
-        //[Inject]
-        private LocalLesson _localLesson;
+        [Inject]
+        private LocalSession _localSesson;
 
 
         public override void Enter()

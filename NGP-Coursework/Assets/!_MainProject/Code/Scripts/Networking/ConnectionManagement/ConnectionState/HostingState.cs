@@ -1,6 +1,8 @@
 using Infrastructure;
 using Unity.Netcode;
 using UnityEngine;
+using UnityServices.Sessions;
+using VContainer;
 
 namespace Netcode.ConnectionManagement
 {
@@ -11,9 +13,9 @@ namespace Netcode.ConnectionManagement
     /// </summary>
     public class HostingState : OnlineState
     {
-        //[Inject]
+        [Inject]
         private MultiplayerServicesFacade _multiplayerServicesFacade;
-        //[Inject]
+        [Inject]
         private IPublisher<ConnectionEventMessage> _connectionEventPublisher;
 
         // Used in ApprovalCheck. This is intended as a light bit of protection against DOS attacks that rely on sending large buffers of garbage.

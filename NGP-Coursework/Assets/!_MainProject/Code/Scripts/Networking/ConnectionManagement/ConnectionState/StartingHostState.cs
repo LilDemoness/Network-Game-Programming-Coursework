@@ -1,5 +1,8 @@
 using Unity.Netcode;
 using UnityEngine;
+using UnityServices.Sessions;
+using VContainer;
+
 
 namespace Netcode.ConnectionManagement
 {
@@ -10,9 +13,9 @@ namespace Netcode.ConnectionManagement
     /// </summary>
     public class StartingHostState : OnlineState
     {
-        //[Inject]
+        [Inject]
         private MultiplayerServicesFacade _multiplayerServicesFacade;
-        //[Inject]
+        [Inject]
         private LocalSession _localSession;
         private ConnectionMethodBase _connectionMethod;
 

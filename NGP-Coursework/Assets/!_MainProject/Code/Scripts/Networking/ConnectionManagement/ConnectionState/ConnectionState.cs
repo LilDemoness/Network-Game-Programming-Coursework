@@ -1,6 +1,7 @@
 using Infrastructure;
 using Unity.Netcode;
 using UnityEngine;
+using VContainer;
 
 namespace Netcode.ConnectionManagement
 {
@@ -9,10 +10,10 @@ namespace Netcode.ConnectionManagement
     /// </summary>
     public abstract class ConnectionState
     {
-        //[Inject]
+        [Inject]
         protected ConnectionManager ConnectionManager;
 
-        //[Inject]
+        [Inject]
         protected IPublisher<ConnectStatus> ConnectStatusPublisher;
 
         public abstract void Enter();
