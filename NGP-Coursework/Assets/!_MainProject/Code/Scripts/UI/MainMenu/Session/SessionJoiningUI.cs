@@ -15,9 +15,12 @@ namespace Gameplay.UI.MainMenu.Session
     /// </summary>
     public class SessionJoiningUI : MonoBehaviour
     {
+        [SerializeField] private CanvasGroup _canvasGroup;
+
+        [Space(5)]
         [SerializeField] private SessionListItemUI _sessionListItemPrototype;
 
-        [SerializeField] private CanvasGroup _canvasGroup;
+        [Space(5)]
         [SerializeField] private TMP_InputField _joinCodeField;
         [SerializeField] private Graphic _emptySessionListLabel;
         [SerializeField] private Button _joinSessionButton;
@@ -72,6 +75,12 @@ namespace Gameplay.UI.MainMenu.Session
             return Regex.Replace(dirtyString.ToUpper(), "[^A-Z0-9]", "");
         }
 
+        public void OnJoinButtonPressed()
+        {
+            _sessionUIMediator.JoinSessionWithCodeRequest(SanitizeJoinCode(_joinCodeField.text));
+        }
+
+
         /// <summary>
         ///     Perform a soft refresh without needing to lock the UI and such.
         /// </summary>
@@ -81,7 +90,8 @@ namespace Gameplay.UI.MainMenu.Session
             _sessionUIMediator.QuerySessionRequest(false);
         }
 
-        public void OnRefresh()
+        // Called from UI Button.
+        public void OnRefreshButtonPressed()
         {
             _sessionUIMediator.QuerySessionRequest(true);
         }
@@ -135,7 +145,7 @@ namespace Gameplay.UI.MainMenu.Session
         }
 
 
-        public void OnQuickJoinClicked()
+        public void OnQuickJoinPressed()
         {
             _sessionUIMediator.QuickJoinRequest();
         }

@@ -27,7 +27,7 @@ namespace Gameplay.UI.MainMenu.Session
             _loadingIndicatorObject.SetActive(false);
         }
 
-        public void OnCreateClick()
+        public void OnCreateButtonPressed()
         {
             _sessionUIMediator.CreateSessionRequest(_sessionNameInputField.text, _isPrivate.isOn);
         }

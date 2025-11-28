@@ -41,7 +41,7 @@ namespace Gameplay.UI.Popups
         public void SetupPopupPanel(string titleText, string mainText, bool closeableByUser = true)
         {
             _titleText.text = titleText;
-            _titleText.text = mainText;
+            _mainText.text = mainText;
             _closableByUser = closeableByUser;
 
             _confirmButton.SetActive(_closableByUser);

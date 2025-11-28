@@ -56,6 +56,16 @@ namespace Netcode.ConnectionManagement
 
 
         /// <summary>
+        ///     Called when a Client successfully connects to the server.
+        /// </summary>
+        public static event System.EventHandler<PlayerConnectionEventArgs> OnClientConnected;
+        /// <summary>
+        ///     Called when a Client disconnects from the server.
+        /// </summary>
+        public static event System.Action<ulong> OnClientDisconnect;
+
+
+        /// <summary>
         ///     Handles client disconnect.
         /// </summary>
         public void DisconnectClient(ulong clientId)
@@ -89,6 +99,8 @@ namespace Netcode.ConnectionManagement
                     }
                 }
             }
+
+            OnClientDisconnect?.Invoke(clientId);
         }
 
 
@@ -115,6 +127,8 @@ namespace Netcode.ConnectionManagement
                 return;
             }
 
+            // The player is a valid connection.
+
             // Check if a previously disconnected client existed with the same playerId.
             if (_clientData.ContainsKey(playerId))
             {
@@ -124,7 +138,6 @@ namespace Netcode.ConnectionManagement
                     isReconnecting = true;
                 }
             }
-
 
             if (isReconnecting)
             {
@@ -137,6 +150,10 @@ namespace Netcode.ConnectionManagement
             // Populate our dictionaries with the SessionPlayerData.
             _clientIDToPlayerId[clientId] = playerId;
             _clientData[playerId] = sessionPlayerData;
+
+
+            // Notify listeners that a player has joined.
+            OnClientConnected?.Invoke(this, new PlayerConnectionEventArgs(clientId, isReconnecting, sessionPlayerData));
         }
 
 
@@ -283,6 +300,24 @@ namespace Netcode.ConnectionManagement
 
                 // Remove the ID connection.
                 _clientIDToPlayerId.Remove(id);
+            }
+        }
+
+
+
+        public class PlayerConnectionEventArgs : System.EventArgs
+        {
+            public readonly ulong ClientId;
+            public readonly bool IsReconnect;
+            public readonly T SessionPlayerData;
+
+
+            private PlayerConnectionEventArgs() { }
+            public PlayerConnectionEventArgs(ulong clientId, bool isReconnect, T sessionPlayerData)
+            {
+                this.ClientId = clientId;
+                this.IsReconnect = isReconnect;
+                this.SessionPlayerData = sessionPlayerData;
             }
         }
     }

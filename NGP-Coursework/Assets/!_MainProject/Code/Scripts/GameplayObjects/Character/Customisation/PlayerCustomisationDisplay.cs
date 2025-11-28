@@ -39,7 +39,10 @@ namespace Gameplay.GameplayObjects.Character.Customisation
             if (clientID != ownerClientID)
                 return; // Not the owning client.
 
-
+            UpdateDummy(buildData);
+        }
+        public void UpdateDummy(BuildDataReference buildData)
+        {
             for (int i = 0; i < _gfxElements.Length; ++i)
             {
                 _gfxElements[i].OnSelectedFrameChanged(CustomisationOptionsDatabase.AllOptionsDatabase.GetFrame(buildData.ActiveFrameIndex));

@@ -39,7 +39,7 @@ namespace Gameplay.UI
 
 
         // Called through UI Button.
-        public void OnCreateClick()
+        public void OnHostButtonPressed()
         {
             _ipUIMediator.HostIPRequest(_ipInputField.text, _portInputField.text);
         }

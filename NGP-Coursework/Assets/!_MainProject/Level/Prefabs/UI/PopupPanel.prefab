@@ -149,6 +149,8 @@ GameObject:
   - component: {fileID: 2539306498970422047}
   - component: {fileID: 5248829293793187980}
   - component: {fileID: 3399736931197717936}
+  - component: {fileID: 49885764667086497}
+  - component: {fileID: 8073573892142532164}
   m_Layer: 0
   m_Name: PopupPanel
   m_TagString: Untagged
@@ -217,6 +219,35 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &49885764667086497
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2976588882060794418}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 303e3ba150664004185358b79559df45, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _canvasGroup: {fileID: 8073573892142532164}
+  _titleText: {fileID: 8981219831883525645}
+  _mainText: {fileID: 7763965193323109017}
+  _confirmButton: {fileID: 2801276450612131316}
+  _loadingSpinner: {fileID: 253167271582504381}
+--- !u!225 &8073573892142532164
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2976588882060794418}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &7042007366190286910
 GameObject:
   m_ObjectHideFlags: 0
@@ -450,6 +481,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 206e6e8771b31ce46b9d3554b39d2198, type: 3}
+--- !u!1 &253167271582504381 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3690380172669038710, guid: 206e6e8771b31ce46b9d3554b39d2198, type: 3}
+  m_PrefabInstance: {fileID: 3509908830391313867}
+  m_PrefabAsset: {fileID: 0}
 --- !u!224 &4622236087437557733 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 8111203138290047534, guid: 206e6e8771b31ce46b9d3554b39d2198, type: 3}
@@ -555,5 +591,10 @@ PrefabInstance:
 --- !u!224 &1006134077985214793 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 5933201912781112184, guid: 9fdaa51b9be25084c9bed723421cde9c, type: 3}
+  m_PrefabInstance: {fileID: 6890637347223097905}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &2801276450612131316 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8737075909630289861, guid: 9fdaa51b9be25084c9bed723421cde9c, type: 3}
   m_PrefabInstance: {fileID: 6890637347223097905}
   m_PrefabAsset: {fileID: 0}

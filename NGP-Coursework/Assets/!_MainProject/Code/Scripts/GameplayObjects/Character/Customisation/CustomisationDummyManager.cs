@@ -2,14 +2,15 @@
 using UnityEngine;
 using Unity.Netcode;
 using Gameplay.GameplayObjects.Character.Customisation.Data;
+using Netcode.ConnectionManagement;
 
 namespace Gameplay.GameplayObjects.Character.Customisation
 {
     public class CustomisationDummyManager : MonoBehaviour
     {
         [Header("Player Lobby GFX Instances")]
-        [SerializeField] private PlayerCustomisationDisplay _playerLobbyPrefab;
-        private Dictionary<ulong, PlayerCustomisationDisplay> _playerLobbyInstances;
+        [SerializeField] private PlayerCustomisationDisplay _playerDummyPrefab;
+        private Dictionary<ulong, PlayerCustomisationDisplay> _playerDummyInstances;
 
         [SerializeField] private LobbySpawnPositions[] _playerLobbyGFXSpawnPositions; // Replace with spawning in a circle?
         [System.Serializable]
@@ -23,32 +24,36 @@ namespace Gameplay.GameplayObjects.Character.Customisation
 
         private void Awake()
         {
-            _playerLobbyInstances = new Dictionary<ulong, PlayerCustomisationDisplay>();
+            _playerDummyInstances = new Dictionary<ulong, PlayerCustomisationDisplay>();
 
-            PlayerCustomisationManager.OnPlayerConnected += HandlePlayerConnected;
-            PlayerCustomisationManager.OnPlayerDisconnected += HandlePlayerDisconnected;
+            SessionManager<SessionPlayerData>.OnClientConnected += SessionManager_OnClientConnected;
+            SessionManager<SessionPlayerData>.OnClientDisconnect += SessionManager_OnClientDisconnect;
         }
         private void OnDestroy()
         {
-            PlayerCustomisationManager.OnPlayerConnected -= HandlePlayerConnected;
-            PlayerCustomisationManager.OnPlayerDisconnected -= HandlePlayerDisconnected;
+            SessionManager<SessionPlayerData>.OnClientConnected -= SessionManager_OnClientConnected;
+            SessionManager<SessionPlayerData>.OnClientDisconnect -= SessionManager_OnClientDisconnect;
         }
 
 
-        private void HandlePlayerConnected(ulong clientID, BuildDataReference initialBuild)
+        private void SessionManager_OnClientConnected(object sender, SessionManager<SessionPlayerData>.PlayerConnectionEventArgs args) => HandlePlayerConnected(args.ClientId, new BuildDataReference(args.SessionPlayerData.BuildData));
+        private void SessionManager_OnClientDisconnect(ulong clientId) => HandlePlayerDisconnected(clientId);
+
+        private void HandlePlayerConnected(ulong clientId, BuildDataReference initialBuild)
         {
-            if (_playerLobbyInstances.ContainsKey(clientID))
+            if (_playerDummyInstances.ContainsKey(clientId))
             {
                 Debug.Log("Contains Key");
             }
             else
             {
-                AddPlayerInstance(clientID, initialBuild);
+                AddPlayerInstance(clientId, initialBuild);
             }
         }
-        private void HandlePlayerDisconnected(ulong clientID) => RemovePlayerInstance(clientID);
+        private void HandlePlayerDisconnected(ulong clientId) => RemovePlayerInstance(clientId);
 
 
+        public void AddNewPlayer(ulong clientId) => AddPlayerInstance(clientId, new BuildDataReference());
         private void AddPlayerInstance(ulong clientIDToAdd, BuildDataReference initialBuild)
         {
             // Get our desired spawn position.
@@ -81,9 +86,9 @@ namespace Gameplay.GameplayObjects.Character.Customisation
 
 
             // Add the client's GFX Instance (Updated here for the first time only as the CustomisationDisplay is created after the event call is triggered, and so doesn't receive it otherwise).
-            PlayerCustomisationDisplay clientGFXInstance = Instantiate<PlayerCustomisationDisplay>(_playerLobbyPrefab, lobbySpawnPosition.SpawnPosition, worldPositionStays: false);
+            PlayerCustomisationDisplay clientGFXInstance = Instantiate<PlayerCustomisationDisplay>(_playerDummyPrefab, lobbySpawnPosition.SpawnPosition, worldPositionStays: false);
             clientGFXInstance.Setup(clientIDToAdd, initialBuild);
-            _playerLobbyInstances.Add(clientIDToAdd, clientGFXInstance);
+            _playerDummyInstances.Add(clientIDToAdd, clientGFXInstance);
         }
         private void RemovePlayerInstance(ulong clientIDToRemove)
         {
@@ -98,9 +103,18 @@ namespace Gameplay.GameplayObjects.Character.Customisation
             }
 
             // Remove the GFX Instance.
-            if (_playerLobbyInstances.Remove(clientIDToRemove, out PlayerCustomisationDisplay customisationInstance))
+            if (_playerDummyInstances.Remove(clientIDToRemove, out PlayerCustomisationDisplay customisationInstance))
             {
                 Destroy(customisationInstance.gameObject);
+            }
+        }
+
+
+        public void UpdateCustomisationDummy(ulong clientId, BuildDataReference buildData)
+        {
+            if (_playerDummyInstances.TryGetValue(clientId, out PlayerCustomisationDisplay playerCustomisationDisplay))
+            {
+                playerCustomisationDisplay.UpdateDummy(buildData);
             }
         }
     }

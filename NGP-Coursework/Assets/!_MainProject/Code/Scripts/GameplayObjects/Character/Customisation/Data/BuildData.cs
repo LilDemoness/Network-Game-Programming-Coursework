@@ -43,17 +43,22 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Data
     public struct BuildDataState : INetworkSerializable, IEquatable<BuildDataState>
     {
         public int ActiveFrameIndex;
-        public int[] ActiveSlottableIndicies;
+        private int[] m_activeSlottableIndicies;
+        public int[] ActiveSlottableIndicies
+        {
+            get => m_activeSlottableIndicies ??= new int[CustomisationOptionsDatabase.AllOptionsDatabase.GetFrame(ActiveFrameIndex).AttachmentPoints.Length];
+            set => m_activeSlottableIndicies = value;
+        }
 
         public BuildDataState(int initialFrame)
         {
             this.ActiveFrameIndex = initialFrame;
-            this.ActiveSlottableIndicies = new int[CustomisationOptionsDatabase.AllOptionsDatabase.GetFrame(initialFrame).AttachmentPoints.Length];
+            this.m_activeSlottableIndicies = new int[CustomisationOptionsDatabase.AllOptionsDatabase.GetFrame(initialFrame).AttachmentPoints.Length];
         }
         public BuildDataState(int initialFrame, int[] initialSlottables)
         {
             this.ActiveFrameIndex = initialFrame;
-            this.ActiveSlottableIndicies = initialSlottables;
+            this.m_activeSlottableIndicies = initialSlottables;
         }
 
 
@@ -66,14 +71,14 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Data
         {
             serializer.SerializeValue(ref ActiveFrameIndex);
 
-            if (serializer.IsWriter && ActiveSlottableIndicies != null)
+            if (serializer.IsWriter && m_activeSlottableIndicies != null)
             {
                 FastBufferWriter writer = serializer.GetFastBufferWriter();
 
-                writer.WriteValueSafe(ActiveSlottableIndicies.Length);
-                for (int i = 0; i < ActiveSlottableIndicies.Length; ++i)
+                writer.WriteValueSafe(m_activeSlottableIndicies.Length);
+                for (int i = 0; i < m_activeSlottableIndicies.Length; ++i)
                 {
-                    writer.WriteValueSafe(ActiveSlottableIndicies[i]);
+                    writer.WriteValueSafe(m_activeSlottableIndicies[i]);
                 }
             }
             if (serializer.IsReader)
@@ -81,11 +86,11 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Data
                 FastBufferReader reader = serializer.GetFastBufferReader();
 
                 reader.ReadValueSafe(out int length);
-                ActiveSlottableIndicies = new int[length];
+                m_activeSlottableIndicies = new int[length];
 
                 for (int i = 0; i < length; ++i)
                 {
-                    reader.ReadValueSafe(out ActiveSlottableIndicies[i]);
+                    reader.ReadValueSafe(out m_activeSlottableIndicies[i]);
                 }
             }
         }

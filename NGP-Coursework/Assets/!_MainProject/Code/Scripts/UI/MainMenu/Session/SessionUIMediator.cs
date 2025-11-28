@@ -18,10 +18,10 @@ namespace Gameplay.UI.MainMenu.Session
         [SerializeField] private SessionJoiningUI _sessionJoiningUI;
         [SerializeField] private SessionCreationUI _sessionCreationUI;
 
-        [SerializeField] private UITinter _joinToggleHighlight;
-        [SerializeField] private UITinter _joinToggleTabBlocker;
-        [SerializeField] private UITinter _createToggleHighlight;
-        [SerializeField] private UITinter _createToggleTabBlocker;
+        //[SerializeField] private UITinter _joinToggleHighlight;
+        //[SerializeField] private UITinter _joinToggleTabBlocker;
+        //[SerializeField] private UITinter _createToggleHighlight;
+        //[SerializeField] private UITinter _createToggleTabBlocker;
 
         [SerializeField] private TextMeshProUGUI _playerNameLabel;
         [SerializeField] private GameObject _loadingSpinner;
@@ -55,8 +55,9 @@ namespace Gameplay.UI.MainMenu.Session
             this._multiplayerServicesFacade = multiplayerServicesFacade;
             this._localUser = localSessionUser;
             this._localSession = localSession;
-            this._connectionManager = connectionManager;
             this._nameGenerationData = nameGenerationData;
+            this._connectStatusSubscriber = connectStatusSubscriber;
+            this._connectionManager = connectionManager;
             RegenerateName();
 
             _connectStatusSubscriber.Subscribe(OnConnectStatus);
@@ -218,20 +219,20 @@ namespace Gameplay.UI.MainMenu.Session
             _sessionJoiningUI.Show();
             _sessionCreationUI.Hide();
 
-            _joinToggleHighlight.SetToColour(1);
-            _joinToggleTabBlocker.SetToColour(1);
-            _createToggleHighlight.SetToColour(0);
-            _createToggleTabBlocker.SetToColour(0);
+            //_joinToggleHighlight.SetToColour(1);
+            //_joinToggleTabBlocker.SetToColour(1);
+            //_createToggleHighlight.SetToColour(0);
+            //_createToggleTabBlocker.SetToColour(0);
         }
         public void OpenCreateSessionUI()
         {
             _sessionJoiningUI.Hide();
             _sessionCreationUI.Show();
 
-            _joinToggleHighlight.SetToColour(0);
-            _joinToggleTabBlocker.SetToColour(0);
-            _createToggleHighlight.SetToColour(1);
-            _createToggleTabBlocker.SetToColour(1);
+            //_joinToggleHighlight.SetToColour(0);
+            //_joinToggleTabBlocker.SetToColour(0);
+            //_createToggleHighlight.SetToColour(1);
+            //_createToggleTabBlocker.SetToColour(1);
         }
 
 

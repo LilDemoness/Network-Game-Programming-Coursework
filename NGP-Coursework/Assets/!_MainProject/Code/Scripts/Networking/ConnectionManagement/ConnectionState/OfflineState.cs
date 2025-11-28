@@ -26,7 +26,8 @@ namespace Netcode.ConnectionManagement
             _multiplayerServicesFacade.EndTracking();
             ConnectionManager.NetworkManager.Shutdown();
 
-            throw new System.NotImplementedException("Reload to Main Menu");
+            Debug.LogWarning("To implement - Reload to Main Menu");
+            //throw new System.NotImplementedException("Reload to Main Menu");
         }
 
         public override void Exit() { }

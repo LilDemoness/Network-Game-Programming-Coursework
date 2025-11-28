@@ -20,6 +20,8 @@ namespace Utils
     {
         private FixedString32Bytes _name;
 
+        public FixedPlayerName(string initialValue) => _name = new FixedString32Bytes(initialValue);
+
         public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
         {
             serializer.SerializeValue(ref _name);
@@ -28,6 +30,6 @@ namespace Utils
         public override string ToString() => _name.Value.ToString();
 
         public static implicit operator string(FixedPlayerName s) => s.ToString();
-        public static implicit operator FixedPlayerName(string s) => new FixedPlayerName() { _name = new FixedString32Bytes(s) };
+        public static implicit operator FixedPlayerName(string s) => new FixedPlayerName(s);
     }
 }

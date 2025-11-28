@@ -24,7 +24,9 @@ namespace Netcode.ConnectionManagement
 
         public override void Enter()
         {
-            throw new System.NotImplementedException("Load Mech Build Scene");
+            Debug.LogWarning("To Properly Implement: Scene Management - Load Initial Lobby Scene");
+            UnityEngine.SceneManagement.SceneManager.LoadScene("MechBuildTestScene");
+            //throw new System.NotImplementedException("Load Mech Build Scene");
 
             if (_multiplayerServicesFacade.CurrentUnitySession != null)
             {

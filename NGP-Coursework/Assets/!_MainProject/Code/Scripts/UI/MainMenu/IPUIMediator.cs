@@ -16,17 +16,21 @@ namespace Gameplay.UI.MainMenu
 
         [SerializeField] private CanvasGroup _canvasGroup;
 
+        [Space(5)]
         [SerializeField] private TextMeshProUGUI _playerNameLabel;
         [SerializeField] private IPJoiningUI _ipJoiningUI;
         [SerializeField] private IPHostingUI _ipHostingUI;
 
-        [SerializeField] private UITinter _joinTabButtonHighlightTinter;
-        [SerializeField] private UITinter _joinTabButtonBlockerTinter;
-        [SerializeField] private UITinter _hostTabButtonHighlightTinter;
-        [SerializeField] private UITinter _hostTabButtonBlockerTinter;
+        //[Space(5)]
+        //[SerializeField] private UITinter _joinTabButtonHighlightTinter;
+        //[SerializeField] private UITinter _joinTabButtonBlockerTinter;
+        //[SerializeField] private UITinter _hostTabButtonHighlightTinter;
+        //[SerializeField] private UITinter _hostTabButtonBlockerTinter;
 
+        [Space(5)]
         [SerializeField] private GameObject _signInSpinner;
 
+        [Space(5)]
         [SerializeField] private IPConnectionWindow _ipConnectionWindow;
 
         [Inject]
@@ -55,7 +59,7 @@ namespace Gameplay.UI.MainMenu
         private void Start()
         {
             // Show 'Create IP' as default.
-            ToggleCreateIPUI();
+            OpenCreateIPUI();
             RegenerateName();
         }
         private void OnDestroy()
@@ -129,25 +133,25 @@ namespace Gameplay.UI.MainMenu
             _playerNameLabel.text = _nameGenerationData.GenerateRandomName();
         }
 
-        public void ToggleJoinIPUI()
+        public void OpenJoinIPUI()
         {
             _ipJoiningUI.Show();
             _ipHostingUI.Hide();
 
-            _joinTabButtonHighlightTinter.SetToColour(1);
-            _joinTabButtonBlockerTinter.SetToColour(1);
-            _hostTabButtonHighlightTinter.SetToColour(0);
-            _hostTabButtonBlockerTinter.SetToColour(0);
+            //_joinTabButtonHighlightTinter.SetToColour(1);
+            //_joinTabButtonBlockerTinter.SetToColour(1);
+            //_hostTabButtonHighlightTinter.SetToColour(0);
+            //_hostTabButtonBlockerTinter.SetToColour(0);
         }
-        public void ToggleCreateIPUI()
+        public void OpenCreateIPUI()
         {
             _ipJoiningUI.Hide();
             _ipHostingUI.Show();
 
-            _joinTabButtonHighlightTinter.SetToColour(0);
-            _joinTabButtonBlockerTinter.SetToColour(0);
-            _hostTabButtonHighlightTinter.SetToColour(1);
-            _hostTabButtonBlockerTinter.SetToColour(1);
+            //_joinTabButtonHighlightTinter.SetToColour(0);
+            //_joinTabButtonBlockerTinter.SetToColour(0);
+            //_hostTabButtonHighlightTinter.SetToColour(1);
+            //_hostTabButtonBlockerTinter.SetToColour(1);
         }
 
 
@@ -202,8 +206,8 @@ namespace Gameplay.UI.MainMenu
 
         public static bool AreIPAddressAndPortValid(string ipAddress, string port)
         {
-            bool portValid = ushort.TryParse(ipAddress, out ushort portNumber);
-            return portValid && NetworkEndpoint.TryParse(ipAddress, portNumber, out NetworkEndpoint _);
+            bool portValid = ushort.TryParse(port, out ushort portNumber);
+            return portValid && NetworkEndpoint.TryParse(ipAddress, portNumber, out var netowkrEndPoint);
         }
     }
 }

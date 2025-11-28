@@ -19,11 +19,11 @@ namespace Gameplay.UI.MainMenu
         }
 
 
-        public void OnSelectClick()
+        public void OnSelectButtonPressed()
         {
             _profileManager.Profile = _profileNameText.text;
         }
-        public void OnDeleteClick()
+        public void OnDeleteButtonPressed()
         {
             _profileManager.DeleteProfile(_profileNameText.text);
         }
