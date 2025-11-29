@@ -31,6 +31,7 @@ namespace Gameplay.GameplayObjects.Players
 
         #endregion
 
+        public static event System.Action<BuildDataReference> OnLocalPlayerBuildChanged;
         public static event System.Action<ulong, BuildDataReference> OnPlayerBuildChanged;
 
 
@@ -59,6 +60,9 @@ namespace Gameplay.GameplayObjects.Players
             {
                 LocalPersistentPlayer = this;
             }
+
+            // Subscribe to Events.
+            _networkBuildState.OnBuildChanged += OnBuildChanged;
         }
         public override void OnNetworkDespawn()
         {
@@ -72,6 +76,7 @@ namespace Gameplay.GameplayObjects.Players
             base.OnDestroy();
             RemovePersistentPlayer();
         }
+
 
         /// <summary>
         ///     Remove this PersistentPlayer from the <see cref="PersistentPlayerRuntimeCollection"/> and (If the Server) update the saved
@@ -95,6 +100,16 @@ namespace Gameplay.GameplayObjects.Players
                     SessionManager<SessionPlayerData>.Instance.SetPlayerData(OwnerClientId, playerData);
                 }
             }
+        }
+
+
+        private void OnBuildChanged(BuildDataReference buildData)
+        {
+            Debug.Log("Build Changed");
+            if (IsLocalPlayer)
+                OnLocalPlayerBuildChanged?.Invoke(buildData);
+
+            OnPlayerBuildChanged?.Invoke(this.OwnerClientId, buildData);
         }
     }
 }

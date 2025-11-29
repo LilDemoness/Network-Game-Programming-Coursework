@@ -20,7 +20,12 @@ namespace Utils
     {
         private FixedString32Bytes _name;
 
-        public FixedPlayerName(string initialValue) => _name = new FixedString32Bytes(initialValue);
+        public FixedPlayerName(string initialValue)
+        {
+            Debug.Log(initialValue);
+            _name = new FixedString32Bytes(initialValue);
+            Debug.Log(_name.ToString());
+        }
 
         public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
         {

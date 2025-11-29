@@ -6,6 +6,7 @@ using Gameplay.GameplayObjects;
 using Gameplay.GameplayObjects.Character.Customisation;
 using Gameplay.GameplayObjects.Character.Customisation.Data;
 using UserInput;
+using Gameplay.GameplayObjects.Players;
 
 namespace UI.Customisation.SlottableSelection
 {
@@ -14,7 +15,6 @@ namespace UI.Customisation.SlottableSelection
     /// </summary>
     public class SlottableSelectionUI : MonoBehaviour
     {
-        [SerializeField] private PlayerCustomisationManager _playerCustomisationManager;
         private FrameData _selectedFrameData;
         private AttachmentSlotIndex _activeTab;
 
@@ -46,14 +46,15 @@ namespace UI.Customisation.SlottableSelection
             ClientInput.OnNavigatePerformed += ClientInput_OnNavigatePerformed;
             ClientInput.OnNextTabPerformed += ClientInput_OnNextTabPerformed;
             ClientInput.OnPreviousTabPerformed += ClientInput_OnPreviousTabPerformed;
-            PlayerCustomisationManager.OnLocalClientBuildChanged += PlayerCustomisationManager_OnPlayerCustomisationStateChanged;
+            PersistentPlayer.OnLocalPlayerBuildChanged += PersistentPlayer_OnLocalPlayerBuildChanged;
         }
+        private void Start() => PersistentPlayer_OnLocalPlayerBuildChanged(PersistentPlayer.LocalPersistentPlayer.NetworkBuildState.BuildDataReference);    // Temp - Ensure build data is loaded initially.
         private void OnDestroy()
         {
             ClientInput.OnNavigatePerformed -= ClientInput_OnNavigatePerformed;
             ClientInput.OnNextTabPerformed -= ClientInput_OnNextTabPerformed;
             ClientInput.OnPreviousTabPerformed -= ClientInput_OnPreviousTabPerformed;
-            PlayerCustomisationManager.OnLocalClientBuildChanged -= PlayerCustomisationManager_OnPlayerCustomisationStateChanged;
+            PersistentPlayer.OnLocalPlayerBuildChanged -= PersistentPlayer_OnLocalPlayerBuildChanged;
         }
 
         private void ClientInput_OnNavigatePerformed(Vector2 value)
@@ -164,7 +165,7 @@ namespace UI.Customisation.SlottableSelection
         }
 
 
-        private void PlayerCustomisationManager_OnPlayerCustomisationStateChanged(BuildDataReference buildData)
+        private void PersistentPlayer_OnLocalPlayerBuildChanged(BuildDataReference buildData)
         {
             // Check if our selected frame has changed, and if it has update our cached data.
             FrameData frameData = CustomisationOptionsDatabase.AllOptionsDatabase.GetFrame(buildData.ActiveFrameIndex);
@@ -225,7 +226,7 @@ namespace UI.Customisation.SlottableSelection
             }
 
             // Select the corresponding slot for the currently selected slottable.
-            int selectedIndex = _playerCustomisationManager.GetClientSelectedSlottableIndex(_activeTab);
+            int selectedIndex = PersistentPlayer.LocalPersistentPlayer.NetworkBuildState.GetSlottableIndex(_activeTab);
             OnSlottablePreviewSelectionChanged?.Invoke(selectedIndex);
             _selectionButtons[selectedIndex].MarkAsSelected();
         }
@@ -263,7 +264,7 @@ namespace UI.Customisation.SlottableSelection
         /// </summary>
         private void EquipSelectedSlottable()
         {
-            _playerCustomisationManager.SelectSlottableData(_activeTab, _currentPreviewSlottableIndex);
+            PersistentPlayer.LocalPersistentPlayer.NetworkBuildState.SetSlottable(_activeTab, _currentPreviewSlottableIndex);
         }
     }
 }

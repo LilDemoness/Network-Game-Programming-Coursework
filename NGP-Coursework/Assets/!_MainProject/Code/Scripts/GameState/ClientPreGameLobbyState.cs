@@ -3,6 +3,8 @@ using Gameplay.GameplayObjects.Character.Customisation.Data;
 using Gameplay.GameplayObjects.Players;
 using System.Collections.Generic;
 using TMPro;
+using UI;
+using UI.Lobby;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
@@ -44,13 +46,13 @@ namespace Gameplay.GameState
         [SerializeField] private TextMeshProUGUI _playerCountText;
 
         [Space(5)]
-        [SerializeField] private Button _readyButton;
+        [SerializeField] private NonNavigableButton _readyButton;
         [SerializeField] private TextMeshProUGUI _readyButtonText;
 
         [Space(5)]
         [SerializeField] private Transform _playerReadyIndicatorRoot;
-        [SerializeField] private Toggle _playerReadyIndicatorPrefab;
-        private List<Toggle> _playerReadyIndicatorInstances;
+        [SerializeField] private ReadyCheckMark _playerReadyIndicatorPrefab;
+        private List<ReadyCheckMark> _playerReadyIndicatorInstances;
 
 
         [Header("UI Elements for Different Session Modes")]
@@ -201,19 +203,19 @@ namespace Gameplay.GameState
             switch (mode)
             {
                 case SessionMode.Unready:
-                    _readyButton.interactable = true;
+                    _readyButton.IsInteractable = true;
                     _readyButtonText.text = "READY";
                     break;
                 case SessionMode.Ready:
-                    _readyButton.interactable = true;
+                    _readyButton.IsInteractable = true;
                     _readyButtonText.text = "UNREADY";
                     break;
                 case SessionMode.GameStarting:
-                    _readyButton.interactable = true;
+                    _readyButton.IsInteractable = true;
                     _readyButtonText.text = "UNREADY";
                     break;
                 case SessionMode.LobbyLocked:
-                    _readyButton.interactable = false;
+                    _readyButton.IsInteractable = false;
                     break;
             }
         }
@@ -246,7 +248,8 @@ namespace Gameplay.GameState
             for (int i = 0; i < _networkLobbyState.SessionPlayers.Count; ++i)
             {
                 // Update the indicator.
-                _playerReadyIndicatorInstances[i].isOn = _networkLobbyState.SessionPlayers[i].IsReady;
+                _playerReadyIndicatorInstances[i].SetToggleText(_networkLobbyState.SessionPlayers[i].PlayerName);
+                _playerReadyIndicatorInstances[i].SetToggleVisibility(_networkLobbyState.SessionPlayers[i].IsReady);
             }
         }
         private void EnsurePlayerReadyIndicatorCount()
@@ -259,9 +262,8 @@ namespace Gameplay.GameState
                 _playerReadyIndicatorInstances.Capacity = playerCount;  // Set capacity so that we don't dynamically resize the list.
                 for (int i = 0; i < delta; ++i)
                 {
-                    Toggle toggle = Instantiate<Toggle>(_playerReadyIndicatorPrefab, _playerReadyIndicatorRoot);
-                    toggle.interactable = false;
-                    _playerReadyIndicatorInstances.Add(toggle);
+                    ReadyCheckMark readyCheckMark = Instantiate<ReadyCheckMark>(_playerReadyIndicatorPrefab, _playerReadyIndicatorRoot);
+                    _playerReadyIndicatorInstances.Add(readyCheckMark);
                 }
             }
 
@@ -293,6 +295,7 @@ namespace Gameplay.GameState
             if (!_networkLobbyState.IsSpawned)
                 return;
 
+            Debug.Log("Set Lobby State");
             _networkLobbyState.ChangeReadyStateServerRpc(NetworkManager.Singleton.LocalClientId, isReady);
         }
     }

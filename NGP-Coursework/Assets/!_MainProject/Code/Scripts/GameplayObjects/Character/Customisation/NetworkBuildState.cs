@@ -16,6 +16,7 @@ namespace Gameplay.GameplayObjects
 
         private void Awake()
         {
+            _buildDataReference = new BuildDataReference(BuildData.Value);
             BuildData.OnValueChanged += OnBuildDataValueChanged;
         }
         public override void OnDestroy()
@@ -38,11 +39,14 @@ namespace Gameplay.GameplayObjects
             buildData.ActiveFrameIndex = frameIndex;
             BuildData.Value = buildData;
         }
+        public int GetFrameIndex() => BuildData.Value.ActiveFrameIndex;
+
         public void SetSlottable(AttachmentSlotIndex slotIndex, int slottableIndex)
         {
             BuildDataState buildData = BuildData.Value;
             buildData.ActiveSlottableIndicies[slotIndex.GetSlotInteger()] = slottableIndex;
             BuildData.Value = buildData;
         }
+        public int GetSlottableIndex(AttachmentSlotIndex slotIndex) => BuildData.Value.GetSlottableDataIndex(slotIndex);
     }
 }

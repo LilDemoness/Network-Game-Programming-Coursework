@@ -34,6 +34,15 @@ namespace UI
         }
 
 
+        [SerializeField] private bool _isInteractable = true;
+        public bool IsInteractable
+        {
+            get => _isInteractable;
+            set => _isInteractable = true;
+        }
+
+
+        [Space(10)]
         [Tooltip("(Optional) The input action that this button will be triggered by.")]
         [SerializeField] private InputActionReference _inputAction;
         [Tooltip("The type of check that will be run when the input action is performed.")]
@@ -78,6 +87,9 @@ namespace UI
 
         private void Action_performed(InputAction.CallbackContext ctx)
         {
+            if (!_isInteractable)
+                return; // The action is not interractable.
+
             if (!_allowInputWhenNotInFocus && !OverlayMenu.IsWithinActiveMenu(this.transform))
                 return; // We are not in focus and aren't allowing out-of-focus input.
 
@@ -87,7 +99,13 @@ namespace UI
             // Valid input. Trigger our callback.
             _onButtonTriggered?.Invoke();
         }
-        public void OnPointerClick(PointerEventData eventData) => _onButtonTriggered?.Invoke();
+        public void OnPointerClick(PointerEventData eventData)
+        {
+            if (!_isInteractable)
+                return; // The action is not interractable.
+
+            _onButtonTriggered?.Invoke();
+        }
         public void OnPointerEnter(PointerEventData eventData) { }  // Required for IPointerClickHandler().
         public void OnPointerExit(PointerEventData eventData) { }   // Required for IPointerClickHandler().
 

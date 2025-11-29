@@ -53,7 +53,7 @@ namespace Netcode.ConnectionManagement
             string payload = JsonUtility.ToJson(new ConnectionPayload
             {
                 PlayerId = playerId,
-                PlayerName = playerId,
+                PlayerName = playerName,
                 IsDebug = Debug.isDebugBuild,
             });
 

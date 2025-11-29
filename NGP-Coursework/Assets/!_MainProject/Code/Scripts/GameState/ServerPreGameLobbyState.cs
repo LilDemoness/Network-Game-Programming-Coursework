@@ -20,9 +20,9 @@ namespace Gameplay.GameState
     public class ServerPreGameLobbyState : GameStateBehaviour
     {
         [SerializeField] private NetcodeHooks _netcodeHooks;
+        [field: SerializeField] public NetworkLobbyState NetworkLobbyState { get; private set; }
 
         public override GameState ActiveState => GameState.GameLobby;
-        public NetworkLobbyState NetworkLobbyState { get; private set; }
 
         private Coroutine _waitToEndSessionCoroutine;
         private const float LOBBY_READY_TIME = 3.0f;
@@ -35,8 +35,6 @@ namespace Gameplay.GameState
         protected override void Awake()
         {
             base.Awake();
-            NetworkLobbyState = GetComponent<NetworkLobbyState>();
-
             _netcodeHooks.OnNetworkSpawnHook += OnNetworkSpawn;
             _netcodeHooks.OnNetworkDespawnHook += OnNetworkDespawn;
         }
