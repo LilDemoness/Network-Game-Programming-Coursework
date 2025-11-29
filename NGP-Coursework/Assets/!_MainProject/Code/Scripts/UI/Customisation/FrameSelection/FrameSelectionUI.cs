@@ -4,6 +4,7 @@ using Unity.Netcode;
 using UserInput;
 using Gameplay.GameplayObjects.Character.Customisation;
 using Gameplay.GameplayObjects.Character.Customisation.Data;
+using Gameplay.GameplayObjects.Players;
 
 namespace UI.Customisation.FrameSelection
 {
@@ -43,12 +44,12 @@ namespace UI.Customisation.FrameSelection
             Close(false);
 
             SubscribeToInput();
-            PlayerCustomisationManager.OnPlayerBuildChanged += PlayerCustomisationManager_OnPlayerCustomisationStateChanged;
+            PersistentPlayer.OnLocalPlayerBuildChanged += PersistentPlayer_OnLocalPlayerBuildChanged;
         }
         private void OnDestroy()
         {
             UnsubscribeFromInput();
-            PlayerCustomisationManager.OnPlayerBuildChanged -= PlayerCustomisationManager_OnPlayerCustomisationStateChanged;   
+            PersistentPlayer.OnLocalPlayerBuildChanged -= PersistentPlayer_OnLocalPlayerBuildChanged;   
         }
 
 
@@ -104,11 +105,8 @@ namespace UI.Customisation.FrameSelection
         #endregion
 
 
-        private void PlayerCustomisationManager_OnPlayerCustomisationStateChanged(ulong clientID, BuildDataReference buildData)
+        private void PersistentPlayer_OnLocalPlayerBuildChanged(BuildDataReference buildData)
         {
-            if (clientID != NetworkManager.Singleton.LocalClientId)
-                return; // Not the client.
-
             // Update the selected frame option.
             _selectedFrameIndex = buildData.ActiveFrameIndex;
             UpdateActiveFrameIdentifier();
@@ -235,7 +233,7 @@ namespace UI.Customisation.FrameSelection
         /// <remarks> Hides this menu once performed.</remarks>
         public void EquipPreviewedFrameOption()
         {
-            PlayerCustomisationManager.Instance.SelectFrame(_currentPreviewedFrameIndex);
+            PersistentPlayer.LocalPersistentPlayer.NetworkBuildState.SetFrame(_currentPreviewedFrameIndex);
             Close();
         }
     }

@@ -17,30 +17,12 @@ namespace Gameplay.GameplayObjects.Character.Customisation
         [SerializeField] private FrameGFX[] _gfxElements;
     
 
-        public void Setup(ulong ownerClientID) => this.ownerClientID = ownerClientID;
         public void Setup(ulong ownerClientID, BuildDataReference initialState)
         {
             this.ownerClientID = ownerClientID;
-            PlayerCustomisationManager_OnPlayerCustomisationStateChanged(ownerClientID, initialState);
-        }
-        private void Awake()
-        {
-            PlayerCustomisationManager.OnPlayerBuildChanged += PlayerCustomisationManager_OnPlayerCustomisationStateChanged;
-
-            _gfxElements = GetComponentsInChildren<FrameGFX>();
-        }
-        private void OnDestroy()
-        {
-            PlayerCustomisationManager.OnPlayerBuildChanged -= PlayerCustomisationManager_OnPlayerCustomisationStateChanged;
+            UpdateDummy(initialState);
         }
 
-        private void PlayerCustomisationManager_OnPlayerCustomisationStateChanged(ulong clientID, BuildDataReference buildData)
-        {
-            if (clientID != ownerClientID)
-                return; // Not the owning client.
-
-            UpdateDummy(buildData);
-        }
         public void UpdateDummy(BuildDataReference buildData)
         {
             for (int i = 0; i < _gfxElements.Length; ++i)

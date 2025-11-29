@@ -4,6 +4,7 @@ using TMPro;
 using UI.Tables;
 using Gameplay.GameplayObjects.Character.Customisation.Data;
 using Gameplay.GameplayObjects.Character.Customisation;
+using Gameplay.GameplayObjects.Players;
 
 namespace UI.Customisation.FrameSelection
 {
@@ -24,14 +25,11 @@ namespace UI.Customisation.FrameSelection
 
 
 
-        private void Awake() => PlayerCustomisationManager.OnPlayerBuildChanged += PlayerCustomisationManager_OnPlayerCustomisationStateChanged;
+        private void Awake() => PersistentPlayer.OnLocalPlayerBuildChanged += PersistentPlayer_OnLocalPlayerBuildChanged;
         
-        private void OnDestroy() => PlayerCustomisationManager.OnPlayerBuildChanged -= PlayerCustomisationManager_OnPlayerCustomisationStateChanged;
-        private void PlayerCustomisationManager_OnPlayerCustomisationStateChanged(ulong clientID, BuildDataReference buildData)
+        private void OnDestroy() => PersistentPlayer.OnLocalPlayerBuildChanged -= PersistentPlayer_OnLocalPlayerBuildChanged;
+        private void PersistentPlayer_OnLocalPlayerBuildChanged(BuildDataReference buildData)
         {
-            if (clientID != NetworkManager.Singleton.LocalClientId)
-                return; // Not the client.
-
             // Update our displayed frame information.
             FrameData frameData = buildData.GetFrameData();
             SetSelectedFrameText(frameData.Name);

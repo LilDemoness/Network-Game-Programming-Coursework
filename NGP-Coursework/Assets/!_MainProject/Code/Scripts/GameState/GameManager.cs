@@ -28,7 +28,8 @@ namespace GameState
             Player.OnPlayerDeath += Player_OnPlayerDeath;
 
             // Setup our players, notifying clients once each has been spawned.
-            foreach (var kvp in PlayerCustomisationManager_Server.Instance.PlayerBuilds)
+            throw new System.NotImplementedException("Player Spawning");
+            /*foreach (var kvp in PlayerCustomisationManager_Server.Instance.PlayerBuilds)
             {
                 Vector3 spawnPosition = Vector3.right * Mathf.Floor(kvp.Key) * 2.0f;
 
@@ -36,7 +37,7 @@ namespace GameState
                 Player playerInstance = Instantiate<Player>(_playerPrefab, spawnPosition, Quaternion.identity);
                 playerInstance.NetworkObject.SpawnAsPlayerObject(kvp.Key);
                 playerInstance.GetComponent<ServerCharacter>().BuildData.Value = kvp.Value.GetBuildDataState();
-            }
+            }*/
         }
         public override void OnNetworkDespawn()
         {
