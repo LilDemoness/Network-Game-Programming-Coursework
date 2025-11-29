@@ -5,7 +5,7 @@ public class ClientData
 {
     public ulong ClientID { get; }
 
-    public BuildDataReference BuildData { get; set; }
+    public BuildData BuildData { get; set; }
 
 
     private ClientData() { }

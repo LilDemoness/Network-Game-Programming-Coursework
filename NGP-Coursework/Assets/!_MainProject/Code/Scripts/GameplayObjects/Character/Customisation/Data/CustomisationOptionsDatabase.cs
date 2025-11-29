@@ -13,6 +13,7 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Data
             get => s_allOptionsDatabase ??= Resources.Load<CustomisationOptionsDatabase>(ALL_OPTIONS_DATABASE_PATH);
         }
         private const string ALL_OPTIONS_DATABASE_PATH = "PlayerData/AllPlayerCustomisationOptions";
+        public const int MAX_SLOTTABLE_DATAS = 4;
 
 
         [field: SerializeField] public FrameData[] FrameDatas;

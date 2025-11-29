@@ -17,13 +17,13 @@ namespace Gameplay.GameplayObjects.Character.Customisation
         [SerializeField] private FrameGFX[] _gfxElements;
     
 
-        public void Setup(ulong ownerClientID, BuildDataReference initialState)
+        public void Setup(ulong ownerClientID, BuildData initialState)
         {
             this.ownerClientID = ownerClientID;
             UpdateDummy(initialState);
         }
 
-        public void UpdateDummy(BuildDataReference buildData)
+        public void UpdateDummy(BuildData buildData)
         {
             for (int i = 0; i < _gfxElements.Length; ++i)
             {

@@ -37,7 +37,7 @@ namespace Gameplay.GameplayObjects.Players
         /// <summary>
         ///     Called when we've updated the local player's build.
         /// </summary>
-        public static event System.Action<BuildDataReference> OnLocalPlayerBuildUpdated;
+        public static event System.Action<BuildData> OnLocalPlayerBuildUpdated;
 
 
         /// <summary>
@@ -92,7 +92,7 @@ namespace Gameplay.GameplayObjects.Players
                     SessionPlayerData playerData = sessionPlayerData.Value;
                     playerData.PlayerPosition = movementTransform.position;
                     playerData.PlayerRotation = movementTransform.rotation;
-                    playerData.BuildData = ServerCharacter.BuildData.Value;
+                    //playerData.BuildData = ServerCharacter.BuildData.Value;
                     playerData.CurrentHealth = ServerCharacter.CurrentHealth.Value;
                     playerData.HasCharacterSpawned = true;
 
@@ -114,7 +114,7 @@ namespace Gameplay.GameplayObjects.Players
         /// <summary>
         ///     The player's build has been changed. Update the player's graphics and subsequent cached values.
         /// </summary>
-        private void OnBuildChanged(BuildDataReference buildData)
+        private void OnBuildChanged(BuildData buildData)
         {
             Debug.Log("Build Changed");
 
@@ -258,7 +258,7 @@ namespace Gameplay.GameplayObjects.Players
             }
 
 
-            public bool Toggle(BuildDataReference buildData, ref FrameGFX activeFrameGFX, ref Dictionary<AttachmentSlotIndex, SlotGFXSection> slottables)
+            public bool Toggle(BuildData buildData, ref FrameGFX activeFrameGFX, ref Dictionary<AttachmentSlotIndex, SlotGFXSection> slottables)
             {
                 if (_frameGFX.Toggle(buildData.GetFrameData()) == false)
                 {

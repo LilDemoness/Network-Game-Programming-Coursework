@@ -7,6 +7,7 @@ using Gameplay.GameplayObjects.Character.Customisation;
 using Gameplay.GameplayObjects.Character.Customisation.Data;
 using UserInput;
 using Gameplay.GameplayObjects.Players;
+using System.Collections;
 
 namespace UI.Customisation.SlottableSelection
 {
@@ -48,7 +49,11 @@ namespace UI.Customisation.SlottableSelection
             ClientInput.OnPreviousTabPerformed += ClientInput_OnPreviousTabPerformed;
             PersistentPlayer.OnLocalPlayerBuildChanged += PersistentPlayer_OnLocalPlayerBuildChanged;
         }
-        private void Start() => PersistentPlayer_OnLocalPlayerBuildChanged(PersistentPlayer.LocalPersistentPlayer.NetworkBuildState.BuildDataReference);    // Temp - Ensure build data is loaded initially.
+        private IEnumerator Start()
+        {
+            yield return null;
+            PersistentPlayer_OnLocalPlayerBuildChanged(PersistentPlayer.LocalPersistentPlayer.NetworkBuildState.BuildDataReference);    // Temp - Ensure build data is loaded initially.
+        }
         private void OnDestroy()
         {
             ClientInput.OnNavigatePerformed -= ClientInput_OnNavigatePerformed;
@@ -165,7 +170,7 @@ namespace UI.Customisation.SlottableSelection
         }
 
 
-        private void PersistentPlayer_OnLocalPlayerBuildChanged(BuildDataReference buildData)
+        private void PersistentPlayer_OnLocalPlayerBuildChanged(BuildData buildData)
         {
             // Check if our selected frame has changed, and if it has update our cached data.
             FrameData frameData = CustomisationOptionsDatabase.AllOptionsDatabase.GetFrame(buildData.ActiveFrameIndex);
@@ -264,7 +269,7 @@ namespace UI.Customisation.SlottableSelection
         /// </summary>
         private void EquipSelectedSlottable()
         {
-            PersistentPlayer.LocalPersistentPlayer.NetworkBuildState.SetSlottable(_activeTab, _currentPreviewSlottableIndex);
+            PersistentPlayer.LocalPersistentPlayer.NetworkBuildState.SetSlottableServerRpc(_activeTab, _currentPreviewSlottableIndex);
         }
     }
 }

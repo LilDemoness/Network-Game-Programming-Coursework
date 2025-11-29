@@ -3,11 +3,15 @@ using UnityEngine;
 using Unity.Netcode;
 using Gameplay.GameplayObjects.Character.Customisation.Data;
 using Netcode.ConnectionManagement;
+using Gameplay.GameplayObjects.Players;
 
 namespace Gameplay.GameplayObjects.Character.Customisation
 {
     public class CustomisationDummyManager : MonoBehaviour
     {
+        [SerializeField] private PersistentPlayerRuntimeCollection _persistentPlayerRuntimeCollection;
+
+
         [Header("Player Lobby GFX Instances")]
         [SerializeField] private PlayerCustomisationDisplay _playerDummyPrefab;
         private Dictionary<ulong, PlayerCustomisationDisplay> _playerDummyInstances;
@@ -26,35 +30,27 @@ namespace Gameplay.GameplayObjects.Character.Customisation
         {
             _playerDummyInstances = new Dictionary<ulong, PlayerCustomisationDisplay>();
 
-            SessionManager<SessionPlayerData>.OnClientConnected += SessionManager_OnClientConnected;
-            SessionManager<SessionPlayerData>.OnClientDisconnect += SessionManager_OnClientDisconnect;
+            _persistentPlayerRuntimeCollection.ItemAdded += PersistentPlayerCollection_ItemAdded;
+            _persistentPlayerRuntimeCollection.ItemRemoved += PersistentPlayerCollection_Removed;
+
+            foreach (PersistentPlayer persistentPlayer in _persistentPlayerRuntimeCollection.Items)
+            {
+                AddPlayerInstance(persistentPlayer.OwnerClientId, persistentPlayer.NetworkBuildState.BuildDataReference);
+            }
+
         }
         private void OnDestroy()
         {
-            SessionManager<SessionPlayerData>.OnClientConnected -= SessionManager_OnClientConnected;
-            SessionManager<SessionPlayerData>.OnClientDisconnect -= SessionManager_OnClientDisconnect;
+            _persistentPlayerRuntimeCollection.ItemAdded -= PersistentPlayerCollection_ItemAdded;
+            _persistentPlayerRuntimeCollection.ItemRemoved -= PersistentPlayerCollection_Removed;
         }
 
 
-        private void SessionManager_OnClientConnected(object sender, SessionManager<SessionPlayerData>.PlayerConnectionEventArgs args) => HandlePlayerConnected(args.ClientId, new BuildDataReference(args.SessionPlayerData.BuildData));
-        private void SessionManager_OnClientDisconnect(ulong clientId) => HandlePlayerDisconnected(clientId);
-
-        private void HandlePlayerConnected(ulong clientId, BuildDataReference initialBuild)
-        {
-            if (_playerDummyInstances.ContainsKey(clientId))
-            {
-                Debug.Log("Contains Key");
-            }
-            else
-            {
-                AddPlayerInstance(clientId, initialBuild);
-            }
-        }
-        private void HandlePlayerDisconnected(ulong clientId) => RemovePlayerInstance(clientId);
+        private void PersistentPlayerCollection_ItemAdded(PersistentPlayer persistentPlayer) => AddPlayerInstance(persistentPlayer.OwnerClientId, persistentPlayer.NetworkBuildState.BuildDataReference);
+        private void PersistentPlayerCollection_Removed(PersistentPlayer persistentPlayer) => RemovePlayerInstance(persistentPlayer.OwnerClientId);
 
 
-        public void AddNewPlayer(ulong clientId) => AddPlayerInstance(clientId, new BuildDataReference());
-        private void AddPlayerInstance(ulong clientIDToAdd, BuildDataReference initialBuild)
+        private void AddPlayerInstance(ulong clientIDToAdd, BuildData initialBuild)
         {
             // Get our desired spawn position.
             LobbySpawnPositions lobbySpawnPosition = null;
@@ -110,12 +106,14 @@ namespace Gameplay.GameplayObjects.Character.Customisation
         }
 
 
-        public void UpdateCustomisationDummy(ulong clientId, BuildDataReference buildData)
+        public void UpdateCustomisationDummy(ulong clientId, BuildData buildData)
         {
             if (_playerDummyInstances.TryGetValue(clientId, out PlayerCustomisationDisplay playerCustomisationDisplay))
             {
                 playerCustomisationDisplay.UpdateDummy(buildData);
             }
+            else
+                Debug.Log("No Player Dummy");
         }
     }
 }

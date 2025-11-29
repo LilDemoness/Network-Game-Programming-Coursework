@@ -31,8 +31,8 @@ namespace Gameplay.GameplayObjects.Players
 
         #endregion
 
-        public static event System.Action<BuildDataReference> OnLocalPlayerBuildChanged;
-        public static event System.Action<ulong, BuildDataReference> OnPlayerBuildChanged;
+        public static event System.Action<BuildData> OnLocalPlayerBuildChanged;
+        public static event System.Action<ulong, BuildData> OnPlayerBuildChanged;
 
 
         public override void OnNetworkSpawn()
@@ -56,7 +56,7 @@ namespace Gameplay.GameplayObjects.Players
                     // Cache Build Data?
                 }
             }
-            if (IsClient)
+            if (IsOwner)
             {
                 LocalPersistentPlayer = this;
             }
@@ -103,9 +103,9 @@ namespace Gameplay.GameplayObjects.Players
         }
 
 
-        private void OnBuildChanged(BuildDataReference buildData)
+        private void OnBuildChanged(BuildData buildData)
         {
-            Debug.Log("Build Changed");
+            Debug.Log("Build Changed: " + buildData.ActiveSlottableIndicies[0]);
             if (IsLocalPlayer)
                 OnLocalPlayerBuildChanged?.Invoke(buildData);
 

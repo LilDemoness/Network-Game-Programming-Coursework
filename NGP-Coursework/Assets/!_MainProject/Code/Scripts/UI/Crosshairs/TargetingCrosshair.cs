@@ -43,7 +43,7 @@ namespace UI.Crosshairs
         }
 
 
-        private void PlayerManager_OnLocalPlayerBuildUpdated(BuildDataReference buildData)
+        private void PlayerManager_OnLocalPlayerBuildUpdated(BuildData buildData)
         {
             if (buildData.GetFrameData().AttachmentPoints.Length < (int)_attachmentSlotIndex)
                 DisableCrosshair();

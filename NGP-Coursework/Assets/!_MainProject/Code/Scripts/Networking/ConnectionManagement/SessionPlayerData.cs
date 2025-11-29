@@ -11,12 +11,13 @@ namespace Netcode.ConnectionManagement
         public Vector3 PlayerPosition;
         public Quaternion PlayerRotation;
 
-        public BuildDataState BuildData;
+        public BuildData BuildData;
+
         public float CurrentHealth;
         public bool HasCharacterSpawned;
 
 
-        public SessionPlayerData(ulong clientID, string name, BuildDataState buildData = default, float currentHealth = 0.0f, bool isConnected = false, bool hasCharacterSpawned = false)
+        public SessionPlayerData(ulong clientID, string name, BuildData buildData = default, float currentHealth = 0.0f, bool isConnected = false, bool hasCharacterSpawned = false)
         {
             this.ClientID = clientID;
 

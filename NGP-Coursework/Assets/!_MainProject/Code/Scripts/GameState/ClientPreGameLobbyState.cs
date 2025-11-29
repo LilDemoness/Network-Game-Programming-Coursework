@@ -52,7 +52,7 @@ namespace Gameplay.GameState
         [Space(5)]
         [SerializeField] private Transform _playerReadyIndicatorRoot;
         [SerializeField] private ReadyCheckMark _playerReadyIndicatorPrefab;
-        private List<ReadyCheckMark> _playerReadyIndicatorInstances;
+        private List<ReadyCheckMark> _playerReadyIndicatorInstances = new List<ReadyCheckMark>();
 
 
         [Header("UI Elements for Different Session Modes")]
@@ -166,6 +166,11 @@ namespace Gameplay.GameState
         }
         private void OnSessionPlayerStateChanged(NetworkListEvent<NetworkLobbyState.SessionPlayerState> changeEvent)
         {
+            if (changeEvent.Type == NetworkListEvent<NetworkLobbyState.SessionPlayerState>.EventType.Add)
+                Debug.Log("Player Joined");
+            else if (changeEvent.Type == NetworkListEvent<NetworkLobbyState.SessionPlayerState>.EventType.Remove || changeEvent.Type == NetworkListEvent<NetworkLobbyState.SessionPlayerState>.EventType.RemoveAt)
+                Debug.Log("Player Disconnected");
+
             UpdatePlayerReadyIndicators();
             UpdatePlayerCountUI();
 
@@ -238,7 +243,7 @@ namespace Gameplay.GameState
             }
         }
 
-        private void UpdatePlayerModel(ulong clientId, BuildDataReference buildData) => _customisationDummyManager.UpdateCustomisationDummy(clientId, buildData);
+        private void UpdatePlayerModel(ulong clientId, BuildData buildData) => _customisationDummyManager.UpdateCustomisationDummy(clientId, buildData);
         
 
         private void UpdatePlayerReadyIndicators()
@@ -285,7 +290,7 @@ namespace Gameplay.GameState
 
 
         public void OnReadyButtonPressed() => SetReadyState(!_isLocalPlayerReady);
-        public void OnPlayerBuildChanged(ulong clientId, BuildDataReference buildData)
+        public void OnPlayerBuildChanged(ulong clientId, BuildData buildData)
         {
             UpdatePlayerModel(clientId, buildData);
         }

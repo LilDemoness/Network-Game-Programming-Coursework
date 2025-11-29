@@ -87,6 +87,10 @@ namespace Gameplay.GameState
             if (sceneEvent.SceneEventType != SceneEventType.LoadComplete)
                 return; // We are only wanting to process 'LoadComplete' events.
 
+
+            SessionPlayerData? sessionPlayerData = SessionManager<SessionPlayerData>.Instance.GetPlayerData(sceneEvent.ClientId);
+            if (sessionPlayerData.HasValue)
+                NetworkLobbyState.SessionPlayers.Add(new NetworkLobbyState.SessionPlayerState(sceneEvent.ClientId, sessionPlayerData.Value.PlayerName, false));
             //SeatNewPlayer(sceneEvent.ClientId);
         }
         private void OnConnectionEvent(NetworkManager networkManager, ConnectionEventData connectionEventData)

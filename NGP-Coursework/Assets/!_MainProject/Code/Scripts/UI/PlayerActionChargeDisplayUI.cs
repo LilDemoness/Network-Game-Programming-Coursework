@@ -112,7 +112,7 @@ namespace UI.Actions
             Player.OnLocalPlayerBuildUpdated -= Player_OnLocalPlayerBuildUpdated;
         }
 
-        private void Player_OnLocalPlayerBuildUpdated(Gameplay.GameplayObjects.Character.Customisation.Data.BuildDataReference buildData)
+        private void Player_OnLocalPlayerBuildUpdated(Gameplay.GameplayObjects.Character.Customisation.Data.BuildData buildData)
         {
             if (buildData.GetFrameData().AttachmentPoints.Length < (int)_slotIndex)
             {

@@ -26,9 +26,10 @@ namespace UI.Customisation.FrameSelection
 
 
         private void Awake() => PersistentPlayer.OnLocalPlayerBuildChanged += PersistentPlayer_OnLocalPlayerBuildChanged;
-        
+        private void Start() => PersistentPlayer_OnLocalPlayerBuildChanged(PersistentPlayer.LocalPersistentPlayer.NetworkBuildState.BuildDataReference);    // Temp - Ensure build data is loaded initially.
+
         private void OnDestroy() => PersistentPlayer.OnLocalPlayerBuildChanged -= PersistentPlayer_OnLocalPlayerBuildChanged;
-        private void PersistentPlayer_OnLocalPlayerBuildChanged(BuildDataReference buildData)
+        private void PersistentPlayer_OnLocalPlayerBuildChanged(BuildData buildData)
         {
             // Update our displayed frame information.
             FrameData frameData = buildData.GetFrameData();

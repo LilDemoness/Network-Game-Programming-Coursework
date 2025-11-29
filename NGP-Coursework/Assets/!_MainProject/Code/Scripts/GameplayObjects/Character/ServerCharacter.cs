@@ -16,9 +16,9 @@ namespace Gameplay.GameplayObjects.Character
         public ClientCharacter ClientCharacter => m_clientCharacter;
 
 
-        public NetworkVariable<BuildDataState> BuildData { get; set; } = new NetworkVariable<BuildDataState>();
+        //public NetworkVariable<BuildDataState> BuildData { get; set; } = new NetworkVariable<BuildDataState>();
 
-        public event System.Action<BuildDataReference> OnBuildDataChanged;
+        public event System.Action<BuildData> OnBuildDataChanged;
 
 
         /// <summary>
@@ -35,7 +35,7 @@ namespace Gameplay.GameplayObjects.Character
         #region Health & Life State
 
         public NetworkVariable<float> CurrentHealth { get; private set; } = new NetworkVariable<float>();
-        public float MaxHealth => BuildData.Value.GetFrameData()?.MaxHealth ?? 0.0f;
+        public float MaxHealth => throw new System.NotImplementedException("ServerCharacter Build Reference - Max Health");
 
         /// <summary>
         ///     Should only be set in the 'SetLifeState()' functions.
@@ -52,7 +52,7 @@ namespace Gameplay.GameplayObjects.Character
         // Heat.
 
         public NetworkVariable<float> CurrentHeat { get; private set; } = new NetworkVariable<float>();
-        public float MaxHeat => BuildData.Value.GetFrameData()?.HeatCapacity ?? 0.0f;
+        public float MaxHeat => throw new System.NotImplementedException("ServerCharacter Build Reference - Max Heat");
         private float _lastHeatIncreaseTime = 0.0f;
 
 
@@ -88,7 +88,7 @@ namespace Gameplay.GameplayObjects.Character
         public override void OnNetworkSpawn()
         {
             // We're subscribing to this event on clients too in order to relay our BuildData through the class reference as opposed to duplicating the struct.
-            BuildData.OnValueChanged += NetworkedBuildDataChanged;
+            //BuildData.OnValueChanged += NetworkedBuildDataChanged;
 
             if (!IsServer)
             {
@@ -101,7 +101,7 @@ namespace Gameplay.GameplayObjects.Character
         public override void OnNetworkDespawn()
         {
             // Unsubscribe from NetworkVariable Events.
-            BuildData.OnValueChanged -= NetworkedBuildDataChanged;
+            //BuildData.OnValueChanged -= NetworkedBuildDataChanged;
             OnBuildDataChanged -= ServerCharacter_OnBuildDataChanged;
         }
 
@@ -376,12 +376,12 @@ namespace Gameplay.GameplayObjects.Character
 
         #region Build
 
-        private void NetworkedBuildDataChanged(BuildDataState oldValue, BuildDataState newValue)
-        {
-            OnBuildDataChanged?.Invoke(new BuildDataReference(newValue));
-        }
+        //private void NetworkedBuildDataChanged(BuildDataState oldValue, BuildDataState newValue)
+        //{
+        //    OnBuildDataChanged?.Invoke(new BuildDataReference(newValue));
+        //}
 
-        private void ServerCharacter_OnBuildDataChanged(BuildDataReference buildData)
+        private void ServerCharacter_OnBuildDataChanged(BuildData buildData)
         {
             InitialiseHealth();
             InitialiseHeat();

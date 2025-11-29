@@ -34,7 +34,7 @@ namespace Gameplay.GameplayObjects.Players
             Player.OnLocalPlayerBuildUpdated -= PlayerManager_OnLocalPlayerBuildUpdated;
         }
 
-        private void PlayerManager_OnLocalPlayerBuildUpdated(BuildDataReference buildData) => SetupCameraForFrame(buildData.GetFrameData());
+        private void PlayerManager_OnLocalPlayerBuildUpdated(BuildData buildData) => SetupCameraForFrame(buildData.GetFrameData());
 
 
         private void SetupCameraForFrame(FrameData frameData)

@@ -391,92 +391,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 9767373}
   m_CullTransparentMesh: 1
---- !u!1 &14889073
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 14889076}
-  - component: {fileID: 14889074}
-  - component: {fileID: 14889077}
-  - component: {fileID: 14889075}
-  m_Layer: 0
-  m_Name: CustomisationManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &14889074
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 14889073}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 4117294774
-  InScenePlacedSourceGlobalObjectIdHash: 0
-  DeferredDespawnTick: 0
-  Ownership: 1
-  AlwaysReplicateAsRoot: 0
-  SynchronizeTransform: 1
-  ActiveSceneSynchronization: 0
-  SceneMigrationSynchronization: 0
-  SpawnWithObservers: 1
-  DontDestroyWithOwner: 0
-  AutoObjectParentSync: 1
-  SyncOwnerTransformWhenParented: 1
-  AllowOwnerToParent: 0
---- !u!114 &14889075
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 14889073}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b6161c85941d75247b43a8cb106e36cb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ShowTopMostFoldoutHeaderGroup: 1
-  _optionsDatabase: {fileID: 11400000, guid: 4ac138f60c58a9b469e5e446fdb0223d, type: 2}
---- !u!4 &14889076
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 14889073}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &14889077
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 14889073}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 898ce42d98e803e4fa7beee8f04a12ed, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ShowTopMostFoldoutHeaderGroup: 1
 --- !u!1 &35493779
 GameObject:
   m_ObjectHideFlags: 0
@@ -3926,6 +3840,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ed5aadfa15419c64fbeb6862e7c1abe2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _persistentPlayerRuntimeCollection: {fileID: 11400000, guid: 9596a55ab7773b941bfe4be909d1f13d, type: 2}
   _playerDummyPrefab: {fileID: 1189479451218648122, guid: bf990d160d4b5fd4f9cd3264956f3f0f, type: 3}
   _playerLobbyGFXSpawnPositions:
   - SpawnPosition: {fileID: 2106355538}
@@ -12985,7 +12900,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7d8531c4383f1354f89065c0a1ebf7a5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _playerCustomisationManager: {fileID: 14889075}
   _tabButtonPrefab: {fileID: 401711318420102509, guid: 63e33541ccf1bbf42b324c34409056ef, type: 3}
   _tabButtonContainer: {fileID: 580338680}
   _selectionButtonPrefab: {fileID: 1098675253895633356, guid: a68ac370fc5350b4a85769fbfde1bda7, type: 3}
@@ -15610,7 +15524,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 14889075}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: Gameplay.GameplayObjects.Character.Customisation.PlayerCustomisationManager,
           Assembly-CSharp
         m_MethodName: ToggleReady
@@ -16071,7 +15985,6 @@ SceneRoots:
   - {fileID: 7066058116562057064}
   - {fileID: 1383952601}
   - {fileID: 525132389}
-  - {fileID: 14889076}
   - {fileID: 1935891695}
   - {fileID: 131788955}
   - {fileID: 109777445}

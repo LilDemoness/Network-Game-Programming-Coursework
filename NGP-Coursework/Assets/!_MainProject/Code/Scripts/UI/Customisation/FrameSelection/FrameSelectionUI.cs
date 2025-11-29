@@ -46,6 +46,7 @@ namespace UI.Customisation.FrameSelection
             SubscribeToInput();
             PersistentPlayer.OnLocalPlayerBuildChanged += PersistentPlayer_OnLocalPlayerBuildChanged;
         }
+        private void Start() => PersistentPlayer_OnLocalPlayerBuildChanged(PersistentPlayer.LocalPersistentPlayer.NetworkBuildState.BuildDataReference);    // Temp - Ensure build data is loaded initially.
         private void OnDestroy()
         {
             UnsubscribeFromInput();
@@ -105,7 +106,7 @@ namespace UI.Customisation.FrameSelection
         #endregion
 
 
-        private void PersistentPlayer_OnLocalPlayerBuildChanged(BuildDataReference buildData)
+        private void PersistentPlayer_OnLocalPlayerBuildChanged(BuildData buildData)
         {
             // Update the selected frame option.
             _selectedFrameIndex = buildData.ActiveFrameIndex;
@@ -233,7 +234,7 @@ namespace UI.Customisation.FrameSelection
         /// <remarks> Hides this menu once performed.</remarks>
         public void EquipPreviewedFrameOption()
         {
-            PersistentPlayer.LocalPersistentPlayer.NetworkBuildState.SetFrame(_currentPreviewedFrameIndex);
+            PersistentPlayer.LocalPersistentPlayer.NetworkBuildState.SelectFrame(_currentPreviewedFrameIndex);
             Close();
         }
     }
