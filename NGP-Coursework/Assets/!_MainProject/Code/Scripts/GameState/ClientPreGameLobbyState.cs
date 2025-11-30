@@ -1,6 +1,7 @@
 using Gameplay.GameplayObjects.Character.Customisation;
 using Gameplay.GameplayObjects.Character.Customisation.Data;
 using Gameplay.GameplayObjects.Players;
+using NUnit.Framework;
 using System.Collections.Generic;
 using TMPro;
 using UI;
@@ -24,12 +25,13 @@ namespace Gameplay.GameState
         /// </summary>
         enum SessionMode
         {
-            Unready,        // The player isn't yet readied.
+            Unready = 0,    // The player isn't yet readied.
             Ready,          // The player is ready, but the game isn't starting yet.
             GameStarting,   // The game is starting, but players can still unready.
             LobbyLocked,    // The game is starting, and players cannot change their ready state.
             FatalError      // An error has occured.
         }
+        private const int SESSION_MODE_COUNT = 5;
 
 
         public static ClientPreGameLobbyState Instance { get; private set; }
@@ -67,6 +69,8 @@ namespace Gameplay.GameState
 
         private int _localPlayerNumber = -1;
         private bool _isLocalPlayerReady;
+
+        public static float LobbyClosedEstimatedTime { get; private set; }
 
 
 
@@ -142,6 +146,7 @@ namespace Gameplay.GameState
         {
             if (isStartingGame)
             {
+                LobbyClosedEstimatedTime = Time.time + ServerPreGameLobbyState.LOBBY_READY_TIME;
                 ConfigureUIForSessionMode(SessionMode.GameStarting);
             }
             else
@@ -149,6 +154,7 @@ namespace Gameplay.GameState
                 // The game could have been starting without the player being ready for several reasons, such as:
                 //  - The player has just joined.
                 ConfigureUIForSessionMode(_isLocalPlayerReady ? SessionMode.Ready : SessionMode.Unready);
+                LobbyClosedEstimatedTime = -1.0f;
             }
         }
         private void OnLobbyLockedValueChanged(bool wasLobbyLocked, bool isLobbyLocked)
@@ -191,17 +197,19 @@ namespace Gameplay.GameState
         /// <param name="session"></param>
         private void ConfigureUIForSessionMode(SessionMode mode)
         {
-            // Disable all inappropritate UI elements.
-            foreach(List<GameObject> list in _sessionUIElementsByMode.Values)
+            // Disable all inappropriate UI elements.
+            for (int i = 0; i < SESSION_MODE_COUNT; ++i)
             {
-                foreach(GameObject uiElement in list)
+                if ((SessionMode)i != mode)
                 {
-                    uiElement.SetActive(false);
+                    foreach (GameObject uiElement in _sessionUIElementsByMode[(SessionMode)i])
+                    {
+                        uiElement.SetActive(false);
+                    }
                 }
             }
-
-            // Enable all appropritate UI elements.
-            foreach(GameObject uiElement in _sessionUIElementsByMode[mode])
+            // Enable all appropriate UI elements.
+            foreach (GameObject uiElement in _sessionUIElementsByMode[mode])
             {
                 uiElement.SetActive(true);
             }

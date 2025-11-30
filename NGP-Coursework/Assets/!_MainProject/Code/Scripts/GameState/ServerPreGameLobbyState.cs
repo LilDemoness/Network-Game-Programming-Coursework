@@ -25,8 +25,8 @@ namespace Gameplay.GameState
         public override GameState ActiveState => GameState.GameLobby;
 
         private Coroutine _waitToEndSessionCoroutine;
-        private const float LOBBY_READY_TIME = 3.0f;
-        private const float LOBBY_LOCKDOWN_TIME = 1.0f; // Must be less than LOBBY_READY_TIME.
+        public const float LOBBY_READY_TIME = 2.0f;
+        private const float LOBBY_LOCKDOWN_TIME = 1.0f; // The time before starting where players cannot cancel. Game start animations would play during this time.
 
         [Inject]
         private ConnectionManager _connectionManager;
@@ -282,7 +282,7 @@ namespace Gameplay.GameState
             // Mark ourselves as starting the game.
             NetworkLobbyState.IsStartingGame.Value = true;
 
-            yield return new WaitForSeconds(LOBBY_READY_TIME - LOBBY_LOCKDOWN_TIME);
+            yield return new WaitForSeconds(LOBBY_READY_TIME);
 
             // Prevent any changes to the lobby and save our current state.
             LockDownLobby();
