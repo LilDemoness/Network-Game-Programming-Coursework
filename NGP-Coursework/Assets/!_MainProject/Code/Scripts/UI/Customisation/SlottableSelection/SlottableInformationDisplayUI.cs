@@ -27,7 +27,6 @@ namespace UI.Customisation.SlottableSelection
 
         private void SlottableSelectionUI_OnSlottablePreviewSelectionChanged(int slottableDataIndex)
         {
-            Debug.Log("SlottableSelectionUI Index Sent: " + slottableDataIndex);
             UpdateDisplayInformation(CustomisationOptionsDatabase.AllOptionsDatabase.GetSlottableData(slottableDataIndex));
         }
         /// <summary>

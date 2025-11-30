@@ -88,10 +88,7 @@ namespace Gameplay.GameState
                 return; // We are only wanting to process 'LoadComplete' events.
 
 
-            SessionPlayerData? sessionPlayerData = SessionManager<SessionPlayerData>.Instance.GetPlayerData(sceneEvent.ClientId);
-            if (sessionPlayerData.HasValue)
-                NetworkLobbyState.SessionPlayers.Add(new NetworkLobbyState.SessionPlayerState(sceneEvent.ClientId, sessionPlayerData.Value.PlayerName, false));
-            //SeatNewPlayer(sceneEvent.ClientId);
+            SeatNewPlayer(sceneEvent.ClientId);
         }
         private void OnConnectionEvent(NetworkManager networkManager, ConnectionEventData connectionEventData)
         {
@@ -116,13 +113,20 @@ namespace Gameplay.GameState
         }
 
         // Called when a client changes their ready state.
-        private void OnClientChangedReadyState(ulong clientId, bool newReadyState)
+        private void OnClientChangedReadyState(ulong clientId, int lobbySeatIndex, bool newReadyState)
         {
             if (NetworkLobbyState.IsLobbyLocked.Value == true)
             {
                 // Lobby is currently locked and players cannot change that fact.
                 return;
             }
+
+            // Update the networked state.
+            NetworkLobbyState.SessionPlayers[lobbySeatIndex] = new NetworkLobbyState.SessionPlayerState(
+                clientId,
+                NetworkLobbyState.SessionPlayers[lobbySeatIndex].PlayerNumber,
+                NetworkLobbyState.SessionPlayers[lobbySeatIndex].FixedPlayerName,
+                newReadyState);
 
             if (newReadyState == true)
             {
@@ -132,6 +136,75 @@ namespace Gameplay.GameState
             {
                 CancelGameStart();
             }
+        }
+
+
+        /// <summary>
+        ///     Add a new player to the session.
+        /// </summary>
+        private void SeatNewPlayer(ulong clientId)
+        {
+            if (NetworkLobbyState.IsLobbyLocked.Value)  // Change here if we want to prevent new players joining when the lobby is just about to start, rather than cancelling the game start.
+                UnlockLobby();
+            if (NetworkLobbyState.IsStartingGame.Value)
+                CancelGameStart();
+            
+            // Retrieve player data.
+            SessionPlayerData? sessionPlayerData = SessionManager<SessionPlayerData>.Instance.GetPlayerData(clientId);
+            if (!sessionPlayerData.HasValue)
+                return; // No/Invalid data.
+            
+            SessionPlayerData playerData = sessionPlayerData.Value; // You cannot assign to the parameters of nullable structs, so we cache the value to allow us to edit parameters.
+            if (playerData.PlayerNumber == -1 || !IsPlayerNumberAvailable(playerData.PlayerNumber))
+            {
+                playerData.PlayerNumber = GetAvailablePlayerNumber();
+            }
+            if (playerData.PlayerNumber == -1)
+            {
+                // No remaining steats.
+                throw new System.Exception($"The lobby was full when the player joined. Connection Approval should have refused this connection for Client ID: {clientId}");
+            }
+
+            // Add our player's data to the session.
+            NetworkLobbyState.SessionPlayers.Add(new NetworkLobbyState.SessionPlayerState(
+                clientId: clientId,
+                playerNumber: playerData.PlayerNumber,
+                name: playerData.PlayerName,
+                isReady: false));
+            // Update our SessionPlayerData to include the Player Number.
+            SessionManager<SessionPlayerData>.Instance.SetPlayerData(clientId, playerData);
+        }
+
+        /// <summary>
+        ///     Returns true if the specified PlayerNumber is available, or false if it is already taken.
+        /// </summary>
+        private bool IsPlayerNumberAvailable(int playerNumber)
+        {
+            for(int i = 0; i < NetworkLobbyState.SessionPlayers.Count; ++i)
+            {
+                if (NetworkLobbyState.SessionPlayers[i].PlayerNumber == playerNumber)
+                    return false;   // This player is using the player number, making it unavailable.
+            }
+
+            // No players are using this number, so it is available.
+            return true;
+        }
+        /// <summary>
+        ///     Returns the first available PlayerNumber, or -1 if no valid PlayerNumbers are available.
+        /// </summary>
+        private int GetAvailablePlayerNumber()
+        {
+            for(int possiblePlayerNumber = 0; possiblePlayerNumber < _connectionManager.MaxConnectedPlayers; ++possiblePlayerNumber)
+            {
+                if (IsPlayerNumberAvailable(possiblePlayerNumber))
+                {
+                    // This number is available.
+                    return possiblePlayerNumber;
+                }
+            }
+
+            // We failed to get a playerNumber for this user, meaning that the session is full.
+            return -1;
         }
 
 

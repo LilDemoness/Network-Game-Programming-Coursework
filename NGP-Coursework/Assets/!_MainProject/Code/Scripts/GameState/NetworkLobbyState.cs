@@ -18,7 +18,7 @@ namespace Gameplay.GameState
         public NetworkVariable<bool> IsLobbyLocked { get; } = new NetworkVariable<bool>(value: false);
 
 
-        public event System.Action<ulong, bool> OnClientChangedReadyState;
+        public event System.Action<ulong, int, bool> OnClientChangedReadyState;
 
 
         private void Awake()
@@ -31,9 +31,9 @@ namespace Gameplay.GameState
         ///     An RPC to notify the server when a client changes their ready state.
         /// </summary>
         [Rpc(SendTo.Server, RequireOwnership = false)]
-        public void ChangeReadyStateServerRpc(ulong clientId, bool newReadyState)
+        public void ChangeReadyStateServerRpc(ulong clientId, int seatIndex, bool newReadyState)
         {
-            OnClientChangedReadyState?.Invoke(clientId, newReadyState);
+            OnClientChangedReadyState?.Invoke(clientId, seatIndex, newReadyState);
         }
 
 
@@ -43,8 +43,10 @@ namespace Gameplay.GameState
         public struct SessionPlayerState : INetworkSerializable, IEquatable<SessionPlayerState>
         {
             public ulong ClientId;
+            public int PlayerNumber;
 
             private FixedPlayerName m_playerName;
+            public FixedPlayerName FixedPlayerName => m_playerName;
             public string PlayerName
             {
                 get => m_playerName;
@@ -54,10 +56,13 @@ namespace Gameplay.GameState
             public bool IsReady;
 
 
-            public SessionPlayerState(ulong clientID, string name, bool isReady)
+            public SessionPlayerState(ulong clientId, int playerNumber, string name, bool isReady) : this(clientId, playerNumber, new FixedPlayerName(name), isReady)
+            { }
+            public SessionPlayerState(ulong clientId, int playerNumber, FixedPlayerName playerName, bool isReady)
             {
-                this.ClientId = clientID;
-                this.m_playerName = new FixedPlayerName(name);
+                this.ClientId = clientId;
+                this.PlayerNumber = playerNumber;
+                this.m_playerName = playerName;
                 this.IsReady = isReady;
             }
 
@@ -65,10 +70,12 @@ namespace Gameplay.GameState
             public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
             {
                 serializer.SerializeValue(ref ClientId);
+                serializer.SerializeValue(ref PlayerNumber);
                 serializer.SerializeValue(ref m_playerName);
+                serializer.SerializeValue(ref IsReady);
             }
 
-            public bool Equals(SessionPlayerState other) => (this.ClientId, this.m_playerName) == (other.ClientId, other.m_playerName);
+            public bool Equals(SessionPlayerState other) => (this.ClientId, this.PlayerNumber, this.m_playerName, this.IsReady) == (other.ClientId, other.PlayerNumber, other.m_playerName, other.IsReady);
         }
     }
 }

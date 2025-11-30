@@ -65,6 +65,7 @@ namespace Gameplay.GameState
         private Dictionary<SessionMode, List<GameObject>> _sessionUIElementsByMode;
 
 
+        private int _localPlayerNumber = -1;
         private bool _isLocalPlayerReady;
 
 
@@ -105,7 +106,7 @@ namespace Gameplay.GameState
             base.Start();
 
             ConfigureUIForSessionMode(SessionMode.Unready);
-            SetReadyState(isReady: false);
+            //SetReadyState(isReady: false);
         }
 
 
@@ -171,11 +172,13 @@ namespace Gameplay.GameState
             else if (changeEvent.Type == NetworkListEvent<NetworkLobbyState.SessionPlayerState>.EventType.Remove || changeEvent.Type == NetworkListEvent<NetworkLobbyState.SessionPlayerState>.EventType.RemoveAt)
                 Debug.Log("Player Disconnected");
 
+
             UpdatePlayerReadyIndicators();
             UpdatePlayerCountUI();
 
             if (changeEvent.Value.ClientId == NetworkManager.Singleton.LocalClientId)
             {
+                _localPlayerNumber = changeEvent.Value.PlayerNumber;
                 UpdateLocalReadyState(changeEvent.Value.IsReady);
             }
         }
@@ -300,8 +303,7 @@ namespace Gameplay.GameState
             if (!_networkLobbyState.IsSpawned)
                 return;
 
-            Debug.Log("Set Lobby State");
-            _networkLobbyState.ChangeReadyStateServerRpc(NetworkManager.Singleton.LocalClientId, isReady);
+            _networkLobbyState.ChangeReadyStateServerRpc(NetworkManager.Singleton.LocalClientId, _localPlayerNumber, isReady);
         }
     }
 }
