@@ -273,7 +273,9 @@ namespace Gameplay.GameState
         /// </summary>
         private void TransitionToGameplay()
         {
-            throw new System.NotImplementedException("Scene Loader - Load Gameplay Scene");
+            Debug.LogWarning("To-do: Properly Implement - Load Gameplay Scene");
+            NetworkManager.Singleton.SceneManager.LoadScene("GameplayTestScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
+            //throw new System.NotImplementedException("Scene Loader - Load Gameplay Scene");
         }
 
 
