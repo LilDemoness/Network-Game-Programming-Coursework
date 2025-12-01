@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using Gameplay.GameplayObjects;
 using Gameplay.GameplayObjects.Character;
@@ -81,7 +82,28 @@ namespace Gameplay.GameState
 
         private void OnLifeStateChangedEventMessage(LifeStateChangedEventMessage message)
         {
-            throw new System.NotImplementedException("Implement Scoring. Note: We require knowledge on the killer");
+            Debug.Log($"Message! SenderId: {message.OriginCharacterObjectId}, InflicterId: {message.InflicterObjectId}, Name: {message.CharacterName}, LifeState: {message.NewLifeState}");
+            if (message.NewLifeState != LifeState.Dead)
+                return; // We're only wanting to process death events.
+
+
+            // If the inflicter was a ServerCharacter, give their team a point.
+            if (message.HasInflicter)
+            {
+                NetworkObject inflicterNetworkObject = NetworkManager.Singleton.SpawnManager.SpawnedObjects[message.InflicterObjectId];
+                if (inflicterNetworkObject.TryGetComponent<ServerCharacter>(out ServerCharacter serverCharacter))
+                {
+                    _persistentGameState.IncrementScore(serverCharacter.TeamID.Value);
+                }
+            }
+
+            // If the origin was a Player, mark them for respawn.
+            NetworkObject originCharacterNetworkObject = NetworkManager.Singleton.SpawnManager.SpawnedObjects[message.OriginCharacterObjectId];
+            if (originCharacterNetworkObject.TryGetComponent<Player>(out Player player))
+            {
+                // Note: If we revive the player within a few frames of them dying, they are instantly killed again on the client, but not on the server.
+                StartCoroutine(ReviveAfterDelay(player));
+            }
         }
         private void OnConnectionEvent(NetworkManager networkManager, ConnectionEventData connectionEventData)  // Triggered when a client connects or disconnects from the server.
         {
@@ -161,10 +183,18 @@ namespace Gameplay.GameState
             if (newPlayer.TryGetComponent<NetworkNameState>(out NetworkNameState networkNameState))
                 networkNameState.Name = new NetworkVariable<FixedPlayerName>(persistentPlayer.NetworkNameState.Name.Value);
             // Note: Player Builds are handled by the 'Player' and 'PersistentPlayer' scripts.
+            newPlayerServerCharacter.TeamID = new NetworkVariable<int>(persistentPlayer.PlayerNumber);
 
             // Spawn the Player Character.
             newPlayer.SpawnWithOwnership(clientId, destroyWithScene: true);
         }
-        private void RespawnPlayer(ulong clientId) => throw new System.NotImplementedException();
+
+
+        private IEnumerator ReviveAfterDelay(Player player)
+        {
+            yield return new WaitForSeconds(1.0f);
+            Transform spawnPoint = _playerSpawnPoints[Random.Range(0, _playerSpawnPoints.Length)];
+            player.PerformRespawn(spawnPoint.position, spawnPoint.rotation);
+        }
     }
 }

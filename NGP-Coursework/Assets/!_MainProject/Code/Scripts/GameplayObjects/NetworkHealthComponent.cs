@@ -34,6 +34,7 @@ namespace Gameplay.GameplayObjects
 
         public event System.Action<BaseDamageReceiverEventArgs> OnDied;
         public event System.Action<BaseDamageReceiverEventArgs> OnRevived;
+        public event System.Action<ulong?, LifeState> OnLifeStateChanged;
 
         #endregion
 
@@ -48,9 +49,30 @@ namespace Gameplay.GameplayObjects
         private void NotifyOfHealingRpc(ulong inflicterObjectId, float healthChange) => OnHealingReceived?.Invoke(new HealthChangeEventArgs(GetServerCharacterForObjectId(inflicterObjectId), healthChange));
 
         [Rpc(SendTo.Everyone)]
-        private void NotifyOfDeathRpc(ulong inflicterObjectId) => OnDied?.Invoke(new BaseDamageReceiverEventArgs(GetServerCharacterForObjectId(inflicterObjectId)));
+        private void NotifyOfDeathRpc(ulong inflicterObjectId)
+        {
+            OnLifeStateChanged?.Invoke(inflicterObjectId, _lifeState.Value);
+            OnDied?.Invoke(new BaseDamageReceiverEventArgs(GetServerCharacterForObjectId(inflicterObjectId)));
+        }
         [Rpc(SendTo.Everyone)]
-        private void NotifyOfReviveRpc(ulong inflicterObjectId) => OnRevived?.Invoke(new BaseDamageReceiverEventArgs(GetServerCharacterForObjectId(inflicterObjectId)));
+        private void NotifyOfDeathRpc()
+        {
+            OnLifeStateChanged?.Invoke(null, _lifeState.Value);
+            //OnDied?.Invoke(new BaseDamageReceiverEventArgs(GetServerCharacterForObjectId(inflicterObjectId)));
+        }
+
+        [Rpc(SendTo.Everyone)]
+        private void NotifyOfReviveRpc(ulong inflicterObjectId)
+        {
+            OnLifeStateChanged?.Invoke(inflicterObjectId, _lifeState.Value);
+            OnRevived?.Invoke(new BaseDamageReceiverEventArgs(GetServerCharacterForObjectId(inflicterObjectId)));
+        }
+        [Rpc(SendTo.Everyone)]
+        private void NotifyOfReviveRpc()
+        {
+            OnLifeStateChanged?.Invoke(null, _lifeState.Value);
+            //OnRevived?.Invoke(new BaseDamageReceiverEventArgs(GetServerCharacterForObjectId(inflicterObjectId)));
+        }
 
         #endregion
 
@@ -152,18 +174,30 @@ namespace Gameplay.GameplayObjects
         }
 
 
+        public void Revive_Server(ServerCharacter inflicter)
+        {
+            _currentHealth.Value = MaxHealth;
+            SetLifeState_Server(inflicter, LifeState.Alive);
+        }
         public void SetLifeState_Server(ServerCharacter inflicter, LifeState newLifeState)
         {
             LifeState oldLifeState = _lifeState.Value;
             _lifeState.Value = newLifeState;
+            Debug.Log($"Old: {oldLifeState} | New: {_lifeState.Value}");
 
             if (oldLifeState == LifeState.Alive && newLifeState == LifeState.Dead)
             {
-                NotifyOfDeathRpc(inflicter.NetworkObjectId);
+                if (inflicter != null)
+                    NotifyOfDeathRpc(inflicter.NetworkObjectId);
+                else
+                    NotifyOfDeathRpc();
             }
             else if (oldLifeState == LifeState.Dead && newLifeState == LifeState.Alive)
             {
-                NotifyOfReviveRpc(inflicter.NetworkObjectId);
+                if (inflicter != null)
+                    NotifyOfReviveRpc(inflicter.NetworkObjectId);
+                else
+                    NotifyOfReviveRpc();
             }
         }
 

@@ -28,12 +28,18 @@ namespace UI
         }
 
         private void Player_OnLocalPlayerDeath(object sender, Player.PlayerDeathEventArgs e) => Show(e.Inflicter, 10.0f);
-        private void Player_OnLocalPlayerRevived(object sender, System.EventArgs e) => Hide();
+        private void Player_OnLocalPlayerRevived(object sender, System.EventArgs e)
+        {
+            Debug.Log("Player Revived");
+            Hide();
+        }
 
 
 
         public void Show(ServerCharacter killer, float timeToRespawn)
         {
+            Debug.Log("Show");
+
             // Killer Name.
             _killerNameText.text = killer.name;
 

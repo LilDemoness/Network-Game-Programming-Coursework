@@ -23,6 +23,8 @@ namespace Gameplay.GameplayObjects.Players
         [SerializeField] private NetworkNameState _networkNameState;
         [SerializeField] private NetworkBuildState _networkBuildState;
 
+        public int PlayerNumber { get; set; }
+
 
         #region Public Accessors
 

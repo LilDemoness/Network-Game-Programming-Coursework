@@ -74,7 +74,7 @@ namespace Gameplay.GameplayObjects.Character
         [SerializeField] private ServerCharacterMovement _movement; 
         public ServerCharacterMovement Movement => _movement;
 
-        public int TeamID;
+        public NetworkVariable<int> TeamID;
 
 
         private void Awake()

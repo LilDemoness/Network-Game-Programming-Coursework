@@ -45,15 +45,6 @@ public class CameraControllerTest : NetworkBehaviour
     private void Awake()
     {
         _playerManager.OnThisPlayerBuildUpdated += Player_OnLocalPlayerBuildUpdated;
-        Player.OnLocalPlayerDeath += OnPlayerDeath;
-        Player.OnLocalPlayerRevived += OnPlayerRevived;
-    }
-    public override void OnDestroy()
-    {
-        base.OnDestroy();
-        _playerManager.OnThisPlayerBuildUpdated -= Player_OnLocalPlayerBuildUpdated;
-        Player.OnLocalPlayerDeath -= OnPlayerDeath;
-        Player.OnLocalPlayerRevived -= OnPlayerRevived;
     }
     public override void OnNetworkSpawn()
     {
@@ -62,10 +53,25 @@ public class CameraControllerTest : NetworkBehaviour
         {
             PlayerCamera.SetCameraTarget(_rotationPivot);
             //Cursor.lockState = CursorLockMode.Locked;
+
+            _rotation = _rotationPivot.rotation.eulerAngles;
+
+            Player.OnLocalPlayerDeath += OnPlayerDeath;
+            Player.OnLocalPlayerRevived += OnPlayerRevived;
         }
     }
     public override void OnNetworkDespawn()
-    { }
+    {
+        Player.OnLocalPlayerDeath -= OnPlayerDeath;
+        Player.OnLocalPlayerRevived -= OnPlayerRevived;
+    }
+    public override void OnDestroy()
+    {
+        base.OnDestroy();
+
+        if (_playerManager != null)
+            _playerManager.OnThisPlayerBuildUpdated -= Player_OnLocalPlayerBuildUpdated;
+    }
 
 
     private void Update()
@@ -112,7 +118,7 @@ public class CameraControllerTest : NetworkBehaviour
 
     private void SetRotation(float horizontalRotation, float verticalRotation)
     {
-        Debug.Log(IsOwner);
+        Debug.Log(IsOwner, this);
         _rotation = new Vector2(horizontalRotation, verticalRotation);
         _rotationPivot.rotation = Quaternion.Euler(_rotation);  // Ensure instant update.
 
@@ -189,8 +195,16 @@ public class CameraControllerTest : NetworkBehaviour
     private void SetGraphicsRotation()
     {
         // The vertical rotation pivot is the child of the horizontal, so set horizontal first and use local rotation for the vertical.
+        try
+        {
         _horizontalRotationPivot.rotation = GetHorizontalRotationTarget();
         _verticalRotationPivot.localRotation = GetVerticalLocalRotationTarget();
+        }
+        catch (System.Exception e)
+        {
+            Debug.Log("", this);
+            throw e;
+        }
     }
     /// <summary>
 	///		Smoothly set the rotation of our graphics transform to face its target rotation..

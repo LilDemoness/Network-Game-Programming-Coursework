@@ -58,7 +58,7 @@ namespace GameState
         private IEnumerator RespawnAfterDelay(Player player, float delay, Vector3 respawnPosition)
         {
             yield return new WaitForSeconds(delay);
-            player.PerformRespawn(respawnPosition);
+            //player.PerformRespawn(respawnPosition);
         }
 
         public float GetRespawnTimeEstimate() => 3.0f;
