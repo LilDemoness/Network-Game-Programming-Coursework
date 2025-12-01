@@ -5,10 +5,12 @@ namespace Gameplay.GameplayObjects
 {
     public interface IDamageable
     {
-        void ReceiveHealthChange(ServerCharacter influencer, float hitPointsChange);
+        void ReceiveHealthChange_Server(ServerCharacter influencer, float hitPointsChange);
 
         float GetMissingHealth();
 
-        bool IsDamageable();
+        bool CanHaveHealthChanged();
+        bool CanTakeDamage();
+        bool CanReceiveHealing();
     }
 }

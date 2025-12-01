@@ -6,9 +6,9 @@ namespace Gameplay.GameplayObjects.Health
 {
     public class DamageLogger : NetworkBehaviour, IDamageable
     {
-        public void ReceiveHealthChange(ServerCharacter inflicter, float change)
+        public void ReceiveHealthChange_Server(ServerCharacter inflicter, float change)
         {
-            if (!IsDamageable())
+            if (!CanHaveHealthChanged())
             {
                 Debug.Log($"{this.name} is Invulnerable");
                 return;
@@ -18,6 +18,8 @@ namespace Gameplay.GameplayObjects.Health
         }
         public float GetMissingHealth() => 0;
 
-        public bool IsDamageable() => true;
+        public bool CanHaveHealthChanged() => true;
+        public bool CanReceiveHealing() => true;
+        public bool CanTakeDamage() => true;
     }
 }

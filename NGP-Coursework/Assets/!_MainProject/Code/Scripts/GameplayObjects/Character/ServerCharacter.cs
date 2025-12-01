@@ -3,6 +3,7 @@ using Unity.Netcode;
 using Gameplay.Actions;
 using Gameplay.GameplayObjects.Character.Customisation.Data;
 using Gameplay.StatusEffects;
+using Gameplay.GameplayObjects.Character.Customisation;
 
 namespace Gameplay.GameplayObjects.Character
 {
@@ -10,14 +11,13 @@ namespace Gameplay.GameplayObjects.Character
     ///     Contains all NetworkVariables, RPCs, and Server-Side Logic of a Character.
     ///     Separated from the Client Logic so that it is always known whether a section of code is running on the server or the client.
     /// </summary>
-    public class ServerCharacter : NetworkBehaviour, IDamageable
+    public class ServerCharacter : NetworkBehaviour
     {
         [SerializeField] private ClientCharacter m_clientCharacter;
         public ClientCharacter ClientCharacter => m_clientCharacter;
 
 
-        //public NetworkVariable<BuildDataState> BuildData { get; set; } = new NetworkVariable<BuildDataState>();
-
+        [field:SerializeField] public NetworkBuildReference NetworkBuildReference { get; private set; }
         public event System.Action<BuildData> OnBuildDataChanged;
 
 
@@ -32,27 +32,14 @@ namespace Gameplay.GameplayObjects.Character
         public NetworkVariable<bool> IsInStealth { get; } = new NetworkVariable<bool>();
 
 
-        #region Health & Life State
-
-        public NetworkVariable<float> CurrentHealth { get; private set; } = new NetworkVariable<float>();
-        public float MaxHealth => throw new System.NotImplementedException("ServerCharacter Build Reference - Max Health");
-
-        /// <summary>
-        ///     Should only be set in the 'SetLifeState()' functions.
-        /// </summary>
-        private LifeState m_currentLifeState { get; set; } = LifeState.Alive;
-        public bool IsDead => m_currentLifeState == LifeState.Dead;
-
-
-        public event System.EventHandler<CharacterDeadEventArgs> OnCharacterDied;
-
-        #endregion
+        [SerializeField] private NetworkHealthComponent _networkHealthComponent;
+        public NetworkHealthComponent NetworkHealthComponent => _networkHealthComponent;
 
 
         // Heat.
 
         public NetworkVariable<float> CurrentHeat { get; private set; } = new NetworkVariable<float>();
-        public float MaxHeat => throw new System.NotImplementedException("ServerCharacter Build Reference - Max Heat");
+        public float MaxHeat => 10.0f;//throw new System.NotImplementedException("ServerCharacter Build Reference - Max Heat");
         private float _lastHeatIncreaseTime = 0.0f;
 
 
@@ -64,7 +51,7 @@ namespace Gameplay.GameplayObjects.Character
         public ServerActionPlayer ActionPlayer => m_serverActionPlayer;
         private ServerActionPlayer m_serverActionPlayer;
 
-        public bool CanPerformActions => !IsDead;
+        public bool CanPerformActions => !_networkHealthComponent.IsDead;
 
 
         /// <summary>
@@ -89,20 +76,37 @@ namespace Gameplay.GameplayObjects.Character
         {
             // We're subscribing to this event on clients too in order to relay our BuildData through the class reference as opposed to duplicating the struct.
             //BuildData.OnValueChanged += NetworkedBuildDataChanged;
+            NetworkBuildReference.OnBuildChanged += NetworkBuildData_OnBuildChanged;
 
             if (!IsServer)
             {
                 this.enabled = false;
+                if (NetworkBuildReference.Reference != null)
+                    OnBuildDataChanged?.Invoke(NetworkBuildReference.Reference.BuildDataReference);
                 return;
             }
 
+
+            
+                
             OnBuildDataChanged += ServerCharacter_OnBuildDataChanged;
+            if (NetworkBuildReference.Reference != null)
+                OnBuildDataChanged?.Invoke(NetworkBuildReference.Reference.BuildDataReference);
         }
         public override void OnNetworkDespawn()
         {
             // Unsubscribe from NetworkVariable Events.
             //BuildData.OnValueChanged -= NetworkedBuildDataChanged;
+            if (NetworkBuildReference != null)
+                NetworkBuildReference.OnBuildChanged -= NetworkBuildData_OnBuildChanged;
             OnBuildDataChanged -= ServerCharacter_OnBuildDataChanged;
+        }
+
+
+        private void NetworkBuildData_OnBuildChanged(BuildData buildData)
+        {
+            Debug.Log(buildData.ActiveFrameIndex);
+            OnBuildDataChanged?.Invoke(buildData);
         }
 
 
@@ -220,116 +224,6 @@ namespace Gameplay.GameplayObjects.Character
         }
 
 
-
-        #region Health & Life
-
-        /// <summary>
-        ///     Initialise our Health value.
-        /// </summary>
-        private void InitialiseHealth()
-        {
-            CurrentHealth.Value = MaxHealth;
-            SetLifeState(this, LifeState.Alive);    // Change to InitialiseLifeState() or directly setting?
-        }
-
-        /// <summary>
-        ///     Apply a change in health to this ServerCharacter. Handles adjustments for Healing and Damage, and the notification that we've recieved each.
-        /// </summary>
-        /// <param name="inflicter"> The ServerCharacter that afflicted the damage.</param>
-        /// <param name="healthChange"> The change in health to apply (Positive is Healing, Negative is Damage).</param>
-        public void ReceiveHealthChange(ServerCharacter inflicter, float healthChange)
-        {
-            if (!IsDamageable())
-                return;
-
-
-            if (healthChange > 0.0f)
-            {
-                // Healing.
-                m_serverActionPlayer.OnGameplayActivity(Action.GameplayActivity.Healed);
-                float healingModifier = m_serverActionPlayer.GetBuffedValue(Action.BuffableValue.PercentHealingReceived);
-                healthChange = Mathf.CeilToInt(healthChange * healingModifier);
-            }
-            else
-            {
-                // Damage.
-                m_serverActionPlayer.OnGameplayActivity(Action.GameplayActivity.AttackedByEnemy);
-                float damageModifier = m_serverActionPlayer.GetBuffedValue(Action.BuffableValue.PercentDamageReceived);
-                healthChange = Mathf.CeilToInt(healthChange * damageModifier);
-
-                // Take Damage Animation.
-            }
-
-            // Change the value of our health.
-            SetCurrentHealth(inflicter, CurrentHealth.Value + healthChange);
-        }
-        /// <summary>
-        ///     Set the value of the character's health, clamped between 0 & MaxHealth.
-        /// </summary>
-        /// <param name="newValue"> The new value of CurrentHealth before clamping.</param>
-        /// <param name="excessBecomesOverhealth"> Should health above our maximum health become Overhealth?</param>
-        private void SetCurrentHealth(ServerCharacter inflicter, float newValue, bool excessBecomesOverhealth = false)
-        {
-            if (excessBecomesOverhealth)
-                throw new System.NotImplementedException();
-
-            CurrentHealth.Value = Mathf.Clamp(newValue, 0, MaxHealth);
-            Debug.Log($"New Health: {CurrentHealth.Value}");
-
-            if (CurrentHealth.Value <= 0.0f)
-            {
-                // We've died.
-                SetLifeState(inflicter, LifeState.Dead);
-            }
-        }
-
-        public float GetMissingHealth()
-        {
-            if (!IsDamageable())
-            {
-                return 0.0f;
-            }
-
-            return Mathf.Max(0.0f, MaxHealth - CurrentHealth.Value);
-        }
-        public bool IsDamageable() => !IsDead;
-
-
-        public void ReviveCharacter(ServerCharacter inflicter)
-        {
-            if (inflicter == null)  // Revived by the Game System.
-            { }
-            else if (inflicter != this) // Revived by Another Player.
-            { }
-            else    // Revied by ourself.
-            { }
-
-            // Set our Life State.
-            SetLifeState(inflicter, LifeState.Alive);
-
-            // Reset Health & Heat. (Change from initialisation functions?)
-            InitialiseHealth();
-            InitialiseHeat();
-        }
-        private void SetLifeState(ServerCharacter inflicter, LifeState lifeState)
-        {
-            m_currentLifeState = lifeState;
-
-            if (IsDead)
-            {
-                // We have just died.
-                // Cancel active actions.
-                m_serverActionPlayer.ClearActions(true);
-                _movement.CancelMove();
-
-                // Notify Listeners.
-                OnCharacterDied?.Invoke(this, new CharacterDeadEventArgs(this, inflicter));
-            }
-        }
-
-        #endregion
-
-
         #region Heat
 
         /// <summary>
@@ -383,7 +277,7 @@ namespace Gameplay.GameplayObjects.Character
 
         private void ServerCharacter_OnBuildDataChanged(BuildData buildData)
         {
-            InitialiseHealth();
+            _networkHealthComponent.InitialiseDamageReceiver_Server(buildData.GetFrameData().MaxHealth);
             InitialiseHeat();
         }
 
@@ -397,7 +291,7 @@ namespace Gameplay.GameplayObjects.Character
         [ContextMenu("Kill Character")]
         private void Editor_KillCharacter()
         {
-            SetCurrentHealth(this, 0.0f);
+            _networkHealthComponent.SetLifeState_Server(this, LifeState.Dead);
         }
 
 #endif

@@ -70,13 +70,13 @@ namespace Gameplay.GameState
             // Unsubscribe from events.
             if (NetworkManager.Singleton != null)
             {
-                NetworkManager.Singleton.OnConnectionEvent += OnConnectionEvent;
-                NetworkManager.Singleton.SceneManager.OnSceneEvent += OnSceneEvent;
+                NetworkManager.Singleton.OnConnectionEvent -= OnConnectionEvent;
+                NetworkManager.Singleton.SceneManager.OnSceneEvent -= OnSceneEvent;
             }
 
             if (NetworkLobbyState != null)
             {
-                NetworkLobbyState.OnClientChangedReadyState += OnClientChangedReadyState;
+                NetworkLobbyState.OnClientChangedReadyState -= OnClientChangedReadyState;
             }
         }
 

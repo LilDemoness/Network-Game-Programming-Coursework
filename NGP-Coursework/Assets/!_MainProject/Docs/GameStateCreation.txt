@@ -1,0 +1,19 @@
+Game State Creation
+-------------------
+
+With our current implementation sharing code from the Unity Boss Room sample, we are using GameStates to process the logic of different scenes (Both in games and outwith).
+
+Each scene requires a State, however states can persist between states. Additionally, there should currently only ever be a maximum of 1 state on the Server and 1 on the Client, and both should be on the same GameObject.
+
+
+
+Creating a GameState implementation
+-----------------------------------
+
+Have the GameState inherit from the abstract class "GameStateBehaviour" and ensure that you override the 'ActiveState' property.
+	Server and Client GameStates should share the same ActiveState value.
+Override the value of 'Persists' to have the GameState persist across multiple scenes until another GameState overrides it.
+
+Use a "NetcodeHooks" component to gain access to OnNetworkSpawn and OnNetworkDespawn events if required.
+
+Ensure that the in-scene implementation of the GameState has the ApplicationController assigned as its DI Parent ('Parent' field in the inspector)

@@ -18,7 +18,7 @@ namespace Gameplay.Actions.Effects
         {
             if (hitInfo.Target.TryGetComponentThroughParents<IDamageable>(out IDamageable damageable))
             {
-                damageable.ReceiveHealthChange(owner, _scaleValueWithCharge ? chargePercentage * _healthChange : _healthChange);
+                damageable.ReceiveHealthChange_Server(owner, _scaleValueWithCharge ? chargePercentage * _healthChange : _healthChange);
             }
         }
     }

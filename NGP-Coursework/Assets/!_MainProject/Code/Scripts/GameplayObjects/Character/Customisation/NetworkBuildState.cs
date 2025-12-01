@@ -73,6 +73,9 @@ namespace Gameplay.GameplayObjects
         }
         private void CacheSlottableIndex(int index, int value)
         {
+            if (!IsOwner)
+                return;
+
             if (_cachedBuildData.ContainsKey(ActiveFrameIndex.Value))
             {
                 Debug.Log("Has Key. Set Index: " + index);
@@ -117,7 +120,7 @@ namespace Gameplay.GameplayObjects
 
 
         [Rpc(SendTo.Server)]
-        private void SetBuildServerRpc(int frameIndex, int[] slottableIndicies)
+        public void SetBuildServerRpc(int frameIndex, int[] slottableIndicies)
         {
             // Unsubscribe from NetworkEvent Notifications to prevent multiple OnBuildChanged calls when we only need one.
             UnsubscribeFromNetworkEvents();
@@ -126,15 +129,22 @@ namespace Gameplay.GameplayObjects
             ActiveFrameIndex.Value = frameIndex;
             for (int i = 0; i < slottableIndicies.Length; ++i)
                 ActiveSlottableIndicies[i] = slottableIndicies[i];
-            
-            // Update Rereference.
-            _buildDataReference.SetFrameDataIndex(frameIndex);
-            _buildDataReference.SetActiveSlottableDataIndicies(slottableIndicies);
 
-            // Notify Listeners.
-            OnBuildChanged?.Invoke(_buildDataReference);
+            NotifyOfFullBuildChangeRpc();
+
             // Resubscribe to NetworkEvent Notifications.
             SubscribeToNetworkEvents();
+        }
+        [Rpc(SendTo.Everyone)]
+        private void NotifyOfFullBuildChangeRpc()
+        {
+            _buildDataReference.SetFrameDataIndex(ActiveFrameIndex.Value);
+            int[] slottableIndicies = new int[ActiveSlottableIndicies.Count];
+            for (int i = 0; i < slottableIndicies.Length; ++i)
+                slottableIndicies[i] = ActiveSlottableIndicies[i];
+            _buildDataReference.SetActiveSlottableDataIndicies(slottableIndicies);
+
+            OnBuildChanged?.Invoke(_buildDataReference);
         }
         [Rpc(SendTo.Server)]
         public void SetSlottableServerRpc(AttachmentSlotIndex slotIndex, int slottableIndex) => ActiveSlottableIndicies[slotIndex.GetSlotInteger()] = slottableIndex;
@@ -143,5 +153,29 @@ namespace Gameplay.GameplayObjects
 
         public int GetFrameIndex() => ActiveFrameIndex.Value;
         public int GetSlottableIndex(AttachmentSlotIndex slotIndex) => ActiveSlottableIndicies[slotIndex.GetSlotInteger()];
+        public int[] GetSlottableIndicies()
+        {
+            int[] activeSlottableIndiciesArray = new int[ActiveSlottableIndicies.Count];
+            for(int i = 0; i < activeSlottableIndiciesArray.Length; ++i)
+                activeSlottableIndiciesArray[i] = ActiveSlottableIndicies[i];
+            return activeSlottableIndiciesArray;
+        }
+
+
+
+        #if UNITY_EDITOR
+
+        [ContextMenu("Randomise Build")]
+        private void Editor_RandomiseBuild()
+        {
+            int randomIndex = Random.Range(0, CustomisationOptionsDatabase.AllOptionsDatabase.FrameDatas.Length);
+            int[] randomSlottableIndicies = new int[CustomisationOptionsDatabase.MAX_SLOTTABLE_DATAS];
+            for(int i = 0; i < CustomisationOptionsDatabase.MAX_SLOTTABLE_DATAS; ++i)
+                randomSlottableIndicies[i] = Random.Range(0, CustomisationOptionsDatabase.AllOptionsDatabase.SlottableDatas.Length);
+
+            SetBuildServerRpc(randomIndex, randomSlottableIndicies);
+        }
+
+        #endif
     }
 }

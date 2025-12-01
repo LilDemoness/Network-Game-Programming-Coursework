@@ -14,6 +14,7 @@ namespace Gameplay.GameplayObjects.Players
     public class Player : NetworkBehaviour, IActionSource
     {
         public static Player LocalClientInstance { get; private set; }
+        [SerializeField] private PersistentPlayerRuntimeCollection _runtimeCollection;
 
 
 
@@ -28,6 +29,10 @@ namespace Gameplay.GameplayObjects.Players
         private PlayerGFXWrapper[] _playerGFXWrappers;
         private FrameGFX _activeFrame;
         private Dictionary<AttachmentSlotIndex, SlotGFXSection> _slotIndexToActiveGFXDict = new Dictionary<AttachmentSlotIndex, SlotGFXSection>();
+
+
+        public static event System.Action OnLocalPlayerSet;
+
 
 
         /// <summary>
@@ -69,7 +74,7 @@ namespace Gameplay.GameplayObjects.Players
             Debug.Log("Player Wrapper Count: " + _playerGFXWrappers.Length);
 
             ServerCharacter.OnBuildDataChanged += OnBuildChanged;
-            ServerCharacter.OnCharacterDied += ServerCharacter_OnCharacterDied;
+            ServerCharacter.NetworkHealthComponent.OnDied += ServerCharacter_OnDied;
         }
         public override void OnNetworkSpawn()
         {
@@ -77,6 +82,8 @@ namespace Gameplay.GameplayObjects.Players
             {
                 LocalClientInstance = this;
                 Debug.Log("Local Player", this);
+
+                OnLocalPlayerSet?.Invoke();
             }
         }
         public override void OnNetworkDespawn()
@@ -93,7 +100,7 @@ namespace Gameplay.GameplayObjects.Players
                     playerData.PlayerPosition = movementTransform.position;
                     playerData.PlayerRotation = movementTransform.rotation;
                     //playerData.BuildData = ServerCharacter.BuildData.Value;
-                    playerData.CurrentHealth = ServerCharacter.CurrentHealth.Value;
+                    playerData.CurrentHealth = ServerCharacter.NetworkHealthComponent.GetCurrentHealth();
                     playerData.HasCharacterSpawned = true;
 
                     // Set the player data to its updated value.
@@ -106,7 +113,13 @@ namespace Gameplay.GameplayObjects.Players
             base.OnDestroy();
 
             ServerCharacter.OnBuildDataChanged -= OnBuildChanged;
-            ServerCharacter.OnCharacterDied -= ServerCharacter_OnCharacterDied;
+            ServerCharacter.NetworkHealthComponent.OnDied -= ServerCharacter_OnDied;
+        }
+
+
+        private void PersistentPlayer_OnPlayerBuildChanged(ulong clientId, BuildData buildData)
+        {
+            //ServerCharacter.NetworkBuildData.SetBuildServerRpc(buildData.ActiveFrameIndex, buildData.ActiveSlottableIndicies);
         }
 
 
@@ -142,12 +155,12 @@ namespace Gameplay.GameplayObjects.Players
                 OnLocalPlayerBuildUpdated?.Invoke(buildData);
         }
 
-        private void ServerCharacter_OnCharacterDied(object sender, CharacterDeadEventArgs e)
+        private void ServerCharacter_OnDied(NetworkHealthComponent.BaseDamageReceiverEventArgs e)
         {
             Debug.Log("Player Died");
 
-            NotifyOwnerOfDeath(e);
-            OnPlayerDeath?.Invoke(this, new PlayerDeathEventArgs(e));
+            NotifyOwnerOfDeath(e.Inflicter);
+            OnPlayerDeath?.Invoke(this, new PlayerDeathEventArgs(this.ServerCharacter, e.Inflicter));
         }
 
 
@@ -155,12 +168,12 @@ namespace Gameplay.GameplayObjects.Players
         ///     Notify the owning client that their player has died.<br/>
         ///     Argument passing choice is handled within this function.
         /// </summary>
-        private void NotifyOwnerOfDeath(CharacterDeadEventArgs args)
+        private void NotifyOwnerOfDeath(ServerCharacter inflicter)
         {
-            if (args.Inflicter == null)
+            if (inflicter == null)
                 OnPlayerDiedByGameOwnerRpc();
             else
-                OnPlayerDiedOwnerRpc(args.Inflicter.NetworkObjectId);
+                OnPlayerDiedOwnerRpc(inflicter.NetworkObjectId);
         }
         /// <summary>
         ///     Called on the owning client when the player dies.
@@ -192,7 +205,7 @@ namespace Gameplay.GameplayObjects.Players
             NotifyOwnerOfRespawn();
 
             // Revive the character.
-            ServerCharacter.ReviveCharacter(null);  // Revive the character from the Game System.
+            ServerCharacter.NetworkHealthComponent.SetLifeState_Server(null, LifeState.Alive);  // Revive the character from the Game System.
             NetworkTransform.Teleport(respawnPosition, Quaternion.LookRotation(Vector3.forward, Vector3.up), this.transform.localScale);    // Note: Doesn't actually change rotation as the CameraControllerTest instantly overrides it.
         }
 
