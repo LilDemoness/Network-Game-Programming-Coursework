@@ -160,10 +160,7 @@ namespace Gameplay.GameState
             // Pass required data from PersistentPlayer to the player instance.
             if (newPlayer.TryGetComponent<NetworkNameState>(out NetworkNameState networkNameState))
                 networkNameState.Name = new NetworkVariable<FixedPlayerName>(persistentPlayer.NetworkNameState.Name.Value);
-            //newPlayerServerCharacter.GetNetworkBuildStateFunc = () => persistentPlayer.NetworkBuildState;
-            newPlayerServerCharacter.NetworkBuildReference.NetworkReferenceObjectId = new NetworkVariable<ulong>(persistentPlayer.NetworkObjectId);
-            Debug.LogWarning("To Implement - Set Player Build");
-
+            // Note: Player Builds are handled by the 'Player' and 'PersistentPlayer' scripts.
 
             // Spawn the Player Character.
             newPlayer.SpawnWithOwnership(clientId, destroyWithScene: true);

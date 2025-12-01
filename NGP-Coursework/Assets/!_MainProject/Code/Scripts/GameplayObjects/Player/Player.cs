@@ -8,6 +8,7 @@ using Gameplay.Actions;
 using UserInput;
 using Unity.Netcode.Components;
 using Netcode.ConnectionManagement;
+using System.Collections;
 
 namespace Gameplay.GameplayObjects.Players
 {
@@ -15,6 +16,7 @@ namespace Gameplay.GameplayObjects.Players
     {
         public static Player LocalClientInstance { get; private set; }
         [SerializeField] private PersistentPlayerRuntimeCollection _runtimeCollection;
+        private PersistentPlayer _persistentPlayer;
 
 
 
@@ -73,11 +75,21 @@ namespace Gameplay.GameplayObjects.Players
             }
             Debug.Log("Player Wrapper Count: " + _playerGFXWrappers.Length);
 
-            ServerCharacter.OnBuildDataChanged += OnBuildChanged;
             ServerCharacter.NetworkHealthComponent.OnDied += ServerCharacter_OnDied;
         }
         public override void OnNetworkSpawn()
         {
+            // Cache our linked PersistentPlayer.
+            if (!_runtimeCollection.TryGetPlayer(this.OwnerClientId, out _persistentPlayer))
+                throw new System.Exception($"No PersistenPlayer Reference for Client: {OwnerClientId}");
+
+            // When the PersistentPlayer's Build changes, update this player instance's build
+            _persistentPlayer.NetworkBuildState.OnBuildChanged += OnBuildChanged;
+            Debug.Log("Ref: " + _persistentPlayer.NetworkBuildState.BuildDataReference.ActiveFrameIndex);
+            Debug.Log("Network Var: " + _persistentPlayer.NetworkBuildState.ActiveFrameIndex.Value);
+            //OnBuildChanged(_persistentPlayer.NetworkBuildState.BuildDataReference); // Ensure that we sync our initial state.
+            StartCoroutine(SyncAfterFrame());
+
             if (IsLocalPlayer)
             {
                 LocalClientInstance = this;
@@ -88,6 +100,8 @@ namespace Gameplay.GameplayObjects.Players
         }
         public override void OnNetworkDespawn()
         {
+            _persistentPlayer.NetworkBuildState.OnBuildChanged -= OnBuildChanged;
+
             if (IsServer)
             {
                 // Update our Player Data (If there is one).
@@ -112,14 +126,14 @@ namespace Gameplay.GameplayObjects.Players
         {
             base.OnDestroy();
 
-            ServerCharacter.OnBuildDataChanged -= OnBuildChanged;
             ServerCharacter.NetworkHealthComponent.OnDied -= ServerCharacter_OnDied;
         }
 
 
-        private void PersistentPlayer_OnPlayerBuildChanged(ulong clientId, BuildData buildData)
+        private IEnumerator SyncAfterFrame()
         {
-            //ServerCharacter.NetworkBuildData.SetBuildServerRpc(buildData.ActiveFrameIndex, buildData.ActiveSlottableIndicies);
+            yield return null;
+            OnBuildChanged(_persistentPlayer.NetworkBuildState.BuildDataReference); // Ensure that we sync our initial state.
         }
 
 
@@ -130,6 +144,7 @@ namespace Gameplay.GameplayObjects.Players
         private void OnBuildChanged(BuildData buildData)
         {
             Debug.Log("Build Changed");
+            ServerCharacter.BuildDataReference = buildData;
 
             bool hasFoundActiveFrame = false;
             for (int i = 0; i < _playerGFXWrappers.Length; ++i)

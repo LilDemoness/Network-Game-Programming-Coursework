@@ -61,7 +61,7 @@ public class CameraControllerTest : NetworkBehaviour
 		if (IsOwner)
         {
             PlayerCamera.SetCameraTarget(_rotationPivot);
-            Cursor.lockState = CursorLockMode.Locked;
+            //Cursor.lockState = CursorLockMode.Locked;
         }
     }
     public override void OnNetworkDespawn()

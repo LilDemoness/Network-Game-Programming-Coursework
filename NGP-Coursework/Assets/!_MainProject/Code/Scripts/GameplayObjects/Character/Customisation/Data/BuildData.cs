@@ -1,13 +1,12 @@
-using System;
-using System.Collections.Generic;
-using Unity.Netcode;
+using UnityEngine;
 
 namespace Gameplay.GameplayObjects.Character.Customisation.Data
 {
+    [System.Serializable]
     public class BuildData
     {
-        public int ActiveFrameIndex { get; private set; }
-        public int[] ActiveSlottableIndicies { get; private set; }
+        [field: SerializeField, ReadOnly] public int ActiveFrameIndex { get; private set; }
+        [field: SerializeField, ReadOnly] public int[] ActiveSlottableIndicies { get; private set; }
 
         public BuildData(int activeFrameIndex)
         {

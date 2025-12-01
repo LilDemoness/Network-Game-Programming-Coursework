@@ -27,7 +27,7 @@ namespace UI
             Player.OnLocalPlayerRevived -= Player_OnLocalPlayerRevived;
         }
 
-        private void Player_OnLocalPlayerDeath(object sender, Player.PlayerDeathEventArgs e) => Show(e.Inflicter, GameManager.Instance.GetRespawnTimeEstimate());
+        private void Player_OnLocalPlayerDeath(object sender, Player.PlayerDeathEventArgs e) => Show(e.Inflicter, 10.0f);
         private void Player_OnLocalPlayerRevived(object sender, System.EventArgs e) => Hide();
 
 

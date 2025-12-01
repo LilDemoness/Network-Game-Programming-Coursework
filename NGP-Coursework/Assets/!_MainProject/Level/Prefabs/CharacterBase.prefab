@@ -17,7 +17,6 @@ GameObject:
   - component: {fileID: 2522467751388242565}
   - component: {fileID: 1740831282522941567}
   - component: {fileID: 2257280709253185089}
-  - component: {fileID: -7360431504945230045}
   m_Layer: 0
   m_Name: CharacterBase
   m_TagString: Untagged
@@ -125,7 +124,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
   m_clientCharacter: {fileID: 0}
-  <NetworkBuildReference>k__BackingField: {fileID: -7360431504945230045}
+  _buildDataReference:
+    <ActiveFrameIndex>k__BackingField: 0
+    <ActiveSlottableIndicies>k__BackingField: 
   _networkHealthComponent: {fileID: 3256541695494498627}
   _movement: {fileID: 2257280709253185089}
   TeamID: 0
@@ -221,18 +222,3 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   _characterLogic: {fileID: 781988145697744951}
   _rotationPivot: {fileID: 7621494308545332439}
---- !u!114 &-7360431504945230045
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 702022887536766587}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b0bcf8e588ac37445a6eea381812d12f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ShowTopMostFoldoutHeaderGroup: 1
-  NetworkReferenceObjectId:
-    m_InternalValue: 0

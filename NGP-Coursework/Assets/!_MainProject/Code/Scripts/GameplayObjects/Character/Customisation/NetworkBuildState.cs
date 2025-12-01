@@ -13,21 +13,36 @@ namespace Gameplay.GameplayObjects
         public NetworkList<int> ActiveSlottableIndicies { get; set; } = new NetworkList<int>(new int[CustomisationOptionsDatabase.MAX_SLOTTABLE_DATAS]);
 
 
+        private bool _shouldUpdateBuildDataReference = true;
         private BuildData _buildDataReference;
-        public BuildData BuildDataReference => _buildDataReference;
+        public BuildData BuildDataReference
+        {
+            get
+            {
+                if (_shouldUpdateBuildDataReference)
+                {
+                    _buildDataReference = new BuildData(GetFrameIndex(), GetSlottableIndicies());
+                    _shouldUpdateBuildDataReference = false;
+                }
+
+                return _buildDataReference;
+            }
+        }
         public event System.Action<BuildData> OnBuildChanged;
 
 
         private void Awake()
         {
-            _buildDataReference = new BuildData(0);
-
             SubscribeToNetworkEvents();
         }
         public override void OnNetworkSpawn()
         {
             if (IsOwner)
+            {
                 InitialiseBuildState();
+            }
+
+            //OnBuildChanged?.Invoke(_buildDataReference);
         }
         public override void OnDestroy()
         {
@@ -55,19 +70,21 @@ namespace Gameplay.GameplayObjects
             };
             Debug.Log("Setting Build");
 
-            SetBuildServerRpc(0, new int[CustomisationOptionsDatabase.AllOptionsDatabase.GetFrame(0).AttachmentPoints.Length]);
+            //SetBuildServerRpc(0, new int[CustomisationOptionsDatabase.AllOptionsDatabase.GetFrame(0).AttachmentPoints.Length]);
         }
 
 
         private void ActiveFrameIndex_OnValueChanged(int previousValue, int newFrameIndex)
         {
             _buildDataReference.SetFrameDataIndex(newFrameIndex);
+            _shouldUpdateBuildDataReference = true;
             OnBuildChanged?.Invoke(_buildDataReference);
         }
         private void ActiveSlottableIndicies_OnListChanged(NetworkListEvent<int> changeEvent)
         {
             _buildDataReference.ActiveSlottableIndicies[changeEvent.Index] = changeEvent.Value;
-            CacheSlottableIndex(changeEvent.Index, changeEvent.Value);
+            _shouldUpdateBuildDataReference = true;
+            //CacheSlottableIndex(changeEvent.Index, changeEvent.Value);
 
             OnBuildChanged?.Invoke(_buildDataReference);
         }
@@ -143,6 +160,7 @@ namespace Gameplay.GameplayObjects
             for (int i = 0; i < slottableIndicies.Length; ++i)
                 slottableIndicies[i] = ActiveSlottableIndicies[i];
             _buildDataReference.SetActiveSlottableDataIndicies(slottableIndicies);
+            _shouldUpdateBuildDataReference = true;
 
             OnBuildChanged?.Invoke(_buildDataReference);
         }

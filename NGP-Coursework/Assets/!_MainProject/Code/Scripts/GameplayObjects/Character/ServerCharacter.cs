@@ -17,8 +17,18 @@ namespace Gameplay.GameplayObjects.Character
         public ClientCharacter ClientCharacter => m_clientCharacter;
 
 
-        [field:SerializeField] public NetworkBuildReference NetworkBuildReference { get; private set; }
-        public event System.Action<BuildData> OnBuildDataChanged;
+        [SerializeField, ReadOnly] private BuildData _buildDataReference;
+        public BuildData BuildDataReference
+        {
+            get => _buildDataReference;
+            set
+            {
+                _buildDataReference = value;
+
+                if (IsServer)
+                    ServerCharacter_OnBuildDataChanged(_buildDataReference);
+            }
+        }
 
 
         /// <summary>
@@ -39,7 +49,7 @@ namespace Gameplay.GameplayObjects.Character
         // Heat.
 
         public NetworkVariable<float> CurrentHeat { get; private set; } = new NetworkVariable<float>();
-        public float MaxHeat => 10.0f;//throw new System.NotImplementedException("ServerCharacter Build Reference - Max Heat");
+        public float MaxHeat => _buildDataReference.GetFrameData().HeatCapacity;
         private float _lastHeatIncreaseTime = 0.0f;
 
 
@@ -75,38 +85,15 @@ namespace Gameplay.GameplayObjects.Character
         public override void OnNetworkSpawn()
         {
             // We're subscribing to this event on clients too in order to relay our BuildData through the class reference as opposed to duplicating the struct.
-            //BuildData.OnValueChanged += NetworkedBuildDataChanged;
-            NetworkBuildReference.OnBuildChanged += NetworkBuildData_OnBuildChanged;
-
             if (!IsServer)
             {
                 this.enabled = false;
-                if (NetworkBuildReference.Reference != null)
-                    OnBuildDataChanged?.Invoke(NetworkBuildReference.Reference.BuildDataReference);
                 return;
             }
-
-
-            
-                
-            OnBuildDataChanged += ServerCharacter_OnBuildDataChanged;
-            if (NetworkBuildReference.Reference != null)
-                OnBuildDataChanged?.Invoke(NetworkBuildReference.Reference.BuildDataReference);
         }
         public override void OnNetworkDespawn()
         {
             // Unsubscribe from NetworkVariable Events.
-            //BuildData.OnValueChanged -= NetworkedBuildDataChanged;
-            if (NetworkBuildReference != null)
-                NetworkBuildReference.OnBuildChanged -= NetworkBuildData_OnBuildChanged;
-            OnBuildDataChanged -= ServerCharacter_OnBuildDataChanged;
-        }
-
-
-        private void NetworkBuildData_OnBuildChanged(BuildData buildData)
-        {
-            Debug.Log(buildData.ActiveFrameIndex);
-            OnBuildDataChanged?.Invoke(buildData);
         }
 
 
