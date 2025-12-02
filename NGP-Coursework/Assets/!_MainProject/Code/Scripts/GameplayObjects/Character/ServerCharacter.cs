@@ -18,6 +18,10 @@ namespace Gameplay.GameplayObjects.Character
 
 
         [SerializeField, ReadOnly] private BuildData _buildDataReference;
+        /// <summary>
+        ///     Property for this ServerCharacter's BuildData.<br/>
+        ///     Must be populated through both Clients and Servers.
+        /// </summary>
         public BuildData BuildDataReference
         {
             get => _buildDataReference;
@@ -261,6 +265,11 @@ namespace Gameplay.GameplayObjects.Character
         //{
         //    OnBuildDataChanged?.Invoke(new BuildDataReference(newValue));
         //}
+        [Rpc(SendTo.ClientsAndHost)]
+        public void UpdateBuildStateClientRpc(int activeFrame, int[] activeSlottables)
+        {
+            this.BuildDataReference = new BuildData(activeFrame, activeSlottables);
+        }
 
         private void ServerCharacter_OnBuildDataChanged(BuildData buildData)
         {

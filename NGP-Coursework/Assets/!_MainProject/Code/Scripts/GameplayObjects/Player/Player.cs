@@ -40,16 +40,18 @@ namespace Gameplay.GameplayObjects.Players
         /// <summary>
         ///     Called when we've updated this player's build.
         /// </summary>
+        // Client & Server.
         public event System.Action OnThisPlayerBuildUpdated;
         /// <summary>
         ///     Called when we've updated the local player's build.
         /// </summary>
+        // Client-side.
         public static event System.Action<BuildData> OnLocalPlayerBuildUpdated;
-
 
         /// <summary>
         ///     Called when any player is killed.
         /// </summary>
+        // Client-side.
         public static event System.EventHandler<PlayerDeathEventArgs> OnPlayerDeath;
 
         /// <summary>
@@ -75,7 +77,6 @@ namespace Gameplay.GameplayObjects.Players
             }
             Debug.Log("Player Wrapper Count: " + _playerGFXWrappers.Length);
 
-            ServerCharacter.NetworkHealthComponent.OnDied += ServerCharacter_OnDied;
         }
         public override void OnNetworkSpawn()
         {
@@ -85,10 +86,7 @@ namespace Gameplay.GameplayObjects.Players
 
             // When the PersistentPlayer's Build changes, update this player instance's build
             _persistentPlayer.NetworkBuildState.OnBuildChanged += OnBuildChanged;
-            Debug.Log("Ref: " + _persistentPlayer.NetworkBuildState.BuildDataReference.ActiveFrameIndex);
-            Debug.Log("Network Var: " + _persistentPlayer.NetworkBuildState.ActiveFrameIndex.Value);
-            //OnBuildChanged(_persistentPlayer.NetworkBuildState.BuildDataReference); // Ensure that we sync our initial state.
-            StartCoroutine(SyncAfterFrame());
+            OnBuildChanged(_persistentPlayer.NetworkBuildState.BuildDataReference); // Ensure that we sync our initial state (Change to trigger after a frame if we are having issues here).
 
             if (IsLocalPlayer)
             {
@@ -96,6 +94,11 @@ namespace Gameplay.GameplayObjects.Players
                 Debug.Log("Local Player", this);
 
                 OnLocalPlayerSet?.Invoke();
+            }
+
+            if (IsServer)
+            {
+                ServerCharacter.NetworkHealthComponent.OnDied += Server_OnDied;
             }
         }
         public override void OnNetworkDespawn()
@@ -120,20 +123,10 @@ namespace Gameplay.GameplayObjects.Players
                     // Set the player data to its updated value.
                     SessionManager<SessionPlayerData>.Instance.SetPlayerData(OwnerClientId, playerData);
                 }
+
+                if (ServerCharacter != null && ServerCharacter.NetworkHealthComponent != null)
+                    ServerCharacter.NetworkHealthComponent.OnDied -= Server_OnDied;
             }
-        }
-        public override void OnDestroy()
-        {
-            base.OnDestroy();
-
-            ServerCharacter.NetworkHealthComponent.OnDied -= ServerCharacter_OnDied;
-        }
-
-
-        private IEnumerator SyncAfterFrame()
-        {
-            yield return null;
-            OnBuildChanged(_persistentPlayer.NetworkBuildState.BuildDataReference); // Ensure that we sync our initial state.
         }
 
 
@@ -170,18 +163,56 @@ namespace Gameplay.GameplayObjects.Players
                 OnLocalPlayerBuildUpdated?.Invoke(buildData);
         }
 
-        private void ServerCharacter_OnDied(NetworkHealthComponent.BaseDamageReceiverEventArgs e)
-        {
-            if (!IsServer)
-            {
-                Debug.LogWarning("We're only wanting this to be called from the Server");
-                return;
-            }
-            Debug.Log("Player Died");
 
-            NotifyOwnerOfDeath(e.Inflicter);
-            OnPlayerDeath?.Invoke(this, new PlayerDeathEventArgs(this.ServerCharacter, e.Inflicter));
+        // Server-only.
+        private void Server_OnDied(NetworkHealthComponent.BaseDamageReceiverEventArgs e)
+        {
+            NotifyClientsOfDeath(e.Inflicter);
+            //NotifyOwnerOfDeath(e.Inflicter);
+            //OnPlayerDeath?.Invoke(this, new PlayerDeathEventArgs(this.ServerCharacter, e.Inflicter));
         }
+
+        // Server-only. Passes to Clients & Host.
+        private void NotifyClientsOfDeath(ServerCharacter inflicter)
+        {
+            if (inflicter != null)
+                NotifyOfDeathClientRpc(this.ServerCharacter.OwnerClientId, inflicter.NetworkObjectId);
+            else
+                NotifyOfDeathByGameClientRpc(this.ServerCharacter.OwnerClientId);
+        }
+        /// <summary>
+        ///     Called on clients when this player dies.
+        /// </summary>
+        /// <remarks> If there is no Inflicter Object (Such as if the change was caused by the server), instead use <see cref="OnPlayerDiedByGameOwnerRpc()"/></remarks>
+        [Rpc(SendTo.ClientsAndHost)]
+        public void NotifyOfDeathClientRpc(ulong targetClientId, ulong inflicterObjectId)
+        {
+            if (targetClientId != this.OwnerClientId)
+                return;
+
+            ServerCharacter inflicter = NetworkManager.Singleton.SpawnManager.SpawnedObjects[inflicterObjectId].GetComponent<ServerCharacter>();
+            Debug.Log($"{this.GetComponent<Utils.NetworkNameState>().Name.Value} Killed by {inflicter.GetComponent<Utils.NetworkNameState>().Name.Value}. Is Local: {IsLocalPlayer}. ClientId Comparison: {NetworkManager.Singleton.LocalClientId == targetClientId}");
+            if (IsOwner)
+                OnLocalPlayerDied(inflicter);
+            OnPlayerDied(inflicter);
+        }
+        /// <summary>
+        ///     Called on clients when this player dies from an unknown source, such as the Game itself.
+        /// </summary>
+        [Rpc(SendTo.ClientsAndHost)]
+        public void NotifyOfDeathByGameClientRpc(ulong targetClientId)
+        {
+            if (targetClientId != this.OwnerClientId)
+                return;
+
+            Debug.Log($"{this.GetComponent<Utils.NetworkNameState>().Name.Value} Killed by Game");
+            if (IsOwner)
+                OnLocalPlayerDied(null);
+            OnPlayerDied(null);
+        }
+
+        private void OnPlayerDied(ServerCharacter inflicter) => OnPlayerDeath?.Invoke(this, new PlayerDeathEventArgs(this.ServerCharacter, inflicter));
+
 
 
         /// <summary>
@@ -217,6 +248,7 @@ namespace Gameplay.GameplayObjects.Players
         /// <param name="inflicter"> The ServerCharacter that caused this player to die.</param>
         private void OnLocalPlayerDied(ServerCharacter inflicter)
         {
+            Debug.Log("Local Death");
             ClientInput.PreventActions(typeof(Player), ClientInput.ActionTypes.Respawning);         // Prevent Input.
             OnLocalPlayerDeath?.Invoke(this, new PlayerDeathEventArgs(ServerCharacter, inflicter)); // Notify Listeners (Respawn Screen, etc).
         }

@@ -33,6 +33,12 @@ namespace Gameplay.GameState
         private bool _initialSpawnsComplete = false;
 
 
+        [Header("Player Respawning")]
+        private const bool USE_GROUPED_RESPAWNS = true;  // If true, respawns are grouped together at the time which is the nearest multiple of '_respawnDelay'.
+        private const float RESPAWN_DELAY = 5.0f;
+        private const float MIN_RESPAWN_DELAY = 2.0f;
+
+
         [Inject]
         private ISubscriber<LifeStateChangedEventMessage> _lifeStateChangedEventMessageSubscriber;
 
@@ -101,8 +107,7 @@ namespace Gameplay.GameState
             NetworkObject originCharacterNetworkObject = NetworkManager.Singleton.SpawnManager.SpawnedObjects[message.OriginCharacterObjectId];
             if (originCharacterNetworkObject.TryGetComponent<Player>(out Player player))
             {
-                // Note: If we revive the player within a few frames of them dying, they are instantly killed again on the client, but not on the server.
-                StartCoroutine(ReviveAfterDelay(player));
+                RevivePlayer(player);
             }
         }
         private void OnConnectionEvent(NetworkManager networkManager, ConnectionEventData connectionEventData)  // Triggered when a client connects or disconnects from the server.
@@ -190,9 +195,25 @@ namespace Gameplay.GameState
         }
 
 
-        private IEnumerator ReviveAfterDelay(Player player)
+        private void RevivePlayer(Player player)
         {
-            yield return new WaitForSeconds(1.0f);
+            float respawnDelay = GetRespawnDelay();
+            StartCoroutine(ReviveAfterDelay(player, respawnDelay));
+        }
+        public static float GetRespawnDelay()
+        {
+            if (USE_GROUPED_RESPAWNS)
+            {
+                float respawnDelay = (Mathf.Ceil(Time.time / RESPAWN_DELAY) * RESPAWN_DELAY) - Time.time;
+                return respawnDelay >= MIN_RESPAWN_DELAY ? respawnDelay : respawnDelay + RESPAWN_DELAY; // Prevent being under our minimum respawn time by moving to the next multiple if we are below.
+            }
+            //else
+            //    return RESPAWN_DELAY;
+        }
+        private IEnumerator ReviveAfterDelay(Player player, float respawnDelay)
+        {
+            yield return new WaitForSeconds(respawnDelay);
+
             Transform spawnPoint = _playerSpawnPoints[Random.Range(0, _playerSpawnPoints.Length)];
             player.PerformRespawn(spawnPoint.position, spawnPoint.rotation);
         }

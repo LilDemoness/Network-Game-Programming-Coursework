@@ -2,7 +2,6 @@ using UnityEngine;
 using TMPro;
 using Gameplay.GameplayObjects.Character;
 using Gameplay.GameplayObjects.Players;
-using GameState;
 
 namespace UI
 {
@@ -27,7 +26,7 @@ namespace UI
             Player.OnLocalPlayerRevived -= Player_OnLocalPlayerRevived;
         }
 
-        private void Player_OnLocalPlayerDeath(object sender, Player.PlayerDeathEventArgs e) => Show(e.Inflicter, 10.0f);
+        private void Player_OnLocalPlayerDeath(object sender, Player.PlayerDeathEventArgs e) => Show(e.Inflicter, Gameplay.GameState.ServerFreeForAllState.GetRespawnDelay());
         private void Player_OnLocalPlayerRevived(object sender, System.EventArgs e)
         {
             Debug.Log("Player Revived");
@@ -41,7 +40,10 @@ namespace UI
             Debug.Log("Show");
 
             // Killer Name.
-            _killerNameText.text = killer.name;
+            if (killer != null)
+                _killerNameText.text = killer.TryGetComponent<Utils.NetworkNameState>(out var nameState) ? nameState.Name.Value : killer.name;
+            else
+                _killerNameText.text = "SERVER";
 
             // Time Remaining.
             this._respawnTimeRemaining = timeToRespawn;
