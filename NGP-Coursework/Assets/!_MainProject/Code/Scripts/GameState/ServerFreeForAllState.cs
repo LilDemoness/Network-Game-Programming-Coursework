@@ -11,18 +11,27 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using Utils;
 using VContainer;
+using VContainer.Unity;
 
 namespace Gameplay.GameState
 {
     /// <summary>
     ///     Server specialisation of the logic for a Free-For-All Game Match.
     /// </summary>
+    [RequireComponent(typeof(NetcodeHooks), typeof(NetworkGameplayState))]
     public class ServerFreeForAllState : GameStateBehaviour
     {
         public override GameState ActiveState => GameState.InGameplay;
 
 
         [SerializeField] private NetcodeHooks _netcodeHooks;
+        [SerializeField] private NetworkGameplayState _networkGameplayState;
+
+
+        [SerializeField] private float _gameTime = 60.0f;
+        [SerializeField] private float _matchTimeSyncInterval = 15.0f;
+        private float _nextSyncTime;
+        private float _gameTimeRemaining;
 
 
         [Header("Player Spawning")]
@@ -44,6 +53,13 @@ namespace Gameplay.GameState
 
         [Inject]
         private PersistentGameState _persistentGameState;   // Used to transfer score between the Gameplay and Post-Game States.
+
+
+        protected override void Configure(IContainerBuilder builder)
+        {
+            base.Configure(builder);
+            builder.RegisterComponent<NetworkGameplayState>(_networkGameplayState);
+        }
 
 
         protected override void Awake()
@@ -82,6 +98,23 @@ namespace Gameplay.GameState
             NetworkManager.Singleton.OnConnectionEvent -= OnConnectionEvent;
             NetworkManager.Singleton.SceneManager.OnLoadEventCompleted -= OnLoadEventCompleted;
             NetworkManager.Singleton.SceneManager.OnSynchronizeComplete -= OnSynchronizeComplete;
+        }
+
+        private void Update()
+        {
+            if (!_initialSpawnsComplete)
+                return;
+
+            _gameTimeRemaining -= Time.deltaTime;
+            if (_gameTimeRemaining <= 0.0f)
+            {
+                EndGame();
+            }
+            if(_nextSyncTime <= Time.time)
+            {
+                _networkGameplayState.SyncGameTime(_gameTimeRemaining);
+                _nextSyncTime += _matchTimeSyncInterval;
+            }
         }
 
 
@@ -127,10 +160,11 @@ namespace Gameplay.GameState
 
             // Spawn all players.
             _initialSpawnsComplete = true;
-            foreach(var kvp in NetworkManager.Singleton.ConnectedClients)
+            foreach (var kvp in NetworkManager.Singleton.ConnectedClients)
             {
                 SpawnPlayer(kvp.Key, false);
             }
+            StartGame();
         }
         private void OnSynchronizeComplete(ulong clientId)  // Triggered once a newly approved client has finished synchonizing the current game session.
         {
@@ -142,6 +176,23 @@ namespace Gameplay.GameState
 
             // A client has joined after the initial spawn.
             SpawnPlayer(clientId, true);
+            _networkGameplayState.SyncGameTime(_gameTimeRemaining);
+        }
+
+
+        
+        private void StartGame()
+        {
+            // Time limits.
+            _gameTimeRemaining = _gameTime;
+
+            _networkGameplayState.SyncGameTime(_gameTimeRemaining);
+        }
+        private void EndGame()
+        {
+            // End the Game:
+            //  - Change to Post Game Scene
+            Debug.Log("Game Over");
         }
 
 

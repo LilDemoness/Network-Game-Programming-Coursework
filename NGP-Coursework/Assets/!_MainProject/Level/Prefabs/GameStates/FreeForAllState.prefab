@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 7260594802072808011}
   - component: {fileID: 3671268573212348019}
   - component: {fileID: 2293472982834247301}
+  - component: {fileID: 5094925492656260139}
   m_Layer: 0
   m_Name: FreeForAllState
   m_TagString: Untagged
@@ -76,6 +77,10 @@ MonoBehaviour:
   autoRun: 1
   autoInjectGameObjects: []
   _netcodeHooks: {fileID: 2293472982834247301}
+  _networkGameplayState: {fileID: 5094925492656260139}
+  _gameTime: 60
+  GameTimeRemaining:
+    m_InternalValue: 0
   _playerPrefab: {fileID: 801874179514615870, guid: 0f3d7e267c592ed448e9668caa3e67bf, type: 3}
   _playerSpawnPoints:
   - {fileID: 0}
@@ -93,6 +98,19 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ced2aa636da9d614eadabcb2d132dd2a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
+--- !u!114 &5094925492656260139
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1688527563463541721}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 916dea42d9fd3bf468967a0789f6d9fb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
