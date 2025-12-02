@@ -84,11 +84,7 @@ namespace Gameplay.GameplayObjects.Players
             if (!_runtimeCollection.TryGetPlayer(this.OwnerClientId, out _persistentPlayer))
                 throw new System.Exception($"No PersistenPlayer Reference for Client: {OwnerClientId}");
 
-            // When the PersistentPlayer's Build changes, update this player instance's build
-            _persistentPlayer.NetworkBuildState.OnBuildChanged += OnBuildChanged;
-            OnBuildChanged(_persistentPlayer.NetworkBuildState.BuildDataReference); // Ensure that we sync our initial state (Change to trigger after a frame if we are having issues here).
-
-            if (IsLocalPlayer)
+            if (IsOwner)
             {
                 LocalClientInstance = this;
                 Debug.Log("Local Player", this);
@@ -100,6 +96,10 @@ namespace Gameplay.GameplayObjects.Players
             {
                 ServerCharacter.NetworkHealthComponent.OnDied += Server_OnDied;
             }
+
+            // When the PersistentPlayer's Build changes, update this player instance's build
+            _persistentPlayer.NetworkBuildState.OnBuildChanged += OnBuildChanged;
+            OnBuildChanged(_persistentPlayer.NetworkBuildState.BuildDataReference); // Ensure that we sync our initial state (Change to trigger after a frame if we are having issues here).
         }
         public override void OnNetworkDespawn()
         {
@@ -159,7 +159,7 @@ namespace Gameplay.GameplayObjects.Players
             }
 
             OnThisPlayerBuildUpdated?.Invoke();
-            if (IsLocalPlayer)
+            if (IsOwner)
                 OnLocalPlayerBuildUpdated?.Invoke(buildData);
         }
 
@@ -191,7 +191,6 @@ namespace Gameplay.GameplayObjects.Players
                 return;
 
             ServerCharacter inflicter = NetworkManager.Singleton.SpawnManager.SpawnedObjects[inflicterObjectId].GetComponent<ServerCharacter>();
-            Debug.Log($"{this.GetComponent<Utils.NetworkNameState>().Name.Value} Killed by {inflicter.GetComponent<Utils.NetworkNameState>().Name.Value}. Is Local: {IsLocalPlayer}. ClientId Comparison: {NetworkManager.Singleton.LocalClientId == targetClientId}");
             if (IsOwner)
                 OnLocalPlayerDied(inflicter);
             OnPlayerDied(inflicter);
