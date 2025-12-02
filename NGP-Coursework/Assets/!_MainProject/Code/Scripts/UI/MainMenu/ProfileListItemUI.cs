@@ -7,10 +7,12 @@ namespace Gameplay.UI.MainMenu
 {
     public class ProfileListItemUI : MonoBehaviour
     {
-        [SerializeField] private TextMeshProUGUI _profileNameText;
+        [SerializeField] private UIProfileSelector _uiProfileSelector;
 
-        [Inject]
-        private ProfileManager _profileManager;
+        [Space(10)]
+        [SerializeField] private GameObject _selectionIndicator;
+        [SerializeField] private TextMeshProUGUI _profileNameText;
+        public string ProfileName => _profileNameText.text;
 
 
         public void SetProfileName(string profileName)
@@ -19,13 +21,11 @@ namespace Gameplay.UI.MainMenu
         }
 
 
-        public void OnSelectButtonPressed()
-        {
-            _profileManager.Profile = _profileNameText.text;
-        }
-        public void OnDeleteButtonPressed()
-        {
-            _profileManager.DeleteProfile(_profileNameText.text);
-        }
+        public void OnSelectButtonPressed() => _uiProfileSelector.SelectProfile(ProfileName);
+        public void OnDeleteButtonPressed() => _uiProfileSelector.DeleteProfile(ProfileName);
+
+
+        public void MarkSelected() => _selectionIndicator.SetActive(true);
+        public void MarkUnselected() => _selectionIndicator.SetActive(false);
     }
 }

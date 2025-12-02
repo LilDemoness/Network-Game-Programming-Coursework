@@ -204,7 +204,8 @@ namespace Gameplay.GameState
         {
             if (USE_GROUPED_RESPAWNS)
             {
-                float respawnDelay = (Mathf.Ceil(Time.time / RESPAWN_DELAY) * RESPAWN_DELAY) - Time.time;
+                float serverTime = NetworkManager.Singleton.ServerTime.TimeAsFloat;
+                float respawnDelay = (Mathf.Ceil(serverTime / RESPAWN_DELAY) * RESPAWN_DELAY) - serverTime;
                 return respawnDelay >= MIN_RESPAWN_DELAY ? respawnDelay : respawnDelay + RESPAWN_DELAY; // Prevent being under our minimum respawn time by moving to the next multiple if we are below.
             }
             //else

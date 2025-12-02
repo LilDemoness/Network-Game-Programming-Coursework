@@ -11,6 +11,7 @@ namespace UI
 
         [SerializeField] private TMP_Text _respawnTimeRemainingText;
         private float _respawnTimeRemaining;
+        private const string DEFAULT_KILLER_NAME = "SERVER";
 
 
         private void Awake()
@@ -40,10 +41,7 @@ namespace UI
             Debug.Log("Show");
 
             // Killer Name.
-            if (killer != null)
-                _killerNameText.text = killer.TryGetComponent<Utils.NetworkNameState>(out var nameState) ? nameState.Name.Value : killer.name;
-            else
-                _killerNameText.text = "SERVER";
+            _killerNameText.text = killer != null ? killer.CharacterName : DEFAULT_KILLER_NAME;
 
             // Time Remaining.
             this._respawnTimeRemaining = timeToRespawn;

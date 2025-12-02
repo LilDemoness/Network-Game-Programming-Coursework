@@ -18,9 +18,6 @@ namespace Gameplay.GameplayObjects
         private NetworkHealthComponent _networkHealthComponent;
         private ServerCharacter _serverCharacter;
 
-        [SerializeField] private string _characterName;
-        private NetworkNameState _networkNameState;
-
 
         [Inject]
         private IPublisher<LifeStateChangedEventMessage> _publisher;
@@ -36,7 +33,6 @@ namespace Gameplay.GameplayObjects
             if (!IsServer)
                 return;
 
-            _networkNameState = GetComponent<NetworkNameState>();
             _networkHealthComponent.OnLifeStateChanged += OnLifeStateChanged;
 
             GameStateBehaviour gameState = FindAnyObjectByType<GameStateBehaviour>();
@@ -51,7 +47,7 @@ namespace Gameplay.GameplayObjects
                 _serverCharacter.NetworkObjectId,
                 inflicterObjectId,
                 lifeState,
-                _networkNameState != null ? _networkNameState.Name.Value : (FixedPlayerName)_characterName
+                _serverCharacter.CharacterName
             ));
         }
     }

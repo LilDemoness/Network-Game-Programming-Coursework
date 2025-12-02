@@ -111,6 +111,10 @@ PrefabInstance:
       propertyPath: m_clientCharacter
       value: 
       objectReference: {fileID: 4877026079753461683}
+    - target: {fileID: 781988145697744951, guid: 19e12c250a369b843b0be12527b88951, type: 3}
+      propertyPath: m_networkNameState
+      value: 
+      objectReference: {fileID: 995224596338858405}
     - target: {fileID: 2257280709253185089, guid: 19e12c250a369b843b0be12527b88951, type: 3}
       propertyPath: _rotationPivot
       value: 

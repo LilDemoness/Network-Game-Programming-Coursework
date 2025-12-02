@@ -36,7 +36,6 @@ namespace Gameplay.UI.MainMenu
         {
             _profileListItemPrototype.gameObject.SetActive(false);
             Hide();
-            _createProfileButton.interactable = false;
         }
 
         /// <summary>
@@ -82,6 +81,8 @@ namespace Gameplay.UI.MainMenu
                 _profileListItems[i].SetProfileName(profileName);
             }
 
+            HighlightSelectedProfile();
+
             // Toggle empty list label as required.
             _emptyProfileListLabel.enabled = _profileManager.AvailableProfiles.Count == 0;
         }
@@ -119,16 +120,47 @@ namespace Gameplay.UI.MainMenu
         }
 
 
+        private void HighlightSelectedProfile()
+        {
+            for(int i = 0; i < _profileListItems.Count; ++i)
+            {
+                if (_profileListItems[i].ProfileName == _profileManager.Profile)
+                {
+                    _profileListItems[i].MarkSelected();
+                }
+                else
+                {
+                    _profileListItems[i].MarkUnselected();
+                }
+            }
+        }
+
+        public void SelectProfile(string profileName)
+        {
+            _profileManager.Profile = profileName;
+            //HighlightSelectedProfile();
+            Hide();
+        }
+        public void DeleteProfile(string profileName)
+        {
+            _profileManager.DeleteProfile(profileName);
+            HighlightSelectedProfile();
+        }
+
+
         public void Show()
         {
             _canvasGroup.alpha = 1.0f;
+            _canvasGroup.interactable = true;
             _canvasGroup.blocksRaycasts = true;
             _newProfileField.text = "";
+
             InitialiseUI();
         }
         public void Hide()
         {
             _canvasGroup.alpha = 0.0f;
+            _canvasGroup.interactable = false;
             _canvasGroup.blocksRaycasts = false;
         }
     }

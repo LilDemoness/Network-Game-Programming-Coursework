@@ -4,6 +4,7 @@ using Gameplay.Actions;
 using Gameplay.GameplayObjects.Character.Customisation.Data;
 using Gameplay.StatusEffects;
 using Gameplay.GameplayObjects.Character.Customisation;
+using Utils;
 
 namespace Gameplay.GameplayObjects.Character
 {
@@ -15,6 +16,12 @@ namespace Gameplay.GameplayObjects.Character
     {
         [SerializeField] private ClientCharacter m_clientCharacter;
         public ClientCharacter ClientCharacter => m_clientCharacter;
+
+
+        [SerializeField] private NetworkNameState m_networkNameState;
+        [SerializeField] private string _characterName;
+        public string CharacterName => m_networkNameState ? m_networkNameState.Name.Value : _characterName;
+        public FixedPlayerName FixedCharacterName => m_networkNameState ? m_networkNameState.Name.Value : new FixedPlayerName(_characterName);
 
 
         [SerializeField, ReadOnly] private BuildData _buildDataReference;

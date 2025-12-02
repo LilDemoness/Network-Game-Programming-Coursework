@@ -579,6 +579,34 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6217849353738452434, guid: 9fdaa51b9be25084c9bed723421cde9c, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6217849353738452434, guid: 9fdaa51b9be25084c9bed723421cde9c, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6217849353738452434, guid: 9fdaa51b9be25084c9bed723421cde9c, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 49885764667086497}
+    - target: {fileID: 6217849353738452434, guid: 9fdaa51b9be25084c9bed723421cde9c, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6217849353738452434, guid: 9fdaa51b9be25084c9bed723421cde9c, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: OnConfirmClick
+      objectReference: {fileID: 0}
+    - target: {fileID: 6217849353738452434, guid: 9fdaa51b9be25084c9bed723421cde9c, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: Gameplay.UI.Popups.PopupPanel, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 6217849353738452434, guid: 9fdaa51b9be25084c9bed723421cde9c, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
+      objectReference: {fileID: 0}
     - target: {fileID: 8737075909630289861, guid: 9fdaa51b9be25084c9bed723421cde9c, type: 3}
       propertyPath: m_Name
       value: ConfirmButton
