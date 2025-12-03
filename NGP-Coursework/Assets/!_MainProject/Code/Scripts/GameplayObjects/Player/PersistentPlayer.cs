@@ -24,6 +24,7 @@ namespace Gameplay.GameplayObjects.Players
         [SerializeField] private NetworkBuildState _networkBuildState;
 
         public int PlayerNumber { get; set; }
+        public int TeamIndex { get; set; }
 
 
         #region Public Accessors
@@ -55,6 +56,7 @@ namespace Gameplay.GameplayObjects.Players
                     SessionPlayerData playerData = sessionPlayerData.Value;
 
                     _networkNameState.Name.Value = playerData.PlayerName;
+                    TeamIndex = playerData.TeamIndex;
                     // Cache Build Data?
                 }
             }
@@ -90,17 +92,24 @@ namespace Gameplay.GameplayObjects.Players
 
             if (IsServer)
             {
-                SessionPlayerData? sessionPlayerData = SessionManager<SessionPlayerData>.Instance.GetPlayerData(OwnerClientId);
-                if (sessionPlayerData.HasValue)
-                {
-                    SessionPlayerData playerData = sessionPlayerData.Value;
+                SavePlayerData();
+            }
+        }
 
-                    playerData.PlayerName = _networkNameState.Name.Value;
-                    // Build Data?
+        //  Server-only.
+        public void SavePlayerData()
+        {
+            SessionPlayerData? sessionPlayerData = SessionManager<SessionPlayerData>.Instance.GetPlayerData(OwnerClientId);
+            if (sessionPlayerData.HasValue)
+            {
+                SessionPlayerData playerData = sessionPlayerData.Value;
 
-                    // Update set value.
-                    SessionManager<SessionPlayerData>.Instance.SetPlayerData(OwnerClientId, playerData);
-                }
+                playerData.PlayerName = _networkNameState.Name.Value;
+                playerData.TeamIndex = TeamIndex;
+                // Build Data?
+
+                // Update set value.
+                SessionManager<SessionPlayerData>.Instance.SetPlayerData(OwnerClientId, playerData);
             }
         }
 

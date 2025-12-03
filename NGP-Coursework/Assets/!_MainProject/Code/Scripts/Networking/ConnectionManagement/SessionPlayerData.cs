@@ -5,16 +5,17 @@ namespace Netcode.ConnectionManagement
 {
     public struct SessionPlayerData : ISessionPlayerData
     {
-        public string PlayerName;
-        public int PlayerNumber;
+        public string PlayerName { get; set; }
+        public int PlayerNumber { get; set; }
+        public int TeamIndex { get; set; }
 
-        public Vector3 PlayerPosition;
-        public Quaternion PlayerRotation;
+        public Vector3 PlayerPosition { get; set; }
+        public Quaternion PlayerRotation { get; set; }
 
-        public BuildData BuildData;
+        public BuildData BuildData { get; set; }
 
-        public float CurrentHealth;
-        public bool HasCharacterSpawned;
+        public float CurrentHealth { get; set; }
+        public bool HasCharacterSpawned { get; set; }
 
 
         public SessionPlayerData(ulong clientID, string name, BuildData buildData = default, float currentHealth = 0.0f, bool isConnected = false, bool hasCharacterSpawned = false)
@@ -23,6 +24,7 @@ namespace Netcode.ConnectionManagement
 
             this.PlayerName = name;
             this.PlayerNumber = -1;
+            this.TeamIndex = -1;
 
             this.PlayerPosition = Vector3.zero;
             this.PlayerRotation = Quaternion.identity;

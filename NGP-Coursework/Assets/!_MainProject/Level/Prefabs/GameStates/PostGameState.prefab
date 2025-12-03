@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &1688527563463541721
+--- !u!1 &9086076007265251720
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,25 +8,25 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 5795627754764065503}
-  - component: {fileID: 7260594802072808011}
-  - component: {fileID: 3671268573212348019}
-  - component: {fileID: 2293472982834247301}
-  - component: {fileID: 5094925492656260139}
+  - component: {fileID: 6117445696026768967}
+  - component: {fileID: 5981604830039942399}
+  - component: {fileID: 5878340715548181255}
+  - component: {fileID: 3377346102218951194}
+  - component: {fileID: 2582697839975618118}
   m_Layer: 0
-  m_Name: FreeForAllState
+  m_Name: PostGameState
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &5795627754764065503
+--- !u!4 &6117445696026768967
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1688527563463541721}
+  m_GameObject: {fileID: 9086076007265251720}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -35,24 +35,24 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &7260594802072808011
+--- !u!114 &5981604830039942399
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1688527563463541721}
+  m_GameObject: {fileID: 9086076007265251720}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 870068260
+  GlobalObjectIdHash: 127832815
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
   AlwaysReplicateAsRoot: 0
-  SynchronizeTransform: 0
+  SynchronizeTransform: 1
   ActiveSceneSynchronization: 0
   SceneMigrationSynchronization: 1
   SpawnWithObservers: 1
@@ -60,57 +60,47 @@ MonoBehaviour:
   AutoObjectParentSync: 1
   SyncOwnerTransformWhenParented: 1
   AllowOwnerToParent: 0
---- !u!114 &3671268573212348019
+--- !u!114 &5878340715548181255
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1688527563463541721}
+  m_GameObject: {fileID: 9086076007265251720}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c09af67b2689d374bba3889d0c9d0805, type: 3}
+  m_Script: {fileID: 11500000, guid: ba6a1de3519b3da418c31946b03c738d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   parentReference:
     TypeName: ApplicationLifecycle.ApplicationController
   autoRun: 1
   autoInjectGameObjects: []
-  _netcodeHooks: {fileID: 2293472982834247301}
-  _networkGameplayState: {fileID: 5094925492656260139}
-  _gameTime: 60
-  _matchTimeSyncInterval: 15
-  _playerPrefab: {fileID: 801874179514615870, guid: 0f3d7e267c592ed448e9668caa3e67bf, type: 3}
-  _playerSpawnPoints:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
---- !u!114 &2293472982834247301
+  _netcodeHooks: {fileID: 3377346102218951194}
+  <NetworkPostGame>k__BackingField: {fileID: 2582697839975618118}
+--- !u!114 &3377346102218951194
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1688527563463541721}
+  m_GameObject: {fileID: 9086076007265251720}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ced2aa636da9d614eadabcb2d132dd2a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
---- !u!114 &5094925492656260139
+--- !u!114 &2582697839975618118
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1688527563463541721}
+  m_GameObject: {fileID: 9086076007265251720}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 916dea42d9fd3bf468967a0789f6d9fb, type: 3}
+  m_Script: {fileID: 11500000, guid: 83fa8d634aed0d14182123e247b84ebe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
-  _persistentPlayerCollection: {fileID: 11400000, guid: 9596a55ab7773b941bfe4be909d1f13d, type: 2}

@@ -1,22 +1,18 @@
+using Gameplay.GameplayObjects;
+using Gameplay.GameplayObjects.Character;
+using Gameplay.GameplayObjects.Players;
 using Unity.Netcode;
 using UnityEngine;
 
 namespace Gameplay.GameState
 {
-    /// <summary>
-    ///     Common data and RPCs for the Gameplay states (General for different GameModes).
-    /// </summary>
-    public class NetworkGameplayState : NetworkBehaviour
+    public abstract class NetworkGameplayState : NetworkBehaviour
     {
-        /*
-        Contents:
-            - Match Time Syncing
-            - Scores? (Stored in PersistentGameState?)
-         */
+        [SerializeField] private PersistentPlayerRuntimeCollection _persistentPlayerCollection;
+
 
         private float _matchTimeCompleteEstimate;
         public float RemainingMatchTimeEstimate => _matchTimeCompleteEstimate - Time.time;
-
 
         public void SyncGameTime(float timeRemaining) => SyncGameTimeClientRpc(NetworkManager.ServerTime.TimeAsFloat, timeRemaining);
         [Rpc(SendTo.ClientsAndHost)]
@@ -27,5 +23,38 @@ namespace Gameplay.GameState
 
             _matchTimeCompleteEstimate = Time.time + timeRemainingEstimate;
         }
+
+
+        public abstract void Initialise(ulong[] clientIds);
+        public abstract void AddPlayer(ulong clientId);
+
+
+        protected int GetPlayerIndex(ulong clientId)
+        {
+            if (!_persistentPlayerCollection.TryGetPlayer(clientId, out PersistentPlayer persistentPlayer))
+                throw new System.Exception($"No PersistentPlayer found for Client {clientId}");
+
+            return persistentPlayer.PlayerNumber;
+        }
+
+        protected int GetTeamIndex(ulong clientId)
+        {
+            if (!_persistentPlayerCollection.TryGetPlayer(clientId, out PersistentPlayer persistentPlayer))
+                throw new System.Exception($"No PersistentPlayer found for Client {clientId}");
+
+            return persistentPlayer.TeamIndex;
+        }
+
+
+        /// <summary>
+        ///     Increment the score of the passed ServerCharacter, if possible.
+        /// </summary>
+        public abstract void IncrementScore(ServerCharacter serverCharacter);
+
+
+        /// <summary>
+        ///     Server-only function to save this NetworkGameplayState's data to the Persistent State.
+        /// </summary>
+        public abstract void SavePersistentData(ref PersistentGameState persistentGameState);
     }
 }

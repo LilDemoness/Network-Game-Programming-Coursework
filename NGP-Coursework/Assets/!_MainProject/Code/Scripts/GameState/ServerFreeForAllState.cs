@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Gameplay.GameplayObjects;
 using Gameplay.GameplayObjects.Character;
 using Gameplay.GameplayObjects.Players;
@@ -18,7 +19,7 @@ namespace Gameplay.GameState
     /// <summary>
     ///     Server specialisation of the logic for a Free-For-All Game Match.
     /// </summary>
-    [RequireComponent(typeof(NetcodeHooks), typeof(NetworkGameplayState))]
+    [RequireComponent(typeof(NetcodeHooks), typeof(NetworkTeamlessGameplayState))]
     public class ServerFreeForAllState : GameStateBehaviour
     {
         public override GameState ActiveState => GameState.InGameplay;
@@ -119,6 +120,8 @@ namespace Gameplay.GameState
 
 
 
+
+        // Server-only.
         private void OnLifeStateChangedEventMessage(LifeStateChangedEventMessage message)
         {
             Debug.Log($"Message! SenderId: {message.OriginCharacterObjectId}, InflicterId: {message.InflicterObjectId}, Name: {message.CharacterName}, LifeState: {message.NewLifeState}");
@@ -132,7 +135,7 @@ namespace Gameplay.GameState
                 NetworkObject inflicterNetworkObject = NetworkManager.Singleton.SpawnManager.SpawnedObjects[message.InflicterObjectId];
                 if (inflicterNetworkObject.TryGetComponent<ServerCharacter>(out ServerCharacter serverCharacter))
                 {
-                    _persistentGameState.IncrementScore(serverCharacter.TeamID.Value);
+                    _networkGameplayState.IncrementScore(serverCharacter);
                 }
             }
 
@@ -176,6 +179,7 @@ namespace Gameplay.GameState
 
             // A client has joined after the initial spawn.
             SpawnPlayer(clientId, true);
+            _networkGameplayState.AddPlayer(clientId);
             _networkGameplayState.SyncGameTime(_gameTimeRemaining);
         }
 
@@ -183,6 +187,8 @@ namespace Gameplay.GameState
         
         private void StartGame()
         {
+            _networkGameplayState.Initialise(NetworkManager.Singleton.ConnectedClients.Keys.ToArray());
+
             // Time limits.
             _gameTimeRemaining = _gameTime;
 
@@ -190,9 +196,11 @@ namespace Gameplay.GameState
         }
         private void EndGame()
         {
-            // End the Game:
-            //  - Change to Post Game Scene
-            Debug.Log("Game Over");
+            // Save data to the PersistentGameState for retrieval in the Post-Game State.
+            _networkGameplayState.SavePersistentData(ref _persistentGameState);
+
+            Debug.LogWarning("To Implement - Load PostGame Scene");
+            NetworkManager.Singleton.SceneManager.LoadScene("PostGameScene", LoadSceneMode.Single);
         }
 
 
@@ -211,6 +219,10 @@ namespace Gameplay.GameState
             if (!NetworkManager.Singleton.SpawnManager.GetPlayerNetworkObject(clientId).TryGetComponent<PersistentPlayer>(out PersistentPlayer persistentPlayer))
                 Debug.LogError($"No matching persistent PersistentPlayer for client {clientId} was found");
 
+            // Retrieve our cached data (If this player has already joined & been spawned).
+            SessionPlayerData? sessionPlayerData = isLateJoin ? SessionManager<SessionPlayerData>.Instance.GetPlayerData(clientId) : null;
+            if (sessionPlayerData is { HasCharacterSpawned: false })
+                sessionPlayerData = null;
 
             // Instantiate the Player.
             NetworkObject newPlayer = Instantiate<NetworkObject>(_playerPrefab, Vector3.zero, Quaternion.identity);
@@ -222,24 +234,25 @@ namespace Gameplay.GameState
             {
                 playerPhysicsTransform.SetPositionAndRotation(spawnPoint.position, spawnPoint.rotation);
             }
-            if (isLateJoin)
+            if (sessionPlayerData.HasValue)
             {
-                // Check if this is a reconnection. If so, set the player's position & rotation to their previous position?
-                Debug.LogWarning("Determine if we should keep");
-                SessionPlayerData? sessionPlayerData = SessionManager<SessionPlayerData>.Instance.GetPlayerData(clientId);
-                if (sessionPlayerData is { HasCharacterSpawned: true })
-                {
-                    playerPhysicsTransform.SetPositionAndRotation(sessionPlayerData.Value.PlayerPosition, sessionPlayerData.Value.PlayerRotation);
-                }
+                // Restore the player's previous position.
+                Debug.LogWarning("Remve this?");
+                playerPhysicsTransform.SetPositionAndRotation(sessionPlayerData.Value.PlayerPosition, sessionPlayerData.Value.PlayerRotation);
             }
 
             // Instantiate NetworkVariables with their values to ensure that they're ready for use on OnNetworkSpawn.
+            // Note: Player Builds are handled by the 'Player' and 'PersistentPlayer' scripts.
 
             // Pass required data from PersistentPlayer to the player instance.
             if (newPlayer.TryGetComponent<NetworkNameState>(out NetworkNameState networkNameState))
                 networkNameState.Name = new NetworkVariable<FixedPlayerName>(persistentPlayer.NetworkNameState.Name.Value);
-            // Note: Player Builds are handled by the 'Player' and 'PersistentPlayer' scripts.
-            newPlayerServerCharacter.TeamID = new NetworkVariable<int>(persistentPlayer.PlayerNumber);
+            //newPlayerServerCharacter.TeamID.Value = sessionPlayerData.HasValue ? sessionPlayerData.Value.TeamIndex : persistentPlayer.PlayerNumber;
+
+
+            // Cache required values.
+            persistentPlayer.SavePlayerData();
+
 
             // Spawn the Player Character.
             newPlayer.SpawnWithOwnership(clientId, destroyWithScene: true);
