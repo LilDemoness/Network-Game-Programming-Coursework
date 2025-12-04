@@ -9,11 +9,8 @@ namespace UI.PostGame
     public class PostGameLeaderboard : MonoBehaviour
     {
         [SerializeField] private Transform _leaderboardValuesContainer;
-        [SerializeField] private GameObject _leaderboardRowPrefab;
-        private List<GameObject> _leaderboardRowInstances;
-
-        [SerializeField] private TextMeshProUGUI _tempText;
-
+        [SerializeField] private PostGameLeaderboardRow _leaderboardRowPrefab;
+        private List<PostGameLeaderboardRow> _leaderboardRowInstances = new List<PostGameLeaderboardRow>();
 
         //[Inject]
         [SerializeField] private NetworkPostFFAGame _networkPostGame;
@@ -32,22 +29,24 @@ namespace UI.PostGame
 
         private void InitialiseUI()
         {
-            /*
-            ----- Teams -----
-            Team Name | Score | Players
-            
-            ----- No Teams -----
-            Player Name | Score | Deaths?
-            
-            */
-
-            string displayString = "";
-            for(int i = 0; i < _networkPostGame.PostGameData.Length; ++i)
+            int currentInstancesCount = _leaderboardRowInstances.Count;
+            for (int i = 0; i < _networkPostGame.PostGameData.Length; ++i)
             {
-                displayString += $"{_networkPostGame.PostGameData[i].PlayerIndex}: {_networkPostGame.PostGameData[i].Kills}\n";
-            }
+                if (i >= currentInstancesCount)
+                {
+                    // Create a new row.
+                    PostGameLeaderboardRow leaderboardRow = Instantiate<PostGameLeaderboardRow>(_leaderboardRowPrefab, _leaderboardValuesContainer);
+                    _leaderboardRowInstances.Add(leaderboardRow);
+                }
 
-            _tempText.text = displayString;
+                // Populate the UI Element.
+                _leaderboardRowInstances[i].SetPlace(i);
+                _leaderboardRowInstances[i].SetInformation(
+                    playerName:     _networkPostGame.PostGameData[i].Name,
+                    score:          _networkPostGame.PostGameData[i].Score,
+                    killsCount:     _networkPostGame.PostGameData[i].Kills,
+                    deathsCount:    _networkPostGame.PostGameData[i].Deaths);
+            }
         }
     }
 }
