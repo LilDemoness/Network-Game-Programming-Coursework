@@ -44,7 +44,7 @@ namespace UI.PostGame
             string displayString = "";
             for(int i = 0; i < _networkPostGame.PostGameData.Length; ++i)
             {
-                displayString += $"{_networkPostGame.PostGameData[i].PlayerIndex}: {_networkPostGame.PostGameData[i].Score}\n";
+                displayString += $"{_networkPostGame.PostGameData[i].PlayerIndex}: {_networkPostGame.PostGameData[i].Kills}\n";
             }
 
             _tempText.text = displayString;

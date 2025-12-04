@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using Gameplay.GameplayObjects.Character;
 using Unity.Netcode;
@@ -12,6 +13,7 @@ namespace Gameplay.GameState
     public class NetworkFFAGameplayState : NetworkGameplayState
     {
         private List<ServerPlayerGameData> _serverPlayerData;
+        private Dictionary<ServerCharacter, ServerPlayerGameData> _characterToDataIndex = new();
 
         public NetworkList<PlayerGameData> PlayerData { get; private set; } = new NetworkList<PlayerGameData>(); // Also includes players that have left the game? OR have score in SessionPlayerData (But what about states that don't use scores?)?
         private Dictionary<int, PlayerGameData> _playerIndexToDataDict = new Dictionary<int, PlayerGameData>();
@@ -58,7 +60,12 @@ namespace Gameplay.GameState
                 PlayerData.Add(new PlayerGameData(playerIndex));
                 // Note: Adding to the index->data dictionary is handed through the 'OnListChanged' event subscription.
 
-                _serverPlayerData.Add(ServerPlayerGameData.NewDataForPlayer(playerCharacter, PlayerData.Count - 1));
+                // Create the server data.
+                ServerPlayerGameData data = ServerPlayerGameData.NewDataForPlayer(playerCharacter, PlayerData.Count - 1);
+
+                // Cache the server data.
+                _serverPlayerData.Add(data);
+                _characterToDataIndex.Add(playerCharacter, data);
             }
 
         }
@@ -68,14 +75,21 @@ namespace Gameplay.GameState
             PlayerData.Add(new PlayerGameData(-1));
             // Note: Adding to the index->data dictionary is handed through the 'OnListChanged' event subscription.
 
-            _serverPlayerData.Add(ServerPlayerGameData.NewDataForNPC(npcCharacter, PlayerData.Count - 1));
+            // Create the server data.
+            ServerPlayerGameData data = ServerPlayerGameData.NewDataForNPC(npcCharacter, PlayerData.Count - 1);
+
+            // Cache the server data.
+            _serverPlayerData.Add(data);
+            _characterToDataIndex.Add(npcCharacter, data);
         }
 
 
         // Server-only.
         public override void OnPlayerLeft(ulong clientId)
         {
-            for(int i = 0; i < _serverPlayerData.Count; ++i)
+            StartCoroutine(RemoveNullKeysAfterFrame());
+
+            for (int i = 0; i < _serverPlayerData.Count; ++i)
             {
                 if (!_serverPlayerData[i].IsPlayer)
                     continue;   // Not a player, so can't have been disconnected.
@@ -88,6 +102,7 @@ namespace Gameplay.GameState
                 return;
             }
         }
+        private IEnumerator RemoveNullKeysAfterFrame() { yield return null; _characterToDataIndex.RemoveNullKeys(); }
         // Server-only.
         public override void OnPlayerReconnected(int playerIndex, ServerCharacter newServerCharacter)
         {
@@ -101,6 +116,7 @@ namespace Gameplay.GameState
 
                 // We found the desired player. Update their cached data where neccessary.
                 _serverPlayerData[i].OnCorrepsondingPlayerRejoined(newServerCharacter);
+                _characterToDataIndex.Add(newServerCharacter, _serverPlayerData[i]);
                 return;
             }
         }
@@ -200,41 +216,33 @@ namespace Gameplay.GameState
 
         public override void IncrementScore(ServerCharacter serverCharacter)
         {
-            if (serverCharacter.GetComponent<Gameplay.GameplayObjects.Players.Player>() == null)
-                return; // We cannot currently increase the score of non-players.
-            
+            // Find our character's PlayerData NetworkList index.
+            int listIndex = _characterToDataIndex[serverCharacter].PlayerGameDataListIndex;
 
-            // Increment the score of the corresponding player data.
-            // Retrieve the character's PlayerID.
-            int playerIndex = GetPlayerIndex(serverCharacter.OwnerClientId);
-
-            // Retrieve the Team Data for editing.
-            int index = GetListIndexForPlayerIndex(playerIndex);
-            PlayerGameData playerData = PlayerData[index];
+            // Retrieve our PlayerGameData (Required as it's a struct, so we need to set externally then re-add to the list).
+            PlayerGameData data = PlayerData[listIndex];
 
             // Increment Score.
-            playerData.Score += 1;
+            data.Kills += 1;
 
             // Apply our changes.
-            PlayerData[index] = playerData;
-            Debug.Log($"Player '{serverCharacter.CharacterName}' - New Score: {PlayerData[index].Score}");
+            PlayerData[listIndex] = data;
+            Debug.Log($"Player '{serverCharacter.CharacterName}' - New Kills: {PlayerData[listIndex].Kills}");
         }
-        /// <summary>
-        ///     Try to get the PlayerData index of the PlayerGameData with the passed PlayerIndex.
-        /// </summary>
-        private int GetListIndexForPlayerIndex(int playerIndex)
+        public void OnCharacterDied(ServerCharacter serverCharacter)
         {
-            if (_playerIndexToDataDict.ContainsKey(playerIndex))
-            {
-                int index = _playerIndexToDataDict[playerIndex].ListIndex;
+            // Find our character's PlayerData NetworkList index.
+            int listIndex = _characterToDataIndex[serverCharacter].PlayerGameDataListIndex;
 
-                if (index == -1)
-                    throw new System.Exception($"The Cached Player with Index {playerIndex} has an invalid ListPosition value");
+            // Retrieve our PlayerGameData (Required as it's a struct, so we need to set externally then re-add to the list).
+            PlayerGameData data = PlayerData[listIndex];
 
-                return index;
-            }
+            // Increment our Deaths.
+            data.Deaths += 1;
 
-            throw new System.Exception($"No Player Cached with Index {playerIndex}");
+            // Apply our changes.
+            PlayerData[listIndex] = data;
+            Debug.Log($"Player '{serverCharacter.CharacterName}' - New Deaths: {PlayerData[listIndex].Deaths}");
         }
 
 
@@ -273,7 +281,8 @@ namespace Gameplay.GameState
 
             public FFAPostGameData ToPostGameData(PlayerGameData playerGameData) => new FFAPostGameData(
                 playerIndex:        playerGameData.PlayerIndex,
-                score:              playerGameData.Score,
+                kills:              playerGameData.Kills,
+                deaths:             playerGameData.Deaths,
                 name:               ServerCharacter.FixedCharacterName,
                 frameIndex:         ServerCharacter.BuildDataReference.ActiveFrameIndex,
                 slottableIndicies:  ServerCharacter.BuildDataReference.ActiveSlottableIndicies
@@ -282,7 +291,8 @@ namespace Gameplay.GameState
         public struct PlayerGameData : INetworkSerializable, IEquatable<PlayerGameData>
         {
             public int PlayerIndex;
-            public int Score;
+            public int Kills;
+            public int Deaths;
 
             [field: System.NonSerialized] public int ListIndex { get; set; } // A non-serialized, non-synced int representing this data's position in the PlayerData array. Used on the server for easier retrieval of data.
 
@@ -291,7 +301,8 @@ namespace Gameplay.GameState
             public PlayerGameData(int playerIndex, int listIndex)
             {
                 this.PlayerIndex = playerIndex;
-                this.Score = 0;
+                this.Kills = 0;
+                this.Deaths = 0;
                 this.ListIndex = listIndex;
             }
 
@@ -299,9 +310,12 @@ namespace Gameplay.GameState
             public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
             {
                 serializer.SerializeValue(ref PlayerIndex);
-                serializer.SerializeValue(ref Score);
+                serializer.SerializeValue(ref Kills);
+                serializer.SerializeValue(ref Deaths);
             }
-            public bool Equals(PlayerGameData other) => (this.PlayerIndex, this.Score) == (other.PlayerIndex, other.Score);
+            public bool Equals(PlayerGameData othr)
+                => (this.PlayerIndex, this.Kills, this.Deaths)
+                == (othr.PlayerIndex, othr.Kills, othr.Deaths);
         }
     }
 }

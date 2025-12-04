@@ -26,13 +26,18 @@ namespace Gameplay.GameState
 
 
         [SerializeField] private NetcodeHooks _netcodeHooks;
-        [SerializeField] private NetworkGameplayState _networkGameplayState;
+        [SerializeField] private NetworkFFAGameplayState _networkGameplayState;
 
 
         [SerializeField] private float _gameTime = 60.0f;
         [SerializeField] private float _matchTimeSyncInterval = 15.0f;
         private float _nextSyncTime;
         private float _gameTimeRemaining;
+
+
+        [Space(10)]
+        [Tooltip("If true, then Score = Kills - Deaths. If false, Score = Kills.")]
+        [SerializeField] private bool _deathsCountAsLostPoints = false;
 
 
         [Header("Player Spawning")]
@@ -130,18 +135,25 @@ namespace Gameplay.GameState
                 return; // We're only wanting to process death events.
 
 
-            // If the inflicter was a ServerCharacter, give their team a point.
+            // If the inflicter was a ServerCharacter, increment their kills.
             if (message.HasInflicter)
             {
                 NetworkObject inflicterNetworkObject = NetworkManager.Singleton.SpawnManager.SpawnedObjects[message.InflicterObjectId];
-                if (inflicterNetworkObject.TryGetComponent<ServerCharacter>(out ServerCharacter serverCharacter))
+                if (inflicterNetworkObject.TryGetComponent<ServerCharacter>(out ServerCharacter inflicterServerCharacter))
                 {
-                    _networkGameplayState.IncrementScore(serverCharacter);
+                    _networkGameplayState.IncrementScore(inflicterServerCharacter);
                 }
             }
 
-            // If the origin was a Player, mark them for respawn.
+            // Add a Death to the character who died.
             NetworkObject originCharacterNetworkObject = NetworkManager.Singleton.SpawnManager.SpawnedObjects[message.OriginCharacterObjectId];
+            if (originCharacterNetworkObject.TryGetComponent<ServerCharacter>(out ServerCharacter originServerCharacter))
+            {
+                _networkGameplayState.OnCharacterDied(originServerCharacter);
+            }
+
+
+            // If the origin character was a Player, mark them for respawn.
             if (originCharacterNetworkObject.TryGetComponent<Player>(out Player player))
             {
                 RevivePlayer(player);
@@ -205,6 +217,7 @@ namespace Gameplay.GameState
         {
             // Save data to the PersistentGameState for retrieval in the Post-Game State.
             _networkGameplayState.SavePersistentData(ref _persistentGameState);
+            FFAPostGameData.CountDeathsAsNegativePoints = _deathsCountAsLostPoints; // Find a better place to put this.
 
             Debug.LogWarning("To Implement - Load PostGame Scene");
             NetworkManager.Singleton.SceneManager.LoadScene("PostGameScene-FFA", LoadSceneMode.Single);

@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -127,5 +129,23 @@ public static class ScrollRectExtensions
         }
 
         return new Rect(toLocalCorners[0].x, toLocalCorners[0].y, toLocalCorners[2].x - toLocalCorners[1].x, toLocalCorners[1].y - toLocalCorners[0].y);
+    }
+}
+
+
+
+public static class DictionaryExtensions
+{
+    public static bool HasNullKey<TKey, TValue>(this Dictionary<TKey, TValue> dictionary) => dictionary.Keys.Any(t => t.Equals(null));
+
+    public static void RemoveNullKeys<TKey, TValue>(this Dictionary<TKey, TValue> dictionary)
+    {
+        if (!dictionary.HasNullKey())
+            return;
+
+        // Remove all null keys from the dictionary.
+        dictionary = dictionary
+            .Where(kvp => !kvp.Key.Equals(null))
+            .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
     }
 }

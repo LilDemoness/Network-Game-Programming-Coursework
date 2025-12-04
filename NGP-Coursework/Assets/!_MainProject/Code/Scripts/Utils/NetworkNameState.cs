@@ -9,8 +9,8 @@ namespace Utils
     /// </summary>
     public class NetworkNameState : NetworkBehaviour
     {
-        [HideInInspector]
-        public NetworkVariable<FixedPlayerName> Name = new NetworkVariable<FixedPlayerName>();
+        [ReadOnly]
+        public NetworkVariable<FixedPlayerName> Name { get; set; } = new NetworkVariable<FixedPlayerName>();
     }
 
     /// <summary>

@@ -36,7 +36,7 @@ namespace Gameplay.UI
 
             // Is the local player.
             // Set text.
-            _currentScoreText.text = changeEvent.Value.Score.ToString();
+            _currentScoreText.text = changeEvent.Value.Kills.ToString();
         }
     }
 }

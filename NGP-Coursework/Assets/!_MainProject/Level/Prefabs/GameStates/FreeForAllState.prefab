@@ -80,6 +80,7 @@ MonoBehaviour:
   _networkGameplayState: {fileID: 7292792879602085089}
   _gameTime: 60
   _matchTimeSyncInterval: 15
+  _deathsCountAsLostPoints: 0
   _playerPrefab: {fileID: 801874179514615870, guid: 0f3d7e267c592ed448e9668caa3e67bf, type: 3}
   _playerSpawnPoints:
   - {fileID: 0}
