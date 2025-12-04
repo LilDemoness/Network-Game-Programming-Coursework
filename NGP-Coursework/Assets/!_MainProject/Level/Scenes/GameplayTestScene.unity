@@ -3689,6 +3689,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
+  _persistentPlayerCollection: {fileID: 11400000, guid: 9596a55ab7773b941bfe4be909d1f13d, type: 2}
   _currentScoreText: {fileID: 2025374891}
   _gameplayState: {fileID: 1150197779574916155}
 --- !u!114 &1139196079
@@ -7250,13 +7251,13 @@ PrefabInstance:
   m_SourcePrefab: {fileID: 100100000, guid: 2383fd6616e43f54997ecfeb995632f7, type: 3}
 --- !u!114 &1150197779574916155 stripped
 MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 5094925492656260139, guid: 2383fd6616e43f54997ecfeb995632f7, type: 3}
+  m_CorrespondingSourceObject: {fileID: 7292792879602085089, guid: 2383fd6616e43f54997ecfeb995632f7, type: 3}
   m_PrefabInstance: {fileID: 1150197779574916154}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 916dea42d9fd3bf468967a0789f6d9fb, type: 3}
+  m_Script: {fileID: 11500000, guid: 94509dd5bd4fee1409fcf78dd3232424, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1001 &4440947496919816648

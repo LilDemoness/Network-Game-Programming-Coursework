@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 5981604830039942399}
   - component: {fileID: 5878340715548181255}
   - component: {fileID: 3377346102218951194}
-  - component: {fileID: 2582697839975618118}
+  - component: {fileID: 2996313721635033969}
   m_Layer: 0
   m_Name: PostGameState
   m_TagString: Untagged
@@ -47,7 +47,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 127832815
+  GlobalObjectIdHash: 3250722920
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -77,7 +77,7 @@ MonoBehaviour:
   autoRun: 1
   autoInjectGameObjects: []
   _netcodeHooks: {fileID: 3377346102218951194}
-  <NetworkPostGame>k__BackingField: {fileID: 2582697839975618118}
+  <NetworkPostGame>k__BackingField: {fileID: 2996313721635033969}
 --- !u!114 &3377346102218951194
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -91,7 +91,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
---- !u!114 &2582697839975618118
+--- !u!114 &2996313721635033969
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -100,7 +100,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 9086076007265251720}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 83fa8d634aed0d14182123e247b84ebe, type: 3}
+  m_Script: {fileID: 11500000, guid: a466a1e671bc3964c88f2fa8048423db, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1

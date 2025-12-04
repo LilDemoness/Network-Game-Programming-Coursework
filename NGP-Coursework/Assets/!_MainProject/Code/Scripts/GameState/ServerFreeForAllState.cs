@@ -19,7 +19,7 @@ namespace Gameplay.GameState
     /// <summary>
     ///     Server specialisation of the logic for a Free-For-All Game Match.
     /// </summary>
-    [RequireComponent(typeof(NetcodeHooks), typeof(NetworkTeamlessGameplayState))]
+    [RequireComponent(typeof(NetcodeHooks), typeof(NetworkFFAGameplayState))]
     public class ServerFreeForAllState : GameStateBehaviour
     {
         public override GameState ActiveState => GameState.InGameplay;
@@ -90,6 +90,8 @@ namespace Gameplay.GameState
             NetworkManager.Singleton.OnConnectionEvent += OnConnectionEvent;
             NetworkManager.Singleton.SceneManager.OnLoadEventCompleted += OnLoadEventCompleted;
             NetworkManager.Singleton.SceneManager.OnSynchronizeComplete += OnSynchronizeComplete;
+
+            SessionManager<SessionPlayerData>.Instance.OnSessionStarted();
         }
         private void OnNetworkDespawn()
         {
@@ -117,7 +119,6 @@ namespace Gameplay.GameState
                 _nextSyncTime += _matchTimeSyncInterval;
             }
         }
-
 
 
 
@@ -154,7 +155,8 @@ namespace Gameplay.GameState
             if (connectionEventData.ClientId == networkManager.LocalClientId)
                 return; // The host has disconnected, but the server will be getting shutdown so we don't need to do anything.
 
-            // A client has disconnected. In a limited-life mode, we would check for a Game Over here (After a frame to allow for the client's player to be removed/despawned).
+            // A client has disconnected. In a limited-life mode, we would also check for a Game Over here (After a frame to allow for the client's player to be removed/despawned).
+            _networkGameplayState.OnPlayerLeft(connectionEventData.ClientId);
         }
         private void OnLoadEventCompleted(string sceneName, LoadSceneMode loadSceneMode, List<ulong> clientsCompleted, List<ulong> clientsTimedOut) // Triggered once all clients have finished loading a scene.
         {
@@ -163,11 +165,16 @@ namespace Gameplay.GameState
 
             // Spawn all players.
             _initialSpawnsComplete = true;
+            ServerCharacter[] playerCharacters = new ServerCharacter[NetworkManager.Singleton.ConnectedClients.Count];
+            int index = 0;
             foreach (var kvp in NetworkManager.Singleton.ConnectedClients)
             {
-                SpawnPlayer(kvp.Key, false);
+                playerCharacters[index] = SpawnPlayer(kvp.Key, false);
+                ++index;
             }
-            StartGame();
+
+            // Start the game.
+            StartGame(playerCharacters);
         }
         private void OnSynchronizeComplete(ulong clientId)  // Triggered once a newly approved client has finished synchonizing the current game session.
         {
@@ -178,16 +185,16 @@ namespace Gameplay.GameState
             //    return;   // This client already exists within the game.
 
             // A client has joined after the initial spawn.
-            SpawnPlayer(clientId, true);
-            _networkGameplayState.AddPlayer(clientId);
+            ServerCharacter playerCharacter = SpawnPlayer(clientId, true);
+            _networkGameplayState.AddPlayer(playerCharacter);
             _networkGameplayState.SyncGameTime(_gameTimeRemaining);
         }
 
 
         
-        private void StartGame()
+        private void StartGame(ServerCharacter[] playerCharacters)
         {
-            _networkGameplayState.Initialise(NetworkManager.Singleton.ConnectedClients.Keys.ToArray());
+            _networkGameplayState.Initialise(playerCharacters, null);
 
             // Time limits.
             _gameTimeRemaining = _gameTime;
@@ -200,11 +207,11 @@ namespace Gameplay.GameState
             _networkGameplayState.SavePersistentData(ref _persistentGameState);
 
             Debug.LogWarning("To Implement - Load PostGame Scene");
-            NetworkManager.Singleton.SceneManager.LoadScene("PostGameScene", LoadSceneMode.Single);
+            NetworkManager.Singleton.SceneManager.LoadScene("PostGameScene-FFA", LoadSceneMode.Single);
         }
 
 
-        private void SpawnPlayer(ulong clientId, bool isLateJoin)
+        private ServerCharacter SpawnPlayer(ulong clientId, bool isLateJoin)
         {
             _initialSpawnPointsList ??= new List<Transform>(_playerSpawnPoints);
 
@@ -256,6 +263,7 @@ namespace Gameplay.GameState
 
             // Spawn the Player Character.
             newPlayer.SpawnWithOwnership(clientId, destroyWithScene: true);
+            return newPlayerServerCharacter;
         }
 
 

@@ -11,14 +11,14 @@ namespace Gameplay.GameState
     /// <summary>
     ///     Server specialisation of the Post-Game Lobby game state.
     /// </summary>
-    [RequireComponent(typeof(NetcodeHooks), typeof(NetworkPostGame))]
+    [RequireComponent(typeof(NetcodeHooks), typeof(NetworkPostFFAGame))]
     public class ServerPostGameState : GameStateBehaviour
     {
         public override GameState ActiveState => GameState.PostGameScreen;
 
 
         [SerializeField] private NetcodeHooks _netcodeHooks;
-        [field:SerializeField] public NetworkPostGame NetworkPostGame { get; private set;}
+        [field:SerializeField] public NetworkPostFFAGame NetworkPostGame { get; private set;}
 
 
         [Inject]

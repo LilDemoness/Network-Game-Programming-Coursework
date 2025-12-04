@@ -56,6 +56,7 @@ namespace Gameplay.GameplayObjects.Players
                     SessionPlayerData playerData = sessionPlayerData.Value;
 
                     _networkNameState.Name.Value = playerData.PlayerName;
+                    PlayerNumber = playerData.PlayerNumber;
                     TeamIndex = playerData.TeamIndex;
                     // Cache Build Data?
                 }
@@ -105,6 +106,7 @@ namespace Gameplay.GameplayObjects.Players
                 SessionPlayerData playerData = sessionPlayerData.Value;
 
                 playerData.PlayerName = _networkNameState.Name.Value;
+                playerData.PlayerNumber = PlayerNumber;
                 playerData.TeamIndex = TeamIndex;
                 // Build Data?
 
@@ -116,7 +118,6 @@ namespace Gameplay.GameplayObjects.Players
 
         private void OnBuildChanged(BuildData buildData)
         {
-            Debug.Log("Build Changed: " + buildData.ActiveSlottableIndicies[0]);
             if (IsLocalPlayer)
                 OnLocalPlayerBuildChanged?.Invoke(buildData);
 

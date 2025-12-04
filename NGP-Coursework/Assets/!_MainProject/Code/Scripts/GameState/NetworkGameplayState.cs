@@ -25,8 +25,14 @@ namespace Gameplay.GameState
         }
 
 
-        public abstract void Initialise(ulong[] clientIds);
-        public abstract void AddPlayer(ulong clientId);
+        public abstract void Initialise(ServerCharacter[] playerCharacters, ServerCharacter[] npcCharacters);
+        public abstract void AddPlayer(ServerCharacter playerCharacter);
+        public abstract void AddNPC(ServerCharacter npcCharacter);
+
+
+        public abstract void OnPlayerLeft(ulong clientId);
+        public void OnPlayerReconnected(ulong clientId, ServerCharacter newServerCharacter) => OnPlayerReconnected(GetPlayerIndex(clientId), newServerCharacter);
+        public abstract void OnPlayerReconnected(int playerIndex, ServerCharacter newServerCharacter);
 
 
         protected int GetPlayerIndex(ulong clientId)
@@ -36,7 +42,6 @@ namespace Gameplay.GameState
 
             return persistentPlayer.PlayerNumber;
         }
-
         protected int GetTeamIndex(ulong clientId)
         {
             if (!_persistentPlayerCollection.TryGetPlayer(clientId, out PersistentPlayer persistentPlayer))

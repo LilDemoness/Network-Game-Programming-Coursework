@@ -1,3 +1,5 @@
+using Gameplay.GameplayObjects;
+using Gameplay.GameplayObjects.Players;
 using Gameplay.GameState;
 using TMPro;
 using Unity.Netcode;
@@ -10,8 +12,10 @@ namespace Gameplay.UI
     /// </summary>
     public class LocalPlayerScoreUI : NetworkBehaviour
     {
+        [SerializeField] private PersistentPlayerRuntimeCollection _persistentPlayerCollection;
+
         [SerializeField] private TextMeshProUGUI _currentScoreText;
-        [SerializeField] private NetworkTeamlessGameplayState _gameplayState;
+        [SerializeField] private NetworkFFAGameplayState _gameplayState;
 
 
         public override void OnNetworkSpawn()
@@ -23,11 +27,15 @@ namespace Gameplay.UI
             _gameplayState.PlayerData.OnListChanged -= PlayerData_OnListChanged;
         }
 
-        private void PlayerData_OnListChanged(NetworkListEvent<NetworkTeamlessGameplayState.PlayerGameData> changeEvent)
+        private void PlayerData_OnListChanged(NetworkListEvent<NetworkFFAGameplayState.PlayerGameData> changeEvent)
         {
-            if (changeEvent.Value.ClientId != NetworkManager.Singleton.LocalClientId)
-                return;
+            if (!_persistentPlayerCollection.TryGetPlayer(changeEvent.Value.PlayerIndex, out PersistentPlayer persistentPlayer))
+                return; // To PersistentPlayer (Not a Player).
+            if (persistentPlayer.OwnerClientId != NetworkManager.Singleton.LocalClientId)
+                return; // Not the local player.
 
+            // Is the local player.
+            // Set text.
             _currentScoreText.text = changeEvent.Value.Score.ToString();
         }
     }

@@ -18,7 +18,7 @@ EditorBuildSettings:
     path: Assets/!_MainProject/Level/Scenes/GameplayTestScene.unity
     guid: 27a6a203d2ddf774b9e10ffe6bb3d0cc
   - enabled: 1
-    path: Assets/!_MainProject/Level/Scenes/PostGameScene.unity
+    path: Assets/!_MainProject/Level/Scenes/PostGameScene-FFA.unity
     guid: 3f5107fc0f014134bb2b83cf64ba3500
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 832195adfe757804ab6ebd15233eab2e, type: 3}

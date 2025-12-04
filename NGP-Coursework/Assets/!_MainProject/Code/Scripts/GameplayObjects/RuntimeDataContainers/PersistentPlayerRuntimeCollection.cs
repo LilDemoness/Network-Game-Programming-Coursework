@@ -26,5 +26,24 @@ namespace Gameplay.GameplayObjects
             persistentPlayer = null;
             return false;
         }
+        public bool TryGetPlayer(int playerIndex, out PersistentPlayer persistentPlayer)
+        {
+            if (playerIndex != -1)  // Player Index '-1' is an unset value.
+            {
+                for (int i = 0; i < Items.Count; ++i)
+                {
+                    if (Items[i].PlayerNumber == playerIndex)
+                    {
+                        // Found the matching player.
+                        persistentPlayer = Items[i];
+                        return true;
+                    }
+                }
+            }
+
+            // No PersistentPlayers with the requested Player Index.
+            persistentPlayer = null;
+            return false;
+        }
     }
 }

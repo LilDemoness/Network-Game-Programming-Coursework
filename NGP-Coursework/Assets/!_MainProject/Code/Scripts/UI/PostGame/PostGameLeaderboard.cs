@@ -16,7 +16,7 @@ namespace UI.PostGame
 
 
         //[Inject]
-        [SerializeField] private NetworkPostGame _networkPostGame;
+        [SerializeField] private NetworkPostFFAGame _networkPostGame;
 
 
         private void Awake()
@@ -42,9 +42,9 @@ namespace UI.PostGame
             */
 
             string displayString = "";
-            for(int i = 0; i < _networkPostGame.PostGameData.Count; ++i)
+            for(int i = 0; i < _networkPostGame.PostGameData.Length; ++i)
             {
-                displayString += $"{_networkPostGame.PostGameData[i].Index}: {_networkPostGame.PostGameData[i].Score}\n";
+                displayString += $"{_networkPostGame.PostGameData[i].PlayerIndex}: {_networkPostGame.PostGameData[i].Score}\n";
             }
 
             _tempText.text = displayString;
