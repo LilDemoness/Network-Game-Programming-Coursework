@@ -220,7 +220,7 @@ namespace Gameplay.GameState
                 if (playerNetworkObject != null && playerNetworkObject.TryGetComponent<PersistentPlayer>(out PersistentPlayer persistentPlayer))
                 {
                     // Pass required information to the PersistentPlayer.
-                    persistentPlayer.PlayerNumber = NetworkLobbyState.SessionPlayers[i].PlayerNumber;
+                    persistentPlayer.PlayerNumber.Value = NetworkLobbyState.SessionPlayers[i].PlayerNumber;
                     //persistentPlayer.NetworkBuildState.BuildData.Value = NetworkLobbyState.SessionPlayers[i].BuildData;
                 }
             }

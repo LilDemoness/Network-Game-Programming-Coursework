@@ -40,14 +40,14 @@ namespace Gameplay.GameState
             if (!_persistentPlayerCollection.TryGetPlayer(clientId, out PersistentPlayer persistentPlayer))
                 throw new System.Exception($"No PersistentPlayer found for Client {clientId}");
 
-            return persistentPlayer.PlayerNumber;
+            return persistentPlayer.PlayerNumber.Value;
         }
         protected int GetTeamIndex(ulong clientId)
         {
             if (!_persistentPlayerCollection.TryGetPlayer(clientId, out PersistentPlayer persistentPlayer))
                 throw new System.Exception($"No PersistentPlayer found for Client {clientId}");
 
-            return persistentPlayer.TeamIndex;
+            return persistentPlayer.TeamIndex.Value;
         }
 
 

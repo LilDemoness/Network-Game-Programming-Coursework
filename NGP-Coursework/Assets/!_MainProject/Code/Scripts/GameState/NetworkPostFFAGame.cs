@@ -64,7 +64,8 @@ namespace Gameplay.GameState
             if (!_persistentPlayerCollection.TryGetPlayer(NetworkManager.Singleton.LocalClientId, out PersistentPlayer persistentPlayer))
                 throw new System.Exception($"No PersistentPlayer found for this Client (Id: {NetworkManager.Singleton.LocalClientId})");
 
-            int playerIndex = persistentPlayer.PlayerNumber;
+            int playerIndex = persistentPlayer.PlayerNumber.Value;
+            Debug.Log(playerIndex);
             ThisClientDataIndex = -1;
             for(int i = 0; i < PostGameData.Length; ++i)
             {

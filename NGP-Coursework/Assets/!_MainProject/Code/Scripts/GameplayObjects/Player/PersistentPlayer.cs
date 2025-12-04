@@ -23,8 +23,8 @@ namespace Gameplay.GameplayObjects.Players
         [SerializeField] private NetworkNameState _networkNameState;
         [SerializeField] private NetworkBuildState _networkBuildState;
 
-        public int PlayerNumber { get; set; }
-        public int TeamIndex { get; set; }
+        public NetworkVariable<int> PlayerNumber { get; } = new NetworkVariable<int>();
+        public NetworkVariable<int> TeamIndex { get; } = new NetworkVariable<int>();
 
 
         #region Public Accessors
@@ -56,8 +56,8 @@ namespace Gameplay.GameplayObjects.Players
                     SessionPlayerData playerData = sessionPlayerData.Value;
 
                     _networkNameState.Name.Value = playerData.PlayerName;
-                    PlayerNumber = playerData.PlayerNumber;
-                    TeamIndex = playerData.TeamIndex;
+                    PlayerNumber.Value = playerData.PlayerNumber;
+                    TeamIndex.Value = playerData.TeamIndex;
                     // Cache Build Data?
                 }
             }
@@ -106,8 +106,8 @@ namespace Gameplay.GameplayObjects.Players
                 SessionPlayerData playerData = sessionPlayerData.Value;
 
                 playerData.PlayerName = _networkNameState.Name.Value;
-                playerData.PlayerNumber = PlayerNumber;
-                playerData.TeamIndex = TeamIndex;
+                playerData.PlayerNumber = PlayerNumber.Value;
+                playerData.TeamIndex = TeamIndex.Value;
                 // Build Data?
 
                 // Update set value.

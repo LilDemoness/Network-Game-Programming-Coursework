@@ -32,7 +32,7 @@ namespace Gameplay.GameplayObjects
             {
                 for (int i = 0; i < Items.Count; ++i)
                 {
-                    if (Items[i].PlayerNumber == playerIndex)
+                    if (Items[i].PlayerNumber.Value == playerIndex)
                     {
                         // Found the matching player.
                         persistentPlayer = Items[i];
