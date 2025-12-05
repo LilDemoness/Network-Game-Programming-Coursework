@@ -12,14 +12,16 @@ namespace UI.PostGame
         [SerializeField] private PostGameLeaderboardRow _leaderboardRowPrefab;
         private List<PostGameLeaderboardRow> _leaderboardRowInstances = new List<PostGameLeaderboardRow>();
 
-        //[Inject]
-        [SerializeField] private NetworkPostGame_FFA _networkPostGame;
+        // Injected via DI.
+        private NetworkPostGame_FFA _networkPostGame;
 
-
-        private void Awake()
+        [Inject]
+        private void InjectDependenciesAndSubscribe(NetworkPostGame_FFA networkPostGame)
         {
+            this._networkPostGame = networkPostGame;
             _networkPostGame.OnScoresSet += InitialiseUI;
         }
+
         private void OnDestroy()
         {
             if (_networkPostGame != null)

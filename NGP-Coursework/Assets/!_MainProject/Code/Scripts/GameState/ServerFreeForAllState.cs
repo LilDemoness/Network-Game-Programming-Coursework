@@ -19,7 +19,7 @@ namespace Gameplay.GameState
     /// <summary>
     ///     Server specialisation of the logic for a Free-For-All Game Match.
     /// </summary>
-    [RequireComponent(typeof(NetcodeHooks), typeof(NetworkFFAGameplayState))]
+    [RequireComponent(typeof(NetcodeHooks), typeof(NetworkFFAGameplayState), typeof(NetworkTimer))]
     public class ServerFreeForAllState : GameStateBehaviour
     {
         public override GameState ActiveState => GameState.InGameplay;
@@ -27,12 +27,12 @@ namespace Gameplay.GameState
 
         [SerializeField] private NetcodeHooks _netcodeHooks;
         [SerializeField] private NetworkFFAGameplayState _networkGameplayState;
+        [SerializeField] private NetworkTimer _networkTimer;
 
 
         [SerializeField] private float _gameTime = 60.0f;
         [SerializeField] private float _matchTimeSyncInterval = 15.0f;
         private float _nextSyncTime;
-        private float _gameTimeRemaining;
 
 
         [Space(10)]
@@ -65,6 +65,7 @@ namespace Gameplay.GameState
         {
             base.Configure(builder);
             builder.RegisterComponent<NetworkGameplayState>(_networkGameplayState);
+            builder.RegisterComponent<NetworkTimer>(_networkTimer);
         }
 
 
@@ -73,12 +74,16 @@ namespace Gameplay.GameState
             base.Awake();
             _netcodeHooks.OnNetworkSpawnHook += OnNetworkSpawn;
             _netcodeHooks.OnNetworkDespawnHook += OnNetworkDespawn;
+
+            _networkTimer.OnTimerElapsed += EndGame;
         }
         protected override void OnDestroy()
         {
             base.OnDestroy();
             _netcodeHooks.OnNetworkSpawnHook -= OnNetworkSpawn;
             _netcodeHooks.OnNetworkDespawnHook -= OnNetworkDespawn;
+
+            _networkTimer.OnTimerElapsed -= EndGame;
         }
 
         private void OnNetworkSpawn()
@@ -113,14 +118,9 @@ namespace Gameplay.GameState
             if (!_initialSpawnsComplete)
                 return;
 
-            _gameTimeRemaining -= Time.deltaTime;
-            if (_gameTimeRemaining <= 0.0f)
-            {
-                EndGame();
-            }
             if(_nextSyncTime <= Time.time)
             {
-                _networkGameplayState.SyncGameTime(_gameTimeRemaining);
+                _networkTimer.SyncGameTime();
                 _nextSyncTime += _matchTimeSyncInterval;
             }
         }
@@ -199,7 +199,7 @@ namespace Gameplay.GameState
             // A client has joined after the initial spawn.
             ServerCharacter playerCharacter = SpawnPlayer(clientId, true);
             _networkGameplayState.AddPlayer(playerCharacter);
-            _networkGameplayState.SyncGameTime(_gameTimeRemaining);
+            _networkTimer.SyncGameTime();
         }
 
 
@@ -209,9 +209,7 @@ namespace Gameplay.GameState
             _networkGameplayState.Initialise(playerCharacters, null);
 
             // Time limits.
-            _gameTimeRemaining = _gameTime;
-
-            _networkGameplayState.SyncGameTime(_gameTimeRemaining);
+            _networkTimer.StartTimer(_gameTime);
         }
         private void EndGame()
         {

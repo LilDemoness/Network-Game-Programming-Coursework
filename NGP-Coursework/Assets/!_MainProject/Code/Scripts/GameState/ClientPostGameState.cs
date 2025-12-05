@@ -1,4 +1,5 @@
 using UnityEngine;
+using Utils;
 using VContainer;
 using VContainer.Unity;
 
@@ -23,6 +24,8 @@ namespace Gameplay.GameState
         protected override void Configure(IContainerBuilder builder)
         {
             builder.RegisterComponent(_networkPostGame);
+            if (this.TryGetComponent<NetworkTimer>(out NetworkTimer networkTimer))
+                builder.RegisterComponent(networkTimer);
             base.Configure(builder);
         }
 

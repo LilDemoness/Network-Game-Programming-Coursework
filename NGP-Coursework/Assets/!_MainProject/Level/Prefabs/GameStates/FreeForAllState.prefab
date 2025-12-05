@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 3671268573212348019}
   - component: {fileID: 2293472982834247301}
   - component: {fileID: 7292792879602085089}
+  - component: {fileID: 1690924763756929910}
   m_Layer: 0
   m_Name: FreeForAllState
   m_TagString: Untagged
@@ -78,6 +79,7 @@ MonoBehaviour:
   autoInjectGameObjects: []
   _netcodeHooks: {fileID: 2293472982834247301}
   _networkGameplayState: {fileID: 7292792879602085089}
+  _networkTimer: {fileID: 1690924763756929910}
   _gameTime: 60
   _matchTimeSyncInterval: 15
   _deathsCountAsLostPoints: 0
@@ -115,3 +117,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
   _persistentPlayerCollection: {fileID: 11400000, guid: 9596a55ab7773b941bfe4be909d1f13d, type: 2}
+--- !u!114 &1690924763756929910
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1688527563463541721}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d701866e16a515c42ae81ef6312f0fe7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1

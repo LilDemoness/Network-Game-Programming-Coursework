@@ -2,6 +2,7 @@ using Gameplay.GameplayObjects.Character.Customisation;
 using Gameplay.GameplayObjects.Character.Customisation.Data;
 using Gameplay.GameState;
 using UnityEngine;
+using VContainer;
 
 namespace UI.PostGame
 {
@@ -11,7 +12,6 @@ namespace UI.PostGame
     public class PostGamePodium : MonoBehaviour
     {
         private FFAPostGameData[] _postGameData;
-        [SerializeField] private NetworkPostGame_FFA _networkPostFFAState;
 
 
         [Header("Podium Models")]
@@ -29,23 +29,19 @@ namespace UI.PostGame
 
 
 
-        private void Awake()
+        // Injected via DI.
+        private NetworkPostGame_FFA _networkPostFFAState;
+        [Inject]
+        private void InjectDependenciesAndSubscribe(NetworkPostGame_FFA networkPostFFAState)
         {
+            this._networkPostFFAState = networkPostFFAState;
             _networkPostFFAState.OnScoresSet += OnGameComplete;
         }
+
         private void OnDestroy()
         {
-            _networkPostFFAState.OnScoresSet -= OnGameComplete;
-        }
-
-
-        public void ShowPodium()
-        {
-            _uiContainerCanvas.enabled = true;
-        }
-        public void HidePodium()
-        {
-            _uiContainerCanvas.enabled = false;
+            if (_networkPostFFAState != null)
+                _networkPostFFAState.OnScoresSet -= OnGameComplete;
         }
 
 

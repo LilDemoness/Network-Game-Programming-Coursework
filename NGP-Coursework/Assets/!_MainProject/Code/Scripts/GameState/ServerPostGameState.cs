@@ -13,7 +13,7 @@ namespace Gameplay.GameState
     /// <summary>
     ///     Server specialisation of the Post-Game Lobby game state.
     /// </summary>
-    [RequireComponent(typeof(NetcodeHooks), typeof(NetworkPostGame_FFA))]
+    [RequireComponent(typeof(NetcodeHooks), typeof(NetworkPostGame_FFA), typeof(NetworkTimer))]
     public class ServerPostGameState : GameStateBehaviour
     {
         public override GameState ActiveState => GameState.PostGameScreen;
@@ -21,12 +21,11 @@ namespace Gameplay.GameState
 
         [SerializeField] private NetcodeHooks _netcodeHooks;
         [field:SerializeField] public NetworkPostGame_FFA NetworkPostGame { get; private set;}
+        [SerializeField] private NetworkTimer _networkTimer;
 
 
         [Header("Progressing to the Next Scene")]
-        [SerializeField] private float _timeTillNextScene = 2.0f;
-        private float _remainingTime;
-        private bool _hasHandledMatchTime;
+        [SerializeField] private float _timeTillNextScene = 20.0f;
 
 
         [Inject]
@@ -40,6 +39,7 @@ namespace Gameplay.GameState
             base.Awake();
 
             _netcodeHooks.OnNetworkSpawnHook += OnNetworkSpawn;
+            _networkTimer.OnTimerElapsed += ReturnToLobbyTimerElapsed;
         }
         protected override void OnDestroy()
         {
@@ -50,6 +50,8 @@ namespace Gameplay.GameState
 
             if (_netcodeHooks != null)
                 _netcodeHooks.OnNetworkSpawnHook -= OnNetworkSpawn;
+            if (_networkTimer != null)
+                _networkTimer.OnTimerElapsed -= ReturnToLobbyTimerElapsed;
         }
 
 
@@ -64,23 +66,9 @@ namespace Gameplay.GameState
             // Prepare for the next game.
             SessionManager<SessionPlayerData>.Instance.OnSessionEnded();    // Clears data from removed players.
 
-            _remainingTime = _timeTillNextScene;
-            _hasHandledMatchTime = false;
+            _networkTimer.StartTimer(_timeTillNextScene);
         }
 
-
-        private void Update()
-        {
-            _remainingTime -= Time.deltaTime;
-
-            if (_remainingTime <= 0.0f && !_hasHandledMatchTime)
-            {
-                _hasHandledMatchTime = true;    // Ensure that we don't double-process this.
-
-                _persistentGameState.GameMode = GetVotedGameType();
-                ReturnToLobby();
-            }
-        }
 
         /// <summary>
         ///     Determine and return the highest voted <see cref="GameMode"/>, randomly selecting between all the most voted options if they are tied.
@@ -120,7 +108,15 @@ namespace Gameplay.GameState
         }
 
 
-        public void ReturnToLobby()
+        private void ReturnToLobbyTimerElapsed()
+        {
+            // Process Votes.
+            _persistentGameState.GameMode = GetVotedGameType();
+
+            // Return to the lobby.
+            ReturnToLobby();
+        }
+        private void ReturnToLobby()
         {
             Debug.LogWarning("To Implement - Return to Lobby");
             NetworkManager.Singleton.SceneManager.LoadScene("MechBuildTestScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
