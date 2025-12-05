@@ -2,13 +2,13 @@ using Gameplay.GameState;
 using TMPro;
 using UnityEngine;
 
-namespace UI.PostGame
+namespace UI
 {
     /// <summary>
     ///     A class representing a single row of a Leaderboard.<br/>
     ///     Handles updating the row's information to match the stats of the given player.
     /// </summary>
-    public class PostGameLeaderboardRow : MonoBehaviour
+    public class LeaderboardRow : MonoBehaviour
     {
         [SerializeField] private TextMeshProUGUI _placeText;
         [SerializeField] private TextMeshProUGUI _playerNameText;

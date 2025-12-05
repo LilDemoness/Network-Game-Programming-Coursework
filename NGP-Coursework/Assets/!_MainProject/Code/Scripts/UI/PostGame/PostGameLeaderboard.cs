@@ -9,8 +9,8 @@ namespace UI.PostGame
     public class PostGameLeaderboard : MonoBehaviour
     {
         [SerializeField] private Transform _leaderboardValuesContainer;
-        [SerializeField] private PostGameLeaderboardRow _leaderboardRowPrefab;
-        private List<PostGameLeaderboardRow> _leaderboardRowInstances = new List<PostGameLeaderboardRow>();
+        [SerializeField] private LeaderboardRow _leaderboardRowPrefab;
+        private List<LeaderboardRow> _leaderboardRowInstances = new List<LeaderboardRow>();
 
         // Injected via DI.
         private NetworkPostGame_FFA _networkPostGame;
@@ -37,7 +37,7 @@ namespace UI.PostGame
                 if (i >= currentInstancesCount)
                 {
                     // Create a new row.
-                    PostGameLeaderboardRow leaderboardRow = Instantiate<PostGameLeaderboardRow>(_leaderboardRowPrefab, _leaderboardValuesContainer);
+                    LeaderboardRow leaderboardRow = Instantiate<LeaderboardRow>(_leaderboardRowPrefab, _leaderboardValuesContainer);
                     _leaderboardRowInstances.Add(leaderboardRow);
                 }
 

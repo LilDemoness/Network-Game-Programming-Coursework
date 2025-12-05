@@ -148,7 +148,7 @@ GameObject:
   - component: {fileID: 6087083949078418224}
   - component: {fileID: 5688924251999536983}
   - component: {fileID: 6034192372099124265}
-  - component: {fileID: 8735384241490254310}
+  - component: {fileID: 4658847618097496087}
   m_Layer: 5
   m_Name: LeaderboardRow
   m_TagString: Untagged
@@ -244,7 +244,7 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
---- !u!114 &8735384241490254310
+--- !u!114 &4658847618097496087
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -253,7 +253,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1658044048400682291}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 38b7b3ccc057c574d97a4237c957beac, type: 3}
+  m_Script: {fileID: 11500000, guid: d6f84ab2b605aa64c85880ab9c87dd55, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _placeText: {fileID: 2483937417420159780}

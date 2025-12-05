@@ -443,6 +443,15 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""ToggleLeaderboardUI"",
+                    ""type"": ""Button"",
+                    ""id"": ""7dd1269b-6d6a-4e0c-8f5c-67794e422313"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -907,6 +916,17 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""action"": ""SelectPreviousFrame"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""0ad58bc1-f4a4-4cc1-a1e8-aa65e297493a"",
+                    ""path"": ""<Keyboard>/y"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";MnK"",
+                    ""action"": ""ToggleLeaderboardUI"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         },
@@ -989,6 +1009,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         m_UI_Confirm = m_UI.FindAction("Confirm", throwIfNotFound: true);
         m_UI_SelectPreviousFrame = m_UI.FindAction("SelectPreviousFrame", throwIfNotFound: true);
         m_UI_SelectNextFrame = m_UI.FindAction("SelectNextFrame", throwIfNotFound: true);
+        m_UI_ToggleLeaderboardUI = m_UI.FindAction("ToggleLeaderboardUI", throwIfNotFound: true);
         // Global
         m_Global = asset.FindActionMap("Global", throwIfNotFound: true);
         m_Global_ToggleNetworkStats = m_Global.FindAction("ToggleNetworkStats", throwIfNotFound: true);
@@ -1424,6 +1445,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
     private readonly InputAction m_UI_Confirm;
     private readonly InputAction m_UI_SelectPreviousFrame;
     private readonly InputAction m_UI_SelectNextFrame;
+    private readonly InputAction m_UI_ToggleLeaderboardUI;
     /// <summary>
     /// Provides access to input actions defined in input action map "UI".
     /// </summary>
@@ -1500,6 +1522,10 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         /// </summary>
         public InputAction @SelectNextFrame => m_Wrapper.m_UI_SelectNextFrame;
         /// <summary>
+        /// Provides access to the underlying input action "UI/ToggleLeaderboardUI".
+        /// </summary>
+        public InputAction @ToggleLeaderboardUI => m_Wrapper.m_UI_ToggleLeaderboardUI;
+        /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
         public InputActionMap Get() { return m_Wrapper.m_UI; }
@@ -1573,6 +1599,9 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
             @SelectNextFrame.started += instance.OnSelectNextFrame;
             @SelectNextFrame.performed += instance.OnSelectNextFrame;
             @SelectNextFrame.canceled += instance.OnSelectNextFrame;
+            @ToggleLeaderboardUI.started += instance.OnToggleLeaderboardUI;
+            @ToggleLeaderboardUI.performed += instance.OnToggleLeaderboardUI;
+            @ToggleLeaderboardUI.canceled += instance.OnToggleLeaderboardUI;
         }
 
         /// <summary>
@@ -1632,6 +1661,9 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
             @SelectNextFrame.started -= instance.OnSelectNextFrame;
             @SelectNextFrame.performed -= instance.OnSelectNextFrame;
             @SelectNextFrame.canceled -= instance.OnSelectNextFrame;
+            @ToggleLeaderboardUI.started -= instance.OnToggleLeaderboardUI;
+            @ToggleLeaderboardUI.performed -= instance.OnToggleLeaderboardUI;
+            @ToggleLeaderboardUI.canceled -= instance.OnToggleLeaderboardUI;
         }
 
         /// <summary>
@@ -1966,6 +1998,13 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnSelectNextFrame(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "ToggleLeaderboardUI" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnToggleLeaderboardUI(InputAction.CallbackContext context);
     }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "Global" which allows adding and removing callbacks.

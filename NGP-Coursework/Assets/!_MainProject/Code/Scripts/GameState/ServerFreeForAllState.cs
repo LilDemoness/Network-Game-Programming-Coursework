@@ -39,6 +39,7 @@ namespace Gameplay.GameState
         [Space(10)]
         [Tooltip("If true, then Score = Kills - Deaths. If false, Score = Kills.")]
         [SerializeField] private bool _deathsCountAsLostPoints = false;
+        public bool DeathsCountAsLostPoints => _deathsCountAsLostPoints;
 
 
         [Header("Player Spawning")]
@@ -62,7 +63,7 @@ namespace Gameplay.GameState
         protected override void Configure(IContainerBuilder builder)
         {
             base.Configure(builder);
-            builder.RegisterComponent<NetworkGameplayState>(_networkGameplayState);
+            builder.RegisterComponent<NetworkFFAGameplayState>(_networkGameplayState);
             builder.RegisterComponent<NetworkTimer>(_networkTimer);
         }
 

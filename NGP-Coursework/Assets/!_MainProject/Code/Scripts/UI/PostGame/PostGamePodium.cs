@@ -21,7 +21,7 @@ namespace UI.PostGame
         [Header("UI")]
         [SerializeField] private Canvas _uiContainerCanvas;
 
-        [SerializeField] private PostGameLeaderboardRow[] _podiumLeaderboardElements;
+        [SerializeField] private LeaderboardRow[] _podiumLeaderboardElements;
         private const int PODIUM_POSITIONS = 3;
 
         [SerializeField] private GameObject _thisPlayerUIIdentifier;

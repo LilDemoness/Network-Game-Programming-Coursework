@@ -42,6 +42,9 @@ namespace UserInput
         // Customisation UI.
         public static event System.Action OnOpenFrameSelectionPerformed;
 
+        // Other.
+        public static event System.Action OnToggleLeaderboardPerformed;
+
         #endregion
 
 
@@ -128,6 +131,7 @@ namespace UserInput
             s_inputActions.UI.NextTab.performed += NextTab_performed;
             s_inputActions.UI.PreviousTab.performed += PreviousTab_performed;
             s_inputActions.UI.Navigate.performed += Navigate_performed;
+            s_inputActions.UI.ToggleLeaderboardUI.performed += ToggleLeaderboardUI_performed;
 
             #endregion
 
@@ -159,11 +163,12 @@ namespace UserInput
 
             #region UI Events
 
-            s_inputActions.UI.OpenFrameSelection.performed   -= OpenFrameSelection_performed;
-            s_inputActions.UI.Confirm.performed              -= Confirm_performed;
-            s_inputActions.UI.NextTab.performed              -= NextTab_performed;
-            s_inputActions.UI.PreviousTab.performed          -= PreviousTab_performed;
-            s_inputActions.UI.Navigate.performed             -= Navigate_performed;
+            s_inputActions.UI.OpenFrameSelection.performed      -= OpenFrameSelection_performed;
+            s_inputActions.UI.Confirm.performed                 -= Confirm_performed;
+            s_inputActions.UI.NextTab.performed                 -= NextTab_performed;
+            s_inputActions.UI.PreviousTab.performed             -= PreviousTab_performed;
+            s_inputActions.UI.Navigate.performed                -= Navigate_performed;
+            s_inputActions.UI.ToggleLeaderboardUI.performed     -= ToggleLeaderboardUI_performed;
 
             #endregion
 
@@ -216,6 +221,8 @@ namespace UserInput
 
         private void OpenFrameSelection_performed(InputAction.CallbackContext obj) => OnOpenFrameSelectionPerformed?.Invoke();
         private void Confirm_performed(InputAction.CallbackContext obj) => OnConfirmPerformed?.Invoke();
+
+        private void ToggleLeaderboardUI_performed(InputAction.CallbackContext obj) => OnToggleLeaderboardPerformed?.Invoke();
 
         #endregion
 

@@ -357,6 +357,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "ToggleLeaderboardUI",
+                    "type": "Button",
+                    "id": "7dd1269b-6d6a-4e0c-8f5c-67794e422313",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -819,6 +828,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "SelectPreviousFrame",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "0ad58bc1-f4a4-4cc1-a1e8-aa65e297493a",
+                    "path": "<Keyboard>/y",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";MnK",
+                    "action": "ToggleLeaderboardUI",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

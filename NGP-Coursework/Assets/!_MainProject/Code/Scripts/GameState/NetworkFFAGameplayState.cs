@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using Gameplay.GameplayObjects.Character;
 using Unity.Netcode;
 using UnityEngine;
+using Utils;
+using VContainer;
 
 namespace Gameplay.GameState
 {
@@ -18,6 +20,13 @@ namespace Gameplay.GameState
         public NetworkList<PlayerGameData> PlayerData { get; private set; } = new NetworkList<PlayerGameData>(); // Also includes players that have left the game? OR have score in SessionPlayerData (But what about states that don't use scores?)?
         private Dictionary<int, PlayerGameData> _playerIndexToDataDict = new Dictionary<int, PlayerGameData>();
         public PlayerGameData GetPlayerData(ulong clientId) => PlayerData[GetPlayerIndex(clientId)];
+
+
+        [Inject]
+        private void Initialise(ServerFreeForAllState serverFreeForAllState)
+        {
+            PlayerGameData.DeathsCountAsLostPoints = serverFreeForAllState.DeathsCountAsLostPoints;
+        }
 
 
         public override void OnNetworkSpawn()
@@ -57,7 +66,7 @@ namespace Gameplay.GameState
             else
             {
                 // New Player.
-                PlayerData.Add(new PlayerGameData(playerIndex));
+                PlayerData.Add(new PlayerGameData(playerIndex, playerCharacter.CharacterName));
                 // Note: Adding to the index->data dictionary is handed through the 'OnListChanged' event subscription.
 
                 // Create the server data.
@@ -72,7 +81,7 @@ namespace Gameplay.GameState
         // Server-only.
         public override void AddNPC(ServerCharacter npcCharacter)
         {
-            PlayerData.Add(new PlayerGameData(-1));
+            PlayerData.Add(new PlayerGameData(-1, npcCharacter.CharacterName));
             // Note: Adding to the index->data dictionary is handed through the 'OnListChanged' event subscription.
 
             // Create the server data.
@@ -290,17 +299,22 @@ namespace Gameplay.GameState
         }
         public struct PlayerGameData : INetworkSerializable, IEquatable<PlayerGameData>
         {
+            public static bool DeathsCountAsLostPoints { get; set; }
+
             public int PlayerIndex;
+            public FixedPlayerName Name;
+            public int Score => DeathsCountAsLostPoints ? (Kills - Deaths) : Kills;
             public int Kills;
             public int Deaths;
 
             [field: System.NonSerialized] public int ListIndex { get; set; } // A non-serialized, non-synced int representing this data's position in the PlayerData array. Used on the server for easier retrieval of data.
 
 
-            public PlayerGameData(int playerIndex) : this(playerIndex, -1) { }
-            public PlayerGameData(int playerIndex, int listIndex)
+            public PlayerGameData(int playerIndex, FixedPlayerName name) : this(playerIndex, name, -1) { }
+            public PlayerGameData(int playerIndex, FixedPlayerName name, int listIndex)
             {
                 this.PlayerIndex = playerIndex;
+                this.Name = name;
                 this.Kills = 0;
                 this.Deaths = 0;
                 this.ListIndex = listIndex;
