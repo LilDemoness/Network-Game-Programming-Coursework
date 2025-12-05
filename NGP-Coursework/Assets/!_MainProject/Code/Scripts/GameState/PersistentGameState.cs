@@ -9,6 +9,8 @@ namespace Gameplay.GameState
     /// </summary>
     public class PersistentGameState
     {
+        public GameMode GameMode { get; set; }
+
         private PersistentDataContainer _test;
 
 

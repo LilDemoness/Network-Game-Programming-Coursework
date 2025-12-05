@@ -11,7 +11,7 @@ namespace UI.PostGame
     public class PostGamePodium : MonoBehaviour
     {
         private FFAPostGameData[] _postGameData;
-        [SerializeField] private NetworkPostFFAGame _networkPostFFAState;
+        [SerializeField] private NetworkPostGame_FFA _networkPostFFAState;
 
 
         [Header("Podium Models")]

@@ -13,7 +13,7 @@ namespace UI.PostGame
         private List<PostGameLeaderboardRow> _leaderboardRowInstances = new List<PostGameLeaderboardRow>();
 
         //[Inject]
-        [SerializeField] private NetworkPostFFAGame _networkPostGame;
+        [SerializeField] private NetworkPostGame_FFA _networkPostGame;
 
 
         private void Awake()

@@ -30,6 +30,8 @@ namespace Gameplay.GameState
 
         [Inject]
         private ConnectionManager _connectionManager;
+        [Inject]
+        private PersistentGameState _persistentGameState;
 
 
         protected override void Awake()
@@ -274,7 +276,7 @@ namespace Gameplay.GameState
         /// </summary>
         private void TransitionToGameplay()
         {
-            Debug.LogWarning("To-do: Properly Implement - Load Gameplay Scene");
+            Debug.LogWarning($"To-do: Properly Implement - Load Gameplay Scene (Mode: {_persistentGameState.GameMode.ToString()})");
             NetworkManager.Singleton.SceneManager.LoadScene("GameplayTestScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
             //throw new System.NotImplementedException("Scene Loader - Load Gameplay Scene");
         }

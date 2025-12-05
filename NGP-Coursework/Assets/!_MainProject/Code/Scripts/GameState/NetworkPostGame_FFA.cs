@@ -13,7 +13,7 @@ namespace Gameplay.GameState
     /// <summary>
     ///     Synced data & RPCs for the Post-Game State after a FFA match.
     /// </summary>
-    public class NetworkPostFFAGame : NetworkBehaviour
+    public class NetworkPostGame_FFA : NetworkBehaviour
     {
         [SerializeField] private PersistentPlayerRuntimeCollection _persistentPlayerCollection;
 
@@ -23,6 +23,9 @@ namespace Gameplay.GameState
         private PersistentGameState _persistentGameState;
         public event System.Action OnScoresSet;
 
+
+        public NetworkList<int> PlayerVotes = new NetworkList<int>();
+        private Dictionary<ulong, GameMode> _playerVotes = new();
 
 
         [Inject]
@@ -51,8 +54,14 @@ namespace Gameplay.GameState
 
         public override void OnNetworkSpawn()
         {
-            if (IsServer && _persistentGameState != null)
+            if (!IsServer)
+                return;
+
+            if (_persistentGameState != null)
                 SetValues();
+
+            foreach(GameMode gameType in GameMode.Invalid.GetAllGameModes())
+                PlayerVotes.Add(0);
         }
 
         [Rpc(SendTo.ClientsAndHost)]
@@ -79,6 +88,30 @@ namespace Gameplay.GameState
                 throw new System.Exception($"No PostGameData found for this Client (Id: {NetworkManager.Singleton.LocalClientId})");
 
             OnScoresSet?.Invoke();
+        }
+
+
+        [Rpc(SendTo.Server)]
+        public void SetPlayerVoteServerRpc(GameMode vote, RpcParams rpcParams = default)
+        {
+            if (!_playerVotes.ContainsKey(rpcParams.Receive.SenderClientId))
+            {
+                // This player hasn't voted before.
+                _playerVotes.Add(rpcParams.Receive.SenderClientId, vote);
+                PlayerVotes[(int)vote] += 1;
+                return;
+            }
+
+            if (vote == _playerVotes[rpcParams.Receive.SenderClientId])
+                return; // Voting for the same option as current.
+
+            // Remove a vote from the old option (If it was valid), ensuring that we don't go below 0.
+            if (_playerVotes[rpcParams.Receive.SenderClientId] != GameMode.Invalid)
+                PlayerVotes[(int)_playerVotes[rpcParams.Receive.SenderClientId]] = Mathf.Max(PlayerVotes[(int)_playerVotes[rpcParams.Receive.SenderClientId]] - 1, 0);
+
+            // Change our vote & add to the new selection's count.
+            _playerVotes[rpcParams.Receive.SenderClientId] = vote;
+            PlayerVotes[(int)vote] += 1;
         }
     }
 }
