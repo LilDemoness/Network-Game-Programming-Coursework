@@ -497,10 +497,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 3184328538429835962, guid: 3eea3c2593913594ca13c7248b7af90d, type: 3}
-      propertyPath: _networkPostGame
-      value: 
-      objectReference: {fileID: 8576420107912745963}
     - target: {fileID: 3778788684781631570, guid: 3eea3c2593913594ca13c7248b7af90d, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
@@ -511,7 +507,7 @@ PrefabInstance:
       objectReference: {fileID: 8576420107912745964}
     - target: {fileID: 6833919771475288895, guid: 3eea3c2593913594ca13c7248b7af90d, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -0.0003557763
+      value: -0.68134606
       objectReference: {fileID: 0}
     - target: {fileID: 8999879357962599902, guid: 3eea3c2593913594ca13c7248b7af90d, type: 3}
       propertyPath: m_Name

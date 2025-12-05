@@ -5,6 +5,7 @@ using Gameplay.GameState;
 using Gameplay.Messages;
 using Infrastructure;
 using Netcode.ConnectionManagement;
+using SceneLoading;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -95,9 +96,7 @@ namespace ApplicationLifecycle
             DontDestroyOnLoad(_updateRunner.gameObject);
             Application.targetFrameRate = 120;
 
-            SceneManager.LoadScene("MainMenu");
-            Debug.LogWarning("To Properly Implement: Scene Management - Load Main Menu");
-            //throw new System.NotImplementedException("Scene Management - Load Main Menu");
+            SceneLoader.Instance.LoadNonGameplayScene(SceneLoader.NonGameplayScene.MainMenu, false);
         }
 
         protected override void OnDestroy()

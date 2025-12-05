@@ -7,6 +7,7 @@ using Gameplay.GameplayObjects.Players;
 using Gameplay.Messages;
 using Infrastructure;
 using Netcode.ConnectionManagement;
+using SceneLoading;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -42,9 +43,6 @@ namespace Gameplay.GameState
 
         [Header("Player Spawning")]
         [SerializeField] private NetworkObject _playerPrefab;
-        [SerializeField] private Transform[] _playerSpawnPoints;
-        private List<Transform> _initialSpawnPointsList;
-
         private bool _initialSpawnsComplete = false;
 
 
@@ -98,7 +96,7 @@ namespace Gameplay.GameState
             _lifeStateChangedEventMessageSubscriber.Subscribe(OnLifeStateChangedEventMessage);
 
             NetworkManager.Singleton.OnConnectionEvent += OnConnectionEvent;
-            NetworkManager.Singleton.SceneManager.OnLoadEventCompleted += OnLoadEventCompleted;
+            SceneLoader.OnAllRequestedScenesLoaded += OnMapLoaded;
             NetworkManager.Singleton.SceneManager.OnSynchronizeComplete += OnSynchronizeComplete;
 
             SessionManager<SessionPlayerData>.Instance.OnSessionStarted();
@@ -109,7 +107,7 @@ namespace Gameplay.GameState
                 _lifeStateChangedEventMessageSubscriber.Unsubscribe(OnLifeStateChangedEventMessage);
 
             NetworkManager.Singleton.OnConnectionEvent -= OnConnectionEvent;
-            NetworkManager.Singleton.SceneManager.OnLoadEventCompleted -= OnLoadEventCompleted;
+            SceneLoader.OnAllRequestedScenesLoaded -= OnMapLoaded;
             NetworkManager.Singleton.SceneManager.OnSynchronizeComplete -= OnSynchronizeComplete;
         }
 
@@ -170,24 +168,31 @@ namespace Gameplay.GameState
             // A client has disconnected. In a limited-life mode, we would also check for a Game Over here (After a frame to allow for the client's player to be removed/despawned).
             _networkGameplayState.OnPlayerLeft(connectionEventData.ClientId);
         }
-        private void OnLoadEventCompleted(string sceneName, LoadSceneMode loadSceneMode, List<ulong> clientsCompleted, List<ulong> clientsTimedOut) // Triggered once all clients have finished loading a scene.
+        private void OnMapLoaded() // Triggered once all requested scenes have been loaded for all clients.
         {
-            if (_initialSpawnsComplete || loadSceneMode != LoadSceneMode.Single)
-                return; // We have either performed the initial spawn, or this scene is being added to the game and we don't want to spawn players yet.
+            // Wait a frame to ensure that all EntitySpawnPoints have registered.
+            StartCoroutine(FinishLoadAfterFrame());
+        }
+        public IEnumerator FinishLoadAfterFrame()
+        {
+            // Wait for "Awake" events to be called.
+            yield return null;
 
             // Spawn all players.
             _initialSpawnsComplete = true;
             ServerCharacter[] playerCharacters = new ServerCharacter[NetworkManager.Singleton.ConnectedClients.Count];
+            List<EntitySpawnPoint> spawnPoints = EntitySpawnPoint.GetInitialSpawnPoints(EntitySpawnPoint.EntityTypes.Player, -1, playerCharacters.Length);
             int index = 0;
             foreach (var kvp in NetworkManager.Singleton.ConnectedClients)
             {
-                playerCharacters[index] = SpawnPlayer(kvp.Key, false);
+                playerCharacters[index] = SpawnPlayer(kvp.Key, false, spawnPoints[index]);
                 ++index;
             }
 
             // Start the game.
             StartGame(playerCharacters);
         }
+
         private void OnSynchronizeComplete(ulong clientId)  // Triggered once a newly approved client has finished synchonizing the current game session.
         {
             if (!_initialSpawnsComplete)
@@ -197,7 +202,7 @@ namespace Gameplay.GameState
             //    return;   // This client already exists within the game.
 
             // A client has joined after the initial spawn.
-            ServerCharacter playerCharacter = SpawnPlayer(clientId, true);
+            ServerCharacter playerCharacter = SpawnPlayer(clientId, true, EntitySpawnPoint.GetRandomSpawnPoint(EntitySpawnPoint.EntityTypes.Player, -1));
             _networkGameplayState.AddPlayer(playerCharacter);
             _networkTimer.SyncGameTime();
         }
@@ -217,22 +222,12 @@ namespace Gameplay.GameState
             _networkGameplayState.SavePersistentData(ref _persistentGameState);
             FFAPostGameData.CountDeathsAsNegativePoints = _deathsCountAsLostPoints; // Find a better place to put this.
 
-            Debug.LogWarning("To Implement - Load PostGame Scene");
-            NetworkManager.Singleton.SceneManager.LoadScene("PostGameScene-FFA", LoadSceneMode.Single);
+            SceneLoader.Instance.LoadPostGameScene(GameMode.FreeForAll);
         }
 
 
-        private ServerCharacter SpawnPlayer(ulong clientId, bool isLateJoin)
+        private ServerCharacter SpawnPlayer(ulong clientId, bool isLateJoin, EntitySpawnPoint spawnPoint)
         {
-            _initialSpawnPointsList ??= new List<Transform>(_playerSpawnPoints);
-
-            Debug.Assert(_initialSpawnPointsList.Count > 0, "We ran out of spawn points. Ensure that there are enough spawn points within the _playerSpawnPoints array.");
-
-            // Get our spawn point randomly and remove it from our initial spawns list to ensure that duplicate spawns don't occur.
-            int selectedIndex = Random.Range(0, _initialSpawnPointsList.Count);
-            Transform spawnPoint = _initialSpawnPointsList[selectedIndex];
-            _initialSpawnPointsList.RemoveAt(selectedIndex);
-
             // Get the PersistenPlayer Object, throwing an error if none exists for this client.
             if (!NetworkManager.Singleton.SpawnManager.GetPlayerNetworkObject(clientId).TryGetComponent<PersistentPlayer>(out PersistentPlayer persistentPlayer))
                 Debug.LogError($"No matching persistent PersistentPlayer for client {clientId} was found");
@@ -250,7 +245,8 @@ namespace Gameplay.GameState
             // Set the player's spawn position.
             if (spawnPoint != null)
             {
-                playerPhysicsTransform.SetPositionAndRotation(spawnPoint.position, spawnPoint.rotation);
+                playerPhysicsTransform.SetPositionAndRotation(spawnPoint.transform.position, spawnPoint.transform.rotation);
+                spawnPoint.SpawnAtPoint();
             }
             if (sessionPlayerData.HasValue)
             {
@@ -298,8 +294,9 @@ namespace Gameplay.GameState
         {
             yield return new WaitForSeconds(respawnDelay);
 
-            Transform spawnPoint = _playerSpawnPoints[Random.Range(0, _playerSpawnPoints.Length)];
-            player.PerformRespawn(spawnPoint.position, spawnPoint.rotation);
+            EntitySpawnPoint spawnPoint = EntitySpawnPoint.GetRandomSpawnPoint(EntitySpawnPoint.EntityTypes.Player, -1);
+            player.PerformRespawn(spawnPoint.transform.position, spawnPoint.transform.rotation);
+            spawnPoint.SpawnAtPoint();
         }
     }
 }

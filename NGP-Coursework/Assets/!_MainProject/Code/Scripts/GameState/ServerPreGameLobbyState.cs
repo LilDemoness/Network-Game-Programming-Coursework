@@ -1,5 +1,6 @@
 using Gameplay.GameplayObjects.Players;
 using Netcode.ConnectionManagement;
+using SceneLoading;
 using System.Collections;
 using Unity.Netcode;
 using UnityEngine;
@@ -276,9 +277,8 @@ namespace Gameplay.GameState
         /// </summary>
         private void TransitionToGameplay()
         {
-            Debug.LogWarning($"To-do: Properly Implement - Load Gameplay Scene (Mode: {_persistentGameState.GameMode.ToString()})");
-            NetworkManager.Singleton.SceneManager.LoadScene("GameplayTestScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
-            //throw new System.NotImplementedException("Scene Loader - Load Gameplay Scene");
+            const string DEFAULT_MAP_NAME = "TestGameMap";
+            SceneLoader.Instance.LoadGameModeAndMap(_persistentGameState.GameMode, DEFAULT_MAP_NAME);
         }
 
 

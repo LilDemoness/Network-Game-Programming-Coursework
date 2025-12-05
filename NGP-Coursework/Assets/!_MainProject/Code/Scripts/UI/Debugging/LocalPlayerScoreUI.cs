@@ -30,9 +30,11 @@ namespace Gameplay.UI
         private void PlayerData_OnListChanged(NetworkListEvent<NetworkFFAGameplayState.PlayerGameData> changeEvent)
         {
             if (!_persistentPlayerCollection.TryGetPlayer(changeEvent.Value.PlayerIndex, out PersistentPlayer persistentPlayer))
-                return; // To PersistentPlayer (Not a Player).
+                return; // No PersistentPlayer (Not a Player).
+            
             if (persistentPlayer.OwnerClientId != NetworkManager.Singleton.LocalClientId)
                 return; // Not the local player.
+            
 
             // Is the local player.
             // Set text.

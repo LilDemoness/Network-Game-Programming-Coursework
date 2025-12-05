@@ -64,7 +64,8 @@ namespace Gameplay.GameState
         }
         protected override void OnDestroy()
         {
-            _profileManager.OnProfileChanged -= OnProfileChanged;
+            if (_profileManager != null)
+                _profileManager.OnProfileChanged -= OnProfileChanged;
             base.OnDestroy();
         }
 

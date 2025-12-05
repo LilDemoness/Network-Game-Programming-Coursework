@@ -3,6 +3,7 @@ using UnityEngine.SceneManagement;
 using UnityServices.Sessions;
 using VContainer;
 using Utils;
+using SceneLoading;
 
 
 namespace Netcode.ConnectionManagement
@@ -26,8 +27,7 @@ namespace Netcode.ConnectionManagement
             _multiplayerServicesFacade.EndTracking();
             ConnectionManager.NetworkManager.Shutdown();
 
-            Debug.LogWarning("To implement - Reload to Main Menu");
-            //throw new System.NotImplementedException("Reload to Main Menu");
+            SceneLoader.Instance.LoadNonGameplayScene(SceneLoader.NonGameplayScene.MainMenu, false);
         }
 
         public override void Exit() { }

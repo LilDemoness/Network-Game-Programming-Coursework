@@ -1,5 +1,6 @@
 using Gameplay.Actions;
 using Netcode.ConnectionManagement;
+using SceneLoading;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Netcode;
@@ -92,6 +93,7 @@ namespace Gameplay.GameState
                 {
                     // This GameType has more votes than the previously highest.
                     // Replace the previously highest votes in the array.
+                    highestVotes = NetworkPostGame.PlayerVotes[i];
                     votesInDuplicate = 0;
                     gameTypes[votesInDuplicate] = (GameMode)i;
                 }
@@ -118,8 +120,7 @@ namespace Gameplay.GameState
         }
         private void ReturnToLobby()
         {
-            Debug.LogWarning("To Implement - Return to Lobby");
-            NetworkManager.Singleton.SceneManager.LoadScene("MechBuildTestScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
+            SceneLoader.Instance.LoadNonGameplayScene(SceneLoader.NonGameplayScene.Lobby, true);
         }
         public void ReturnToMainMenu()
         {

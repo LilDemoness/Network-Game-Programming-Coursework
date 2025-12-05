@@ -1,4 +1,5 @@
 using Infrastructure;
+using SceneLoading;
 using Unity.Netcode;
 using UnityEngine;
 using UnityServices.Sessions;
@@ -24,9 +25,7 @@ namespace Netcode.ConnectionManagement
 
         public override void Enter()
         {
-            Debug.LogWarning("To Properly Implement: Scene Management - Load Initial Lobby Scene");
-            NetworkManager.Singleton.SceneManager.LoadScene("MechBuildTestScene", UnityEngine.SceneManagement.LoadSceneMode.Single);
-            //throw new System.NotImplementedException("Load Mech Build Scene");
+            SceneLoader.Instance.LoadNonGameplayScene(SceneLoader.NonGameplayScene.Lobby, true);
 
             if (_multiplayerServicesFacade.CurrentUnitySession != null)
             {

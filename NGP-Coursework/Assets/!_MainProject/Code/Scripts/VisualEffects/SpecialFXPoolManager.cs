@@ -17,6 +17,14 @@ namespace VisualEffects
         {
             s_specialEffectToInstancePool = new Dictionary<SpecialFXGraphic, ObjectPool<SpecialFXGraphic>>();
         }
+        public static void Clear()  // When switching scenes our SpecialFX instances get destroyed. For now, we're just going to clear them, however it'll possibly be better to have the instances persist between gameplay scenes.
+        {
+            foreach(ObjectPool<SpecialFXGraphic> objectPool in s_specialEffectToInstancePool.Values)
+            {
+                objectPool.Clear();
+            }
+            s_specialEffectToInstancePool.Clear();
+        }
 
 
         private static ObjectPool<SpecialFXGraphic> CreateNewPool(SpecialFXGraphic graphic)
