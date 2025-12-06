@@ -931,6 +931,74 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
             ]
         },
         {
+            ""name"": ""MultiplayerChat"",
+            ""id"": ""1a6017b1-ea50-472b-85c9-93962949deb1"",
+            ""actions"": [
+                {
+                    ""name"": ""OpenChat"",
+                    ""type"": ""Button"",
+                    ""id"": ""72f872df-227e-4332-b876-f023b57d5129"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""SubmitChat"",
+                    ""type"": ""Button"",
+                    ""id"": ""9db3ab6f-3a20-4de5-a922-4bf334982946"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""CancelChat"",
+                    ""type"": ""Button"",
+                    ""id"": ""0f41f0e8-3aba-46bf-a222-06d79d60bedf"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""c84412b0-aca4-4e68-99e8-b2b2a87c2953"",
+                    ""path"": ""<Keyboard>/slash"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";MnK"",
+                    ""action"": ""OpenChat"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""00b909b8-c838-49c7-946e-721249c60fbf"",
+                    ""path"": ""<Keyboard>/enter"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";MnK"",
+                    ""action"": ""SubmitChat"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""c55f433c-8f6c-4ada-be01-97b77e626779"",
+                    ""path"": ""<Keyboard>/escape"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";MnK"",
+                    ""action"": ""CancelChat"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
+        },
+        {
             ""name"": ""Global"",
             ""id"": ""4ac300b3-a308-4453-8ce0-3725919a0073"",
             ""actions"": [
@@ -1010,6 +1078,11 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         m_UI_SelectPreviousFrame = m_UI.FindAction("SelectPreviousFrame", throwIfNotFound: true);
         m_UI_SelectNextFrame = m_UI.FindAction("SelectNextFrame", throwIfNotFound: true);
         m_UI_ToggleLeaderboardUI = m_UI.FindAction("ToggleLeaderboardUI", throwIfNotFound: true);
+        // MultiplayerChat
+        m_MultiplayerChat = asset.FindActionMap("MultiplayerChat", throwIfNotFound: true);
+        m_MultiplayerChat_OpenChat = m_MultiplayerChat.FindAction("OpenChat", throwIfNotFound: true);
+        m_MultiplayerChat_SubmitChat = m_MultiplayerChat.FindAction("SubmitChat", throwIfNotFound: true);
+        m_MultiplayerChat_CancelChat = m_MultiplayerChat.FindAction("CancelChat", throwIfNotFound: true);
         // Global
         m_Global = asset.FindActionMap("Global", throwIfNotFound: true);
         m_Global_ToggleNetworkStats = m_Global.FindAction("ToggleNetworkStats", throwIfNotFound: true);
@@ -1021,6 +1094,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         UnityEngine.Debug.Assert(!m_Camera.enabled, "This will cause a leak and performance issues, PlayerInputActions.Camera.Disable() has not been called.");
         UnityEngine.Debug.Assert(!m_Combat.enabled, "This will cause a leak and performance issues, PlayerInputActions.Combat.Disable() has not been called.");
         UnityEngine.Debug.Assert(!m_UI.enabled, "This will cause a leak and performance issues, PlayerInputActions.UI.Disable() has not been called.");
+        UnityEngine.Debug.Assert(!m_MultiplayerChat.enabled, "This will cause a leak and performance issues, PlayerInputActions.MultiplayerChat.Disable() has not been called.");
         UnityEngine.Debug.Assert(!m_Global.enabled, "This will cause a leak and performance issues, PlayerInputActions.Global.Disable() has not been called.");
     }
 
@@ -1698,6 +1772,124 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
     /// </summary>
     public UIActions @UI => new UIActions(this);
 
+    // MultiplayerChat
+    private readonly InputActionMap m_MultiplayerChat;
+    private List<IMultiplayerChatActions> m_MultiplayerChatActionsCallbackInterfaces = new List<IMultiplayerChatActions>();
+    private readonly InputAction m_MultiplayerChat_OpenChat;
+    private readonly InputAction m_MultiplayerChat_SubmitChat;
+    private readonly InputAction m_MultiplayerChat_CancelChat;
+    /// <summary>
+    /// Provides access to input actions defined in input action map "MultiplayerChat".
+    /// </summary>
+    public struct MultiplayerChatActions
+    {
+        private @PlayerInputActions m_Wrapper;
+
+        /// <summary>
+        /// Construct a new instance of the input action map wrapper class.
+        /// </summary>
+        public MultiplayerChatActions(@PlayerInputActions wrapper) { m_Wrapper = wrapper; }
+        /// <summary>
+        /// Provides access to the underlying input action "MultiplayerChat/OpenChat".
+        /// </summary>
+        public InputAction @OpenChat => m_Wrapper.m_MultiplayerChat_OpenChat;
+        /// <summary>
+        /// Provides access to the underlying input action "MultiplayerChat/SubmitChat".
+        /// </summary>
+        public InputAction @SubmitChat => m_Wrapper.m_MultiplayerChat_SubmitChat;
+        /// <summary>
+        /// Provides access to the underlying input action "MultiplayerChat/CancelChat".
+        /// </summary>
+        public InputAction @CancelChat => m_Wrapper.m_MultiplayerChat_CancelChat;
+        /// <summary>
+        /// Provides access to the underlying input action map instance.
+        /// </summary>
+        public InputActionMap Get() { return m_Wrapper.m_MultiplayerChat; }
+        /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.Enable()" />
+        public void Enable() { Get().Enable(); }
+        /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.Disable()" />
+        public void Disable() { Get().Disable(); }
+        /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.enabled" />
+        public bool enabled => Get().enabled;
+        /// <summary>
+        /// Implicitly converts an <see ref="MultiplayerChatActions" /> to an <see ref="InputActionMap" /> instance.
+        /// </summary>
+        public static implicit operator InputActionMap(MultiplayerChatActions set) { return set.Get(); }
+        /// <summary>
+        /// Adds <see cref="InputAction.started"/>, <see cref="InputAction.performed"/> and <see cref="InputAction.canceled"/> callbacks provided via <param cref="instance" /> on all input actions contained in this map.
+        /// </summary>
+        /// <param name="instance">Callback instance.</param>
+        /// <remarks>
+        /// If <paramref name="instance" /> is <c>null</c> or <paramref name="instance"/> have already been added this method does nothing.
+        /// </remarks>
+        /// <seealso cref="MultiplayerChatActions" />
+        public void AddCallbacks(IMultiplayerChatActions instance)
+        {
+            if (instance == null || m_Wrapper.m_MultiplayerChatActionsCallbackInterfaces.Contains(instance)) return;
+            m_Wrapper.m_MultiplayerChatActionsCallbackInterfaces.Add(instance);
+            @OpenChat.started += instance.OnOpenChat;
+            @OpenChat.performed += instance.OnOpenChat;
+            @OpenChat.canceled += instance.OnOpenChat;
+            @SubmitChat.started += instance.OnSubmitChat;
+            @SubmitChat.performed += instance.OnSubmitChat;
+            @SubmitChat.canceled += instance.OnSubmitChat;
+            @CancelChat.started += instance.OnCancelChat;
+            @CancelChat.performed += instance.OnCancelChat;
+            @CancelChat.canceled += instance.OnCancelChat;
+        }
+
+        /// <summary>
+        /// Removes <see cref="InputAction.started"/>, <see cref="InputAction.performed"/> and <see cref="InputAction.canceled"/> callbacks provided via <param cref="instance" /> on all input actions contained in this map.
+        /// </summary>
+        /// <remarks>
+        /// Calling this method when <paramref name="instance" /> have not previously been registered has no side-effects.
+        /// </remarks>
+        /// <seealso cref="MultiplayerChatActions" />
+        private void UnregisterCallbacks(IMultiplayerChatActions instance)
+        {
+            @OpenChat.started -= instance.OnOpenChat;
+            @OpenChat.performed -= instance.OnOpenChat;
+            @OpenChat.canceled -= instance.OnOpenChat;
+            @SubmitChat.started -= instance.OnSubmitChat;
+            @SubmitChat.performed -= instance.OnSubmitChat;
+            @SubmitChat.canceled -= instance.OnSubmitChat;
+            @CancelChat.started -= instance.OnCancelChat;
+            @CancelChat.performed -= instance.OnCancelChat;
+            @CancelChat.canceled -= instance.OnCancelChat;
+        }
+
+        /// <summary>
+        /// Unregisters <param cref="instance" /> and unregisters all input action callbacks via <see cref="MultiplayerChatActions.UnregisterCallbacks(IMultiplayerChatActions)" />.
+        /// </summary>
+        /// <seealso cref="MultiplayerChatActions.UnregisterCallbacks(IMultiplayerChatActions)" />
+        public void RemoveCallbacks(IMultiplayerChatActions instance)
+        {
+            if (m_Wrapper.m_MultiplayerChatActionsCallbackInterfaces.Remove(instance))
+                UnregisterCallbacks(instance);
+        }
+
+        /// <summary>
+        /// Replaces all existing callback instances and previously registered input action callbacks associated with them with callbacks provided via <param cref="instance" />.
+        /// </summary>
+        /// <remarks>
+        /// If <paramref name="instance" /> is <c>null</c>, calling this method will only unregister all existing callbacks but not register any new callbacks.
+        /// </remarks>
+        /// <seealso cref="MultiplayerChatActions.AddCallbacks(IMultiplayerChatActions)" />
+        /// <seealso cref="MultiplayerChatActions.RemoveCallbacks(IMultiplayerChatActions)" />
+        /// <seealso cref="MultiplayerChatActions.UnregisterCallbacks(IMultiplayerChatActions)" />
+        public void SetCallbacks(IMultiplayerChatActions instance)
+        {
+            foreach (var item in m_Wrapper.m_MultiplayerChatActionsCallbackInterfaces)
+                UnregisterCallbacks(item);
+            m_Wrapper.m_MultiplayerChatActionsCallbackInterfaces.Clear();
+            AddCallbacks(instance);
+        }
+    }
+    /// <summary>
+    /// Provides a new <see cref="MultiplayerChatActions" /> instance referencing this action map.
+    /// </summary>
+    public MultiplayerChatActions @MultiplayerChat => new MultiplayerChatActions(this);
+
     // Global
     private readonly InputActionMap m_Global;
     private List<IGlobalActions> m_GlobalActionsCallbackInterfaces = new List<IGlobalActions>();
@@ -2005,6 +2197,35 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnToggleLeaderboardUI(InputAction.CallbackContext context);
+    }
+    /// <summary>
+    /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "MultiplayerChat" which allows adding and removing callbacks.
+    /// </summary>
+    /// <seealso cref="MultiplayerChatActions.AddCallbacks(IMultiplayerChatActions)" />
+    /// <seealso cref="MultiplayerChatActions.RemoveCallbacks(IMultiplayerChatActions)" />
+    public interface IMultiplayerChatActions
+    {
+        /// <summary>
+        /// Method invoked when associated input action "OpenChat" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnOpenChat(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "SubmitChat" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnSubmitChat(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "CancelChat" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnCancelChat(InputAction.CallbackContext context);
     }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "Global" which allows adding and removing callbacks.

@@ -47,6 +47,14 @@ namespace UserInput
 
         #endregion
 
+        #region Multiplayer Chat Events
+
+        public static event System.Action OnOpenChatPerformed;
+        public static event System.Action OnSubmitChatPerformed;
+        public static event System.Action OnCancelChatPerformed;
+
+        #endregion
+
 
         #region Input Device Type
 
@@ -135,6 +143,14 @@ namespace UserInput
 
             #endregion
 
+            #region Multiplayer Chat Events
+
+            s_inputActions.MultiplayerChat.OpenChat.performed   += OpenChat_performed;
+            s_inputActions.MultiplayerChat.SubmitChat.performed += SubmitChat_performed;
+            s_inputActions.MultiplayerChat.CancelChat.performed += CancelChat_performed;
+
+            #endregion
+
 
             // Enable the Input Actions.
             s_inputActions.Enable();
@@ -169,6 +185,14 @@ namespace UserInput
             s_inputActions.UI.PreviousTab.performed             -= PreviousTab_performed;
             s_inputActions.UI.Navigate.performed                -= Navigate_performed;
             s_inputActions.UI.ToggleLeaderboardUI.performed     -= ToggleLeaderboardUI_performed;
+
+            #endregion
+
+            #region Multiplayer Chat Events
+
+            s_inputActions.MultiplayerChat.OpenChat.performed   -= OpenChat_performed;
+            s_inputActions.MultiplayerChat.SubmitChat.performed -= SubmitChat_performed;
+            s_inputActions.MultiplayerChat.CancelChat.performed -= CancelChat_performed;
 
             #endregion
 
@@ -225,6 +249,15 @@ namespace UserInput
         private void ToggleLeaderboardUI_performed(InputAction.CallbackContext obj) => OnToggleLeaderboardPerformed?.Invoke();
 
         #endregion
+
+        #region Multiplayer Chat Event Functions
+
+        private void OpenChat_performed(InputAction.CallbackContext obj) => OnOpenChatPerformed?.Invoke();
+        private void SubmitChat_performed(InputAction.CallbackContext obj) => OnSubmitChatPerformed?.Invoke();
+        private void CancelChat_performed(InputAction.CallbackContext obj) => OnCancelChatPerformed?.Invoke();
+
+        #endregion
+        
 
 
 
@@ -293,6 +326,7 @@ namespace UserInput
             Camera      = 1 << 1,   // Camera Controls
             Combat      = 1 << 2,   // Weapon/Ability Activation
             UI          = 1 << 3,   // Main, Pause, and Customisation Menus
+            MultiplayerChat = 1 << 4,   // Text and Voice Chat Input
 
             Respawning = ActionTypes.Movement | ActionTypes.Camera | ActionTypes.Combat,
 

@@ -845,6 +845,74 @@
             ]
         },
         {
+            "name": "MultiplayerChat",
+            "id": "1a6017b1-ea50-472b-85c9-93962949deb1",
+            "actions": [
+                {
+                    "name": "OpenChat",
+                    "type": "Button",
+                    "id": "72f872df-227e-4332-b876-f023b57d5129",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "SubmitChat",
+                    "type": "Button",
+                    "id": "9db3ab6f-3a20-4de5-a922-4bf334982946",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "CancelChat",
+                    "type": "Button",
+                    "id": "0f41f0e8-3aba-46bf-a222-06d79d60bedf",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "c84412b0-aca4-4e68-99e8-b2b2a87c2953",
+                    "path": "<Keyboard>/slash",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";MnK",
+                    "action": "OpenChat",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "00b909b8-c838-49c7-946e-721249c60fbf",
+                    "path": "<Keyboard>/enter",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";MnK",
+                    "action": "SubmitChat",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "c55f433c-8f6c-4ada-be01-97b77e626779",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";MnK",
+                    "action": "CancelChat",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
             "name": "Global",
             "id": "4ac300b3-a308-4453-8ce0-3725919a0073",
             "actions": [
