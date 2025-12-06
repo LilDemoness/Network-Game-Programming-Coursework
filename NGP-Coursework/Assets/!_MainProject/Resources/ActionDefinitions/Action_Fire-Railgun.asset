@@ -17,7 +17,7 @@ MonoBehaviour:
   <ActivationStyle>k__BackingField: 0
   <ImmediateHeat>k__BackingField: 0
   <ContinuousHeat>k__BackingField: 0
-  <RetriggerHeat>k__BackingField: 0
+  <RetriggerHeat>k__BackingField: 1
   <ExecutionDelay>k__BackingField: 0
   <ActionCooldown>k__BackingField: 0
   <BlockingMode>k__BackingField: 1
@@ -52,7 +52,7 @@ MonoBehaviour:
     - rid: 6632896607793709159
       type: {class: HealthChangeEffect, ns: Gameplay.Actions.Effects, asm: Assembly-CSharp}
       data:
-        _healthChange: -5
+        _healthChange: -7
         _scaleValueWithCharge: 1
     - rid: 6632896607793709162
       type: {class: SpecialFXActionVisual, ns: Gameplay.Actions.Visuals, asm: Assembly-CSharp}

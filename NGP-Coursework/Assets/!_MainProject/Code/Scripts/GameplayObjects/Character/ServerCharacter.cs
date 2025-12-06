@@ -63,6 +63,8 @@ namespace Gameplay.GameplayObjects.Character
         public float MaxHeat => _buildDataReference.GetFrameData().HeatCapacity;
         private float _lastHeatIncreaseTime = 0.0f;
 
+        [SerializeField] private Gameplay.StatusEffects.Definitions.Overheating _overheatingEffectDefinition;
+
 
         // References.
 
@@ -101,6 +103,8 @@ namespace Gameplay.GameplayObjects.Character
                 this.enabled = false;
                 return;
             }
+
+            CurrentHeat.OnValueChanged += CheckIfExceededHeatCap;
         }
         public override void OnNetworkDespawn()
         {
@@ -243,7 +247,8 @@ namespace Gameplay.GameplayObjects.Character
         }
         
         /// <summary>
-        ///     Set the value of CurrentHeat, clamping if below 0 and notifying if we exceed our heat cap.
+        ///     Set the value of CurrentHeat, clamping if below 0 or above <see cref="MaxHeat"/>.</br>
+        ///     Heat Cap Exceeding is handled separately via the OnValueChanged event on the server.
         /// </summary>
         private void SetCurrentHeat(float newValue)
         {
@@ -253,14 +258,20 @@ namespace Gameplay.GameplayObjects.Character
                 _lastHeatIncreaseTime = NetworkManager.ServerTime.TimeAsFloat;
             }
 
-            if (newValue > MaxHeat)
+            CurrentHeat.Value = Mathf.Clamp(newValue, 0, MaxHeat);
+        }
+        private void CheckIfExceededHeatCap(float previousHeat, float newHeat)
+        {
+            if (newHeat >= MaxHeat && previousHeat < MaxHeat)
             {
-                // Exceeded Heat Cap.
-                Debug.Log("Exceeded Heat Cap");
-                CurrentHeat.Value = 0.0f;
+                // Just Exceeded Heat Cap.
+                StatusEffectPlayer.AddStatusEffect(_overheatingEffectDefinition);
             }
-
-            CurrentHeat.Value = Mathf.Max(newValue, 0);
+            else if (newHeat < MaxHeat && previousHeat >= MaxHeat)
+            {
+                // Just went under our Heat Cap.
+                StatusEffectPlayer.ClearAllStatusEffectsOfType(_overheatingEffectDefinition);
+            }
         }
 
         #endregion

@@ -12,10 +12,6 @@ namespace UI.Debugging
     /// </summary>
     public class PlayerStateUI : NetworkBehaviour
     {
-        [Header("Player References")]
-        private ServerCharacter _localClientServerCharacter;    // The ServerCharacter of the local client.
-
-
         [Header("UI References")]
         [SerializeField] private TMP_Text _healthText;
         private string _healthFormattingString;
@@ -47,6 +43,7 @@ namespace UI.Debugging
             // Unsubscribe to change events.
             if (Player.LocalClientInstance != null)
             {
+                Player.LocalClientInstance.ServerCharacter.NetworkHealthComponent.OnInitialised -= NetworkHealthComponent_OnInitialised;
                 Player.LocalClientInstance.ServerCharacter.NetworkHealthComponent.OnDamageReceived -= ServerCharacter_OnHealthChanged;
                 Player.LocalClientInstance.ServerCharacter.NetworkHealthComponent.OnHealingReceived -= ServerCharacter_OnHealthChanged;
                 Player.LocalClientInstance.ServerCharacter.CurrentHeat.OnValueChanged -= ServerCharacter_OnHeatChanged;
@@ -66,28 +63,32 @@ namespace UI.Debugging
         private void Player_OnLocalPlayerSet()
         {
             // Subscribe to change events.
+            Player.LocalClientInstance.ServerCharacter.NetworkHealthComponent.OnInitialised += NetworkHealthComponent_OnInitialised;
             Player.LocalClientInstance.ServerCharacter.NetworkHealthComponent.OnDamageReceived += ServerCharacter_OnHealthChanged;
             Player.LocalClientInstance.ServerCharacter.NetworkHealthComponent.OnHealingReceived += ServerCharacter_OnHealthChanged;
             Player.LocalClientInstance.ServerCharacter.CurrentHeat.OnValueChanged += ServerCharacter_OnHeatChanged;
 
 
             // Get initial values.
-            ServerCharacter_OnHealthChanged(null);
             ServerCharacter_OnHeatChanged(0.0f, Player.LocalClientInstance.ServerCharacter.CurrentHeat.Value);
         }
+        
 
-        private void ServerCharacter_OnHealthChanged(NetworkHealthComponent.HealthChangeEventArgs _) => _healthText.text = CreateHealthString(_localClientServerCharacter.NetworkHealthComponent.GetCurrentHealth(), _localClientServerCharacter.NetworkHealthComponent.MaxHealth);
-        private void ServerCharacter_OnHeatChanged(float previousValue, float newValue) => _heatText.text = CreateHeatString(newValue, _localClientServerCharacter.MaxHeat);
+        private void NetworkHealthComponent_OnInitialised() => ServerCharacter_OnHealthChanged(null);
+
+
+        private void ServerCharacter_OnHealthChanged(NetworkHealthComponent.HealthChangeEventArgs _) => _healthText.text = CreateHealthString(Player.LocalClientInstance.ServerCharacter.NetworkHealthComponent.GetCurrentHealth(), Player.LocalClientInstance.ServerCharacter.NetworkHealthComponent.MaxHealth);
+        private void ServerCharacter_OnHeatChanged(float previousValue, float newValue) => _heatText.text = CreateHeatString(newValue, Player.LocalClientInstance.ServerCharacter.MaxHeat);
 
 
         private string CreateHealthString(float currentHealth, float maxHealth)
         {
-            _healthFormattingString = GetFormattingString(_localClientServerCharacter.NetworkHealthComponent.MaxHealth); // Call when 'MaxHealth' is changed.
+            _healthFormattingString = GetFormattingString(Player.LocalClientInstance.ServerCharacter.NetworkHealthComponent.MaxHealth); // Call when 'MaxHealth' is changed.
             return string.Concat("Health: ", currentHealth.ToString(_healthFormattingString), "/", maxHealth.ToString(_healthFormattingString));
         }
         private string CreateHeatString(float currentHeat, float maxHeat)
         {
-            _heatFormattingString = GetFormattingString(_localClientServerCharacter.MaxHeat); // Call when 'MaxHeat' is changed.
+            _heatFormattingString = GetFormattingString(Player.LocalClientInstance.ServerCharacter.MaxHeat); // Call when 'MaxHeat' is changed.
             return string.Concat("Heat: ", currentHeat.ToString(_heatFormattingString), "/", maxHeat.ToString(_heatFormattingString));
         }
         private string CreateSpeedString(float currentSpeed) => string.Concat("Speed: ", (Mathf.Round(currentSpeed / 10.0f) * 10.0f).ToString(), Units.SPEED_UNITS);

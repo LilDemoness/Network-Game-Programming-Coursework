@@ -62,5 +62,5 @@ namespace Gameplay.StatusEffects.Definitions
         public virtual void OnCancelClient(ClientCharacter clientCharacter) { }
     }
 
-    public enum StatusEffectType { Buff, Debuff }
+    public enum StatusEffectType { Buff, Debuff, Effect }
 }

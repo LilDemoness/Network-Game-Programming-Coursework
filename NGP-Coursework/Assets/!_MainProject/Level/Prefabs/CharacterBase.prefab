@@ -124,12 +124,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
   m_clientCharacter: {fileID: 0}
+  m_networkNameState: {fileID: 0}
+  _characterName: 
   _buildDataReference:
     <ActiveFrameIndex>k__BackingField: 0
     <ActiveSlottableIndicies>k__BackingField: 
   _networkHealthComponent: {fileID: 3256541695494498627}
+  _overheatingEffectDefinition: {fileID: 11400000, guid: 1b22461243af62a4b8eb5c6e9254a8a1, type: 2}
   _movement: {fileID: 2257280709253185089}
-  TeamID: 0
 --- !u!114 &3256541695494498627
 MonoBehaviour:
   m_ObjectHideFlags: 0

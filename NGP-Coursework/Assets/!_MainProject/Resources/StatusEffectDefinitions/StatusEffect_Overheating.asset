@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f7ff4af1024df294d9390694ee41576c, type: 3}
+  m_Name: StatusEffect_Overheating
+  m_EditorClassIdentifier: 
+  <Name>k__BackingField: Overheating
+  <Lifetime>k__BackingField: -1
+  <StackingType>k__BackingField: 0
+  <Type>k__BackingField: 2
+  RetriggerDelay: 0.5
+  _damagePerTick: 1
+  _heatChangeOnTick: -1
