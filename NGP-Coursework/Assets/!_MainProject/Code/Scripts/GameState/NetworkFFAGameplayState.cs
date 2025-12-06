@@ -18,8 +18,13 @@ namespace Gameplay.GameState
         private Dictionary<ServerCharacter, ServerPlayerGameData> _characterToDataIndex = new();
 
         public NetworkList<PlayerGameData> PlayerData { get; private set; } = new NetworkList<PlayerGameData>(); // Also includes players that have left the game? OR have score in SessionPlayerData (But what about states that don't use scores?)?
+        public List<int> SortedDataIndicies = new List<int>();
+        
         private Dictionary<int, PlayerGameData> _playerIndexToDataDict = new Dictionary<int, PlayerGameData>();
         public PlayerGameData GetPlayerData(ulong clientId) => PlayerData[GetPlayerIndex(clientId)];
+
+        public int GetActualDataCount() => SortedDataIndicies.Count;
+        public PlayerGameData GetSortedData(int position) => PlayerData[SortedDataIndicies[position]];
 
 
         [Inject]
@@ -32,6 +37,12 @@ namespace Gameplay.GameState
         public override void OnNetworkSpawn()
         {
             PlayerData.OnListChanged += OnPlayerDataChanged;
+            if (PlayerData.Count > 0)
+            {
+                // The NetworkList is already populated, meaning that we are likely a rejoining client.
+                // Reinitialise the SortedDataIndicies Array as the NetworkList was populated before our 'OnListChanged' subscription.
+                ReinitialiseSortedArray();
+            }
         }
         public override void OnNetworkDespawn()
         {
@@ -111,7 +122,20 @@ namespace Gameplay.GameState
                 return;
             }
         }
-        private IEnumerator RemoveNullKeysAfterFrame() { yield return null; _characterToDataIndex.RemoveNullKeys(); }
+        private IEnumerator RemoveNullKeysAfterFrame()
+        {
+            yield return null;  // Wait a frame to allow the ServerCharacter to be destroyed and its reference set to null.
+
+            foreach(var kvp in _characterToDataIndex)
+                if (kvp.Key == null)
+                {
+                    PlayerGameData data = PlayerData[kvp.Value.PlayerGameDataListIndex];
+                    data.IsInGame = false;
+                    PlayerData[kvp.Value.PlayerGameDataListIndex] = data;
+                }
+
+            _characterToDataIndex.RemoveNullKeys();
+        }
         // Server-only.
         public override void OnPlayerReconnected(int playerIndex, ServerCharacter newServerCharacter)
         {
@@ -126,6 +150,10 @@ namespace Gameplay.GameState
                 // We found the desired player. Update their cached data where neccessary.
                 _serverPlayerData[i].OnCorrepsondingPlayerRejoined(newServerCharacter);
                 _characterToDataIndex.Add(newServerCharacter, _serverPlayerData[i]);
+
+                PlayerGameData data = PlayerData[_serverPlayerData[i].PlayerGameDataListIndex];
+                data.IsInGame = true;
+                PlayerData[_serverPlayerData[i].PlayerGameDataListIndex] = data;
                 return;
             }
         }
@@ -152,6 +180,10 @@ namespace Gameplay.GameState
 
                         if (changeEvent.Value.PlayerIndex != -1)
                             _playerIndexToDataDict.Add(changeEvent.Value.PlayerIndex, playerData);
+
+                        // Add to and then re-sort our sorted indicies list.
+                        SortedDataIndicies.Add(changeEvent.Index);
+                        SortUp(SortedDataIndicies.Count - 1);
                         break;
                     }
 
@@ -163,6 +195,26 @@ namespace Gameplay.GameState
 
                         if (changeEvent.Value.PlayerIndex != -1)
                             _playerIndexToDataDict[changeEvent.Value.PlayerIndex] = playerData;
+
+                        if (!changeEvent.Value.IsInGame)
+                        {
+                            // This entity is no longer in the game. Don't include them in our sorted data.
+                            SortedDataIndicies.Remove(changeEvent.Index);
+                        }
+                        else if (!changeEvent.PreviousValue.IsInGame && !SortedDataIndicies.Contains(changeEvent.Index))
+                        //else if (!SortedDataIndicies.Contains(changeEvent.Index))
+                        {
+                            // This entity wasn't in the game, but now it is (Note: Using a 'Contains' check to ensure that we don't duplicate this client's entry).
+                            // Re-add them to the Sorted Data.
+                            SortedDataIndicies.Add(changeEvent.Index);
+                            SortUp(SortedDataIndicies.Count - 1);
+                        } else
+                        {
+                            // The entity was in the game and still is, they just changed another piece of data.
+                            // Re-sort our sorted indicies list.
+                            SortUp(changeEvent.Index);
+                        }
+                        
                         break;
                     }
 
@@ -196,9 +248,58 @@ namespace Gameplay.GameState
                                 }
                             }
                         }
+
+                        // As every value may have changed, we should fully re-create and sort our sorted indicies list.
+                        ReinitialiseSortedArray();
                         break;
                     }
             }
+        }
+
+
+        private void ReinitialiseSortedArray()
+        {
+            SortedDataIndicies = new List<int>(PlayerData.Count);
+            for (int i = 0; i < PlayerData.Count; ++i)
+                SortedDataIndicies.Add(i);
+
+            SortFullSortedArray();
+        }
+        private void SortFullSortedArray()
+        {
+            // BubbleSort.
+            bool performedSwap;
+            do
+            {
+                performedSwap = false;
+                for (int i = 1; i < PlayerData.Count; ++i)
+                {
+                    if (FirstExceedsSecond(i, i - 1))
+                    {
+                        // Swap the two indicies.
+                        SwapIndicies(i, i - 1);
+                        performedSwap = true;
+                    }
+                }
+            } while (performedSwap);
+        }
+        private void SortUp(int changedIndex)
+        {
+            for(int i = changedIndex; i >= 1; --i)
+            {
+                if (FirstExceedsSecond(i, i - 1))
+                {
+                    Debug.Log($"Sort: {PlayerData[SortedDataIndicies[i]].PlayerIndex} | {PlayerData[SortedDataIndicies[i - 1]].PlayerIndex}");
+                    SwapIndicies(i, i - 1);
+                }
+            }
+        }
+        private bool FirstExceedsSecond(int firstIndex, int secondIndex) => PlayerData[SortedDataIndicies[firstIndex]].Score > PlayerData[SortedDataIndicies[secondIndex]].Score;
+        private void SwapIndicies(int firstIndex, int secondIndex)
+        {
+            int tempIndex = SortedDataIndicies[firstIndex];
+            SortedDataIndicies[firstIndex] = SortedDataIndicies[secondIndex];
+            SortedDataIndicies[secondIndex] = tempIndex;
         }
 
 
@@ -303,6 +404,8 @@ namespace Gameplay.GameState
 
             public int PlayerIndex;
             public FixedPlayerName Name;
+            public bool IsInGame;
+
             public int Score => DeathsCountAsLostPoints ? (Kills - Deaths) : Kills;
             public int Kills;
             public int Deaths;
@@ -315,8 +418,11 @@ namespace Gameplay.GameState
             {
                 this.PlayerIndex = playerIndex;
                 this.Name = name;
+                this.IsInGame = true;
+
                 this.Kills = 0;
                 this.Deaths = 0;
+
                 this.ListIndex = listIndex;
             }
 
@@ -324,12 +430,14 @@ namespace Gameplay.GameState
             public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
             {
                 serializer.SerializeValue(ref PlayerIndex);
+                serializer.SerializeValue(ref Name);
+                serializer.SerializeValue(ref IsInGame);
                 serializer.SerializeValue(ref Kills);
                 serializer.SerializeValue(ref Deaths);
             }
             public bool Equals(PlayerGameData othr)
-                => (this.PlayerIndex, this.Kills, this.Deaths)
-                == (othr.PlayerIndex, othr.Kills, othr.Deaths);
+                => (this.PlayerIndex, this.Name, this.IsInGame, this.Kills, this.Deaths)
+                == (othr.PlayerIndex, othr.Name, othr.IsInGame, othr.Kills, othr.Deaths);
         }
     }
 }

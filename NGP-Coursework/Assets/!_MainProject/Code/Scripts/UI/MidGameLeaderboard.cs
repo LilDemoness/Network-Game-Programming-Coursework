@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using Gameplay.GameState;
 using TMPro;
@@ -21,7 +22,6 @@ namespace UI
         {
             this._networkPostGame = networkPostGame;
             _networkPostGame.PlayerData.OnListChanged += OnListChanged;
-            InitialiseUI();
         }
 
         private void Awake()
@@ -29,6 +29,7 @@ namespace UI
             HideLeaderboard();
             ClientInput.OnToggleLeaderboardPerformed += ToggleLeaderboard;
         }
+        private void OnEnable() => UpdateUI();  // Always ensure that our UI is updated when we open the Leaderboard.
         private void OnDestroy()
         {
             ClientInput.OnToggleLeaderboardPerformed -= ToggleLeaderboard;
@@ -51,11 +52,19 @@ namespace UI
         private void HideLeaderboard() => this.gameObject.SetActive(false);
 
 
-        private void OnListChanged(Unity.Netcode.NetworkListEvent<NetworkFFAGameplayState.PlayerGameData> changeEvent) => InitialiseUI();
-        private void InitialiseUI()
+        private void OnListChanged(Unity.Netcode.NetworkListEvent<NetworkFFAGameplayState.PlayerGameData> changeEvent)
+        {
+            if (this.isActiveAndEnabled)
+                StartCoroutine(InitialiseAfterFrame()); // Update the UI after a frame to allow for the data to be sorted before accessing.
+        }
+        private IEnumerator InitialiseAfterFrame() { yield return null; UpdateUI(); }
+        private void UpdateUI()
         {
             int currentInstancesCount = _leaderboardRowInstances.Count;
-            for (int i = 0; i < _networkPostGame.PlayerData.Count; ++i)
+            int desiredCount = _networkPostGame.GetActualDataCount();
+
+            // Create/Enable and Setup our Leaderboard Rows.
+            for (int i = 0; i < desiredCount; ++i)
             {
                 if (i >= currentInstancesCount)
                 {
@@ -63,15 +72,23 @@ namespace UI
                     LeaderboardRow leaderboardRow = Instantiate<LeaderboardRow>(_leaderboardRowPrefab, _leaderboardValuesContainer);
                     _leaderboardRowInstances.Add(leaderboardRow);
                 }
+                else if (!_leaderboardRowInstances[i].gameObject.activeSelf)
+                    _leaderboardRowInstances[i].gameObject.SetActive(true);
 
                 // Populate the UI Element.
-                _leaderboardRowInstances[i].SetPlace(i);
+                NetworkFFAGameplayState.PlayerGameData data = _networkPostGame.GetSortedData(i);    // Access the Sorted Data rather than the Unsorted Data, ensuring that our Leaderboard is always in order.
+                _leaderboardRowInstances[i].SetPlace(i + 1);
                 _leaderboardRowInstances[i].SetInformation(
-                    playerName:     _networkPostGame.PlayerData[i].Name,
-                    score:          _networkPostGame.PlayerData[i].Score,
-                    killsCount:     _networkPostGame.PlayerData[i].Kills,
-                    deathsCount:    _networkPostGame.PlayerData[i].Deaths);
+                    playerName:     data.Name,
+                    score:          data.Score,
+                    killsCount:     data.Kills,
+                    deathsCount:    data.Deaths);
             }
+
+            // Disable unneeded rows (Can occur if a player left, etc).
+            for(int i = desiredCount; i < currentInstancesCount; ++i)
+                if (_leaderboardRowInstances[i].gameObject.activeSelf)
+                    _leaderboardRowInstances[i].gameObject.SetActive(false);
         }
     }
 }

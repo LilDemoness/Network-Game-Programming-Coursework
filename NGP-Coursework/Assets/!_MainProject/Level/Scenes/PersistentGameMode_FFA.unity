@@ -6308,7 +6308,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3671268573212348019, guid: 2383fd6616e43f54997ecfeb995632f7, type: 3}
       propertyPath: _gameTime
-      value: 15
+      value: 90
       objectReference: {fileID: 0}
     - target: {fileID: 3671268573212348019, guid: 2383fd6616e43f54997ecfeb995632f7, type: 3}
       propertyPath: '_playerSpawnPoints.Array.data[0]'

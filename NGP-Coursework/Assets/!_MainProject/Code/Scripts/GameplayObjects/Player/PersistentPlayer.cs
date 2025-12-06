@@ -26,6 +26,15 @@ namespace Gameplay.GameplayObjects.Players
         public NetworkVariable<int> PlayerNumber { get; } = new NetworkVariable<int>();
         public NetworkVariable<int> TeamIndex { get; } = new NetworkVariable<int>();
 
+        #if UNITY_EDITOR
+
+        [ContextMenu("Log Player Number")]
+        private void Editor_LogPlayerNumber() => Debug.Log(PlayerNumber.Value);
+        [ContextMenu("Log Team Index")]
+        private void Editor_LogTeamIndex() => Debug.Log(TeamIndex.Value);
+
+        #endif
+
 
         #region Public Accessors
 
@@ -78,8 +87,8 @@ namespace Gameplay.GameplayObjects.Players
         }
         public override void OnDestroy()
         {
-            base.OnDestroy();
             RemovePersistentPlayer();
+            base.OnDestroy();
         }
 
 
