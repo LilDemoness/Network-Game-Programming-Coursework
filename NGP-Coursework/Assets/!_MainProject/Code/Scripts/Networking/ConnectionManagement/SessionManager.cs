@@ -216,6 +216,7 @@ namespace Netcode.ConnectionManagement
             if (_clientIDToPlayerId.TryGetValue(clientID, out string playerId))
             {
                 // We should have data for this client. Update it.
+                Debug.Log("Set Player Data");
                 _clientData[playerId] = sessionPlayerData;
             }
             else

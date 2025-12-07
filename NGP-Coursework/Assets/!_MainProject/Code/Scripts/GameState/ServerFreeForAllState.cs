@@ -51,6 +51,7 @@ namespace Gameplay.GameState
         private const bool USE_GROUPED_RESPAWNS = true;  // If true, respawns are grouped together at the time which is the nearest multiple of '_respawnDelay'.
         private const float RESPAWN_DELAY = 5.0f;
         private const float MIN_RESPAWN_DELAY = 2.0f;
+        private Dictionary<ServerCharacter, (float Time, bool ShouldAutoRespawn)> _characterToRespawnInfoDictionary = new();
 
 
         [Inject]
@@ -144,18 +145,14 @@ namespace Gameplay.GameState
                 }
             }
 
-            // Add a Death to the character who died.
             NetworkObject originCharacterNetworkObject = NetworkManager.Singleton.SpawnManager.SpawnedObjects[message.OriginCharacterObjectId];
             if (originCharacterNetworkObject.TryGetComponent<ServerCharacter>(out ServerCharacter originServerCharacter))
             {
+                // Add a Death to the character who died.
                 _networkGameplayState.OnCharacterDied(originServerCharacter);
-            }
 
-
-            // If the origin character was a Player, mark them for respawn.
-            if (originCharacterNetworkObject.TryGetComponent<Player>(out Player player))
-            {
-                RevivePlayer(player);
+                // Start the respawn of the character who died.
+                _networkGameplayState.StartRespawn(originServerCharacter);
             }
         }
         private void OnConnectionEvent(NetworkManager networkManager, ConnectionEventData connectionEventData)  // Triggered when a client connects or disconnects from the server.
@@ -272,32 +269,6 @@ namespace Gameplay.GameState
             // Spawn the Player Character.
             newPlayer.SpawnWithOwnership(clientId, destroyWithScene: true);
             return newPlayerServerCharacter;
-        }
-
-
-        private void RevivePlayer(Player player)
-        {
-            float respawnDelay = GetRespawnDelay();
-            StartCoroutine(ReviveAfterDelay(player, respawnDelay));
-        }
-        public static float GetRespawnDelay()
-        {
-            if (USE_GROUPED_RESPAWNS)
-            {
-                float serverTime = NetworkManager.Singleton.ServerTime.TimeAsFloat;
-                float respawnDelay = (Mathf.Ceil(serverTime / RESPAWN_DELAY) * RESPAWN_DELAY) - serverTime;
-                return respawnDelay >= MIN_RESPAWN_DELAY ? respawnDelay : respawnDelay + RESPAWN_DELAY; // Prevent being under our minimum respawn time by moving to the next multiple if we are below.
-            }
-            //else
-            //    return RESPAWN_DELAY;
-        }
-        private IEnumerator ReviveAfterDelay(Player player, float respawnDelay)
-        {
-            yield return new WaitForSeconds(respawnDelay);
-
-            EntitySpawnPoint spawnPoint = EntitySpawnPoint.GetRandomSpawnPoint(EntitySpawnPoint.EntityTypes.Player, -1);
-            player.PerformRespawn(spawnPoint.transform.position, spawnPoint.transform.rotation);
-            spawnPoint.SpawnAtPoint();
         }
     }
 }

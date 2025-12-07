@@ -23,6 +23,7 @@ public class CameraControllerTest : NetworkBehaviour
     [SerializeField] private float _verticalSensitivity = 20.0f;
     private NetworkVariable<float> _rotationPivotYRotation = new NetworkVariable<float>(writePerm: NetworkVariableWritePermission.Owner);
     private Vector2 _rotation;
+    private bool _snapRotation = false;
 
     private const float MIN_VERTICAL_ROTATION = -45.0f;
     private const float MAX_VERTICAL_ROTATION = 70.0f;
@@ -101,8 +102,16 @@ public class CameraControllerTest : NetworkBehaviour
             _rotationPivot.localRotation = Quaternion.Euler(0.0f, _rotationPivotYRotation.Value, 0.0f);
         }
 
-        // Lerp our graphics to their target position.
-        LerpGraphicsRotation();
+        if (_snapRotation)
+        {
+            SetGraphicsRotation();
+            _snapRotation = false;
+        }
+        else
+        {
+            // Lerp our graphics to their target position.
+            LerpGraphicsRotation();
+        }
     }
 
 
@@ -140,11 +149,19 @@ public class CameraControllerTest : NetworkBehaviour
     private void Player_OnLocalPlayerBuildUpdated() => OnFrameChanged(_playerManager.GetActiveFrame());
     private void OnFrameChanged(FrameGFX newFrame)
     {
-        // Our frame has changed. Cache frame-specific data that we require for the camera (Vertical Pivot, Offsets, Rotation Axis, etc).
+        // Our frame has changed.
+        // Reset the vertical pivot's rotation so that when accessing it to retrieve our default we calculate the proper values.
+        if (_verticalRotationPivot != null)
+            _verticalRotationPivot.localEulerAngles = _verticalDefaultRotation;
+
+        // Cache frame-specific data that we require for the camera (Vertical Pivot, Offsets, Rotation Axis, etc).
         _verticalRotationPivot = newFrame.VerticalRotationPivot;
         _verticalPivotOffset = newFrame.VerticalRotationPivotOffset;
         _useXRotationForVertical = newFrame.UsesXRotationForVertical;
         _verticalDefaultRotation = _verticalRotationPivot.localEulerAngles;
+
+        // Snap rotation to our current values in case we changed mid-gameplay.
+        SnapRotationClientRpc();
     }
 
 
@@ -190,24 +207,12 @@ public class CameraControllerTest : NetworkBehaviour
         //_verticalRotationPivot.position -= Vector3.one;
     }
 	/// <summary>
-	///		Instantly set the rotation of our graphics transform to face its target rotation.
+	///		Instantly set the rotation of our graphics transform to face its target rotation.</br>
+    ///		Triggers on the next Update() tick.
 	///	</summary>
-    private void SetGraphicsRotation()
-    {
-        // The vertical rotation pivot is the child of the horizontal, so set horizontal first and use local rotation for the vertical.
-        try
-        {
-        _horizontalRotationPivot.rotation = GetHorizontalRotationTarget();
-        _verticalRotationPivot.localRotation = GetVerticalLocalRotationTarget();
-        }
-        catch (System.Exception e)
-        {
-            Debug.Log("", this);
-            throw e;
-        }
-    }
+    private void SetGraphicsRotation() => _snapRotation = true;
     /// <summary>
-	///		Smoothly set the rotation of our graphics transform to face its target rotation..
+	///		Smoothly set the rotation of our graphics transform to face its target rotation.
 	///	</summary>
 	private void LerpGraphicsRotation()
     {

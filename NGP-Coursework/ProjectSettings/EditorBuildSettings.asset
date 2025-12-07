@@ -15,6 +15,9 @@ EditorBuildSettings:
     path: Assets/!_MainProject/Level/Scenes/MechBuildTestScene.unity
     guid: 6cfd2266a07d7954cb6569d8283fd081
   - enabled: 1
+    path: Assets/!_MainProject/Level/Scenes/MidGameCustomisation.unity
+    guid: 863e85f22fb3d274fabc115b05fdf337
+  - enabled: 1
     path: Assets/!_MainProject/Level/Scenes/PersistentGameMode_FFA.unity
     guid: 27a6a203d2ddf774b9e10ffe6bb3d0cc
   - enabled: 1

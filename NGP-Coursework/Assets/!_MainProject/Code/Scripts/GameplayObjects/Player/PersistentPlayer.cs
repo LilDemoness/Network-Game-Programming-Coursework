@@ -54,7 +54,7 @@ namespace Gameplay.GameplayObjects.Players
 
             // Add ourselves to the 'PersistentPlayerRuntimeCollection' for accessing from other scripts.
             //  This is done within OnNetworkSpawn as the NetworkBehaviour properties of this object are accessed when added to the collection.
-            //  If we were to do this within Awake/OnEnable/Start, there would be a change that these values are unset.
+            //  If we were to do this within Awake/OnEnable/Start, there would be a chance that these values are unset.
             _persistentPlayerRuntimeCollection.Add(this);
 
             if (IsServer)
@@ -64,10 +64,11 @@ namespace Gameplay.GameplayObjects.Players
                 {
                     SessionPlayerData playerData = sessionPlayerData.Value;
 
+                    // Load persistent data from the save data.
                     _networkNameState.Name.Value = playerData.PlayerName;
                     PlayerNumber.Value = playerData.PlayerNumber;
                     TeamIndex.Value = playerData.TeamIndex;
-                    // Cache Build Data?
+                    _networkBuildState.TrySetBuild(playerData.BuildData);
                 }
             }
             if (IsOwner)
@@ -117,8 +118,8 @@ namespace Gameplay.GameplayObjects.Players
                 playerData.PlayerName = _networkNameState.Name.Value;
                 playerData.PlayerNumber = PlayerNumber.Value;
                 playerData.TeamIndex = TeamIndex.Value;
-                // Build Data?
-
+                playerData.BuildData = _networkBuildState.BuildDataReference;
+                
                 // Update set value.
                 SessionManager<SessionPlayerData>.Instance.SetPlayerData(OwnerClientId, playerData);
             }

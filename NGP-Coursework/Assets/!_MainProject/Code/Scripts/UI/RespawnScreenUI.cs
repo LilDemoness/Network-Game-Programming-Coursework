@@ -2,6 +2,8 @@ using UnityEngine;
 using TMPro;
 using Gameplay.GameplayObjects.Character;
 using Gameplay.GameplayObjects.Players;
+using System.Collections;
+using Unity.Netcode;
 
 namespace UI
 {
@@ -10,12 +12,18 @@ namespace UI
         [SerializeField] private TMP_Text _killerNameText;
 
         [SerializeField] private TMP_Text _respawnTimeRemainingText;
-        private float _respawnTimeRemaining;
+        private float _respawnElapsedTime;
+        private float _respawnTimeRemaining => (_respawnElapsedTime - Time.time);
         private const string DEFAULT_KILLER_NAME = "SERVER";
+
+
+        [Space(10)]
+        [SerializeField] private NonNavigableButton _customisationButton;
 
 
         private void Awake()
         {
+            Gameplay.GameState.NetworkGameplayState.OnLocalPlayerRespawnStarted += NetworkGameplayState_OnLocalPlayerRespawnStarted;
             Player.OnLocalPlayerDeath += Player_OnLocalPlayerDeath;
             Player.OnLocalPlayerRevived += Player_OnLocalPlayerRevived;
 
@@ -23,11 +31,18 @@ namespace UI
         }
         private void OnDestroy()
         {
+            Gameplay.GameState.NetworkGameplayState.OnLocalPlayerRespawnStarted -= NetworkGameplayState_OnLocalPlayerRespawnStarted;
             Player.OnLocalPlayerDeath -= Player_OnLocalPlayerDeath;
             Player.OnLocalPlayerRevived -= Player_OnLocalPlayerRevived;
         }
 
-        private void Player_OnLocalPlayerDeath(object sender, Player.PlayerDeathEventArgs e) => Show(e.Inflicter, Gameplay.GameState.ServerFreeForAllState.GetRespawnDelay());
+        private void Player_OnLocalPlayerDeath(object sender, Player.PlayerDeathEventArgs e)
+        {
+            SetKillerName(e.Inflicter);
+            //Show(e.Inflicter, Gameplay.GameState.NetworkGameplayState.GetRespawnTime());
+        }
+        private void NetworkGameplayState_OnLocalPlayerRespawnStarted(float respawnDelay) => Show(Time.time + respawnDelay - (NetworkManager.Singleton.LocalTime.TimeAsFloat - NetworkManager.Singleton.ServerTime.TimeAsFloat) / 2.0f);
+
         private void Player_OnLocalPlayerRevived(object sender, System.EventArgs e)
         {
             Debug.Log("Player Revived");
@@ -36,26 +51,41 @@ namespace UI
 
 
 
+        private void SetKillerName(ServerCharacter killer) => _killerNameText.text = killer != null ? killer.CharacterName : DEFAULT_KILLER_NAME;
+        
         public void Show(ServerCharacter killer, float timeToRespawn)
         {
-            Debug.Log("Show");
-
             // Killer Name.
-            _killerNameText.text = killer != null ? killer.CharacterName : DEFAULT_KILLER_NAME;
+            SetKillerName(killer);
 
+            Show(timeToRespawn);
+        }
+        private void Show(float timeToRespawn)
+        {
             // Time Remaining.
-            this._respawnTimeRemaining = timeToRespawn;
+            this._respawnElapsedTime = timeToRespawn;
             _respawnTimeRemainingText.text = _respawnTimeRemaining.ToString("0");
 
             // Show the UI.
             gameObject.SetActive(true);
+
+            // Try to reduce accidental input on the Customisation Button.
+            StartCoroutine(HandleCustomisationButtonInteractability());
         }
+
         public void Hide() => gameObject.SetActive(false);
+
+        // Ensures that the Customisation Button isn't interactable for a short duration after opening to reduce accidental input.
+        private IEnumerator HandleCustomisationButtonInteractability()
+        {
+            _customisationButton.IsInteractable = false;
+            yield return new WaitForSeconds(0.5f);
+            _customisationButton.IsInteractable = true;
+        }
 
 
         private void Update()
         {
-            _respawnTimeRemaining -= Time.deltaTime;
             _respawnTimeRemainingText.text = _respawnTimeRemaining.ToString("0");
         }
     }

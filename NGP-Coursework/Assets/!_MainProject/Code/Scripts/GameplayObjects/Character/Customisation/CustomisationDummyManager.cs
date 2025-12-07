@@ -14,8 +14,10 @@ namespace Gameplay.GameplayObjects.Character.Customisation
 
         [Header("Player Lobby GFX Instances")]
         [SerializeField] private PlayerCustomisationDisplay _playerDummyPrefab;
-        private Dictionary<ulong, PlayerCustomisationDisplay> _playerDummyInstances;
+        private Dictionary<ulong, PlayerCustomisationDisplay> _playerDummyInstances = new Dictionary<ulong, PlayerCustomisationDisplay>();
 
+        [Space(5)]
+        [SerializeField] private bool _onlyShowLocalClient = false;
         [SerializeField] private LobbySpawnPositions[] _playerLobbyGFXSpawnPositions; // Replace with spawning in a circle?
         [System.Serializable]
         public class LobbySpawnPositions
@@ -28,8 +30,6 @@ namespace Gameplay.GameplayObjects.Character.Customisation
 
         private void Awake()
         {
-            _playerDummyInstances = new Dictionary<ulong, PlayerCustomisationDisplay>();
-
             _persistentPlayerRuntimeCollection.ItemAdded += PersistentPlayerCollection_ItemAdded;
             _persistentPlayerRuntimeCollection.ItemRemoved += PersistentPlayerCollection_Removed;
 
@@ -61,6 +61,9 @@ namespace Gameplay.GameplayObjects.Character.Customisation
             }
             else
             {
+                if (!_onlyShowLocalClient)
+                    return; // We aren't wanting to add non-local clients.
+
                 // We are not adding the local client, so put them in the first available spawn position.
                 for (int i = 1; i < _playerLobbyGFXSpawnPositions.Length; ++i)
                 {

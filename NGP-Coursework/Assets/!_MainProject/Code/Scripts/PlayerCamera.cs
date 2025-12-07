@@ -4,29 +4,34 @@ using UnityEngine;
 
 namespace Gameplay.GameplayObjects.Players
 {
-    public class PlayerCamera : MonoBehaviour
+    public class PlayerCamera : Singleton<PlayerCamera>
     {
-        private static CinemachineCamera s_cinemachineCamera;
-        private static Transform s_trackingTarget;
-        private static Transform TrackingTarget
+        private CinemachineCamera _cinemachineCamera;
+        private Transform _trackingTarget;
+        private Transform TrackingTarget
         {
-            get => s_trackingTarget;
+            get => _trackingTarget;
             set
             {
-                s_trackingTarget = value;
+                _trackingTarget = value;
 
-                if (s_cinemachineCamera != null)
-                    s_cinemachineCamera.Target = new CameraTarget() { TrackingTarget = s_trackingTarget };
+                if (_cinemachineCamera != null)
+                    _cinemachineCamera.Target = new CameraTarget() { TrackingTarget = _trackingTarget };
             }
         }
-        public static void SetCameraTarget(Transform cameraTarget) => TrackingTarget = cameraTarget;
+        public static void SetCameraTarget(Transform cameraTarget) => Instance.TrackingTarget = cameraTarget;
+
+        public static void Show() => Instance.gameObject.SetActive(true);
+        public static void Hide() => Instance.gameObject.SetActive(false);
 
 
 
-        private void Awake()
+        protected override void Awake()
         {
-            s_cinemachineCamera = this.GetComponent<CinemachineCamera>();
-            s_cinemachineCamera.Target = new CameraTarget() { TrackingTarget = s_trackingTarget };
+            base.Awake();
+
+            if (this.TryGetComponent<CinemachineCamera>(out _cinemachineCamera))
+                _cinemachineCamera.Target = new CameraTarget() { TrackingTarget = _trackingTarget };
             Player.OnLocalPlayerBuildUpdated += PlayerManager_OnLocalPlayerBuildUpdated;
         }
         private void OnDestroy()
@@ -39,7 +44,13 @@ namespace Gameplay.GameplayObjects.Players
 
         private void SetupCameraForFrame(FrameData frameData)
         {
-            CinemachineThirdPersonFollow thirdPersonFollow = s_cinemachineCamera.GetComponent<CinemachineThirdPersonFollow>();
+            #if UNITY_EDITOR
+
+            Debug.Assert(_cinemachineCamera != null, "You are trying to setup a camera through Cinemachine but the camera has no Cinemachine components", this);
+
+            #endif
+
+            CinemachineThirdPersonFollow thirdPersonFollow = _cinemachineCamera.GetComponent<CinemachineThirdPersonFollow>();
             thirdPersonFollow.ShoulderOffset = frameData.ThirdPersonCameraOffset;
             thirdPersonFollow.VerticalArmLength = frameData.CameraVerticalArmLength;
             thirdPersonFollow.CameraDistance = frameData.CameraDistance;

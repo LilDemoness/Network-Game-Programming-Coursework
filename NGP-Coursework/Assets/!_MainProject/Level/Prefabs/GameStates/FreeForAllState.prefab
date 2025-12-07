@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 5795627754764065503}
   - component: {fileID: 7260594802072808011}
   - component: {fileID: 3671268573212348019}
+  - component: {fileID: 8107891825523104614}
   - component: {fileID: 2293472982834247301}
   - component: {fileID: 7292792879602085089}
   - component: {fileID: 1690924763756929910}
@@ -84,12 +85,24 @@ MonoBehaviour:
   _matchTimeSyncInterval: 15
   _deathsCountAsLostPoints: 0
   _playerPrefab: {fileID: 801874179514615870, guid: 0f3d7e267c592ed448e9668caa3e67bf, type: 3}
-  _playerSpawnPoints:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+--- !u!114 &8107891825523104614
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1688527563463541721}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e87fc08ee34b9c4f96fdb569d6d25c6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  parentReference:
+    TypeName: ApplicationLifecycle.ApplicationController
+  autoRun: 1
+  autoInjectGameObjects: []
+  _objectsToDisableForCustomisation: []
+  _networkGameplayState: {fileID: 7292792879602085089}
 --- !u!114 &2293472982834247301
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -117,6 +130,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
   _persistentPlayerCollection: {fileID: 11400000, guid: 9596a55ab7773b941bfe4be909d1f13d, type: 2}
+  SortedDataIndicies: 
 --- !u!114 &1690924763756929910
 MonoBehaviour:
   m_ObjectHideFlags: 0

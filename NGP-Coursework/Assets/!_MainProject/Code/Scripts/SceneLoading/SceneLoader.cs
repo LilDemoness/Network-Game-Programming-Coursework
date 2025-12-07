@@ -40,6 +40,8 @@ namespace SceneLoading
         };
 
         [SerializeField] private string[] _gameplayMaps;
+
+        private const string MID_GAME_CUSTOMISATION_SCENE_NAME = "MidGameCustomisation";
 #endregion
 
 
@@ -273,6 +275,7 @@ namespace SceneLoading
         public void LoadGameModeAndMap(GameMode gameMode, string mapName, LoadSceneMode loadSceneMode = LoadSceneMode.Single)
         {
             LoadGameMode(gameMode, loadSceneMode);
+            LoadNetworkScene(MID_GAME_CUSTOMISATION_SCENE_NAME, LoadSceneMode.Additive);
             LoadMap(mapName);
         }
         public void LoadGameMode(GameMode gameMode, LoadSceneMode loadSceneMode = LoadSceneMode.Single)

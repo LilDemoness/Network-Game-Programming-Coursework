@@ -4671,6 +4671,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _killerNameText: {fileID: 234222366}
   _respawnTimeRemainingText: {fileID: 197759102}
+  _customisationButton: {fileID: 1807852749}
 --- !u!1 &1762156671
 GameObject:
   m_ObjectHideFlags: 0
@@ -5008,7 +5009,19 @@ MonoBehaviour:
   _allowInputWhenNotInFocus: 0
   _onButtonTriggered:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1150197779574916156}
+        m_TargetAssemblyTypeName: Gameplay.GameState.ClientGameplayState, Assembly-CSharp
+        m_MethodName: OpenCustomisationUI
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   _iconDisplayText: {fileID: 510843063}
   _textFormattingString: 'Customise Frame
 
@@ -6411,6 +6424,26 @@ PrefabInstance:
       propertyPath: InScenePlacedSourceGlobalObjectIdHash
       value: 870068260
       objectReference: {fileID: 0}
+    - target: {fileID: 8107891825523104614, guid: 2383fd6616e43f54997ecfeb995632f7, type: 3}
+      propertyPath: _objectsToDisableForCustomisation.Array.size
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 8107891825523104614, guid: 2383fd6616e43f54997ecfeb995632f7, type: 3}
+      propertyPath: '_objectsToDisableForCustomisation.Array.data[0]'
+      value: 
+      objectReference: {fileID: 811893671}
+    - target: {fileID: 8107891825523104614, guid: 2383fd6616e43f54997ecfeb995632f7, type: 3}
+      propertyPath: '_objectsToDisableForCustomisation.Array.data[1]'
+      value: 
+      objectReference: {fileID: 1762156671}
+    - target: {fileID: 8107891825523104614, guid: 2383fd6616e43f54997ecfeb995632f7, type: 3}
+      propertyPath: '_objectsToDisableForCustomisation.Array.data[2]'
+      value: 
+      objectReference: {fileID: 1378770254}
+    - target: {fileID: 8107891825523104614, guid: 2383fd6616e43f54997ecfeb995632f7, type: 3}
+      propertyPath: '_objectsToDisableForCustomisation.Array.data[3]'
+      value: 
+      objectReference: {fileID: 97331667}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -6425,6 +6458,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 94509dd5bd4fee1409fcf78dd3232424, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1150197779574916156 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8107891825523104614, guid: 2383fd6616e43f54997ecfeb995632f7, type: 3}
+  m_PrefabInstance: {fileID: 1150197779574916154}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e87fc08ee34b9c4f96fdb569d6d25c6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!224 &1869607188483514971 stripped
@@ -6642,6 +6686,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 811893675}
     m_Modifications:
+    - target: {fileID: 2703786864099990468, guid: 2632b872ce31e1248aac0e86a2c8273f, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2703786864099990468, guid: 2632b872ce31e1248aac0e86a2c8273f, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2703786864099990468, guid: 2632b872ce31e1248aac0e86a2c8273f, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2886894643586397375, guid: 2632b872ce31e1248aac0e86a2c8273f, type: 3}
       propertyPath: m_AnchorMax.x
       value: 0

@@ -44,21 +44,28 @@ namespace UI.Customisation.SlottableSelection
             GenerateButtons();
             CleanupTabs();
 
+            PersistentPlayer.OnLocalPlayerBuildChanged += PersistentPlayer_OnLocalPlayerBuildChanged;
+        }
+
+        private void OnEnable()
+        {
             ClientInput.OnNavigatePerformed += ClientInput_OnNavigatePerformed;
             ClientInput.OnNextTabPerformed += ClientInput_OnNextTabPerformed;
             ClientInput.OnPreviousTabPerformed += ClientInput_OnPreviousTabPerformed;
-            PersistentPlayer.OnLocalPlayerBuildChanged += PersistentPlayer_OnLocalPlayerBuildChanged;
         }
         private IEnumerator Start()
         {
             yield return null;
             PersistentPlayer_OnLocalPlayerBuildChanged(PersistentPlayer.LocalPersistentPlayer.NetworkBuildState.BuildDataReference);    // Temp - Ensure build data is loaded initially.
         }
-        private void OnDestroy()
+        private void OnDisable()
         {
             ClientInput.OnNavigatePerformed -= ClientInput_OnNavigatePerformed;
             ClientInput.OnNextTabPerformed -= ClientInput_OnNextTabPerformed;
             ClientInput.OnPreviousTabPerformed -= ClientInput_OnPreviousTabPerformed;
+        }
+        private void OnDestroy()
+        {
             PersistentPlayer.OnLocalPlayerBuildChanged -= PersistentPlayer_OnLocalPlayerBuildChanged;
         }
 

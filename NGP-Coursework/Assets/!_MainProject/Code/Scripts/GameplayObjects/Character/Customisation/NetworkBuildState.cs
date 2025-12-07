@@ -136,6 +136,11 @@ namespace Gameplay.GameplayObjects
         public void SelectSlottableData(AttachmentSlotIndex slotIndex, int slottableDataIndex) => SetSlottableServerRpc(slotIndex, slottableDataIndex);
 
 
+        public void TrySetBuild(BuildData buildData)
+        {
+            if (buildData != null)
+                SetBuildServerRpc(buildData.ActiveFrameIndex, buildData.ActiveSlottableIndicies);
+        }
         [Rpc(SendTo.Server)]
         public void SetBuildServerRpc(int frameIndex, int[] slottableIndicies)
         {
@@ -155,11 +160,18 @@ namespace Gameplay.GameplayObjects
         [Rpc(SendTo.Everyone)]
         private void NotifyOfFullBuildChangeRpc()
         {
-            _buildDataReference.SetFrameDataIndex(ActiveFrameIndex.Value);
+            int activeFrameIndex = ActiveFrameIndex.Value;
             int[] slottableIndicies = new int[ActiveSlottableIndicies.Count];
             for (int i = 0; i < slottableIndicies.Length; ++i)
                 slottableIndicies[i] = ActiveSlottableIndicies[i];
-            _buildDataReference.SetActiveSlottableDataIndicies(slottableIndicies);
+
+            if (_buildDataReference == null)
+                _buildDataReference = new BuildData(activeFrameIndex, slottableIndicies);
+            else
+            {
+                _buildDataReference.SetFrameDataIndex(activeFrameIndex);
+                _buildDataReference.SetActiveSlottableDataIndicies(slottableIndicies);
+            }
             _shouldUpdateBuildDataReference = true;
 
             OnBuildChanged?.Invoke(_buildDataReference);

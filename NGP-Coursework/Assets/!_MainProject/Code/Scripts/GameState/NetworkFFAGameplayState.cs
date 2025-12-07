@@ -1,7 +1,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Gameplay.GameplayObjects.Character;
+using Gameplay.GameplayObjects.Players;
 using Unity.Netcode;
 using UnityEngine;
 using Utils;
@@ -354,7 +356,6 @@ namespace Gameplay.GameState
             PlayerData[listIndex] = data;
             Debug.Log($"Player '{serverCharacter.CharacterName}' - New Deaths: {PlayerData[listIndex].Deaths}");
         }
-
 
 
         public class ServerPlayerGameData  // Contains additional information needed when passing to the PostGameState, but that doesn't need to be synced during the game.

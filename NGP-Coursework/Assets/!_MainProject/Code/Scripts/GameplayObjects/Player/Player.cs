@@ -9,6 +9,7 @@ using UserInput;
 using Unity.Netcode.Components;
 using Netcode.ConnectionManagement;
 using System.Collections;
+using System.Linq;
 
 namespace Gameplay.GameplayObjects.Players
 {
@@ -80,10 +81,6 @@ namespace Gameplay.GameplayObjects.Players
         }
         public override void OnNetworkSpawn()
         {
-            // Cache our linked PersistentPlayer.
-            if (!_runtimeCollection.TryGetPlayer(this.OwnerClientId, out _persistentPlayer))
-                throw new System.Exception($"No PersistenPlayer Reference for Client: {OwnerClientId}");
-
             if (IsOwner)
             {
                 LocalClientInstance = this;
@@ -97,13 +94,26 @@ namespace Gameplay.GameplayObjects.Players
                 ServerCharacter.NetworkHealthComponent.OnDied += Server_OnDied;
             }
 
+            // Cache the corresponding PersistentPlayer and perform any required initialisations.
+            // Performed after an 'Initialisation Frame' (1 Frame) to allow for the PersistentPlayer instances to populate the collection on a connecting client.
+            StartCoroutine(GetPersistentPlayerAfterInitialisationFrame());
+        }
+        private IEnumerator GetPersistentPlayerAfterInitialisationFrame()
+        {
+            yield return null;  // Wait a frame to allow for the PersistentPlayerRunetimeCollection to be setup on the connecting client.
+
+            // Cache our linked PersistentPlayer.
+            if (!_runtimeCollection.TryGetPlayer(this.OwnerClientId, out _persistentPlayer))
+                throw new System.Exception($"No PersistenPlayer Reference for Client: {OwnerClientId}");
+
             // When the PersistentPlayer's Build changes, update this player instance's build
             _persistentPlayer.NetworkBuildState.OnBuildChanged += OnBuildChanged;
             OnBuildChanged(_persistentPlayer.NetworkBuildState.BuildDataReference); // Ensure that we sync our initial state (Change to trigger after a frame if we are having issues here).
         }
         public override void OnNetworkDespawn()
         {
-            _persistentPlayer.NetworkBuildState.OnBuildChanged -= OnBuildChanged;
+            if (_persistentPlayer != null)
+                _persistentPlayer.NetworkBuildState.OnBuildChanged -= OnBuildChanged;
 
             if (IsServer)
             {
@@ -112,11 +122,10 @@ namespace Gameplay.GameplayObjects.Players
                 SessionPlayerData? sessionPlayerData = SessionManager<SessionPlayerData>.Instance.GetPlayerData(OwnerClientId);
                 if (sessionPlayerData.HasValue)
                 {
-                    // Update the Player Data struct.
+                    // Update the Player Data struct with Runtime Values (Position, Health, Etc; NOT: Build, Name, and other persistent values).
                     SessionPlayerData playerData = sessionPlayerData.Value;
                     playerData.PlayerPosition = movementTransform.position;
                     playerData.PlayerRotation = movementTransform.rotation;
-                    //playerData.BuildData = ServerCharacter.BuildData.Value;
                     playerData.CurrentHealth = ServerCharacter.NetworkHealthComponent.GetCurrentHealth();
                     playerData.HasCharacterSpawned = true;
 
