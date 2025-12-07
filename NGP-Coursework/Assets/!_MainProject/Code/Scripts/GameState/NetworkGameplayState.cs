@@ -22,6 +22,10 @@ namespace Gameplay.GameState
         public static event System.Action<float> OnLocalPlayerRespawnStarted;
 
 
+        public static event System.Action OnLocalPlayerInitialCustomisationRequested;
+        private static Dictionary<ulong, System.Action<ulong>> s_initialCustomisationPrompts = new();
+
+
 
         public abstract void Initialise(ServerCharacter[] playerCharacters, ServerCharacter[] npcCharacters);
         public abstract void AddPlayer(ServerCharacter playerCharacter);
@@ -146,6 +150,24 @@ namespace Gameplay.GameState
             }
             //else
             //    return RESPAWN_DELAY;
+        }
+
+
+        public void PromptInitialCustomisation(ulong clientId, System.Action<ulong> onCompleteCallback)
+        {
+            PromptInitialCustomisationRpc(RpcTarget.Group(new[] { clientId }, RpcTargetUse.Temp));
+            s_initialCustomisationPrompts.Add(clientId, onCompleteCallback);
+        }
+        [Rpc(SendTo.SpecifiedInParams)]
+        private void PromptInitialCustomisationRpc(RpcParams rpcParams = default) => OnLocalPlayerInitialCustomisationRequested?.Invoke();
+        [Rpc(SendTo.Server)]
+        public void InitialCustomisationPromptCompletedServerRpc(RpcParams rpcParams = default)
+        {
+            Debug.Log("Initial Customisation Completed For Client: " + rpcParams.Receive.SenderClientId);
+            if (!s_initialCustomisationPrompts.TryGetValue(rpcParams.Receive.SenderClientId, out System.Action<ulong> onCompleteCallback))
+                throw new System.Exception();
+
+            onCompleteCallback?.Invoke(rpcParams.Receive.SenderClientId);
         }
 
 

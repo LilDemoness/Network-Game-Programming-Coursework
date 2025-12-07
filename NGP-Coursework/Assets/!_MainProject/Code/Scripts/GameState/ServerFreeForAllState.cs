@@ -198,12 +198,26 @@ namespace Gameplay.GameState
 
             //if (__PlayerExists__)
             //    return;   // This client already exists within the game.
-
             // A client has joined after the initial spawn.
+
+            SessionPlayerData? potentialData = SessionManager<SessionPlayerData>.Instance.GetPlayerData(clientId);
+            bool isRejoin = potentialData.HasValue && potentialData.Value.HasCharacterSpawned;
+            Debug.Log("Is Rejoin? " + isRejoin);
+
+            if (isRejoin)
+                FinishPlayerJoin(clientId);
+            else
+                PromptPlayerForInitialCustomisation(clientId);
+
+        }
+        private void PromptPlayerForInitialCustomisation(ulong clientId) => _networkGameplayState.PromptInitialCustomisation(clientId, FinishPlayerJoin);
+        private void FinishPlayerJoin(ulong clientId)
+        {
             ServerCharacter playerCharacter = SpawnPlayer(clientId, true, EntitySpawnPoint.GetRandomSpawnPoint(EntitySpawnPoint.EntityTypes.Player, -1));
             _networkGameplayState.AddPlayer(playerCharacter);
             _networkTimer.SyncGameTime();
         }
+        
 
 
         

@@ -575,6 +575,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4017252668d6dc442aa478be73dd4916, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _persistentPlayerCollection: {fileID: 11400000, guid: 9596a55ab7773b941bfe4be909d1f13d, type: 2}
   _customisationDummyManager: {fileID: 1499624305}
 --- !u!1 &1106942830
 GameObject:

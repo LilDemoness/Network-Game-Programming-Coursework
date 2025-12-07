@@ -1,4 +1,5 @@
 using System.Linq;
+using Gameplay.GameplayObjects;
 using Gameplay.GameplayObjects.Character.Customisation;
 using Gameplay.GameplayObjects.Players;
 using Unity.Cinemachine;
@@ -24,14 +25,14 @@ namespace UI.Customisation
             base.Awake();
             this.gameObject.SetActive(false);   // Start Hidden.
 
-            Player.OnLocalPlayerBuildUpdated += Player_OnLocalPlayerBuildUpdated;
+            PersistentPlayer.OnLocalPlayerBuildChanged += OnLocalPlayerBuildUpdated;
         }
         private void OnDestroy()
         {
-            Player.OnLocalPlayerBuildUpdated -= Player_OnLocalPlayerBuildUpdated;
+            PersistentPlayer.OnLocalPlayerBuildChanged -= OnLocalPlayerBuildUpdated;
         }
 
-        private void Player_OnLocalPlayerBuildUpdated(Gameplay.GameplayObjects.Character.Customisation.Data.BuildData obj)
+        private void OnLocalPlayerBuildUpdated(Gameplay.GameplayObjects.Character.Customisation.Data.BuildData obj)
         {
             _customisationDummyManager.UpdateCustomisationDummy(Unity.Netcode.NetworkManager.Singleton.LocalClientId, obj);
         }

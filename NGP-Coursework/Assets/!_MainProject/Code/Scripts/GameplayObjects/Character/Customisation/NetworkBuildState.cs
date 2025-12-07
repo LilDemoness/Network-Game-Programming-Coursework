@@ -33,6 +33,7 @@ namespace Gameplay.GameplayObjects
 
         private void Awake()
         {
+            _buildDataReference ??= new BuildData(0);
             SubscribeToNetworkEvents();
         }
         public override void OnNetworkSpawn()
