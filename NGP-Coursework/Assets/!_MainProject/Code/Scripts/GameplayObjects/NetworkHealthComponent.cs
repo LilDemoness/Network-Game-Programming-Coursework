@@ -17,7 +17,7 @@ namespace Gameplay.GameplayObjects
     public class NetworkHealthComponent : NetworkBehaviour, IDamageable
     {
         private NetworkVariable<float> _currentHealth { get; } = new NetworkVariable<float>();
-        public float MaxHealth { get; set; } = 10.0f;   // Initial value for testing. Remove once Builds have been re-implemented.
+        public float MaxHealth { get; set; } = -1.0f;   // Initial value for notifying us that we haven't set the value for some reason.
 
         private NetworkVariable<LifeState> _lifeState { get; } = new NetworkVariable<LifeState>(LifeState.Alive);
 
@@ -28,9 +28,11 @@ namespace Gameplay.GameplayObjects
         #region Events
 
         public event System.Action OnInitialised;
+        public bool IsInitialised = false;
 
         public event System.Action<HealthChangeEventArgs> OnDamageReceived;
         public event System.Action<HealthChangeEventArgs> OnHealingReceived;
+        public event System.Action<float, float> OnHealthChanged;
 
         public event System.Action<BaseDamageReceiverEventArgs> OnDied;
         public event System.Action<BaseDamageReceiverEventArgs> OnRevived;
@@ -41,12 +43,17 @@ namespace Gameplay.GameplayObjects
         #region Event RPCs
 
         [Rpc(SendTo.Everyone)]
-        private void NotifyOfInitialisationRpc() => OnInitialised?.Invoke();
+        private void NotifyOfInitialisationRpc(float maxHealth)
+        {
+            this.MaxHealth = maxHealth;
+            IsInitialised = true;
+            OnInitialised?.Invoke();
+        }
 
         [Rpc(SendTo.Everyone)]
-        private void NotifyOfDamageRpc(ulong inflicterObjectId, float healthChange) => OnDamageReceived?.Invoke(new HealthChangeEventArgs(GetServerCharacterForObjectId(inflicterObjectId), healthChange));
+        private void NotifyOfDamageRpc(ulong inflicterObjectId, float newHealth, float healthChange) => OnDamageReceived?.Invoke(new HealthChangeEventArgs(GetServerCharacterForObjectId(inflicterObjectId), newHealth, healthChange));
         [Rpc(SendTo.Everyone)]
-        private void NotifyOfHealingRpc(ulong inflicterObjectId, float healthChange) => OnHealingReceived?.Invoke(new HealthChangeEventArgs(GetServerCharacterForObjectId(inflicterObjectId), healthChange));
+        private void NotifyOfHealingRpc(ulong inflicterObjectId, float newHealth, float healthChange) => OnHealingReceived?.Invoke(new HealthChangeEventArgs(GetServerCharacterForObjectId(inflicterObjectId), newHealth, healthChange));
 
         [Rpc(SendTo.Everyone)]
         private void NotifyOfDeathRpc(ulong inflicterObjectId)
@@ -77,13 +84,24 @@ namespace Gameplay.GameplayObjects
         #endregion
 
 
+        public override void OnNetworkSpawn()
+        {
+            _currentHealth.OnValueChanged += InvokeOnHealthChanged;
+        }
+        public override void OnNetworkDespawn()
+        {
+            _currentHealth.OnValueChanged -= InvokeOnHealthChanged;
+        }
+        private void InvokeOnHealthChanged(float prevVal, float newVal) => OnHealthChanged?.Invoke(prevVal, newVal);
+
+
         public void InitialiseDamageReceiver_Server(float maxHealth)
         {
             this.MaxHealth = maxHealth;
             this._currentHealth.Value = maxHealth;
             this._lifeState.Value = LifeState.Alive;
 
-            NotifyOfInitialisationRpc();
+            NotifyOfInitialisationRpc(maxHealth);
         }
 
         public void SetMaxHealth_Server(ServerCharacter inflicter, int newMaxHealth, bool increaseHealth = false, bool excessHealthBecomesOverhealth = false)
@@ -100,7 +118,7 @@ namespace Gameplay.GameplayObjects
                 if (increaseHealth)
                 {
                     SetCurrentHealth_Server(inflicter, _currentHealth.Value + delta);
-                    NotifyOfHealingRpc(inflicter.NetworkObjectId, delta);
+                    NotifyOfHealingRpc(inflicter.NetworkObjectId, _currentHealth.Value, delta);
                 }
             }
             else
@@ -113,7 +131,7 @@ namespace Gameplay.GameplayObjects
                     else
                     {
                         SetCurrentHealth_Server(inflicter, _currentHealth.Value + delta);
-                        NotifyOfDamageRpc(inflicter.NetworkObjectId, delta);
+                        NotifyOfDamageRpc(inflicter.NetworkObjectId, _currentHealth.Value, delta);
                     }
                 }
             }
@@ -144,9 +162,9 @@ namespace Gameplay.GameplayObjects
 
             // Notify whether we received healing or damage
             if (isHeal)
-                NotifyOfHealingRpc(inflicter.NetworkObjectId, healthChange);
+                NotifyOfHealingRpc(inflicter.NetworkObjectId, _currentHealth.Value, healthChange);
             else
-                NotifyOfDamageRpc(inflicter.NetworkObjectId, healthChange);
+                NotifyOfDamageRpc(inflicter.NetworkObjectId, _currentHealth.Value, healthChange);
         }
         public void SetCurrentHealth_Server(ServerCharacter inflicter, float newValue, bool excessBecomesOverhealth = false)
         {
@@ -241,10 +259,12 @@ namespace Gameplay.GameplayObjects
         }
         public class HealthChangeEventArgs : BaseDamageReceiverEventArgs
         {
+            public float NewHealth;
             public float HealthChange;
 
-            public HealthChangeEventArgs(ServerCharacter inflicter, float healthChange) : base(inflicter)
+            public HealthChangeEventArgs(ServerCharacter inflicter, float newHealth, float healthChange) : base(inflicter)
             {
+                this.NewHealth = newHealth;
                 this.HealthChange = healthChange;
             }
         }
