@@ -91,6 +91,7 @@ namespace Gameplay.GameplayObjects.Players
 
             if (IsServer)
             {
+                ServerCharacter.NetworkHealthComponent.OnRevived += NotifyOwnerOfRespawn;
                 ServerCharacter.NetworkHealthComponent.OnDied += Server_OnDied;
             }
 
@@ -134,7 +135,10 @@ namespace Gameplay.GameplayObjects.Players
                 }
 
                 if (ServerCharacter != null && ServerCharacter.NetworkHealthComponent != null)
+                {
                     ServerCharacter.NetworkHealthComponent.OnDied -= Server_OnDied;
+                    ServerCharacter.NetworkHealthComponent.OnRevived -= NotifyOwnerOfRespawn;
+                }
             }
         }
 
@@ -261,19 +265,7 @@ namespace Gameplay.GameplayObjects.Players
             OnLocalPlayerDeath?.Invoke(this, new PlayerDeathEventArgs(ServerCharacter, inflicter)); // Notify Listeners (Respawn Screen, etc).
         }
 
-
-
-        public void PerformRespawn(Vector3 respawnPosition, Quaternion respawnRotation)
-        {
-            // Revive the character.
-            ServerCharacter.NetworkHealthComponent.Revive_Server(null);  // Revive the character from the Game System.
-            NetworkTransform.Teleport(respawnPosition, respawnRotation, this.transform.localScale);    // Note: Doesn't actually change rotation as the CameraControllerTest instantly overrides it.
-            Debug.LogWarning("To-Implement: Respawning Rotation");
-
-            // Notify the owner of the respawn.
-            NotifyOwnerOfRespawn();
-        }
-
+        private void NotifyOwnerOfRespawn(NetworkHealthComponent.BaseDamageReceiverEventArgs _) => OnPlayerRespawnPerformedOwnerRpc();
         /// <summary>
         ///     Notify the owning client that their player has been respawned.
         /// </summary>

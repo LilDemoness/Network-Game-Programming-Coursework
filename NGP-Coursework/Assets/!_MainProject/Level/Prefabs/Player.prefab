@@ -104,6 +104,10 @@ PrefabInstance:
       value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 781988145697744951, guid: 19e12c250a369b843b0be12527b88951, type: 3}
+      propertyPath: _gfxRoot
+      value: 
+      objectReference: {fileID: 7221482373417598275}
+    - target: {fileID: 781988145697744951, guid: 19e12c250a369b843b0be12527b88951, type: 3}
       propertyPath: _collection
       value: 
       objectReference: {fileID: 11400000, guid: 9596a55ab7773b941bfe4be909d1f13d, type: 2}
@@ -304,7 +308,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
-  _characterName: 
 --- !u!114 &4214977152437163335 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 1536520540174567601, guid: 19e12c250a369b843b0be12527b88951, type: 3}

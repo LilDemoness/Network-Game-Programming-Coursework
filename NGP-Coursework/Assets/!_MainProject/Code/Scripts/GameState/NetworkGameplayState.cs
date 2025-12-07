@@ -86,11 +86,8 @@ namespace Gameplay.GameState
         {
             CharacterToRespawnInfoDictionary.Remove(serverCharacter);
 
-            if (!serverCharacter.TryGetComponent<Player>(out Player player))
-                throw new System.NotImplementedException("We currently cannot handle the Respawning of ServerCharacters without a Player component.");
-
             EntitySpawnPoint spawnPoint = EntitySpawnPoint.GetRandomSpawnPoint(EntitySpawnPoint.EntityTypes.Player, -1);
-            player.PerformRespawn(spawnPoint.transform.position, spawnPoint.transform.rotation);
+            serverCharacter.RespawnCharacter(spawnPoint.transform.position, spawnPoint.transform.rotation);
             spawnPoint.SpawnAtPoint();
         }
         /// <summary>

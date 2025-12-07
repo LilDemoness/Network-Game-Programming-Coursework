@@ -89,6 +89,8 @@ namespace Gameplay.GameplayObjects.Character
 
         public NetworkVariable<int> TeamID { get; set; } = new NetworkVariable<int>(-1);
 
+        [SerializeField] private GameObject _gfxRoot;
+
 
         private void Awake()
         {
@@ -105,10 +107,13 @@ namespace Gameplay.GameplayObjects.Character
             }
 
             CurrentHeat.OnValueChanged += CheckIfExceededHeatCap;
+            NetworkHealthComponent.OnDied += OnCharacterDied;
         }
         public override void OnNetworkDespawn()
         {
             // Unsubscribe from NetworkVariable Events.
+            CurrentHeat.OnValueChanged -= CheckIfExceededHeatCap;
+            NetworkHealthComponent.OnDied -= OnCharacterDied;
         }
 
 
@@ -294,6 +299,39 @@ namespace Gameplay.GameplayObjects.Character
             _networkHealthComponent.InitialiseDamageReceiver_Server(buildData.GetFrameData().MaxHealth);
             InitialiseHeat();
         }
+
+        #endregion
+
+
+
+        #region Death & Respawning
+
+        public void OnCharacterDied(NetworkHealthComponent.BaseDamageReceiverEventArgs _) => OnCharacterDied();
+        public void OnCharacterDied()
+        {
+            // Spawn Death Model.
+
+            // Hide GFX.
+            HideCharacterGFXClientRpc();
+        }
+
+        public void RespawnCharacter(Vector3 spawnPosition, Quaternion spawnRotation)
+        {
+            // Remove the Death Model (Or have it handle that itself).
+
+            // Show GFX.
+            ShowCharacterGFXClientRpc();
+
+            // Perpetuate Required Revive Changes.
+            NetworkHealthComponent.Revive_Server(null); // Revive the character from the server.
+            this.GetComponent<Unity.Netcode.Components.NetworkTransform>().Teleport(spawnPosition, spawnRotation, this.transform.lossyScale);   // Teleport to our respawn position.
+        }
+
+
+        [Rpc(SendTo.ClientsAndHost)]
+        private void ShowCharacterGFXClientRpc() => _gfxRoot.SetActive(true);
+        [Rpc(SendTo.ClientsAndHost)]
+        private void HideCharacterGFXClientRpc() => _gfxRoot.SetActive(false);
 
         #endregion
 

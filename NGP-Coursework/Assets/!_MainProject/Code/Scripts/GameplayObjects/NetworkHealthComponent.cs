@@ -78,7 +78,7 @@ namespace Gameplay.GameplayObjects
         private void NotifyOfReviveRpc()
         {
             OnLifeStateChanged?.Invoke(null, _lifeState.Value);
-            //OnRevived?.Invoke(new BaseDamageReceiverEventArgs(GetServerCharacterForObjectId(inflicterObjectId)));
+            OnRevived?.Invoke(new BaseDamageReceiverEventArgs(null));
         }
 
         #endregion
@@ -98,8 +98,9 @@ namespace Gameplay.GameplayObjects
         public void InitialiseDamageReceiver_Server(float maxHealth)
         {
             this.MaxHealth = maxHealth;
-            this._currentHealth.Value = maxHealth;
-            this._lifeState.Value = LifeState.Alive;
+            if (this._lifeState.Value == LifeState.Alive)
+                this._currentHealth.Value = maxHealth;
+            //this._lifeState.Value = LifeState.Alive;
 
             NotifyOfInitialisationRpc(maxHealth);
         }
