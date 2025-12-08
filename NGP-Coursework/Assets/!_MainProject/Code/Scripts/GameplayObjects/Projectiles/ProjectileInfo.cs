@@ -11,6 +11,9 @@ namespace Gameplay.GameplayObjects.Projectiles
         [Tooltip("Projectile's speed (In meters/second).")]
         public float Speed;
         
+        [Tooltip("The layers the projectile can hit.")]
+        public LayerMask TargetableLayers;
+        
 
         [Header("Auto Destruction")]
         [Tooltip("Maximum range of the Projectile (In Seconds). '0.0' for Infinite Range.")]

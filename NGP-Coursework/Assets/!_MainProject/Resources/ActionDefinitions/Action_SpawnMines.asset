@@ -53,7 +53,7 @@ MonoBehaviour:
         _prefab: {fileID: 6636132701635344505, guid: 758cb40804652f244a4f0657fadd9ff7, type: 3}
         _maxCount: 10
         _lifetime: 3
-        _destroyFX: {fileID: 4037183185398935712, guid: 07dedc6d9d8e8ab468b454fc9f0fdf49, type: 3}
+        _destroyFX: {fileID: -2805019255976686636, guid: 93485fd5fc2ccf2439cb3239186f6382, type: 3}
     - rid: 9030112632148066305
       type: {class: FixedSpread, ns: Gameplay.Actions.Effects, asm: Assembly-CSharp}
       data:

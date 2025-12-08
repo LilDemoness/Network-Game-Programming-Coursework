@@ -102,5 +102,16 @@ namespace VisualEffects
 
             OnShutdownComplete?.Invoke(this);
         }
+
+
+#if UNITY_EDITOR
+
+        [ContextMenu("Setup/Find All Child Particle Systems")]
+        private void Setup_FindAllChildParticleSystems()
+        {
+            _particleSystems = new List<ParticleSystem>(GetComponentsInChildren<ParticleSystem>());
+        }
+
+#endif
+        }
     }
-}

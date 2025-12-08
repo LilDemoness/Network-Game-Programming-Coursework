@@ -15,7 +15,7 @@ MonoBehaviour:
   IsHostileAction: 1
   <ShouldNotifyClient>k__BackingField: 1
   <ActivationStyle>k__BackingField: 0
-  <ImmediateHeat>k__BackingField: 0
+  <ImmediateHeat>k__BackingField: 0.2
   <ContinuousHeat>k__BackingField: 0
   <RetriggerHeat>k__BackingField: 1
   <ExecutionDelay>k__BackingField: 0
@@ -38,7 +38,9 @@ MonoBehaviour:
   - rid: 6632896607793709159
   TriggeringVisuals:
   - rid: 6632896609068777570
+  - rid: 1083950434222342645
   - rid: 6632896607793709162
+  - rid: 1083950434222342644
   HitVisuals:
   - rid: 1083950434222342314
   <ActionCrosshairPrefab>k__BackingField: {fileID: 830966631555543426, guid: 9d14fbeb532b8d64a99f11ce9df584f9, type: 3}
@@ -54,7 +56,17 @@ MonoBehaviour:
       type: {class: SpecialFXActionVisual, ns: Gameplay.Actions.Visuals, asm: Assembly-CSharp}
       data:
         _triggerTimes: 4
-        _specialFXGraphic: {fileID: 4037183185398935712, guid: de6513b59a0ab6e45827e1457b43a2b3, type: 3}
+        _specialFXGraphic: {fileID: 7886655476902268161, guid: 20b31fcfaed0cb842a56fbbe2419428f, type: 3}
+    - rid: 1083950434222342644
+      type: {class: PlayAudioActionVisual, ns: Gameplay.Actions.Visuals, asm: Assembly-CSharp}
+      data:
+        _triggerTimes: 4
+        _clip: {fileID: 8300000, guid: 76c09b428d672a94c9f1cb703ab8908b, type: 3}
+    - rid: 1083950434222342645
+      type: {class: PlayAudioActionVisual, ns: Gameplay.Actions.Visuals, asm: Assembly-CSharp}
+      data:
+        _triggerTimes: 2
+        _clip: {fileID: 8300000, guid: ec3ea3941cfa7774d8204d95fcb1b0c1, type: 3}
     - rid: 6632896607793709159
       type: {class: HealthChangeEffect, ns: Gameplay.Actions.Effects, asm: Assembly-CSharp}
       data:
@@ -64,7 +76,7 @@ MonoBehaviour:
       type: {class: SpecialFXActionVisual, ns: Gameplay.Actions.Visuals, asm: Assembly-CSharp}
       data:
         _triggerTimes: 4
-        _specialFXGraphic: {fileID: 4037183185398935712, guid: de6513b59a0ab6e45827e1457b43a2b3, type: 3}
+        _specialFXGraphic: {fileID: 7920825190360787008, guid: 5773fbaebd2655948aed0300f4bb2a3e, type: 3}
     - rid: 6632896609068777570
       type: {class: SpecialFXActionVisual, ns: Gameplay.Actions.Visuals, asm: Assembly-CSharp}
       data:

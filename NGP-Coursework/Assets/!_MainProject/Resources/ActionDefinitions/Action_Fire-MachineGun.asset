@@ -54,7 +54,7 @@ MonoBehaviour:
       type: {class: SpecialFXActionVisual, ns: Gameplay.Actions.Visuals, asm: Assembly-CSharp}
       data:
         _triggerTimes: 5
-        _specialFXGraphic: {fileID: 4037183185398935712, guid: de6513b59a0ab6e45827e1457b43a2b3, type: 3}
+        _specialFXGraphic: {fileID: 7886655476902268161, guid: 20b31fcfaed0cb842a56fbbe2419428f, type: 3}
     - rid: 1083950434222342591
       type: {class: PlayAudioActionVisual, ns: Gameplay.Actions.Visuals, asm: Assembly-CSharp}
       data:
@@ -69,4 +69,4 @@ MonoBehaviour:
       type: {class: SpecialFXActionVisual, ns: Gameplay.Actions.Visuals, asm: Assembly-CSharp}
       data:
         _triggerTimes: 4
-        _specialFXGraphic: {fileID: 4037183185398935712, guid: de6513b59a0ab6e45827e1457b43a2b3, type: 3}
+        _specialFXGraphic: {fileID: 1738609560666369171, guid: 7e9c50938e32351438a7df9ccad2f2a5, type: 3}

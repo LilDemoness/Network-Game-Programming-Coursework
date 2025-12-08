@@ -38,11 +38,16 @@ MonoBehaviour:
   - rid: 6632896607793709163
   TriggeringVisuals:
   - rid: 5503895833102778504
-  HitVisuals: []
+  - rid: 1083950434222342643
+  HitVisuals:
+  - rid: 1083950434222342642
   <ActionCrosshairPrefab>k__BackingField: {fileID: 830966631555543426, guid: 21aa4ea43f3904f43936b285a584e850, type: 3}
   _projectileInfo:
     ProjectilePrefab: {fileID: 5177341952338766353, guid: 741492a3145316f46b46d7ee5febb43c, type: 3}
     Speed: 45
+    TargetableLayers:
+      serializedVersion: 2
+      m_Bits: 73
     MaxRange: 100
     MaxLifetime: 0
     MaxHits: 0
@@ -55,6 +60,16 @@ MonoBehaviour:
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
+    - rid: 1083950434222342642
+      type: {class: SpecialFXActionVisual, ns: Gameplay.Actions.Visuals, asm: Assembly-CSharp}
+      data:
+        _triggerTimes: 4
+        _specialFXGraphic: {fileID: -6473489338010196175, guid: b46890100828db6429ff69c322b45893, type: 3}
+    - rid: 1083950434222342643
+      type: {class: PlayAudioActionVisual, ns: Gameplay.Actions.Visuals, asm: Assembly-CSharp}
+      data:
+        _triggerTimes: 4
+        _clip: {fileID: 8300000, guid: 76c09b428d672a94c9f1cb703ab8908b, type: 3}
     - rid: 5503895833102778504
       type: {class: SpecialFXActionVisual, ns: Gameplay.Actions.Visuals, asm: Assembly-CSharp}
       data:

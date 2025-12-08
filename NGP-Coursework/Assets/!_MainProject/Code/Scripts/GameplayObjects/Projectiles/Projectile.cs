@@ -114,8 +114,26 @@ namespace Gameplay.GameplayObjects.Projectiles
             
             // Perform Movement
             Vector3 displacement = transform.forward * _projectileInfo.Speed * Time.fixedDeltaTime;
+            Vector3 previousPosition = transform.position;
             transform.position += displacement;
 
+
+            // Check for Collision.
+            if (Physics.Linecast(previousPosition, transform.position, out RaycastHit hitInfo, _projectileInfo.TargetableLayers))
+            {
+                if (hitInfo.transform.TryGetComponentThroughParents<NetworkObject>(out NetworkObject networkObject))
+                    if (networkObject.NetworkObjectId == _ownerNetworkID)
+                        return; // Don't hit the entity that spawned us.
+
+                HandleTargetHit(hitInfo);
+
+                _remainingHits -= 1;
+                if (_remainingHits < 0)
+                {
+                    EndProjectile();
+                    return;
+                }
+            }
 
 
             if (_remainingSqrDistance > 0.0f)
@@ -157,7 +175,7 @@ namespace Gameplay.GameplayObjects.Projectiles
                 return; // Only run on the server.
             if (!_hasStarted)
                 return; // Only run if we have started.
-            if (collision.transform.TryGetComponentThroughParents<NetworkObject>(out NetworkObject networkObject))
+            /*if (collision.transform.TryGetComponentThroughParents<NetworkObject>(out NetworkObject networkObject))
                 if (networkObject.NetworkObjectId == _ownerNetworkID)
                     return; // Don't hit the entity that spawned us.
 
@@ -168,10 +186,14 @@ namespace Gameplay.GameplayObjects.Projectiles
             if (_remainingHits < 0)
             {
                 DisposeSelf();
-            }
+            }*/
         }
 
 
+        protected virtual void HandleTargetHit(RaycastHit rayHit)
+        {
+            EffectTarget(rayHit.transform, rayHit.point, rayHit.normal);
+        }
         protected virtual void HandleTargetHit(Collision target)
         {
             Vector3 closestPoint = target.GetContact(0).point;
