@@ -90,6 +90,8 @@ namespace Gameplay.GameState
                 { SessionMode.LobbyLocked, _uiElementsForLobbyLocked },
                 { SessionMode.FatalError, _uiElementsForFatalError },
             };
+
+            Cursor.lockState = CursorLockMode.None;
         }
         protected override void OnDestroy()
         {

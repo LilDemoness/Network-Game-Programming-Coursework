@@ -61,6 +61,8 @@ namespace Gameplay.GameState
             }
 
             TrySignIn();
+
+            Cursor.lockState = CursorLockMode.None;
         }
         protected override void OnDestroy()
         {

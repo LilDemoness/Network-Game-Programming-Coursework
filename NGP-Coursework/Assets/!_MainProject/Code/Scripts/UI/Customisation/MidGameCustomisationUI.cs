@@ -17,6 +17,7 @@ namespace UI.Customisation
 
         public static event System.Action OnCustomisationUIOpened;
         public static event System.Action OnCustomisationUIClosed;
+        private CursorLockMode _previousLockMode;
 
 
 
@@ -41,6 +42,8 @@ namespace UI.Customisation
         public void Show()
         {
             this.gameObject.SetActive(true);
+            _previousLockMode = Cursor.lockState;
+            Cursor.lockState = CursorLockMode.None;
 
             OnCustomisationUIOpened?.Invoke();
 
@@ -50,6 +53,7 @@ namespace UI.Customisation
         public void Hide()
         {
             this.gameObject.SetActive(false);
+            Cursor.lockState = _previousLockMode;
 
             OnCustomisationUIClosed?.Invoke();
 

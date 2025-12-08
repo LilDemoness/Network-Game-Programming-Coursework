@@ -33,6 +33,8 @@ namespace Gameplay.GameState
         {
             base.Awake();
             ShowPodium();
+
+            Cursor.lockState = CursorLockMode.None;
         }
 
 

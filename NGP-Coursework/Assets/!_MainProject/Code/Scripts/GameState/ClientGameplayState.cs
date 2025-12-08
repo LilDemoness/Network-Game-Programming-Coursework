@@ -24,6 +24,8 @@ namespace Gameplay.GameState
 
             MidGameCustomisationUI.OnCustomisationUIOpened += OnCustomisationUIOpened;
             MidGameCustomisationUI.OnCustomisationUIClosed += OnCustomisationUIClosed;
+
+            Cursor.lockState = CursorLockMode.Locked;
         }
         protected override void OnDestroy()
         {
