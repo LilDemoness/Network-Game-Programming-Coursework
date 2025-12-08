@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Gameplay.Actions;
 using Gameplay.Actions.Definitions;
 using Gameplay.Actions.Effects;
@@ -70,12 +71,14 @@ public class HitEffectManager : NetworkSingleton<HitEffectManager>
         if (triggeringClientId == NetworkManager.Singleton.LocalClientId)
             Instance.ShowHitEffectVisual(hitPoint);
     }
-    public static void PlayHitEffectsOnNonOwningClients(in ActionHitInformation hitInfo, float chargePercentage, ActionID actionId)
+    public static void PlayHitEffectsOnNonOwningClients(ulong triggeringClientId, in ActionHitInformation hitInfo, float chargePercentage, ActionID actionId)
     {
-        Instance.PlayHitEffectsClientRpc(new NetworkActionHitInformation(hitInfo), chargePercentage, actionId);
+        List<ulong> clientIds = new List<ulong>(NetworkManager.Singleton.ConnectedClientsIds);
+        clientIds.Remove(triggeringClientId);
+        Instance.PlayHitEffectsClientRpc(new NetworkActionHitInformation(hitInfo), chargePercentage, actionId, Instance.RpcTarget.Group(clientIds.ToArray(), RpcTargetUse.Temp));
     }
-    [Rpc(SendTo.NotOwner)]
-    private void PlayHitEffectsClientRpc(NetworkActionHitInformation hitInfo, float chargePercentage, ActionID actionId)
+    [Rpc(SendTo.SpecifiedInParams)]
+    private void PlayHitEffectsClientRpc(NetworkActionHitInformation hitInfo, float chargePercentage, ActionID actionId, RpcParams rpcParams = default)
     {
         ActionDefinition definition = GameDataSource.Instance.GetActionDefinitionByID(actionId);
         for(int i = 0; i < definition.HitVisuals.Length; ++i)

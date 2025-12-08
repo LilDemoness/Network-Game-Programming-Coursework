@@ -86,7 +86,7 @@ namespace Gameplay.Actions.Definitions
             {
                 ActionEffects[i].ApplyEffect(owner, hitInfo, chargePercentage);
             }
-            HitEffectManager.PlayHitEffectsOnNonOwningClients(hitInfo, chargePercentage, ActionID);
+            HitEffectManager.PlayHitEffectsOnNonOwningClients(owner.OwnerClientId, hitInfo, chargePercentage, ActionID);
         }
 
 

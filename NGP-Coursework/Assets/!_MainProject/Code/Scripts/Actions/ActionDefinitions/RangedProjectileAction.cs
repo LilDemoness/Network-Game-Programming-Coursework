@@ -69,7 +69,7 @@ namespace Gameplay.Actions.Definitions
         {
             Debug.Log($"{hitInfo.Target.name} was hit!");
             HitEffectManager.PlayHitEffectsOnSelf(owner.OwnerClientId, hitInfo.HitPoint, hitInfo.HitNormal, chargePercentage, ActionID);
-            HitEffectManager.PlayHitEffectsOnNonOwningClients(hitInfo, chargePercentage, ActionID);
+            HitEffectManager.PlayHitEffectsOnNonOwningClients(owner.OwnerClientId, hitInfo, chargePercentage, ActionID);
 
             for (int i = 0; i < ActionEffects.Length; ++i)
             {
