@@ -39,9 +39,10 @@ MonoBehaviour:
   TriggeringVisuals:
   - rid: 6632896609068777570
   - rid: 6632896607793709162
-  HitVisuals: []
+  HitVisuals:
+  - rid: 1083950434222342314
   <ActionCrosshairPrefab>k__BackingField: {fileID: 830966631555543426, guid: 9d14fbeb532b8d64a99f11ce9df584f9, type: 3}
-  <MaxRange>k__BackingField: 30
+  <MaxRange>k__BackingField: 100
   <ValidLayers>k__BackingField:
     serializedVersion: 2
     m_Bits: 73
@@ -49,6 +50,11 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
+    - rid: 1083950434222342314
+      type: {class: SpecialFXActionVisual, ns: Gameplay.Actions.Visuals, asm: Assembly-CSharp}
+      data:
+        _triggerTimes: 4
+        _specialFXGraphic: {fileID: 4037183185398935712, guid: de6513b59a0ab6e45827e1457b43a2b3, type: 3}
     - rid: 6632896607793709159
       type: {class: HealthChangeEffect, ns: Gameplay.Actions.Effects, asm: Assembly-CSharp}
       data:

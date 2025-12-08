@@ -5,6 +5,7 @@ using Unity.Netcode;
 using Gameplay.GameplayObjects.Character;
 using Gameplay.Actions.Effects;
 using UnityEngine.UIElements;
+using static UnityEngine.Analytics.IAnalytic;
 
 namespace Gameplay.Actions.Definitions
 {
@@ -28,13 +29,13 @@ namespace Gameplay.Actions.Definitions
         public override bool OnUpdate(ServerCharacter owner, ref ActionRequestData data, float chargePercentage = 1.0f)
         {
             // Handle Logic
-            PerformRaycast(owner, ref data, chargePercentage);
+            PerformRaycast(owner, ref data, chargePercentage, PrepareAndProcessTarget);
 
             return ActionConclusion.Continue;
         }
 
 
-        private void PerformRaycast(ServerCharacter owner, ref ActionRequestData data, float chargePercentage)
+        private void PerformRaycast(ServerCharacter owner, ref ActionRequestData data, float chargePercentage, System.Action<ServerCharacter, RaycastHit, Vector3, float> onHitCallback)
         {
             Vector3 rayOrigin = GetActionOrigin(ref data);
             Vector3 rayDirection = GetActionDirection(ref data);
@@ -52,22 +53,30 @@ namespace Gameplay.Actions.Definitions
                 IEnumerator<RaycastHit> enumerator = orderedValidTargets.GetEnumerator();
                 while(enumerator.MoveNext())
                 {
-                    ActionHitInformation actionHitInfo = new ActionHitInformation(enumerator.Current.transform, enumerator.Current.point, enumerator.Current.normal, GetHitForward(enumerator.Current.normal));
-                    ProcessTarget(owner, actionHitInfo, chargePercentage);
+                    onHitCallback?.Invoke(owner, enumerator.Current, rayDirection, chargePercentage);
                 }
             }
             else
             {
                 if (Physics.Raycast(rayOrigin, rayDirection, out RaycastHit hitInfo, MaxRange, ValidLayers, QueryTriggerInteraction.Ignore))
                 {
-                    ActionHitInformation actionHitInfo = new ActionHitInformation(hitInfo.transform, hitInfo.point, hitInfo.normal, GetHitForward(hitInfo.normal));
-                    ProcessTarget(owner, actionHitInfo, chargePercentage);
+                    onHitCallback?.Invoke(owner, hitInfo, rayDirection, chargePercentage);
                 }
             }
-
-            Vector3 GetHitForward(Vector3 hitNormal) => Mathf.Approximately(Mathf.Abs(Vector3.Dot(hitNormal, rayDirection)), 1.0f) ? Vector3.Cross(hitNormal, -owner.transform.right) : Vector3.Cross(hitNormal, rayDirection);
         }
 
+        private void PrepareAndProcessTarget(ServerCharacter owner, RaycastHit hitInfo, Vector3 rayDirection, float chargePercentage)
+        {
+            ActionHitInformation actionHitInfo = new ActionHitInformation(hitInfo.transform, hitInfo.point, hitInfo.normal, GetHitForward(hitInfo.normal));
+            ProcessTarget(owner, actionHitInfo, chargePercentage);
+
+            Vector3 GetHitForward(Vector3 hitNormal)
+            {
+                return Mathf.Approximately(Mathf.Abs(Vector3.Dot(hitNormal, rayDirection)), 1.0f)
+                    ? Vector3.Cross(hitNormal, -owner.transform.right)  // The normal & ray direction are approximately perpendicular. Calculate forward using our right to prevent miscalculation.
+                    : Vector3.Cross(hitNormal, rayDirection);
+            }
+        }
         private void ProcessTarget(ServerCharacter owner, in ActionHitInformation hitInfo, float chargePercentage)
         {
             Debug.Log($"{hitInfo.Target.name} was hit!");
@@ -77,6 +86,28 @@ namespace Gameplay.Actions.Definitions
             {
                 ActionEffects[i].ApplyEffect(owner, hitInfo, chargePercentage);
             }
+            HitEffectManager.PlayHitEffectsOnNonOwningClients(hitInfo, chargePercentage, ActionID);
+        }
+
+
+        public override bool OnUpdateClient(ClientCharacter clientCharacter, ref ActionRequestData data, float chargePercentage = 1.0f)
+        {
+            PerformRaycast(null, ref data, chargePercentage, PrepareHitEffectAndNotify);
+
+            return base.OnUpdateClient(clientCharacter, ref data, chargePercentage);
+        }
+        private void PrepareHitEffectAndNotify(ServerCharacter _, RaycastHit hitInfo, Vector3 rayDirection, float chargePercentage)
+        {
+            HitEffectManager.PlayHitEffectsOnSelf(hitInfo.point, hitInfo.normal, chargePercentage, ActionID);
+        }
+
+        public override void AnticipateClient(ClientCharacter clientCharacter, ref ActionRequestData data)
+        {
+            PerformRaycast(null, ref data, 0.0f, PrepareHitEffectAndNotify_Anticipation);
+        }
+        private void PrepareHitEffectAndNotify_Anticipation(ServerCharacter _, RaycastHit hitInfo, Vector3 rayDirection, float chargePercentage)
+        {
+            HitEffectManager.PlayHitEffectsOnSelfAnticipate(hitInfo.point, hitInfo.normal, chargePercentage, ActionID);
         }
     }
 }

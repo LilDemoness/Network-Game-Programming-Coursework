@@ -187,7 +187,7 @@ namespace Gameplay.DebugCheats
     }
 
 
-#if UNITY_EDITOR || DEVElOPMENT_BUILD
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
     public abstract class ConsoleCommand
     {
         public abstract bool CheckParameterCount(int count);

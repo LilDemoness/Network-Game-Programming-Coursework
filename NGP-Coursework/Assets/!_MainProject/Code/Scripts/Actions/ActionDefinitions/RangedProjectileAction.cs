@@ -68,6 +68,7 @@ namespace Gameplay.Actions.Definitions
         private void OnProjectileHit(ServerCharacter owner, in ActionHitInformation hitInfo, float chargePercentage)
         {
             Debug.Log($"{hitInfo.Target.name} was hit!");
+            HitEffectManager.PlayHitEffectsOnSelf(hitInfo.HitPoint, hitInfo.HitNormal, chargePercentage, ActionID);
 
             for (int i = 0; i < ActionEffects.Length; ++i)
             {

@@ -5,6 +5,7 @@ using Gameplay.GameplayObjects.Character.Customisation.Data;
 using Gameplay.StatusEffects;
 using Gameplay.GameplayObjects.Character.Customisation;
 using Utils;
+using NUnit.Framework.Constraints;
 
 namespace Gameplay.GameplayObjects.Character
 {
@@ -77,6 +78,7 @@ namespace Gameplay.GameplayObjects.Character
         /// </summary>
         public ServerActionPlayer ActionPlayer => m_serverActionPlayer;
         private ServerActionPlayer m_serverActionPlayer;
+        public bool CanPerformActionInstantly = true;
 
         public bool CanPerformActions => !_networkHealthComponent.IsDead;
 
@@ -112,12 +114,16 @@ namespace Gameplay.GameplayObjects.Character
 
             CurrentHeat.OnValueChanged += CheckIfExceededHeatCap;
             NetworkHealthComponent.OnDied += OnCharacterDied;
+            ActionPlayer.OnActionQueueFilled += ServerActionPlayer_OnActionQueueFilled;
+            ActionPlayer.OnActionQueueEmptied += ServerActionPlayer_OnActionQueueEmptied;
         }
         public override void OnNetworkDespawn()
         {
             // Unsubscribe from NetworkVariable Events.
             CurrentHeat.OnValueChanged -= CheckIfExceededHeatCap;
             NetworkHealthComponent.OnDied -= OnCharacterDied;
+            ActionPlayer.OnActionQueueFilled -= ServerActionPlayer_OnActionQueueFilled;
+            ActionPlayer.OnActionQueueEmptied -= ServerActionPlayer_OnActionQueueEmptied;
         }
 
 
@@ -218,6 +224,11 @@ namespace Gameplay.GameplayObjects.Character
             m_clientCharacter.CancelRunningActionsBySlotIDClientRpc(slotIndex);
             ActionPlayer.CancelRunningActionsBySlotID(slotIndex, true);
         }
+
+        private void ServerActionPlayer_OnActionQueueFilled() => UpdateInstantActionAvailabilityOwnerRpc(false);
+        private void ServerActionPlayer_OnActionQueueEmptied() => UpdateInstantActionAvailabilityOwnerRpc(true);
+        [Rpc(SendTo.Owner)]
+        private void UpdateInstantActionAvailabilityOwnerRpc(bool canPerformInstantAction) => CanPerformActionInstantly = canPerformInstantAction;
 
 
 

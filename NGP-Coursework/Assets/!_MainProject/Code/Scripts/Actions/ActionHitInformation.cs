@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Unity.Netcode;
+using UnityEngine;
 
 namespace Gameplay.Actions.Effects
 {
@@ -18,6 +19,21 @@ namespace Gameplay.Actions.Effects
             this.HitPoint = hitPoint;
             this.HitNormal = hitNormal;
             this.HitForward = hitForward;
+        }
+    }
+
+    public struct NetworkActionHitInformation : INetworkSerializeByMemcpy
+    {
+        public Vector3 HitPoint;
+        public Vector3 HitNormal;
+
+        public NetworkActionHitInformation(in ActionHitInformation actionHitInformation) : this(actionHitInformation.HitPoint, actionHitInformation.HitNormal) { }
+        public NetworkActionHitInformation(Vector3 hitPoint, Vector3 hitNormal)
+        {
+            //this.TargetObjectId = targetObjectId;
+            this.HitPoint = hitPoint;
+            this.HitNormal = hitNormal;
+            //this.HitForward = hitForward;
         }
     }
 }

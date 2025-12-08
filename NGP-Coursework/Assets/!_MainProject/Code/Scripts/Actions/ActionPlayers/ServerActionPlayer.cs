@@ -40,6 +40,10 @@ namespace Gameplay.Actions
         private bool _hasPendingSynthesisedAction;
 
 
+        public event System.Action OnActionQueueFilled;
+        public event System.Action OnActionQueueEmptied;
+
+
         public ServerActionPlayer(ServerCharacter serverCharacter)
         {
             this._serverCharacter = serverCharacter;
@@ -55,7 +59,8 @@ namespace Gameplay.Actions
         /// <summary>
         ///     Perform a sequence of actions.
         /// </summary>
-        public void PlayAction(ref ActionRequestData action)
+        /// <returns> True if a new action was queued.</returns>
+        public bool PlayAction(ref ActionRequestData action)
         {
             // Check if we should interrupt the active action.
             if (!action.ShouldQueue && _actionQueue.Count > 0 && (/*_actionQueue[0].ActionInterruptible || */_actionQueue[0].CanBeInterruptedBy(action.ActionID)))
@@ -72,7 +77,7 @@ namespace Gameplay.Actions
             {
                 // We cancelled an action rather than starting a new one.
                 ActionFactory.ReturnAction(newAction);
-                return;
+                return false;
             }
 
             // Cancel any actions that this action should cancel when being queued.
@@ -80,7 +85,9 @@ namespace Gameplay.Actions
 
             // Add our action to the queue and start it if we don't have other actions.
             _actionQueue.Add(newAction);
+            OnActionQueueFilled?.Invoke();
             if(_actionQueue.Count == 1){ StartAction(); }
+            return true;
         }
         /// <summary>
         ///     If the passed action is a Toggle action, cancel all active instances of that action and return true.
@@ -114,6 +121,8 @@ namespace Gameplay.Actions
                 TryReturnAction(actionToBeCancelled);
             }
             _actionQueue.Clear();
+
+            OnActionQueueEmptied?.Invoke();
 
 
             if (cancelNonBlocking)
@@ -218,7 +227,10 @@ namespace Gameplay.Actions
         private void StartAction()
         {
             if (_actionQueue.Count <= 0)
+            {
+                OnActionQueueEmptied?.Invoke();
                 return;
+            }
 
             if (IsActionOnCooldown(_actionQueue[0]))
             {
@@ -563,6 +575,7 @@ namespace Gameplay.Actions
         private void CancelAction(Action actionToCancel)
         {
             Debug.Log("Cancel Action");
+            bool tryStartNextAction = _actionQueue.Count > 0 && actionToCancel == _actionQueue[0];
 
             // Cancel the action.
             actionToCancel.Cancel(_serverCharacter, out float chargeDepletedTime);
@@ -593,6 +606,9 @@ namespace Gameplay.Actions
                 if (!_actionCooldownCompleteTime.TryAdd(_timestampComparison, cooldownCompleteTime))
                     _actionCooldownCompleteTime[_timestampComparison] = cooldownCompleteTime;
             }
+
+            if (tryStartNextAction)
+                StartAction();
         }
     }
 }

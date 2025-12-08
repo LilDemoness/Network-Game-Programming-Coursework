@@ -46,6 +46,17 @@ namespace Gameplay.GameplayObjects.Character
         }
 
 
+        public void ActivateSlot(int slotIndex)
+        {
+            if (slotIndex >= _activationSlots.Length)
+                return; // Outwith our slot count.
+
+            // Anticipate the weapon's effect (For audio & hit markers).
+            if (_serverCharacter.CanPerformActionInstantly)
+                _serverCharacter.ClientCharacter.AnticipateAction(CreateRequestData(_activationSlots[slotIndex], slotIndex.ToSlotIndex()));
+
+            ActivateSlotServerRpc(slotIndex);
+        }
         [Rpc(SendTo.Server)]
         public void ActivateSlotServerRpc(int slotIndex, RpcParams rpcParams = default)
         {
@@ -71,12 +82,7 @@ namespace Gameplay.GameplayObjects.Character
 
         private void StartUsingSlottable(SlotGFXSection weapon, AttachmentSlotIndex attachmentSlotIndex)
         {
-            ActionRequestData actionRequestData = ActionRequestData.Create(weapon.SlottableData.AssociatedAction);
-
-            // Setup the ActionRequestData.
-            actionRequestData.IActionSourceObjectID = weapon.GetAbilitySourceObjectId();
-            actionRequestData.AttachmentSlotIndex = attachmentSlotIndex;
-
+            ActionRequestData actionRequestData = CreateRequestData(weapon, attachmentSlotIndex);
 
             if (_serverCharacter.ActionPlayer.IsActionOnCooldown(actionRequestData.ActionID, actionRequestData.AttachmentSlotIndex))
             {
@@ -90,6 +96,17 @@ namespace Gameplay.GameplayObjects.Character
                 _serverCharacter.PlayActionServerRpc(actionRequestData);
             }
         }
+        private ActionRequestData CreateRequestData(SlotGFXSection weapon, AttachmentSlotIndex attachmentSlotIndex)
+        {
+            ActionRequestData actionRequestData = ActionRequestData.Create(weapon.SlottableData.AssociatedAction);
+
+            // Setup the ActionRequestData.
+            actionRequestData.IActionSourceObjectID = weapon.GetAbilitySourceObjectId();
+            actionRequestData.AttachmentSlotIndex = attachmentSlotIndex;
+
+            return actionRequestData;
+        }
+
         private void StopUsingSlottable(AttachmentSlotIndex attachmentSlotIndex)
         {
             _activationRequests[attachmentSlotIndex.GetSlotInteger()] = false;

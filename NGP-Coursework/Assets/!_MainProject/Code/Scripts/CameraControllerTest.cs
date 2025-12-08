@@ -192,6 +192,7 @@ public class CameraControllerTest : NetworkBehaviour
         }
         s_crosshairAdjustmentPlane.SetNormalAndPosition(-Camera.main.transform.forward, targetPosition);
         Debug.DrawRay(targetPosition, Vector3.back);
+        Debug.DrawLine(targetPosition, Camera.main.transform.position);
 
 
         // Calculate our rotations for the vertical & horizontal rotation pivots.

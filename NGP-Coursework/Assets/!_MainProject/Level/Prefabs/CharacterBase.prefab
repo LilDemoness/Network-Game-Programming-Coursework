@@ -91,7 +91,7 @@ MonoBehaviour:
   TickSyncChildren: 0
   UseUnreliableDeltas: 0
   SyncPositionX: 1
-  SyncPositionY: 0
+  SyncPositionY: 1
   SyncPositionZ: 1
   SyncRotAngleX: 0
   SyncRotAngleY: 0
@@ -130,6 +130,7 @@ MonoBehaviour:
     <ActiveSlottableIndicies>k__BackingField: 
   _networkHealthComponent: {fileID: 3256541695494498627}
   _overheatingEffectDefinition: {fileID: 11400000, guid: 1b22461243af62a4b8eb5c6e9254a8a1, type: 2}
+  CanPerformActionInstantly: 1
   _movement: {fileID: 2257280709253185089}
   _gfxRoot: {fileID: 0}
 --- !u!114 &3256541695494498627
@@ -176,8 +177,8 @@ MonoBehaviour:
   _characterLogic: {fileID: 781988145697744951}
   _rotationPivot: {fileID: 7621494308545332439}
   _characterController: {fileID: 4308262964034644391}
-  _defaultSpeed: 12.5
   _gravityMultiplier: 1
+  _airSpeedDecreaseRate: 1
   _groundCheckRadius: 0.5
   _groundLayers:
     serializedVersion: 2

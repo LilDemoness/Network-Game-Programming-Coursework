@@ -630,16 +630,14 @@ namespace Gameplay.Actions
 
         /// <summary>
         ///     Called when the action is being "anticipated" on the client.
-        ///     For example, if you are the owner of a character and you start swinging a slow weapon, you will get this call immediately on the client, before the server round-trip.
+        ///     For example, showing hit-markers for instant firing weapons.
         /// </summary>
-        /// <remarks>
-        ///     Overriders should always call 'base.AnticipateActionClient' in their implementation.
-        /// </remarks>
-        /// <param name="clientCharacter"></param>
-        public virtual void AnticipateActionClient(ClientCharacter clientCharacter)
+        public virtual void AnticipateActionClient(ClientCharacter clientCharacter, ref ActionRequestData data)
         {
             AnticipatedClient = true;
             TimeStarted = UnityEngine.Time.time;
+
+            _definition.AnticipateClient(clientCharacter, ref data);
 
             /*if (!string.IsNullOrEmpty(Config.AnimAnticipation))
             {

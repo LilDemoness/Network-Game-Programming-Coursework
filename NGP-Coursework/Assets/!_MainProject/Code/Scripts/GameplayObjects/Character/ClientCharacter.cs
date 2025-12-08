@@ -38,6 +38,11 @@ namespace Gameplay.GameplayObjects.Character
             _clientActionPlayer.PlayAction(ref data1, serverTimeStarted);
         }
 
+        public void AnticipateAction(ActionRequestData data)
+        {
+            _clientActionPlayer.AnticipateAction(ref data);
+        }
+
         /// <summary>
         ///     RPC called to clear all active Action FXs (E.g. The character has been stunned).
         /// </summary>

@@ -97,7 +97,7 @@ namespace UserInput
             _movementInput = ClientInput.MovementInput;
             _hasMoveRequest = true;
         }
-        private void ClientInput_OnActivateSlotStarted(int slotIndex) => _serverWeaponController.ActivateSlotServerRpc(slotIndex);
+        private void ClientInput_OnActivateSlotStarted(int slotIndex) => _serverWeaponController.ActivateSlot(slotIndex);//_serverWeaponController.ActivateSlotServerRpc(slotIndex);
         private void ClientInput_OnActivateSlotCancelled(int slotIndex) => _serverWeaponController.DeactivateSlotServerRpc(slotIndex);
         
 

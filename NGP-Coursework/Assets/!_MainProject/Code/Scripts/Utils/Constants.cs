@@ -1,4 +1,4 @@
 public static class Constants
 {
-    public const float TARGET_ESTIMATION_RANGE = 50.0f;
+    public const float TARGET_ESTIMATION_RANGE = 150.0f;
 }

@@ -94,7 +94,7 @@ namespace Gameplay.Actions
             if (!ClientCharacter.IsAnimating() && Action.ShouldClientAnticipate(ClientCharacter, ref data))
             {
                 Action actionFX = ActionFactory.CreateActionFromData(ref data);
-                actionFX.AnticipateActionClient(ClientCharacter);
+                actionFX.AnticipateActionClient(ClientCharacter, ref data);
                 _playingActions.Add(actionFX);
             }
         }

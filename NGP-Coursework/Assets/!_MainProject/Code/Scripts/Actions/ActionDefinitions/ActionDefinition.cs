@@ -293,6 +293,9 @@ namespace Gameplay.Actions.Definitions
         /// </summary>
         public virtual void CleanupClient(ClientCharacter clientCharacter) { }
 
+
+        public virtual void AnticipateClient(ClientCharacter clientCharacter, ref ActionRequestData data) => Debug.Log("Anticipate");
+
         #endregion
     }
 }

@@ -3,6 +3,7 @@ using Gameplay.GameplayObjects.Character;
 using Gameplay.GameplayObjects.Health;
 using Unity.Netcode;
 using UnityEngine;
+using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
 
 namespace Gameplay.GameplayObjects
 {
@@ -30,6 +31,7 @@ namespace Gameplay.GameplayObjects
         public event System.Action OnInitialised;
         public bool IsInitialised = false;
 
+        public static event System.Action<AnyHealthChangeEventArgs> OnAnyHealthChange;
         public event System.Action<HealthChangeEventArgs> OnDamageReceived;
         public event System.Action<HealthChangeEventArgs> OnHealingReceived;
         public event System.Action<float, float> OnHealthChanged;
@@ -51,9 +53,11 @@ namespace Gameplay.GameplayObjects
         }
 
         [Rpc(SendTo.Everyone)]
-        private void NotifyOfDamageRpc(ulong inflicterObjectId, float newHealth, float healthChange) => OnDamageReceived?.Invoke(new HealthChangeEventArgs(GetServerCharacterForObjectId(inflicterObjectId), newHealth, healthChange));
+        private void NotifyOfHealthChangeRpc(ulong inflicterObjectId, float newHealth, float healthChange) => OnAnyHealthChange?.Invoke(new AnyHealthChangeEventArgs(GetServerCharacterForObjectId(inflicterObjectId), GetComponent<ServerCharacter>(), newHealth, healthChange));
         [Rpc(SendTo.Everyone)]
-        private void NotifyOfHealingRpc(ulong inflicterObjectId, float newHealth, float healthChange) => OnHealingReceived?.Invoke(new HealthChangeEventArgs(GetServerCharacterForObjectId(inflicterObjectId), newHealth, healthChange));
+        private void NotifyOfDamageRpc(ulong inflicterObjectId, float healthChange) => OnDamageReceived?.Invoke(new HealthChangeEventArgs(GetServerCharacterForObjectId(inflicterObjectId), healthChange));
+        [Rpc(SendTo.Everyone)]
+        private void NotifyOfHealingRpc(ulong inflicterObjectId, float healthChange) => OnHealingReceived?.Invoke(new HealthChangeEventArgs(GetServerCharacterForObjectId(inflicterObjectId), healthChange));
 
         [Rpc(SendTo.Everyone)]
         private void NotifyOfDeathRpc(ulong inflicterObjectId)
@@ -119,7 +123,8 @@ namespace Gameplay.GameplayObjects
                 if (increaseHealth)
                 {
                     SetCurrentHealth_Server(inflicter, _currentHealth.Value + delta);
-                    NotifyOfHealingRpc(inflicter.NetworkObjectId, _currentHealth.Value, delta);
+                    NotifyOfHealthChangeRpc(inflicter.NetworkObjectId, _currentHealth.Value, delta);
+                    NotifyOfHealingRpc(inflicter.NetworkObjectId, delta);
                 }
             }
             else
@@ -132,7 +137,8 @@ namespace Gameplay.GameplayObjects
                     else
                     {
                         SetCurrentHealth_Server(inflicter, _currentHealth.Value + delta);
-                        NotifyOfDamageRpc(inflicter.NetworkObjectId, _currentHealth.Value, delta);
+                        NotifyOfHealthChangeRpc(inflicter.NetworkObjectId, _currentHealth.Value, delta);
+                        NotifyOfDamageRpc(inflicter.NetworkObjectId, delta);
                     }
                 }
             }
@@ -163,9 +169,10 @@ namespace Gameplay.GameplayObjects
 
             // Notify whether we received healing or damage
             if (isHeal)
-                NotifyOfHealingRpc(inflicter.NetworkObjectId, _currentHealth.Value, healthChange);
+                NotifyOfHealingRpc(inflicter.NetworkObjectId, healthChange);
             else
-                NotifyOfDamageRpc(inflicter.NetworkObjectId, _currentHealth.Value, healthChange);
+                NotifyOfDamageRpc(inflicter.NetworkObjectId, healthChange);
+            NotifyOfHealthChangeRpc(inflicter.NetworkObjectId, _currentHealth.Value, healthChange);
         }
         public void SetCurrentHealth_Server(ServerCharacter inflicter, float newValue, bool excessBecomesOverhealth = false)
         {
@@ -258,14 +265,26 @@ namespace Gameplay.GameplayObjects
                 this.Inflicter = inflicter;
             }
         }
+        public class AnyHealthChangeEventArgs : BaseDamageReceiverEventArgs
+        {
+            public ServerCharacter ThisCharacter { get; }
+
+            public float NewHealth { get; }
+            public float HealthChange { get; }
+
+            public AnyHealthChangeEventArgs(ServerCharacter inflicter, ServerCharacter thisCharacter, float newHealth, float healthChange) : base(inflicter)
+            {
+                this.ThisCharacter = thisCharacter;
+                this.NewHealth = newHealth;
+                this.HealthChange = healthChange;
+            }
+        }
         public class HealthChangeEventArgs : BaseDamageReceiverEventArgs
         {
-            public float NewHealth;
             public float HealthChange;
 
-            public HealthChangeEventArgs(ServerCharacter inflicter, float newHealth, float healthChange) : base(inflicter)
+            public HealthChangeEventArgs(ServerCharacter inflicter, float healthChange) : base(inflicter)
             {
-                this.NewHealth = newHealth;
                 this.HealthChange = healthChange;
             }
         }
