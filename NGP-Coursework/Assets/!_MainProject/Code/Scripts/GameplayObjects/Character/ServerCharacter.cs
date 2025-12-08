@@ -66,6 +66,10 @@ namespace Gameplay.GameplayObjects.Character
         [SerializeField] private Gameplay.StatusEffects.Definitions.Overheating _overheatingEffectDefinition;
 
 
+        // Movement.
+        public float BaseMoveSpeed => _buildDataReference.GetFrameData().MovementSpeed;
+
+
         // References.
 
         /// <summary>

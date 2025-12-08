@@ -10,6 +10,7 @@ namespace Gameplay.GameplayObjects.Character
     public class ServerCharacterMovement : NetworkBehaviour
     {
         private Vector2 _movementInput;
+        private Vector3 _desiredVelocity;
 
 
         private MovementState _movementState;
@@ -21,11 +22,8 @@ namespace Gameplay.GameplayObjects.Character
         [SerializeField] private CharacterController _characterController;
 
 
-        [Header("Movement Settings")]
-        [SerializeField] private float _defaultSpeed = 12.5f;
-        private Vector3 _desiredVelocity;
 
-        [Space(5)]
+        [Header("In-Air Settings")]
         private const float GRAVITY = -9.81f;
         [SerializeField] private float _gravityMultiplier = 1.0f;
         private float _verticalVelocity;
@@ -107,7 +105,7 @@ namespace Gameplay.GameplayObjects.Character
                 // Input-based movement.
                 Vector3 movementVector = _rotationPivot.right * _movementInput.x + _rotationPivot.forward * _movementInput.y;
                 movementVector = Vector3.ProjectOnPlane(movementVector, Vector3.up).normalized * movementVector.magnitude;
-                movementVector *= GetBaseMovementSpeed();
+                movementVector *= GetMovementSpeed();
                 return movementVector;
             }
 
@@ -180,11 +178,11 @@ namespace Gameplay.GameplayObjects.Character
 
 
         /// <summary>
-        ///     Retrieves the base speed for this character.
+        ///     Retrieves the actual speed for this character, based on the Base Speed & any changes or multipliers.
         /// </summary>
-        private float GetBaseMovementSpeed()
+        private float GetMovementSpeed()
         {
-            return _defaultSpeed;
+            return _characterLogic.BaseMoveSpeed;
         }
 
         /// <summary>
