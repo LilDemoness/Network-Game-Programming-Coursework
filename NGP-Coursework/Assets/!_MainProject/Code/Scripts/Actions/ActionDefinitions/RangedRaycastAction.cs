@@ -92,13 +92,13 @@ namespace Gameplay.Actions.Definitions
 
         public override bool OnUpdateClient(ClientCharacter clientCharacter, ref ActionRequestData data, float chargePercentage = 1.0f)
         {
-            PerformRaycast(null, ref data, chargePercentage, PrepareHitEffectAndNotify);
+            PerformRaycast(null, ref data, chargePercentage, (character, hitInfo, rayDirection, chargePercentage) => PrepareHitEffectAndNotify(clientCharacter.OwnerClientId, hitInfo, rayDirection, chargePercentage));
 
             return base.OnUpdateClient(clientCharacter, ref data, chargePercentage);
         }
-        private void PrepareHitEffectAndNotify(ServerCharacter _, RaycastHit hitInfo, Vector3 rayDirection, float chargePercentage)
+        private void PrepareHitEffectAndNotify(ulong ownerClientId, RaycastHit hitInfo, Vector3 rayDirection, float chargePercentage)
         {
-            HitEffectManager.PlayHitEffectsOnSelf(hitInfo.point, hitInfo.normal, chargePercentage, ActionID);
+            HitEffectManager.PlayHitEffectsOnSelf(ownerClientId, hitInfo.point, hitInfo.normal, chargePercentage, ActionID);
         }
 
         public override void AnticipateClient(ClientCharacter clientCharacter, ref ActionRequestData data)

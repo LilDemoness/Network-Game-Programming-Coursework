@@ -59,7 +59,7 @@ public class HitEffectManager : NetworkSingleton<HitEffectManager>
             definition.HitVisuals[i].OnClientStart(null, hitPoint, hitNormal);
         }
     }
-    public static void PlayHitEffectsOnSelf(Vector3 hitPoint, Vector3 hitNormal, float chargePercentage, ActionID actionId)
+    public static void PlayHitEffectsOnSelf(ulong triggeringClientId, Vector3 hitPoint, Vector3 hitNormal, float chargePercentage, ActionID actionId)
     {
         ActionDefinition definition = GameDataSource.Instance.GetActionDefinitionByID(actionId);
         for (int i = 0; i < definition.HitVisuals.Length; ++i)
@@ -67,7 +67,8 @@ public class HitEffectManager : NetworkSingleton<HitEffectManager>
             definition.HitVisuals[i].OnClientUpdate(null, hitPoint, hitNormal);
         }
 
-        Instance.ShowHitEffectVisual(hitPoint);
+        if (triggeringClientId == NetworkManager.Singleton.LocalClientId)
+            Instance.ShowHitEffectVisual(hitPoint);
     }
     public static void PlayHitEffectsOnNonOwningClients(in ActionHitInformation hitInfo, float chargePercentage, ActionID actionId)
     {
