@@ -96,6 +96,7 @@ namespace Gameplay.GameplayObjects.Character
         public NetworkVariable<int> TeamID { get; set; } = new NetworkVariable<int>(-1);
 
         [SerializeField] private GameObject _gfxRoot;
+        [SerializeField] private VisualEffects.SpecialFXGraphic _deathExplosionEffectPrefab;
 
 
         private void Awake()
@@ -326,8 +327,8 @@ namespace Gameplay.GameplayObjects.Character
         {
             // Spawn Death Model.
 
-            // Hide GFX.
-            HideCharacterGFXClientRpc();
+            // Play Death Effects.
+            PlayDeathEffectsClientRpc();
         }
 
         public void RespawnCharacter(Vector3 spawnPosition, Quaternion spawnRotation)
@@ -346,7 +347,17 @@ namespace Gameplay.GameplayObjects.Character
         [Rpc(SendTo.ClientsAndHost)]
         private void ShowCharacterGFXClientRpc() => _gfxRoot.SetActive(true);
         [Rpc(SendTo.ClientsAndHost)]
-        private void HideCharacterGFXClientRpc() => _gfxRoot.SetActive(false);
+        private void PlayDeathEffectsClientRpc()
+        {
+            // Death Explosion.
+            VisualEffects.SpecialFXGraphic deathExplosion = VisualEffects.SpecialFXPoolManager.GetFromPrefab(_deathExplosionEffectPrefab);
+            deathExplosion.OnShutdownComplete += t => VisualEffects.SpecialFXPoolManager.ReturnFromPrefab(_deathExplosionEffectPrefab, t);
+            deathExplosion.transform.SetPositionAndRotation(transform.position, transform.rotation);
+            deathExplosion.Play();
+
+            // Hide GFX.
+            _gfxRoot.SetActive(false);
+        }
 
         #endregion
 

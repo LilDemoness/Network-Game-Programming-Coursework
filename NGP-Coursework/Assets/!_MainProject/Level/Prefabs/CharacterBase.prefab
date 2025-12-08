@@ -133,6 +133,7 @@ MonoBehaviour:
   CanPerformActionInstantly: 1
   _movement: {fileID: 2257280709253185089}
   _gfxRoot: {fileID: 0}
+  _deathExplosionEffectPrefab: {fileID: 5773077417751078236, guid: 6ecf76dc4f268d340b2666896a954bcc, type: 3}
 --- !u!114 &3256541695494498627
 MonoBehaviour:
   m_ObjectHideFlags: 0
