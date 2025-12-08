@@ -3,6 +3,7 @@ Shader "Unlit/ShrinkableRing"
 {
     Properties
     {
+        _MainTex("Sprite Texture", 2D) = "white" {}
         _Thickness("Thickness", Range(0, 1)) = 0.1
     }
         SubShader

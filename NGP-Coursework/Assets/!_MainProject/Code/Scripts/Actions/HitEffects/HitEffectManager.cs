@@ -60,7 +60,10 @@ public class HitEffectManager : NetworkSingleton<HitEffectManager>
             definition.HitVisuals[i].OnClientStart(null, hitPoint, hitNormal);
         }
     }
-    public static void PlayHitEffectsOnSelf(ulong triggeringClientId, Vector3 hitPoint, Vector3 hitNormal, float chargePercentage, ActionID actionId)
+    public static void PlayHitEffectsOnTriggeringClient(ulong triggeringClientId, Vector3 hitPoint, Vector3 hitNormal, float chargePercentage, ActionID actionId)
+        => Instance.PlayHitEffectsOnOwnerRpc(hitPoint, hitNormal, chargePercentage, actionId, Instance.RpcTarget.Group( new ulong[] { triggeringClientId }, RpcTargetUse.Temp));
+    [Rpc(SendTo.SpecifiedInParams)] // SpecifiedInParams as this object is owned by the Server, not the client who triggered the attack.
+    public void PlayHitEffectsOnOwnerRpc(Vector3 hitPoint, Vector3 hitNormal, float chargePercentage, ActionID actionId, RpcParams rpcParams = default)
     {
         ActionDefinition definition = GameDataSource.Instance.GetActionDefinitionByID(actionId);
         for (int i = 0; i < definition.HitVisuals.Length; ++i)
@@ -68,10 +71,9 @@ public class HitEffectManager : NetworkSingleton<HitEffectManager>
             definition.HitVisuals[i].OnClientUpdate(null, hitPoint, hitNormal);
         }
 
-        if (triggeringClientId == NetworkManager.Singleton.LocalClientId)
-            Instance.ShowHitEffectVisual(hitPoint);
+        ShowHitEffectVisual(hitPoint);
     }
-    public static void PlayHitEffectsOnNonOwningClients(ulong triggeringClientId, in ActionHitInformation hitInfo, float chargePercentage, ActionID actionId)
+    public static void PlayHitEffectsOnNonTriggeringClients(ulong triggeringClientId, in ActionHitInformation hitInfo, float chargePercentage, ActionID actionId)
     {
         List<ulong> clientIds = new List<ulong>(NetworkManager.Singleton.ConnectedClientsIds);
         clientIds.Remove(triggeringClientId);

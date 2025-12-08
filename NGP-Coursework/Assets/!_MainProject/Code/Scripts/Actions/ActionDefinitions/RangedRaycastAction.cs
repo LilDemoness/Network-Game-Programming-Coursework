@@ -86,7 +86,7 @@ namespace Gameplay.Actions.Definitions
             {
                 ActionEffects[i].ApplyEffect(owner, hitInfo, chargePercentage);
             }
-            HitEffectManager.PlayHitEffectsOnNonOwningClients(owner.OwnerClientId, hitInfo, chargePercentage, ActionID);
+            HitEffectManager.PlayHitEffectsOnNonTriggeringClients(owner.OwnerClientId, hitInfo, chargePercentage, ActionID);
         }
 
 
@@ -98,7 +98,7 @@ namespace Gameplay.Actions.Definitions
         }
         private void PrepareHitEffectAndNotify(ulong ownerClientId, RaycastHit hitInfo, Vector3 rayDirection, float chargePercentage)
         {
-            HitEffectManager.PlayHitEffectsOnSelf(ownerClientId, hitInfo.point, hitInfo.normal, chargePercentage, ActionID);
+            HitEffectManager.PlayHitEffectsOnTriggeringClient(ownerClientId, hitInfo.point, hitInfo.normal, chargePercentage, ActionID);
         }
 
         public override void AnticipateClient(ClientCharacter clientCharacter, ref ActionRequestData data)

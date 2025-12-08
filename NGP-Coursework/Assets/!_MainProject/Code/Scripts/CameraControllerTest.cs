@@ -23,8 +23,8 @@ public class CameraControllerTest : NetworkBehaviour
 	[Space(5)]
     [SerializeField] private float _horizontalSensitivity = 35.0f;
     [SerializeField] private float _verticalSensitivity = 20.0f;
-    private NetworkVariable<float> _rotationPivotYRotation = new NetworkVariable<float>(writePerm: NetworkVariableWritePermission.Owner);
-    private Vector2 _rotation;
+    [SerializeField] private NetworkVariable<float> _rotationPivotYRotation = new NetworkVariable<float>(writePerm: NetworkVariableWritePermission.Owner);
+    [SerializeField] private Vector2 _rotation;
     private bool _snapRotation = false;
 
     private const float MIN_VERTICAL_ROTATION = -45.0f;
@@ -41,8 +41,8 @@ public class CameraControllerTest : NetworkBehaviour
 	
 	[Space(5)]
     [SerializeField] private LayerMask _targetingLayers;
-    private NetworkVariable<float> _horizontalPivotYRotation = new NetworkVariable<float>(writePerm: NetworkVariableWritePermission.Owner);             // Syncs the horizontal rotation of the character (The Y-Axis).
-    private NetworkVariable<float> _verticalPivotLocalVerticalRotation = new NetworkVariable<float>(writePerm: NetworkVariableWritePermission.Owner);   // Syncs the vertical rotation of the character (Either the X or Z axis depending on setup).
+    [SerializeField] private NetworkVariable<float> _horizontalPivotYRotation = new NetworkVariable<float>(writePerm: NetworkVariableWritePermission.Owner);             // Syncs the horizontal rotation of the character (The Y-Axis).
+    [SerializeField] private NetworkVariable<float> _verticalPivotLocalVerticalRotation = new NetworkVariable<float>(writePerm: NetworkVariableWritePermission.Owner);   // Syncs the vertical rotation of the character (Either the X or Z axis depending on setup).
 
 
     private void Awake()
@@ -123,11 +123,13 @@ public class CameraControllerTest : NetworkBehaviour
     }
     private void OnPlayerRevived(object sender, System.EventArgs e)
     {
-        SetRotation(0.0f, 0.0f);
+        //SetRotation(0.0f, 0.0f);
         this.enabled = true;
     }
 
-    private void SetRotation(float horizontalRotation, float verticalRotation)
+    [Rpc(SendTo.Owner)]
+    public void SetRotationOwnerRpc(float horizontalRotation, float verticalRotation) => SetRotation(horizontalRotation, verticalRotation);
+    public void SetRotation(float horizontalRotation, float verticalRotation)
     {
         Debug.Log(IsOwner, this);
         _rotation = new Vector2(horizontalRotation, verticalRotation);
@@ -139,7 +141,8 @@ public class CameraControllerTest : NetworkBehaviour
         _verticalPivotLocalVerticalRotation.Value = verticalRotation;
 
         // Instantly Set Graphics Rotation.
-        SnapRotationClientRpc();
+        if (IsSpawned)
+            SnapRotationClientRpc();
     }
     [Rpc(SendTo.ClientsAndHost)]
     private void SnapRotationClientRpc()

@@ -63,10 +63,11 @@ namespace VisualEffects
         {
             if (s_specialEffectToInstancePool.TryGetValue(prefab, out ObjectPool<SpecialFXGraphic> pool))
             {
+                Debug.Log("Releasing: " + instance.name);
                 pool.Release(instance);
             }
             else
-                throw new System.ArgumentException("You are trying to return a SpecialFXGraphic instance that you didn't get from the pool manager.");
+                throw new System.Exception("You are trying to return a SpecialFXGraphic instance that you didn't get from the pool manager.");
         }
     }
 }

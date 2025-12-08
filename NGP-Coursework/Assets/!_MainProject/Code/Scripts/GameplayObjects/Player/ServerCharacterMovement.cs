@@ -80,10 +80,15 @@ namespace Gameplay.GameplayObjects.Character
         {
             this._characterController.enabled = false;  // Disable the CharacterController to facilitate teleportation.
 
-            transform.SetPositionAndRotation(newPosition, newRotation);
-            if (IsSpawned)  // Check facilitates initial position setting for spawning players.
-                this.GetComponent<Unity.Netcode.Components.NetworkTransform>().Teleport(newPosition, newRotation, this.transform.lossyScale);   // Teleport for instant movement in clients.
+            transform.position = newPosition;
+            if (IsSpawned) // Check facilitates initial position setting for spawning players.
+            {
+                this.GetComponent<Unity.Netcode.Components.NetworkTransform>().Teleport(newPosition, transform.rotation, this.transform.lossyScale);   // Teleport for instant movement in clients.
             
+                if (this.TryGetComponent<CameraControllerTest>(out CameraControllerTest cameraController))  // Temporary fix to ensure that player rotation isn't messed up by the forced change in rotation.
+                    cameraController.SetRotationOwnerRpc(newRotation.eulerAngles.y, newRotation.eulerAngles.x);
+            }
+
             this._characterController.enabled = true;
         }
 
