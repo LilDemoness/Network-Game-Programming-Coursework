@@ -15,8 +15,28 @@ namespace Gameplay.GameplayObjects.Character
         private MovementState _movementState;
         private MovementStatus _previousState;
 
+        [Header("General References")]
         [SerializeField] private ServerCharacter _characterLogic;
         [SerializeField] private Transform _rotationPivot;
+        [SerializeField] private CharacterController _characterController;
+
+
+        [Header("Movement Settings")]
+        [SerializeField] private float _defaultSpeed = 12.5f;
+        private Vector3 _desiredVelocity;
+
+        [Space(5)]
+        private const float GRAVITY = -9.81f;
+        [SerializeField] private float _gravityMultiplier = 1.0f;
+        private float _verticalVelocity;
+
+        [SerializeField] private float _airSpeedDecreaseRate = 1.0f;
+
+
+        [Header("Ground Check")]
+        [SerializeField] private float _groundCheckRadius = 0.5f;
+        [SerializeField] private LayerMask _groundLayers;
+        private bool _isGrounded;
 
 
         private void Awake()
@@ -36,6 +56,7 @@ namespace Gameplay.GameplayObjects.Character
         }
         private void FixedUpdate()
         {
+            CheckIsGrounded();
             PerformMovement();
 
             var currentState = GetMovementStatus(_movementState);
@@ -55,14 +76,14 @@ namespace Gameplay.GameplayObjects.Character
         }
 
 
-        private void PerformMovement()
+        private void CheckIsGrounded() => _isGrounded = Physics.CheckSphere(transform.position, _groundCheckRadius, _groundLayers, QueryTriggerInteraction.Ignore);
+        private Vector3 CalculateDesiredMovement()
         {
             if (_movementState == MovementState.Idle)
-                return;
+                return Vector3.zero;
 
 
             // Calculate Movement.
-            Vector3 movementVector = Vector3.zero;
             if (_movementState == MovementState.ForcedMovement)
             {
                 // Calculate from Forced Movement.
@@ -70,25 +91,47 @@ namespace Gameplay.GameplayObjects.Character
             else if (_movementState == MovementState.FollowingPath)
             {
                 // Pathfinding-based Movement.
+                Vector3 movementVector = Vector3.zero;
 
                 // If we didn't move, then stop moving (We reached the end of the path).
                 if (movementVector == Vector3.zero)
                 {
                     _movementState = MovementState.Idle;
-                    return;
+                    return Vector3.zero;
                 }
+
+                // To-do: Calculate desired movementVector to reach next point in path.
             }
             else if (_movementState == MovementState.DirectInput)
             {
                 // Input-based movement.
-                movementVector = _rotationPivot.right * _movementInput.x + _rotationPivot.forward * _movementInput.y;
+                Vector3 movementVector = _rotationPivot.right * _movementInput.x + _rotationPivot.forward * _movementInput.y;
                 movementVector = Vector3.ProjectOnPlane(movementVector, Vector3.up).normalized * movementVector.magnitude;
-                movementVector *= GetBaseMovementSpeed() * Time.fixedDeltaTime;
+                movementVector *= GetBaseMovementSpeed();
+                return movementVector;
             }
 
 
+            return Vector3.zero;
+        }
+        private void PerformMovement()
+        {
+            if (_isGrounded)
+                _desiredVelocity = CalculateDesiredMovement();  // We are grounded, so handle movement normally.
+            else
+                _desiredVelocity = Vector3.Lerp(_desiredVelocity, Vector3.zero, _airSpeedDecreaseRate * Time.fixedDeltaTime);   // Prevent change in movement direction while in-air, but also decrease towards 0 to simulate resistance.
+
+            Vector3 movementVector = _desiredVelocity;  // Use a separate Vector3 so that we can modify it without affecting our desired velocity.
+
+            // Apply Gravity.
+            if (_isGrounded)
+                _verticalVelocity = -2.0f;  // Small value to prevent floating above the ground.
+            else
+                _verticalVelocity += GRAVITY * _gravityMultiplier * Time.fixedDeltaTime;    // Apply gravity acceleration.
+            movementVector += Vector3.up * _verticalVelocity;   // Apply current gravity.
+
             // Perform Movement.
-            transform.position += movementVector;
+            _characterController.Move(movementVector * Time.fixedDeltaTime);
         }
 
 
@@ -137,11 +180,11 @@ namespace Gameplay.GameplayObjects.Character
 
 
         /// <summary>
-        ///     Retrieves the speed for this character.
+        ///     Retrieves the base speed for this character.
         /// </summary>
         private float GetBaseMovementSpeed()
         {
-            return 5.0f;
+            return _defaultSpeed;
         }
 
         /// <summary>

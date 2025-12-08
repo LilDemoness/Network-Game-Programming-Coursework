@@ -16,7 +16,7 @@ MonoBehaviour:
   <FrameSize>k__BackingField: 2
   <MaxHealth>k__BackingField: 12
   <HeatCapacity>k__BackingField: 10
-  <MovementSpeed>k__BackingField: 5
+  <MovementSpeed>k__BackingField: 12.5
   <AttachmentPoints>k__BackingField:
   - _dataPlaceholder: 
   - _dataPlaceholder: 

@@ -123,6 +123,18 @@ PrefabInstance:
       propertyPath: _rotationPivot
       value: 
       objectReference: {fileID: 1252660044655768242}
+    - target: {fileID: 4308262964034644391, guid: 19e12c250a369b843b0be12527b88951, type: 3}
+      propertyPath: m_Height
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4308262964034644391, guid: 19e12c250a369b843b0be12527b88951, type: 3}
+      propertyPath: m_Radius
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4308262964034644391, guid: 19e12c250a369b843b0be12527b88951, type: 3}
+      propertyPath: m_Center.y
+      value: 1.5
+      objectReference: {fileID: 0}
     - target: {fileID: 7621494308545332439, guid: 19e12c250a369b843b0be12527b88951, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
