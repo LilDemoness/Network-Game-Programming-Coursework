@@ -41,6 +41,7 @@ namespace Gameplay.GameplayObjects.Character
         {
             // Disable ourselves until we have been spawned
             this.enabled = false;
+            this._characterController.enabled = false;
         }
         public override void OnNetworkSpawn()
         {
@@ -51,6 +52,7 @@ namespace Gameplay.GameplayObjects.Character
             this.enabled = true;
 
             // On the server, enable our other components and initialise ourself.
+            this._characterController.enabled = true;
         }
         private void FixedUpdate()
         {
@@ -71,6 +73,18 @@ namespace Gameplay.GameplayObjects.Character
                 // Disable server components when despawning.
                 this.enabled = false;
             }
+        }
+
+
+        public void SetPositionAndRotation(Vector3 newPosition, Quaternion newRotation)
+        {
+            this._characterController.enabled = false;  // Disable the CharacterController to facilitate teleportation.
+
+            transform.SetPositionAndRotation(newPosition, newRotation);
+            if (IsSpawned)  // Check facilitates initial position setting for spawning players.
+                this.GetComponent<Unity.Netcode.Components.NetworkTransform>().Teleport(newPosition, newRotation, this.transform.lossyScale);   // Teleport for instant movement in clients.
+            
+            this._characterController.enabled = true;
         }
 
 

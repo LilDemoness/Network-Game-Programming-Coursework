@@ -331,6 +331,7 @@ namespace Gameplay.GameplayObjects.Character
             PlayDeathEffectsClientRpc();
         }
 
+        // Server-only.
         public void RespawnCharacter(Vector3 spawnPosition, Quaternion spawnRotation)
         {
             // Remove the Death Model (Or have it handle that itself).
@@ -340,7 +341,7 @@ namespace Gameplay.GameplayObjects.Character
 
             // Perpetuate Required Revive Changes.
             NetworkHealthComponent.Revive_Server(null); // Revive the character from the server.
-            this.GetComponent<Unity.Netcode.Components.NetworkTransform>().Teleport(spawnPosition, spawnRotation, this.transform.lossyScale);   // Teleport to our respawn position.
+            Movement.SetPositionAndRotation(spawnPosition, spawnRotation);
         }
 
 

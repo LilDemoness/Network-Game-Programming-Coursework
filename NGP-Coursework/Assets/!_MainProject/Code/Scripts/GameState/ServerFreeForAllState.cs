@@ -11,6 +11,7 @@ using SceneLoading;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UIElements;
 using Utils;
 using VContainer;
 using VContainer.Unity;
@@ -45,13 +46,6 @@ namespace Gameplay.GameState
         [Header("Player Spawning")]
         [SerializeField] private NetworkObject _playerPrefab;
         private bool _initialSpawnsComplete = false;
-
-
-        [Header("Player Respawning")]
-        private const bool USE_GROUPED_RESPAWNS = true;  // If true, respawns are grouped together at the time which is the nearest multiple of '_respawnDelay'.
-        private const float RESPAWN_DELAY = 5.0f;
-        private const float MIN_RESPAWN_DELAY = 2.0f;
-        private Dictionary<ServerCharacter, (float Time, bool ShouldAutoRespawn)> _characterToRespawnInfoDictionary = new();
 
 
         [Inject]
@@ -244,27 +238,28 @@ namespace Gameplay.GameState
             if (!NetworkManager.Singleton.SpawnManager.GetPlayerNetworkObject(clientId).TryGetComponent<PersistentPlayer>(out PersistentPlayer persistentPlayer))
                 Debug.LogError($"No matching persistent PersistentPlayer for client {clientId} was found");
 
+            Debug.Log($"SpawnPlayer in {spawnPoint.transform.position}");
+
             // Retrieve our cached data (If this player has already joined & been spawned).
-            SessionPlayerData? sessionPlayerData = isLateJoin ? SessionManager<SessionPlayerData>.Instance.GetPlayerData(clientId) : null;
+            SessionPlayerData ? sessionPlayerData = isLateJoin ? SessionManager<SessionPlayerData>.Instance.GetPlayerData(clientId) : null;
             if (sessionPlayerData is { HasCharacterSpawned: false })
                 sessionPlayerData = null;
 
             // Instantiate the Player.
             NetworkObject newPlayer = Instantiate<NetworkObject>(_playerPrefab, Vector3.zero, Quaternion.identity);
             ServerCharacter newPlayerServerCharacter = newPlayer.GetComponent<ServerCharacter>();
-            Transform playerPhysicsTransform = newPlayerServerCharacter.transform;
 
             // Set the player's spawn position.
             if (spawnPoint != null)
             {
-                playerPhysicsTransform.SetPositionAndRotation(spawnPoint.transform.position, spawnPoint.transform.rotation);
+                newPlayerServerCharacter.Movement.SetPositionAndRotation(spawnPoint.transform.position, spawnPoint.transform.rotation);
                 spawnPoint.SpawnAtPoint();
             }
-            if (sessionPlayerData.HasValue)
+            if (sessionPlayerData.HasValue && sessionPlayerData.Value.HasCharacterSpawned)
             {
                 // Restore the player's previous position.
                 Debug.LogWarning("Remve this?");
-                playerPhysicsTransform.SetPositionAndRotation(sessionPlayerData.Value.PlayerPosition, sessionPlayerData.Value.PlayerRotation);
+                newPlayerServerCharacter.Movement.SetPositionAndRotation(sessionPlayerData.Value.PlayerPosition, sessionPlayerData.Value.PlayerRotation);
             }
 
             // Instantiate NetworkVariables with their values to ensure that they're ready for use on OnNetworkSpawn.
