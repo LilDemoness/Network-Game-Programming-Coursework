@@ -3,6 +3,7 @@ using Unity.Netcode;
 using UserInput;
 using Gameplay.GameplayObjects.Players;
 using Gameplay.GameplayObjects.Character.Customisation.Sections;
+using System.Linq;
 
 public class CameraControllerTest : NetworkBehaviour
 {
@@ -12,6 +13,7 @@ public class CameraControllerTest : NetworkBehaviour
 
 
     [SerializeField] private Player _playerManager;
+    [SerializeField] private bool _swapTest;
 
 
     [Header("Rotation Settings")]
@@ -171,13 +173,19 @@ public class CameraControllerTest : NetworkBehaviour
 	///	</summary>
     private void UpdateGraphicsTargetRotation()
     {
-        Vector3 targetPosition = Camera.main.transform.position + Camera.main.transform.forward * Constants.TARGET_ESTIMATION_RANGE;
-        int hits = Physics.RaycastNonAlloc(Camera.main.transform.position, Camera.main.transform.forward, _graphicsHitCache, Constants.TARGET_ESTIMATION_RANGE, _targetingLayers);
-        if (hits > 0)
+        Vector3 originPos = Camera.main.transform.position;
+        Vector3 targetPosition = originPos + Camera.main.transform.forward * Constants.TARGET_ESTIMATION_RANGE;
+        _graphicsHitCache = Physics.RaycastAll(Camera.main.transform.position, Camera.main.transform.forward, Constants.TARGET_ESTIMATION_RANGE, _targetingLayers).OrderBy(t => (t.point - originPos).sqrMagnitude).Take(2).ToArray();
+        if (_swapTest)
+        {
+            Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out RaycastHit hitInfo, Constants.TARGET_ESTIMATION_RANGE, _targetingLayers);
+            Debug.DrawLine(Camera.main.transform.position, hitInfo.point);
+        }
+        if (_graphicsHitCache.Length > 0)
         {
             // Check that we've not only hit this player.
             bool isFirstHitThis = _graphicsHitCache[0].transform.HasParent(this.transform);
-            if (!isFirstHitThis || hits != 1)
+            if (!isFirstHitThis || _graphicsHitCache.Length > 1)
             {
                 // We've hit something other than this player. Use that as our obstruction.
                 int validIndex = isFirstHitThis ? 1 : 0;
@@ -191,8 +199,10 @@ public class CameraControllerTest : NetworkBehaviour
             }
         }
         s_crosshairAdjustmentPlane.SetNormalAndPosition(-Camera.main.transform.forward, targetPosition);
+        if (!_swapTest)
+            Debug.DrawLine(targetPosition, Camera.main.transform.position);
         Debug.DrawRay(targetPosition, Vector3.back);
-        Debug.DrawLine(targetPosition, Camera.main.transform.position);
+        //Debug.DrawLine(targetPosition, Camera.main.transform.position);
 
 
         // Calculate our rotations for the vertical & horizontal rotation pivots.
