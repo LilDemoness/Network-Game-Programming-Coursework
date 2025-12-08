@@ -65,7 +65,7 @@ namespace Gameplay.GameplayObjects
         private void NotifyOfDeathRpc()
         {
             OnLifeStateChanged?.Invoke(null, _lifeState.Value);
-            //OnDied?.Invoke(new BaseDamageReceiverEventArgs(GetServerCharacterForObjectId(inflicterObjectId)));
+            OnDied?.Invoke(new BaseDamageReceiverEventArgs(null));
         }
 
         [Rpc(SendTo.Everyone)]

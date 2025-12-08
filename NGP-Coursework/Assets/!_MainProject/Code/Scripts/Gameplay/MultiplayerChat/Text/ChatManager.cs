@@ -66,8 +66,10 @@ namespace Gameplay.MultiplayerChat.Text
             ClientInput.OnSubmitChatPerformed += SubmitChat;
             ClientInput.OnCancelChatPerformed += CancelChat;
 
-            // Select Text Box.
-            EventSystem.current.SetSelectedGameObject(_chatInput.gameObject);
+            // Select the Input Field.
+            // We are deselecting and then reselecting the next frame to prevent an error with having the input field selected but the user being unable to interact with it.
+            EventSystem.current.SetSelectedGameObject(null);
+            StartCoroutine(Test());
 
             // Prevent Unrelated Input.
             ClientInput.PreventActions(typeof(ChatManager), ALL_ACTIONS_BUT_CHAT);
@@ -94,6 +96,8 @@ namespace Gameplay.MultiplayerChat.Text
             _chatInputCanvasGroup.blocksRaycasts = isVisible;
         }
 
+        private IEnumerator Test() { yield return null; EventSystem.current.SetSelectedGameObject(_chatInput.gameObject); }
+
         #endregion
 
         public void SubmitChat()
@@ -116,8 +120,23 @@ namespace Gameplay.MultiplayerChat.Text
             if (_persistentPlayer == null && !_persistentPlayerCollection.TryGetPlayer(NetworkManager.LocalClientId, out _persistentPlayer))
                 throw new System.Exception($"No PersistentPlayer found for client {NetworkManager.LocalClientId}");
 
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+
+            if (Gameplay.DebugCheats.DebugCheatManager.IsCommand(_chatInput.text))
+            {
+                Gameplay.DebugCheats.DebugCheatManager.Instance.PerformCheat(_chatInput.text);
+                _chatInput.text = "";
+                return;
+            }
+
+#endif
 
             SendChatMessageServerRpc(_persistentPlayer.NetworkNameState.Name.Value, _chatInput.text);
+            _chatInput.text = "";
+        }
+        public void SendChatMessage(string name, string message)
+        {
+            SendChatMessageServerRpc(name ?? "", message);
             _chatInput.text = "";
         }
 

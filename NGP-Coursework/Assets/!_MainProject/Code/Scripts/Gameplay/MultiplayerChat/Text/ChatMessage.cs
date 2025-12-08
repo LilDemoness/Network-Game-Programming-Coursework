@@ -7,6 +7,12 @@ namespace Gameplay.MultiplayerChat.Text
     {
         [SerializeField] private TextMeshProUGUI _messageText;
 
-        public void SetChatText(string senderName, string message) => _messageText.text = $"{senderName}: {message}";
+        public void SetChatText(string senderName, string message)
+        {
+            if (string.IsNullOrWhiteSpace(senderName))
+                _messageText.text = message;    // Server Log Message.
+            else
+                _messageText.text = $"{senderName}: {message}";
+        }
     }
 }
