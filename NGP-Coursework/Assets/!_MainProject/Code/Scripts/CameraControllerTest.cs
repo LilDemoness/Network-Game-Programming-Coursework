@@ -175,12 +175,7 @@ public class CameraControllerTest : NetworkBehaviour
     {
         Vector3 originPos = Camera.main.transform.position;
         Vector3 targetPosition = originPos + Camera.main.transform.forward * Constants.TARGET_ESTIMATION_RANGE;
-        _graphicsHitCache = Physics.RaycastAll(Camera.main.transform.position, Camera.main.transform.forward, Constants.TARGET_ESTIMATION_RANGE, _targetingLayers).OrderBy(t => (t.point - originPos).sqrMagnitude).Take(2).ToArray();
-        if (_swapTest)
-        {
-            Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out RaycastHit hitInfo, Constants.TARGET_ESTIMATION_RANGE, _targetingLayers);
-            Debug.DrawLine(Camera.main.transform.position, hitInfo.point);
-        }
+        _graphicsHitCache = Physics.RaycastAll(originPos, Camera.main.transform.forward, Constants.TARGET_ESTIMATION_RANGE, _targetingLayers).OrderBy(t => (t.point - originPos).sqrMagnitude).Take(2).ToArray();
         if (_graphicsHitCache.Length > 0)
         {
             // Check that we've not only hit this player.
@@ -199,9 +194,6 @@ public class CameraControllerTest : NetworkBehaviour
             }
         }
         s_crosshairAdjustmentPlane.SetNormalAndPosition(-Camera.main.transform.forward, targetPosition);
-        if (!_swapTest)
-            Debug.DrawLine(targetPosition, Camera.main.transform.position);
-        Debug.DrawRay(targetPosition, Vector3.back);
         //Debug.DrawLine(targetPosition, Camera.main.transform.position);
 
 
