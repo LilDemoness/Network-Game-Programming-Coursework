@@ -85,6 +85,15 @@ namespace Utils
         }
 
 
+        public void SetTimerRemainingTime(float newDuration)
+        {
+            _hasTimer = true;
+            _timerRunning = true;
+            _actualTimeRemaining = newDuration;
+            SyncGameTime(true);
+        }
+
+
 
         private void Update()
         {

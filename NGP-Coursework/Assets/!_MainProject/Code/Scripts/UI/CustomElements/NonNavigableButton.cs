@@ -71,10 +71,17 @@ namespace UI
         private void OnEnable()
         {
             if (_inputAction != null)
+            {
+                Debug.Log("Subscribed");
+                _inputAction.action.Enable();
                 _inputAction.action.performed += Action_performed;
+            }
+            else
+                Debug.Log("Didn't Subscribe");
         }
         private void OnDisable()
         {
+            Debug.Log("Unsubscribe");
             if (_inputAction != null)
                 _inputAction.action.performed -= Action_performed;
         }
@@ -87,6 +94,8 @@ namespace UI
 
         private void Action_performed(InputAction.CallbackContext ctx)
         {
+            Debug.Log("Action Performed");
+
             if (!_isInteractable)
                 return; // The action is not interractable.
 

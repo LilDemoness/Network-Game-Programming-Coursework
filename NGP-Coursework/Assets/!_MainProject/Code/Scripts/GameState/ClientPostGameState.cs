@@ -1,4 +1,5 @@
 using UnityEngine;
+using UserInput;
 using Utils;
 using VContainer;
 using VContainer.Unity;
@@ -35,6 +36,7 @@ namespace Gameplay.GameState
             ShowPodium();
 
             Cursor.lockState = CursorLockMode.None;
+            ClientInput.ResetInputPrevention();
         }
 
 

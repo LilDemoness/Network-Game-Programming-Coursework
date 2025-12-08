@@ -32,6 +32,7 @@ namespace Gameplay.DebugCheats
             { "Log", new LogCommand() },
             { "ToggleMouse", new ToggleMouseLockCommand() },
             { "Kill", new KillPlayerCommand() },
+            { "SetGameTimeRemaining", new SetGameTimeRemainingCommand() },
         };
 
 
@@ -279,6 +280,24 @@ namespace Gameplay.DebugCheats
                 target.NetworkHealthComponent.SetLifeState_Server(null, GameplayObjects.Character.LifeState.Dead);
                 ChatManager.Instance.SendChatMessage(null, $"{inflicter.CharacterName} killed {target.CharacterName}");
             }
+        }
+    }
+    public class SetGameTimeRemainingCommand : ConsoleCommand
+    {
+        public override bool CheckParameterCount(int count) => count == 1;
+        public override bool TestParameter(int paramIndex, string parameterAsString) => float.TryParse(parameterAsString, out float _);
+        public override string GetParameterName(int paramIndex) => paramIndex == 1 ? "Server Time" : "Invalid";
+
+        public override void Process(ulong triggeringClientId, string[] parameters)
+        {
+            if (!float.TryParse(parameters[0], out float desiredTime))
+                return; // Find a way to log this.
+
+            GameObject.FindAnyObjectByType<Gameplay.GameState.ServerFreeForAllState>().GetComponent<Utils.NetworkTimer>().SetTimerRemainingTime(desiredTime);
+
+            // Log the Cheat.
+            Gameplay.GameplayObjects.Character.ServerCharacter inflicter = GameObject.FindObjectsByType<Gameplay.GameplayObjects.Players.Player>(FindObjectsInactive.Include, FindObjectsSortMode.None).First(t => t.OwnerClientId == triggeringClientId).ServerCharacter;
+            ChatManager.Instance.SendChatMessage(null, $"{inflicter.CharacterName} set the remaining game time to {desiredTime}");
         }
     }
 
