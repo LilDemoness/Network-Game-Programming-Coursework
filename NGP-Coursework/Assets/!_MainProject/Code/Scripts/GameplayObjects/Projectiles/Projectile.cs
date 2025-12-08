@@ -169,27 +169,6 @@ namespace Gameplay.GameplayObjects.Projectiles
         }
 
 
-        private void OnCollisionEnter(Collision collision)
-        {
-            if (!IsServer)
-                return; // Only run on the server.
-            if (!_hasStarted)
-                return; // Only run if we have started.
-            /*if (collision.transform.TryGetComponentThroughParents<NetworkObject>(out NetworkObject networkObject))
-                if (networkObject.NetworkObjectId == _ownerNetworkID)
-                    return; // Don't hit the entity that spawned us.
-
-
-            HandleTargetHit(collision);
-
-            _remainingHits -= 1;
-            if (_remainingHits < 0)
-            {
-                DisposeSelf();
-            }*/
-        }
-
-
         protected virtual void HandleTargetHit(RaycastHit rayHit)
         {
             EffectTarget(rayHit.transform, rayHit.point, rayHit.normal);
