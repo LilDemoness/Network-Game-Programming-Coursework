@@ -135,7 +135,7 @@ namespace Gameplay.MultiplayerChat.Text
             if (Gameplay.DebugCheats.DebugCheatManager.IsCommand(_chatInput.text))
             {
                 // Our input is a cheat.
-                if (Gameplay.DebugCheats.DebugCheatManager.HasInstance)
+                if (Gameplay.DebugCheats.DebugCheatManager.Instance != null)
                     Gameplay.DebugCheats.DebugCheatManager.Instance.PerformCheat(_chatInput.text);  // Instance Exists: Perform Cheat as Normal.
                 else
                     ReceiveChatMessage(null, "Cheats Unavailable while DebugCheatManager is Uninitialised. Try again during gameplay"); // No Instance: Warn the user.

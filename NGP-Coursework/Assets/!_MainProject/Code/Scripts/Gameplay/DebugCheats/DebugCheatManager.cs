@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using Gameplay.Messages;
 using Gameplay.MultiplayerChat.Text;
 using Infrastructure;
@@ -11,9 +10,6 @@ using VContainer;
 
 namespace Gameplay.DebugCheats
 {
-    public class CheatAttribute : System.Attribute { }
-
-
     /// <summary>
     ///     Handles debug cheat events, applying them on the server and logging them on all clients.<br/>
     ///     This class is only avaliable in the Editor or on Development Builds.

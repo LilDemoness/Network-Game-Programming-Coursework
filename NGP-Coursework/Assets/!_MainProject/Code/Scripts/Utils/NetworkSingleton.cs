@@ -6,7 +6,7 @@ public class NetworkSingleton<T> : NetworkBehaviour where T : Component
     private static T s_instance;
     public static T Instance => s_instance;
 
-    public static bool HasInstance = s_instance != null;
+    //public static bool HasInstance = s_instance != null;  // For some reason this is always returning null. For now, manually perform the check by using 'X.Instance != null'
 
 
     protected virtual void Awake() => InitialiseSingleton();
