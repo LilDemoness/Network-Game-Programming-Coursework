@@ -8,7 +8,8 @@ using Unity.Mathematics;
 namespace Gameplay.Actions
 {
     /// <summary>
-    ///     A container class for action instances.
+    ///     A container class for action instances.<br/>
+    ///     Facilitates instance variables and correctly processing when the action should perform Start, Update, etc functions. 
     /// </summary>
     public class Action
     {

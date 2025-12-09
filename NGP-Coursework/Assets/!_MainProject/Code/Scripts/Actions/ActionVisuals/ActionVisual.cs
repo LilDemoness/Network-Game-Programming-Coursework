@@ -13,9 +13,9 @@ namespace Gameplay.Actions.Visuals
         [System.Flags]
         private enum TriggerTimes
         {
-            OnStart = 1 << 0,
+            OnStart = 1 << 0,           // Triggered when the Action Starts or (Special Case) is Anticipated.
             OnStartCharging = 1 << 1,
-            OnUpdate = 1 << 2,
+            OnUpdate = 1 << 2,          // Triggered when the Action Updates or (Special Case) has an Anticipated Update.
             OnEnd = 1 << 3,
             OnCancel = 1 << 4,
 

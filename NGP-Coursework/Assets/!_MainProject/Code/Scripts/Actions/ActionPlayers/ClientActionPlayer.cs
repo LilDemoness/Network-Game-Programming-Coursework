@@ -170,12 +170,13 @@ namespace Gameplay.Actions
                 Action action = _playingActions[i];
                 if (!forceCancel && !action.CanBeCancelled())
                 {
-                    action.IsGhost = true;
+                    action.IsGhost = true;  // Cancel the action the next tick after it can be cancelled.
                     continue;
                 }
                 if (!cancelCondition(action))
                     continue;
 
+                // Cancel the action instantly.
                 CancelAction(action);
                 _playingActions.RemoveAt(i);
                 ActionFactory.ReturnAction(action);

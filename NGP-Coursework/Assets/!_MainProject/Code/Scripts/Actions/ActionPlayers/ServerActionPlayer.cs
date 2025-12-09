@@ -152,12 +152,11 @@ namespace Gameplay.Actions
             // Check our active Actions to see if any should be cancelled.
             if (_actionQueue.Count > 0)
             {
+                // Only check the active action (Index 0) as the others haven't been started and therefore cannot be interrupted.
                 if (action.ShouldCancelAction(ref action.Data, ref _actionQueue[0].Data))
                 {
                     // Cancel this action.
-                    //Debug.Log($"Cancelling Action: {_actionQueue[0].name} (Slot: {_actionQueue[0].Data.SlotIdentifier})");
                     CancelAction(_actionQueue[0]);
-                    //_actionQueue[0].Cancel(_serverCharacter);
                     AdvanceQueue(false);    // Advance the queue to the next action and remove the current head.
                 }
             }
@@ -168,9 +167,7 @@ namespace Gameplay.Actions
                 if (action.ShouldCancelAction(ref action.Data, ref nonBlockingAction.Data))
                 {
                     // Cancel this action
-                    //Debug.Log($"Cancelling Action: {nonBlockingAction.name} (Slot: {nonBlockingAction.Data.SlotIdentifier})");
                     CancelAction(nonBlockingAction);
-                    //nonBlockingAction.Cancel(_serverCharacter);
                     _nonBlockingActions.RemoveAt(i);
                     TryReturnAction(nonBlockingAction);
                 }
@@ -182,7 +179,7 @@ namespace Gameplay.Actions
         ///     If no action is active, returns false.
         /// </summary>
         /// <remarks>
-        ///     This only refers to the blocking action.
+        ///     This only refers to the blocking action (Index 0).
         ///     Multiple non-blocking actions can be running in the background, and this would still return false.
         /// </remarks>
         public bool GetActiveActionInfo(out ActionRequestData data)
@@ -228,6 +225,7 @@ namespace Gameplay.Actions
         {
             if (_actionQueue.Count <= 0)
             {
+                // The Action Queue has been emptied
                 OnActionQueueEmptied?.Invoke();
                 return;
             }
@@ -235,7 +233,7 @@ namespace Gameplay.Actions
             if (IsActionOnCooldown(_actionQueue[0]))
             {
                 // We've used this action too recently.
-                Debug.Log("Action on Cooldown");
+                Debug.LogWarning("Action on Cooldown - Implement Feedback to Player");
                 AdvanceQueue(false);    // Note: This calls 'StartAction()' recursively if there is more stuff in the queue.
                 return;
             }
@@ -345,7 +343,7 @@ namespace Gameplay.Actions
                 // The active action is no longer blocking, meaning that it should be moved out of the blocking queue and into the non-blocking one.
                 // (We use this for things like projectile attacks so that the projectile can keep flying but the player can start other actions in the meantime).
                 _nonBlockingActions.Add(_actionQueue[0]);
-                AdvanceQueue(false);
+                AdvanceQueue(callEndOnRemoved: false);
             }
 
             // If there's a blocking action, update it.
@@ -353,7 +351,7 @@ namespace Gameplay.Actions
             {
                 if (!UpdateAction(_actionQueue[0]))
                 {
-                    AdvanceQueue(true);
+                    AdvanceQueue(callEndOnRemoved: true);
                 }
             }
 
@@ -363,7 +361,7 @@ namespace Gameplay.Actions
                 Action runningAction = _nonBlockingActions[i];
                 if (!UpdateAction(runningAction))
                 {
-                    // The action has died.
+                    // The action has concluded. Remove it.
                     runningAction.End(_serverCharacter);
                     _nonBlockingActions.RemoveAt(i);
                     TryReturnAction(runningAction);
@@ -507,17 +505,19 @@ namespace Gameplay.Actions
                 Action action;
                 if (cancelQueuedActions)
                 {
+                    // Cancel any matching queued actions.
                     for (int i = _actionQueue.Count - 1; i >= 1; --i)
                     {
                         action = _actionQueue[i];
                         if (!forceCancel && !action.CanBeCancelled())
                         {
-                            action.IsGhost = true;
+                            action.IsGhost = true;  // Cancel the action the next tick after it can be cancelled again.
                             continue;
                         }
                         if (!cancelCondition(action))
                             continue;
 
+                        // Cancel the action instantly
                         hasRemovedAction = true;
                         CancelAction(action);
                         _actionQueue.RemoveAt(i);
@@ -525,14 +525,15 @@ namespace Gameplay.Actions
                     }
                 }
 
+                // Try to cancel the active blocking action.
                 action = _actionQueue[0];
                 if (!forceCancel && !action.CanBeCancelled())
                 {
-                    action.IsGhost = true;
+                    action.IsGhost = true;  // Cancel the action the next tick after it can be cancelled again.
                 }
                 else if (cancelCondition(action))
                 {
-                    // The active blocking action should be removed.
+                    // The active blocking action should be removed instantly.
                     hasRemovedAction = true;
                     CancelAction(_actionQueue[0]);
 
@@ -550,15 +551,15 @@ namespace Gameplay.Actions
                     Action action = _nonBlockingActions[i];
                     if (!forceCancel && !action.CanBeCancelled())
                     {
-                        action.IsGhost = true;
+                        action.IsGhost = true;  // Cancel the action the next tick after it can be cancelled again.
                         continue;
                     }
                     if (!cancelCondition(action))
                         continue;
 
+                    // Cancel the action instantly.
                     hasRemovedAction = true;
                     CancelAction(action);
-                    //action.Cancel(_serverCharacter);
                     _nonBlockingActions.RemoveAt(i);
                     TryReturnAction(action);
                 }
@@ -574,13 +575,12 @@ namespace Gameplay.Actions
         /// <remarks> Doesn't remove the Action from its associated list.</remarks>
         private void CancelAction(Action actionToCancel)
         {
-            Debug.Log("Cancel Action");
-            bool tryStartNextAction = _actionQueue.Count > 0 && actionToCancel == _actionQueue[0];
+            bool tryStartNextAction = _actionQueue.Count > 0 && actionToCancel == _actionQueue[0];  // If this is the blocking action, cache our desire to start the next action in the queue.
 
             // Cancel the action.
             actionToCancel.Cancel(_serverCharacter, out float chargeDepletedTime);
 
-            // Charge Reduction Time.
+            // Calculate & Save Charge Depletion Time.
             if (!_slotIndexToChargeDepletedTimeDict.TryAdd(actionToCancel.Data.AttachmentSlotIndex, chargeDepletedTime))
             {
                 _slotIndexToChargeDepletedTimeDict[actionToCancel.Data.AttachmentSlotIndex] = chargeDepletedTime;
@@ -608,7 +608,7 @@ namespace Gameplay.Actions
             }
 
             if (tryStartNextAction)
-                StartAction();
+                StartAction(); // The cancelled action was the blocking action. Start the next action in the queue.
         }
     }
 }

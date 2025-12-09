@@ -51,7 +51,9 @@ public class HitEffectManager : NetworkSingleton<HitEffectManager>
     
 
 
-
+    /// <summary>
+    ///     Play Anticipated Start HitEffects on the calling client.
+    /// </summary>
     public static void PlayHitEffectsOnSelfAnticipate(Vector3 hitPoint, Vector3 hitNormal, float chargePercentage, ActionID actionId)
     {
         ActionDefinition definition = GameDataSource.Instance.GetActionDefinitionByID(actionId);
@@ -60,21 +62,36 @@ public class HitEffectManager : NetworkSingleton<HitEffectManager>
             definition.HitVisuals[i].OnClientStart(null, hitPoint, hitNormal);
         }
     }
-    public static void PlayHitEffectsOnSelf(bool isOwner, Vector3 hitPoint, Vector3 hitNormal, float chargePercentage, ActionID actionId)
+    /// <summary>
+    ///     Play 'Update' HitEffects on the calling client.<br/>
+    ///     Also triggers Hit Visuals if the client is the action's triggering client.
+    /// </summary>
+    /// <param name="isTriggeringClient"> Is this client the client that triggered the action this is being called from?</param>
+    public static void PlayHitEffectsOnSelf(bool isTriggeringClient, Vector3 hitPoint, Vector3 hitNormal, float chargePercentage, ActionID actionId)
     {
         ActionDefinition definition = GameDataSource.Instance.GetActionDefinitionByID(actionId);
         for (int i = 0; i < definition.HitVisuals.Length; ++i)
         {
-            definition.HitVisuals[i].OnClientStart(null, hitPoint, hitNormal);
+            definition.HitVisuals[i].OnClientUpdate(null, hitPoint, hitNormal);
         }
 
-        if (isOwner)
+        if (isTriggeringClient)
             Instance.ShowHitEffectVisual(hitPoint);
     }
+    /// <summary>
+    ///     Calls a RPC to play the Update effect on the action's triggering client.
+    /// </summary>
     public static void PlayHitEffectsOnTriggeringClient(ulong triggeringClientId, Vector3 hitPoint, Vector3 hitNormal, float chargePercentage, ActionID actionId)
-        => Instance.PlayHitEffectsOnOwnerRpc(hitPoint, hitNormal, chargePercentage, actionId, Instance.RpcTarget.Group( new ulong[] { triggeringClientId }, RpcTargetUse.Temp));
-    [Rpc(SendTo.SpecifiedInParams)] // SpecifiedInParams as this object is owned by the Server, not the client who triggered the attack.
-    public void PlayHitEffectsOnOwnerRpc(Vector3 hitPoint, Vector3 hitNormal, float chargePercentage, ActionID actionId, RpcParams rpcParams = default)
+        => Instance.PlayHitEffectsOnTriggeringClientRpc(hitPoint, hitNormal, chargePercentage, actionId, Instance.RpcTarget.Group( new ulong[] { triggeringClientId }, RpcTargetUse.Temp));
+    /// <summary>
+    ///     Triggers the OnClientUpdate function of the passed action's HitVisuals,
+    ///     along with triggering the TriggeringClient-Specific Hit Effects (E.g. HitMarkers).
+    /// </summary>
+    /// <remarks>
+    ///     SpecifiedInParams as this object is owned by the Server, not the client who triggered the attack.
+    /// </remarks>
+    [Rpc(SendTo.SpecifiedInParams)]
+    public void PlayHitEffectsOnTriggeringClientRpc(Vector3 hitPoint, Vector3 hitNormal, float chargePercentage, ActionID actionId, RpcParams rpcParams = default)
     {
         ActionDefinition definition = GameDataSource.Instance.GetActionDefinitionByID(actionId);
         for (int i = 0; i < definition.HitVisuals.Length; ++i)
@@ -84,12 +101,18 @@ public class HitEffectManager : NetworkSingleton<HitEffectManager>
 
         ShowHitEffectVisual(hitPoint);
     }
+    /// <summary>
+    ///     Calls an RPC to play the Update effect on all clients BUT the action's triggering client.
+    /// </summary>
     public static void PlayHitEffectsOnNonTriggeringClients(ulong triggeringClientId, in ActionHitInformation hitInfo, float chargePercentage, ActionID actionId)
     {
         List<ulong> clientIds = new List<ulong>(NetworkManager.Singleton.ConnectedClientsIds);
         clientIds.Remove(triggeringClientId);
         Instance.PlayHitEffectsClientRpc(new NetworkActionHitInformation(hitInfo), chargePercentage, actionId, Instance.RpcTarget.Group(clientIds.ToArray(), RpcTargetUse.Temp));
     }
+    /// <summary>
+    ///     Triggers the OnClientUpdate function of the passed action's HitVisuals.
+    /// </summary>
     [Rpc(SendTo.SpecifiedInParams)]
     private void PlayHitEffectsClientRpc(NetworkActionHitInformation hitInfo, float chargePercentage, ActionID actionId, RpcParams rpcParams = default)
     {
@@ -100,18 +123,14 @@ public class HitEffectManager : NetworkSingleton<HitEffectManager>
         }
     }
 
-    public static void SpawnHitEffect(Vector3 hitPosition) => Debug.Log("Visual Displayed at " + hitPosition);
+    /// <summary>
+    ///     Spawn a HitMarker at the specified position.
+    /// </summary>
     public void ShowHitEffectVisual(Vector3 hitPosition)
     {
+        // Change to only perform if we are hitting an enemy?
         HitMarker hitMarker = _hitMarkerPool.Get();
         hitMarker.Setup(hitPosition, _hitMarkerPool);
-
-        Debug.Log("Visual Displayed at " + hitPosition);
-    }
-    private System.Collections.IEnumerator DisableAfterDelay(float delay, GameObject objectToDisable)
-    {
-        yield return new WaitForSeconds(delay);
-        objectToDisable.SetActive(false);
     }
     public void PlayHitEffectAudio()
     {

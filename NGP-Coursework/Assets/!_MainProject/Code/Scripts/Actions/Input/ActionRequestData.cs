@@ -19,7 +19,7 @@ namespace Gameplay.Actions
 
         /// <summary> NetworkObjectID of the IActionSource that triggered this source.
         /// (If unset, Position and Direction are used for determining the origin position & direction of the action instead).</summary>
-        public ulong IActionSourceObjectID;
+        public ulong IActionSourceObjectID; // Note: Currently treating ID '0' as unset, but there is a (Very) small chance that this could be a Character. For now it's fine.
         /// <summary> World-space Origin position of the skill. (Unset if IActionSourceObjectID is set).</summary>
         public Vector3 Position;
         /// <summary> World-space Direction of a skill. (Unset if IActionSourceObjectID is set).</summary>
@@ -42,6 +42,10 @@ namespace Gameplay.Actions
         #region Non-Synchronised Data
 
         private Transform _originTransform;
+        /// <summary>
+        ///     The Origin Transform of this Object.
+        /// </summary>
+        /// <remarks> If unset on this instance, retrieves the instance from the NetworkManager's SpawnedObjects list.</remarks>
         public Transform OriginTransform
         {
             get
