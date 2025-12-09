@@ -1,6 +1,7 @@
 using Gameplay.GameplayObjects.Players;
 using UI.Customisation;
 using UnityEngine;
+using VisualEffects;
 
 namespace Gameplay.GameState
 {
@@ -19,6 +20,7 @@ namespace Gameplay.GameState
         protected override void Awake()
         {
             base.Awake();
+            SpecialFXPoolManager.Clear();   // Prevent NullReferenceExceptions on missing references.
 
             NetworkGameplayState.OnLocalPlayerInitialCustomisationRequested += NetworkGameplayState_OnLocalPlayerInitialCustomisationRequested;
 

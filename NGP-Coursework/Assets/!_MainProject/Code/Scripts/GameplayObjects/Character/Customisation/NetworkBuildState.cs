@@ -5,6 +5,10 @@ using UnityEngine;
 
 namespace Gameplay.GameplayObjects
 {
+    /// <summary>
+    ///     NetworkBehaviour that syncs a Build State (Frame Index & Slottable Indicies) across the network.<br/>
+    ///     Contains a BuildData container class which is kept up-to-date with the current build data, and functions to notify listeners when the build has been changed.
+    /// </summary>
     public class NetworkBuildState : NetworkBehaviour
     {
         [field:SerializeField]

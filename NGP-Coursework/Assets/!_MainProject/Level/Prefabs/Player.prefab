@@ -267,7 +267,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
   _serverCharacter: {fileID: 2735484025869481409}
-  _serverWeaponController: {fileID: 6316178410078361309}
+  _serverSlotController: {fileID: 6316178410078361309}
 --- !u!114 &6316178410078361309
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -297,16 +297,24 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
   _playerManager: {fileID: 5888572611276870901}
+  _swapTest: 0
   _rotationPivot: {fileID: 1252660044655768242}
   _graphicsRotationRate: 180
   _horizontalSensitivity: 17.5
   _verticalSensitivity: 15
+  _rotationPivotYRotation:
+    m_InternalValue: 0
+  _rotation: {x: 0, y: 0}
   _horizontalRotationPivot: {fileID: 166711693417683199}
   _verticalRotationPivot: {fileID: 0}
   _verticalPivotOffset: {x: 0, y: 0, z: 0}
   _targetingLayers:
     serializedVersion: 2
     m_Bits: 73
+  _horizontalPivotYRotation:
+    m_InternalValue: 0
+  _verticalPivotLocalVerticalRotation:
+    m_InternalValue: 0
 --- !u!114 &-7200790135118280934
 MonoBehaviour:
   m_ObjectHideFlags: 0

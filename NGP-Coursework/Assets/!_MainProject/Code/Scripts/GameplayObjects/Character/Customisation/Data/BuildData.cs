@@ -2,6 +2,9 @@ using UnityEngine;
 
 namespace Gameplay.GameplayObjects.Character.Customisation.Data
 {
+    /// <summary>
+    ///     Reference class for the active Frame & Slottable Indicies.
+    /// </summary>
     [System.Serializable]
     public class BuildData
     {
