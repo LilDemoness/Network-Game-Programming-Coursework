@@ -5,7 +5,6 @@ using TMPro;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.InputSystem;
 using UserInput;
 using Utils;
 
@@ -59,7 +58,7 @@ namespace Gameplay.MultiplayerChat.Text
                 return; // Chat Input is already open.
             _isCapturingInput = true;   // Mark the chat as open.
 
-            // Set chat visibility.
+            // Show the Input and Main Chat.
             SetChatInputVisibility(true);
             StopMainTextChatFade();
 
@@ -81,6 +80,7 @@ namespace Gameplay.MultiplayerChat.Text
                 return; // Chat Input is already closed.
             _isCapturingInput = false;  // Mark the chat as closed.
 
+            // Hide the Input Box & Start the Main Chat Fading.
             SetChatInputVisibility(false);
             StartMainTextChatFade();
 
@@ -207,6 +207,7 @@ namespace Gameplay.MultiplayerChat.Text
             if (_fadeMainTextChatCoroutine != null)
                 StopCoroutine(_fadeMainTextChatCoroutine);
 
+            // Show our chat messages to prevent issues with them not showing.
             _chatMessagesCanvasGroup.alpha = 1.0f;
         }
 
@@ -219,6 +220,7 @@ namespace Gameplay.MultiplayerChat.Text
         {
             yield return WAIT_TO_START_FADING;
 
+            // Perform the fade over our desired duration.
             float fadeRate = 1.0f / FADE_DURATION;
             while (_chatMessagesCanvasGroup.alpha > 0.0f)
             {
@@ -226,6 +228,7 @@ namespace Gameplay.MultiplayerChat.Text
                 yield return null;
             }
 
+            // Ensure that our chat messages are fully hidden by the end of the fade operation.
             _chatMessagesCanvasGroup.alpha = 0.0f;
         }
 

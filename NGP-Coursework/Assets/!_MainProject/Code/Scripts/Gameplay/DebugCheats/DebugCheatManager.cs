@@ -22,7 +22,7 @@ namespace Gameplay.DebugCheats
     {
         #if UNITY_EDITOR || DEVELOPMENT_BUILD
 
-        public const char CHEAT_MESSAGE_IDENTIFIER = '/';
+        public const char COMMAND_MESSAGE_IDENTIFIER = '/';
         private static Dictionary<string, ConsoleCommand> s_consoleCommands = new()
         {
             { "Log", new LogCommand() },
@@ -39,15 +39,17 @@ namespace Gameplay.DebugCheats
 
         public void PerformCheat(string cheatText)
         {
-            if (IsEmptyCommand(cheatText))
+            // Perform initial checks on the client to preserve bandwidth.
+            // These checks will be re-performed on the server to ensure security.
+
+            if (IsEmptyCommand(cheatText))  // Check that the command isn't empty.
             {
-                HandleEmptyCheat();
+                HandleEmptyCommand(); // Notify the user.
                 return;
             }
-
-            if (!IsValidCommand(cheatText, out string identifier))
+            if (!IsValidCommand(cheatText, out string identifier))  // Check that the command is valid.
             {
-                HandleUnknownCheat("/" + identifier);
+                HandleUnknownCommand("/" + identifier);   // Notify the user.
                 return;
             }
 
@@ -85,15 +87,29 @@ namespace Gameplay.DebugCheats
         }
 
 
+        #region Validation Functions
 
+        /// <summary>
+        ///     Returns true if the command is fully empty or only contains the command identifier.
+        /// </summary>
         private static bool IsEmptyCommand(string cheatText) => string.IsNullOrWhiteSpace(cheatText) || cheatText.Length == 1;
-        public static bool IsCommand(string command) => command.StartsWith(CHEAT_MESSAGE_IDENTIFIER);
+        /// <summary>
+        ///     Returns true if the passed text is a command (Starts with the Command starts with the identifier).
+        /// </summary>
+        public static bool IsCommand(string command) => command.StartsWith(COMMAND_MESSAGE_IDENTIFIER);
+        /// <summary>
+        ///     Returns true if the command is valid (The identifier matches one of our console commands).
+        /// </summary>
         private static bool IsValidCommand(string command, out string identifier)
         {
             identifier = command.Remove(0, 1).Split(' ')[0];
             return s_consoleCommands.ContainsKey(identifier);
         }
+        /// <inheritdoc cref="IsValidCommand(string, out string)"/>
         private static bool IsValidCommand(string identifier) => s_consoleCommands.ContainsKey(identifier);
+        /// <summary>
+        ///     Attempt to parse the given command string, returning true if the parse was successful or not.
+        /// </summary>
         private static bool ParseCommand(string command, out string identifier, out string[] parameters)
         {
             string[] splitCheat = command
@@ -106,12 +122,17 @@ namespace Gameplay.DebugCheats
             return !string.IsNullOrWhiteSpace(identifier);
         }
 
+        #endregion
+
+        /// <summary>
+        ///     Process the given command on the Server and perform it.
+        /// </summary>
         private bool ProcessCommand(ulong triggeringClientId, string identifier, string[] parameters)
         {
             if (!s_consoleCommands.TryGetValue(identifier, out var consoleCommand))
             {
                 // Unknown Cheat.
-                HandleUnknownCheat(identifier);
+                HandleUnknownCommand(identifier);
                 return false;
             }
 
@@ -148,22 +169,29 @@ namespace Gameplay.DebugCheats
         }
         
 
+        /// <summary>
+        ///     Notify the specified client that a valid client-side command has been performed.
+        /// </summary>
         [Rpc(SendTo.SpecifiedInParams)]
         public void SendCommandToClientRpc(string identifier, string parameterString, RpcParams rpcParams = default)
         {
+            // Retrieve the command's parameters from the passed parameterString.
             string[] parameters = string.IsNullOrWhiteSpace(parameterString) ? null : parameterString.Split(',');
+            // Process the client-side command.
             s_consoleCommands[identifier].Process(NetworkManager.LocalClientId, parameters);
         }
 
 
 
+#region Command Response RPCs
+
         [Rpc(SendTo.SpecifiedInParams)]
-        private void CheatInvalidResponseRpc(RpcParams rpcParams = default) => HandleInvalidCheatSent();
-        private void HandleInvalidCheatSent()
+        private void CheatInvalidResponseRpc(RpcParams rpcParams = default) => HandleInvalidCommandSent();
+        private void HandleInvalidCommandSent()
         {
             ChatManager.Instance.ReceiveChatMessage(null, "An Invalid Cheat passed checks on this client but was caught by the Server");
         }
-        private void HandleUnknownCheat(string identifier)
+        private void HandleUnknownCommand(string identifier)
         {
             ChatManager.Instance.ReceiveChatMessage(null, $"Unknown Cheat Used: {identifier}");
         }
@@ -175,10 +203,12 @@ namespace Gameplay.DebugCheats
         {
             ChatManager.Instance.ReceiveChatMessage(null, $"{actualParamCount} is an invalid number of parameters for command '/{identifier}'");
         }
-        private void HandleEmptyCheat()
+        private void HandleEmptyCommand()
         {
             ChatManager.Instance.ReceiveChatMessage(null, $"Empty Cheat Used");
         }
+
+#endregion
 
 #endif
     }
@@ -187,14 +217,34 @@ namespace Gameplay.DebugCheats
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
     public abstract class ConsoleCommand
     {
+        /// <summary>
+        ///     Returns true if the passed parameter count is valid for this command.
+        /// </summary>
         public abstract bool CheckParameterCount(int count);
+        /// <summary>
+        ///     Returns true if the parameter string is valid for the given parameter index.
+        /// </summary>
         public abstract bool TestParameter(int paramIndex, string parameterAsString);
+        /// <summary>
+        ///     Returns the name of the parameter for the given parameter index.
+        /// </summary>
         public abstract string GetParameterName(int paramIndex);
 
-        public virtual bool RunOnTriggeringClient => false; // If true, run on the Triggering Client once processed by the server. If false, run on the Server itself.
 
+        /// <summary>
+        ///     If true, run on the Triggering Client once processed by the server. If false, run on the Server itself.
+        /// </summary>
+        public virtual bool RunOnTriggeringClient => false;
+
+
+        /// <summary>
+        ///     A
+        /// </summary>
         public abstract void Process(ulong triggeringClientId, string[] parameters);
     }
+    /// <summary>
+    ///     Console Command which displays a log message on all Clients.
+    /// </summary>
     public class LogCommand : ConsoleCommand
     {
         public override bool CheckParameterCount(int count) => count > 0;
@@ -208,13 +258,16 @@ namespace Gameplay.DebugCheats
             ChatManager.Instance.SendChatMessage($"Client {triggeringClientId}", logMessage);
         }
     }
+    /// <summary>
+    ///     Client-Side Console Command which toggles the Cursor Lock State between 'Locked' and 'None'
+    /// </summary>
     public class ToggleMouseLockCommand : ConsoleCommand
     {
         public override bool CheckParameterCount(int count) => count == 0;
         public override bool TestParameter(int paramIndex, string parameterAsString) => false;
         public override string GetParameterName(int paramIndex) => "Null";
 
-        public override bool RunOnTriggeringClient => true;
+        public override bool RunOnTriggeringClient => true; // Only perform on the triggering client.
 
         public override void Process(ulong triggeringClientId, string[] parameters)
         {
@@ -224,6 +277,9 @@ namespace Gameplay.DebugCheats
             ChatManager.Instance.ReceiveChatMessage(null, newLockState == CursorLockMode.Locked ? "Mouse Cursor Locked" : "Mouse Cursor Unlocked");
         }
     }
+    /// <summary>
+    ///     Console Command which kills a player based on their name or a special identifier.
+    /// </summary>
     public class KillPlayerCommand : ConsoleCommand
     {
         public override bool CheckParameterCount(int count) => count == 1;
@@ -278,6 +334,9 @@ namespace Gameplay.DebugCheats
             }
         }
     }
+    /// <summary>
+    ///     Console Command which sets the remaining time left in a match.
+    /// </summary>
     public class SetGameTimeRemainingCommand : ConsoleCommand
     {
         public override bool CheckParameterCount(int count) => count == 1;
