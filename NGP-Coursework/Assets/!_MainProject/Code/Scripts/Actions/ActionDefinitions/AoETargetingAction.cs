@@ -31,6 +31,7 @@ namespace Gameplay.Actions.Definitions
             Vector3 actionDirection = base.GetActionDirection(ref data);
             DetermineOriginPositionAndDirection(ref actionOrigin, ref actionDirection, _raycastRange);
 
+            // Get our targets & process them.
             _targetingMethod.GetTargets(owner, actionOrigin, actionDirection, chargePercentage, callback: (ServerCharacter owner, ActionHitInformation hitInfo) => ProcessTarget(owner, hitInfo, chargePercentage));
 
             return ActionConclusion.Continue;
@@ -64,12 +65,16 @@ namespace Gameplay.Actions.Definitions
                     return; // Our AoE origin should match the action origin.
             }
         }
+        /// <summary>
+        ///     Process a hit target & apply this action's effects.
+        /// </summary>
         private void ProcessTarget(ServerCharacter owner, in ActionHitInformation hitInfo, float chargePercentage)
         {
-            Debug.Log($"{hitInfo.Target.name} was hit!");
+            // Debug information.
             Debug.DrawRay(hitInfo.HitPoint, hitInfo.HitNormal, Color.red, 1.0f);
             Debug.DrawRay(hitInfo.HitPoint, hitInfo.HitForward, Color.yellow, 1.0f);
 
+            // Perform this action's effects (Damage, Applying Statuses, etc) on the server (Changes are perpetuated to clients).
             for (int i = 0; i < ActionEffects.Length; ++i)
             {
                 ActionEffects[i].ApplyEffect(owner, hitInfo, chargePercentage);
@@ -78,7 +83,9 @@ namespace Gameplay.Actions.Definitions
 
 
 
-        // Sphere, Line, Cone.
+        /// <summary>
+        ///     Base class for an AoE Targeting Method.
+        /// </summary>
         private abstract class AoETargeting
         {
             public abstract string RangeString { get; }
@@ -124,6 +131,9 @@ namespace Gameplay.Actions.Definitions
                 return false;   // Obstructed by something other than the target.
             }
         }
+        /// <summary>
+        ///     AoE Targeting Method using a Sphere.
+        /// </summary>
         [System.Serializable]
         private class SphereAoETargeting : AoETargeting
         {
@@ -151,6 +161,9 @@ namespace Gameplay.Actions.Definitions
                 }
             }
         }
+        /// <summary>
+        ///     AoE Targeting Method using a line/capsule with the desired thickness/radius.
+        /// </summary>
         [System.Serializable]
         private class LineAoETargeting : AoETargeting
         {
@@ -172,20 +185,22 @@ namespace Gameplay.Actions.Definitions
                     if (hitPoint == Vector3.zero && hitNormal == -direction)
                     {
                         // The collider was overlapping with the spherecast when it started, so has invalid 'point' and 'normal' data.
+                        // Recalculate the invalid data.
                         hitPoint = potentialTarget.collider.ClosestPoint(origin);
                         hitNormal = (origin - hitPoint).normalized;
                     }
 
                     if (!IsValidForOwnerCheck(owner, potentialTarget.transform) || !IsValidForObstructionCheck(origin, potentialTarget.transform, hitPoint))
-                        continue;
+                        continue;   // This target is invalid. Don't process it.
 
                     callback?.Invoke(owner, new ActionHitInformation(potentialTarget.transform, hitPoint, hitNormal, potentialTarget.transform.up));
                 }
-
-                // Helper function for calculating our HitForward from a given Normal.
-                //Vector3 GetHitForward(in Vector3 hitNormal) => (Mathf.Approximately(Mathf.Abs(Vector3.Dot(hitNormal, direction)), 1.0f) ? Vector3.Cross(hitNormal, -owner.transform.right) : Vector3.Cross(hitNormal, direction)).normalized;
             }
         }
+        /// <summary>
+        ///     AoE Targeting Method using a Cone.
+        /// </summary>
+        // Note: Effectively a Sphere but discarding targets outwith specified Angle.
         [System.Serializable]
         private class ConeAoETargeting : AoETargeting
         {

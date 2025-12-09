@@ -60,6 +60,17 @@ public class HitEffectManager : NetworkSingleton<HitEffectManager>
             definition.HitVisuals[i].OnClientStart(null, hitPoint, hitNormal);
         }
     }
+    public static void PlayHitEffectsOnSelf(bool isOwner, Vector3 hitPoint, Vector3 hitNormal, float chargePercentage, ActionID actionId)
+    {
+        ActionDefinition definition = GameDataSource.Instance.GetActionDefinitionByID(actionId);
+        for (int i = 0; i < definition.HitVisuals.Length; ++i)
+        {
+            definition.HitVisuals[i].OnClientStart(null, hitPoint, hitNormal);
+        }
+
+        if (isOwner)
+            Instance.ShowHitEffectVisual(hitPoint);
+    }
     public static void PlayHitEffectsOnTriggeringClient(ulong triggeringClientId, Vector3 hitPoint, Vector3 hitNormal, float chargePercentage, ActionID actionId)
         => Instance.PlayHitEffectsOnOwnerRpc(hitPoint, hitNormal, chargePercentage, actionId, Instance.RpcTarget.Group( new ulong[] { triggeringClientId }, RpcTargetUse.Temp));
     [Rpc(SendTo.SpecifiedInParams)] // SpecifiedInParams as this object is owned by the Server, not the client who triggered the attack.

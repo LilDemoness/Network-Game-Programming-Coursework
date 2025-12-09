@@ -14,17 +14,27 @@ namespace Gameplay.Actions
     {
         #region Network Synced Data
 
-        public ActionID ActionID;       // The index of the action in the list of all actions in the game (Used to recover the reference to the instance at runtime).
+        /// <summary> The index of the action in the list of all actions in the game (Used to recover the reference to the instance at runtime).</summary>
+        public ActionID ActionID;
 
-        public ulong IActionSourceObjectID;   // NetworkObjectID of the IActionSource that triggered this source. (If unset, Position and Direction are used for determining the origin position & direction of the action instead).
-        public Vector3 Position;        // Origin position of the skill. (Unset if IActionSourceObjectID is set).
-        public Vector3 Direction;       // Direction of a skill. (Unset if IActionSourceObjectID is set).
+        /// <summary> NetworkObjectID of the IActionSource that triggered this source.
+        /// (If unset, Position and Direction are used for determining the origin position & direction of the action instead).</summary>
+        public ulong IActionSourceObjectID;
+        /// <summary> World-space Origin position of the skill. (Unset if IActionSourceObjectID is set).</summary>
+        public Vector3 Position;
+        /// <summary> World-space Direction of a skill. (Unset if IActionSourceObjectID is set).</summary>
+        public Vector3 Direction;
 
-        public ulong[] TargetIDs;       // NetworkObjectIds of the targets (E.g. A homing attack), or null if it is untargeted (E.g. A standard projectile)
-        public AttachmentSlotIndex AttachmentSlotIndex;      // If non-zero, represents the identifier of the attachment slot that this action was triggered from.
-        public bool PreventMovement;    // If true, movement is cancelled before playing this action, and isn't allowed during it's runtime.
-        public bool ShouldQueue;        // If true, the action should queue. If false, it clears all other actions and plays immediately
-        public bool ShouldClose;        // If true, the server should synthesise a ChaseAction to reach the target before playing the Action (Used for AI entities)
+        /// <summary> NetworkObjectIds of the targets (E.g. A homing attack), or null if it is untargeted (E.g. A standard projectile).</summary>
+        public ulong[] TargetIDs; 
+        /// <summary> If non-zero, represents the identifier of the attachment slot that this action was triggered from.</summary>
+        public AttachmentSlotIndex AttachmentSlotIndex;
+        /// <summary> If true, movement is cancelled before playing this action, and isn't allowed during it's runtime.</summary>
+        public bool PreventMovement;
+        /// <summary> If true, the action should queue. If false, it clears all other actions and plays immediately.</summary>
+        public bool ShouldQueue;
+        /// <summary> If true, the server should synthesise a ChaseAction to reach the target before playing the Action (Used for AI entities).</summary>
+        public bool ShouldClose;
 
         #endregion
 

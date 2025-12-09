@@ -235,9 +235,9 @@ namespace Gameplay.Actions
                     --_burstsRemaining;
 
                     if (_burstsRemaining <= 0)
-                        return ActionConclusion.Stop;
+                        return ActionConclusion.Stop;   // The burst has finished. The action has concluded.
                     else
-                        _nextUpdateTime = NetworkManager.Singleton.ServerTime.TimeAsFloat + _definition.BurstDelay;
+                        _nextUpdateTime = NetworkManager.Singleton.ServerTime.TimeAsFloat + _definition.BurstDelay; // We still have shots remaining in this burst.
 
                     break;
                 case ActionTriggerType.RepeatedBurst:
@@ -245,17 +245,18 @@ namespace Gameplay.Actions
 
                     if (_burstsRemaining > 0)
                     {
+                        // There are still shots remaining in this burst.
                         _nextUpdateTime = NetworkManager.Singleton.ServerTime.TimeAsFloat + _definition.BurstDelay;
                     }
                     else
                     {
+                        // Finished this burst, wait until the next burst.
                         _burstsRemaining = _definition.Bursts;
                         _nextUpdateTime = NetworkManager.Singleton.ServerTime.TimeAsFloat + _definition.RetriggerDelay;
                     }
                     break;
                 case ActionTriggerType.Repeated:
                     _nextUpdateTime = NetworkManager.Singleton.ServerTime.TimeAsFloat + _definition.RetriggerDelay;
-                    //_nextUpdateTime += _definition.RetriggerDelay;
                     break;
                 default:
                     return ActionConclusion.Stop;
@@ -277,7 +278,7 @@ namespace Gameplay.Actions
                 justStartedCharging = true;
                 _isCharging = true;
                 if (!_isFirstCharge)
-                    _chargeStartTime = NetworkManager.Singleton.ServerTime.TimeAsFloat;
+                    _chargeStartTime = NetworkManager.Singleton.ServerTime.TimeAsFloat; // This isn't our first charge, so note our charge start time.
                 _isFirstCharge = false;
                 return true;
             }
@@ -321,10 +322,10 @@ namespace Gameplay.Actions
 
             // Apply Heat.
             owner.ReceiveHeatChange(owner, _definition.RetriggerHeat);
-            // Update.
+            // Update the action.
             OnUpdateTriggered?.Invoke(this);
             if (_definition.OnUpdate(owner, ref Data) == false)
-                return ActionConclusion.Stop;
+                return ActionConclusion.Stop;   // The action has concluded. Stop.
 
             // We have performed our update and haven't yet stopped.
             // Check if and when we should perform our next update.
@@ -635,7 +636,7 @@ namespace Gameplay.Actions
         public virtual void AnticipateActionClient(ClientCharacter clientCharacter, ref ActionRequestData data)
         {
             AnticipatedClient = true;
-            TimeStarted = UnityEngine.Time.time;
+            TimeStarted = UnityEngine.Time.time;    // Replace with 'NetworkManager.Singleton.LocalTime.TimeAsFloat' to better match server-time when receiving the triggering Rpc?
 
             _definition.AnticipateClient(clientCharacter, ref data);
 

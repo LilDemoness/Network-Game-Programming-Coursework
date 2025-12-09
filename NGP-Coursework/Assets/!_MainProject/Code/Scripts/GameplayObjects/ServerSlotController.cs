@@ -59,7 +59,7 @@ namespace Gameplay.GameplayObjects.Character
 
             // Anticipate the weapon's effect (For audio & hit markers).
             if (_serverCharacter.CanPerformActionInstantly)
-                _serverCharacter.ClientCharacter.AnticipateAction(CreateRequestData(_activationSlots[slotIndex], slotIndex.ToSlotIndex()));
+                _serverCharacter.ClientCharacter.AnticipateActionOwnerRpc(CreateRequestData(_activationSlots[slotIndex], slotIndex.ToSlotIndex()));
 
             ActivateSlotServerRpc(slotIndex);
         }

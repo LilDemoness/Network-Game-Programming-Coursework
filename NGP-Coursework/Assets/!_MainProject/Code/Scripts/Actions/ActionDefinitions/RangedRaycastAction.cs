@@ -35,18 +35,21 @@ namespace Gameplay.Actions.Definitions
         }
 
 
+        /// <summary>
+        ///     Perform a Raycast and trigger the callback for all hit entities.
+        /// </summary>
         private void PerformRaycast(ServerCharacter owner, ref ActionRequestData data, float chargePercentage, System.Action<ServerCharacter, RaycastHit, Vector3, float> onHitCallback)
         {
+            // Cache origin information.
             Vector3 rayOrigin = GetActionOrigin(ref data);
             Vector3 rayDirection = GetActionDirection(ref data);
-            Debug.DrawRay(rayOrigin, rayDirection * MaxRange, Color.red, 0.5f);
 
             if (CanPierce)
             {
                 // Get all valid targets.
                 RaycastHit[] colliders = Physics.RaycastAll(rayOrigin, rayDirection, MaxRange, ValidLayers, QueryTriggerInteraction.Ignore);
 
-                // Order our targets in ascending order, taking only the number we wish to pierce.
+                // Order our targets by distance (Closest Target First), and then only store the number we wish to pierce.
                 IEnumerable<RaycastHit> orderedValidTargets = colliders.OrderBy(t => (t.point - rayOrigin).sqrMagnitude).Take(Pierces + 1);
 
                 // Loop through and process all valid targets.
@@ -58,6 +61,8 @@ namespace Gameplay.Actions.Definitions
             }
             else
             {
+                // The action cannot pierce, so find and process only the first hit object.
+                // We don't need to retrieve multiple targets, so just use a Raycast for efficiency.
                 if (Physics.Raycast(rayOrigin, rayDirection, out RaycastHit hitInfo, MaxRange, ValidLayers, QueryTriggerInteraction.Ignore))
                 {
                     onHitCallback?.Invoke(owner, hitInfo, rayDirection, chargePercentage);
@@ -65,47 +70,65 @@ namespace Gameplay.Actions.Definitions
             }
         }
 
+        /// <summary>
+        ///     Prepare the passed data into a form that lets us process a hit target, then process it.
+        /// </summary>
         private void PrepareAndProcessTarget(ServerCharacter owner, RaycastHit hitInfo, Vector3 rayDirection, float chargePercentage)
         {
             ActionHitInformation actionHitInfo = new ActionHitInformation(hitInfo.transform, hitInfo.point, hitInfo.normal, GetHitForward(hitInfo.normal));
             ProcessTarget(owner, actionHitInfo, chargePercentage);
 
+            // Helper Function to calculate the HitForward value from a given normal.
             Vector3 GetHitForward(Vector3 hitNormal)
             {
                 return Mathf.Approximately(Mathf.Abs(Vector3.Dot(hitNormal, rayDirection)), 1.0f)
-                    ? Vector3.Cross(hitNormal, -owner.transform.right)  // The normal & ray direction are approximately perpendicular. Calculate forward using our right to prevent miscalculation.
-                    : Vector3.Cross(hitNormal, rayDirection);
+                    ? Vector3.Cross(hitNormal, -owner.transform.right)  // The normal & ray direction are approximately perpendicular. Calculate forward using our owner's left vector to get an estimation and prevent a miscalculation.
+                    : Vector3.Cross(hitNormal, rayDirection);           // The normal & ray direction aren't perpendicular, so using their Cross product should get us the correct forward.
             }
         }
+        /// <summary>
+        ///     Process a target hit by this Action.
+        /// </summary>
         private void ProcessTarget(ServerCharacter owner, in ActionHitInformation hitInfo, float chargePercentage)
         {
-            Debug.Log($"{hitInfo.Target.name} was hit!");
-            //Debug.DrawRay(hitInfo.HitPoint, hitInfo.HitNormal, Color.yellow, 0.5f);
+            // Play the contents of HitEffects on all Non-Triggering Clients (Triggering client is handled in anticipation).
+            //  This does mean that these clients will have a slight delay in their displaying of hit information, however they will always display accurate information no matter their local values.
+            HitEffectManager.PlayHitEffectsOnNonTriggeringClients(owner.OwnerClientId, hitInfo, chargePercentage, ActionID);
 
-            for(int i = 0; i < ActionEffects.Length; ++i)
+            // Perform this action's effects (Damage, Applying Statuses, etc) on the server (Changes are perpetuated to clients).
+            for (int i = 0; i < ActionEffects.Length; ++i)
             {
                 ActionEffects[i].ApplyEffect(owner, hitInfo, chargePercentage);
             }
-            HitEffectManager.PlayHitEffectsOnNonTriggeringClients(owner.OwnerClientId, hitInfo, chargePercentage, ActionID);
         }
 
 
         public override bool OnUpdateClient(ClientCharacter clientCharacter, ref ActionRequestData data, float chargePercentage = 1.0f)
         {
-            PerformRaycast(null, ref data, chargePercentage, (character, hitInfo, rayDirection, chargePercentage) => PrepareHitEffectAndNotify(clientCharacter.OwnerClientId, hitInfo, rayDirection, chargePercentage));
+            // Because OnUpdateClient is called on all clients, regardless of whether they were the triggering one or not,
+            //  we need to check whether we are playing on the the triggering client before playing anticipation-based hit effects.
+            if (clientCharacter.OwnerClientId == NetworkManager.Singleton.LocalClientId)
+                PerformRaycast(null, ref data, chargePercentage, PrepareHitEffectAndNotify_AnticipatedUpdate);
 
             return base.OnUpdateClient(clientCharacter, ref data, chargePercentage);
         }
-        private void PrepareHitEffectAndNotify(ulong ownerClientId, RaycastHit hitInfo, Vector3 rayDirection, float chargePercentage)
+        /// <summary>
+        ///     Passes the required data to the <see cref="HitEffectManager"/> for displaying hit effects on the triggering client.<br/>
+        ///     Only to be called through OnUpdateClient() from the triggering client.
+        /// </summary>
+        private void PrepareHitEffectAndNotify_AnticipatedUpdate(ServerCharacter _, RaycastHit hitInfo, Vector3 rayDirection, float chargePercentage)
         {
-            HitEffectManager.PlayHitEffectsOnTriggeringClient(ownerClientId, hitInfo.point, hitInfo.normal, chargePercentage, ActionID);
+            HitEffectManager.PlayHitEffectsOnSelf(true, hitInfo.point, hitInfo.normal, chargePercentage, ActionID);
         }
 
+        /// <summary>
+        ///     Anticipate the initial effects of this action on the triggering client to give immediate feedback.
+        /// </summary>
         public override void AnticipateClient(ClientCharacter clientCharacter, ref ActionRequestData data)
         {
-            PerformRaycast(null, ref data, 0.0f, PrepareHitEffectAndNotify_Anticipation);
+            PerformRaycast(null, ref data, 0.0f, PrepareHitEffectAndNotify_AnticipationStart);
         }
-        private void PrepareHitEffectAndNotify_Anticipation(ServerCharacter _, RaycastHit hitInfo, Vector3 rayDirection, float chargePercentage)
+        private void PrepareHitEffectAndNotify_AnticipationStart(ServerCharacter _, RaycastHit hitInfo, Vector3 rayDirection, float chargePercentage)
         {
             HitEffectManager.PlayHitEffectsOnSelfAnticipate(hitInfo.point, hitInfo.normal, chargePercentage, ActionID);
         }

@@ -38,7 +38,7 @@ namespace Gameplay.GameplayObjects.Character
             _clientActionPlayer.PlayAction(ref data1, serverTimeStarted);
         }
 
-        public void AnticipateAction(ActionRequestData data)
+        public void AnticipateActionOwnerRpc(ActionRequestData data)
         {
             _clientActionPlayer.AnticipateAction(ref data);
         }
