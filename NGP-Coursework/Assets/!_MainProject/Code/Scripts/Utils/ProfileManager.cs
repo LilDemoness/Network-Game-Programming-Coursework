@@ -10,6 +10,9 @@ using System.Text;
 
 namespace Utils
 {
+    /// <summary>
+    ///     Manages the various Profiles of a client
+    /// </summary>
     public class ProfileManager
     {
         public const string AUTH_PROFILE_COMMAND_LINE_ARGUMENT = "-AuthProfile";
@@ -72,9 +75,10 @@ namespace Utils
 
             #if UNITY_EDITOR
 
-            // While runnin in the Editor, make a unique ID from the Application.dataPath.
+            // While running in the Editor, make a unique ID from the Application.dataPath.
             // This will work for cloning projects manually, or with Virtual projects.
-            // Since only a single instance of the Editor can be open for a specific DataPath, uniqueness is ensured.
+            // "Since only a single instance of the Editor can be open for a specific DataPath, uniqueness is ensured."
+            //      Note: This is actually incorrect, but we're not utilising the editor multi-play-mode functions yet so it's fine for now.
             var hashedBytes = new MD5CryptoServiceProvider().ComputeHash(Encoding.UTF8.GetBytes(Application.dataPath));
             Array.Resize(ref hashedBytes, 16);
 
@@ -89,6 +93,9 @@ namespace Utils
             #endif
         }
 
+        /// <summary>
+        ///     Save the available user profiles using the <see cref="ClientPrefs"/> wrapper.
+        /// </summary>
         private void LoadProfiles()
         {
             _availableProfiles = new List<string>();
@@ -101,7 +108,9 @@ namespace Utils
                 }
             }
         }
-
+        /// <summary>
+        ///     Save the available user profiles using the <see cref="ClientPrefs"/> wrapper.
+        /// </summary>
         private void SaveProfiles()
         {
             string profilesToSave = "";

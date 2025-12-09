@@ -22,12 +22,20 @@ namespace UI.PostGame
         {
             this._networkPostGameState = networkPostGameState;
             _networkPostGameState.PlayerVotes.OnListChanged += PlayerVotes_OnListChanged;
+
+            if (_networkPostGameState.PlayerVotes.Count > (int)_gameType)
+                _currentVotesText.text = _networkPostGameState.PlayerVotes[(int)_gameType].ToString();  // Initialise the text in case we received our dependency late.
         }
 
 
         private void Awake()
         {
             InitialiseUI();
+        }
+        private void OnEnable()
+        {
+            if (_networkPostGameState != null && _networkPostGameState.PlayerVotes != null && _networkPostGameState.PlayerVotes.Count > (int)_gameType)
+                _currentVotesText.text = _networkPostGameState.PlayerVotes[(int)_gameType].ToString();  // Initialise the text in case we received our dependency late.
         }
         private void OnDestroy()
         {

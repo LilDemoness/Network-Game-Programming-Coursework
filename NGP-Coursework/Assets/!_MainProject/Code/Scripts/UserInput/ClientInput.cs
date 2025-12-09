@@ -7,6 +7,9 @@ using UnityEngine.InputSystem.Users;
 
 namespace UserInput
 {
+    /// <summary>
+    ///     Script handling the creation of a <see cref="PlayerInputActions"/> action map & relaying it's button presses through events.
+    /// </summary>
     public class ClientInput : MonoBehaviour
     {
         // Prevent Multiple Instances
@@ -210,6 +213,7 @@ namespace UserInput
             if (s_inputActions == null)
                 return;
 
+            // Cache our movement input & notify listeners if it's changed since the last notification.
             MovementInput = s_inputActions.Movement.Movement.ReadValue<Vector2>();
             if (MovementInput != s_previousMovementInput)
             {

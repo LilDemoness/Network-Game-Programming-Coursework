@@ -5,6 +5,10 @@ using UnityEngine.UI;
 
 public static class ComponentExtensions
 {
+    /// <summary>
+    ///     Attempt to retrieve the first component of the desired type,
+    ///     searching this component's parent's until there are none left or it finds an instance of the desired component type.
+    /// </summary>
     public static bool TryGetComponentThroughParents<T>(this Component activeComponent, out T component)
     {
         if (activeComponent.TryGetComponent(out component))
@@ -16,7 +20,9 @@ public static class ComponentExtensions
         return activeComponent.transform.parent.TryGetComponentThroughParents<T>(out component);
     }
 
-
+    /// <summary>
+    ///     Returns true if this component is a child of (Or on the same object of) the object with the passed transform.
+    /// </summary>
     public static bool HasParent(this Component activeComponent, Transform parentToCheck)
     {
         if (activeComponent.transform == parentToCheck)
@@ -136,8 +142,14 @@ public static class ScrollRectExtensions
 
 public static class DictionaryExtensions
 {
+    /// <summary>
+    ///     Returns true if this dictionary contains a null key.
+    /// </summary>
     public static bool HasNullKey<TKey, TValue>(this Dictionary<TKey, TValue> dictionary) => dictionary.Keys.Any(t => t.Equals(null));
 
+    /// <summary>
+    ///     Removes all null keys from this dictionary, if it has any.
+    /// </summary>
     public static void RemoveNullKeys<TKey, TValue>(this Dictionary<TKey, TValue> dictionary)
     {
         if (!dictionary.HasNullKey())
@@ -155,7 +167,7 @@ public static class DictionaryExtensions
 public static class IListExtensions
 {
     /// <summary>
-	///     Shuffles the element order of the specified list.
+	///     Randomly shuffles the element order of the specified list.
 	/// </summary>
     // From: 'https://discussions.unity.com/t/clever-way-to-shuffle-a-list-t-in-one-line-of-c-code/535113/2'.
     public static void Shuffle<T>(this IList<T> listToSort)

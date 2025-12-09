@@ -7,6 +7,9 @@ using Unity.Netcode;
 
 namespace UI
 {
+    /// <summary>
+    ///     UI Element Representing the Respawn Screen for a Player.
+    /// </summary>
     public class RespawnScreenUI : MonoBehaviour
     {
         [SerializeField] private TMP_Text _killerNameText;
@@ -27,7 +30,7 @@ namespace UI
             Player.OnLocalPlayerDeath += Player_OnLocalPlayerDeath;
             Player.OnLocalPlayerRevived += Player_OnLocalPlayerRevived;
 
-            Hide();
+            Hide(); // Start Hidden.
         }
         private void OnDestroy()
         {
@@ -38,14 +41,15 @@ namespace UI
 
         private void Player_OnLocalPlayerDeath(object sender, Player.PlayerDeathEventArgs e)
         {
+            // Only set the killer name when notified of the death on the local player as the required timings are sent through the NetworkGameplayState instead, but that doesn't have killer information.
             SetKillerName(e.Inflicter);
-            //Show(e.Inflicter, Gameplay.GameState.NetworkGameplayState.GetRespawnTime());
         }
-        private void NetworkGameplayState_OnLocalPlayerRespawnStarted(float respawnDelay) => Show(Time.time + respawnDelay - (NetworkManager.Singleton.LocalTime.TimeAsFloat - NetworkManager.Singleton.ServerTime.TimeAsFloat) / 2.0f);
+        private void NetworkGameplayState_OnLocalPlayerRespawnStarted(float respawnDelay)
+            => Show(Time.time + respawnDelay - (NetworkManager.Singleton.LocalTime.TimeAsFloat - NetworkManager.Singleton.ServerTime.TimeAsFloat) / 2.0f);
 
         private void Player_OnLocalPlayerRevived(object sender, System.EventArgs e)
         {
-            Debug.Log("Player Revived");
+            // Hide the Respawn Screen UI when the local player is revived.
             Hide();
         }
 

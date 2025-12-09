@@ -1,3 +1,6 @@
+/// <summary>
+///     Holds const string identifiers for various types of units.
+/// </summary>
 public static class Units
 {
     public const string DISTANCE_UNITS = "u";

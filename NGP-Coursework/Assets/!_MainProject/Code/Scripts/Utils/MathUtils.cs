@@ -1,8 +1,20 @@
 using UnityEngine;
 
+// A variety of utility functions relating to maths.
+
 public static class MathUtils
 {
+    /// <summary>
+    ///     Returns 0 if <paramref name="value"/> exceeds <paramref name="maxValueExclusive"/>,<br/>
+    ///     <paramref name="maxValueExclusive"/> if <paramref name="value"/> is below 0,<br/>
+    ///     or <paramref name="value"/> if it is within their range.
+    /// </summary>
     public static int Loop(int value, int maxValueExclusive) => Loop(value, 0, maxValueExclusive);
+    /// <summary>
+    ///     Returns <paramref name="minValueInclusive"/> if <paramref name="value"/> exceeds <paramref name="maxValueExclusive"/>,<br/>
+    ///     <paramref name="maxValueExclusive"/> if <paramref name="value"/> is below <paramref name="minValueInclusive"/>,<br/>
+    ///     or <paramref name="value"/> if it is within their range.
+    /// </summary>
     public static int Loop(int value, int minValueInclusive, int maxValueExclusive)
     {
         if (value >= maxValueExclusive)
@@ -17,43 +29,10 @@ public static class MathUtils
 
 public static class Interception
 {
-    public static bool CalculateInterceptionDirection(Vector2 a, Vector2 b, Vector2 vA, float sB, out Vector2 result)
-    {
-        Vector3 aToB = b - a;
-        float dC = aToB.magnitude;
-        float alpha = Vector2.Angle(aToB, vA) * Mathf.Deg2Rad;
-        float sA = vA.magnitude;
-        float r = sA / sB;
-        if (SolveQuadratic(1 - r * r, 2 * r * dC * Mathf.Cos(alpha), -(dC * dC), out var root1, out var root2) == 0)
-        {
-            result = Vector2.zero;
-            return false;
-        }
-        var dA = Mathf.Max(root1, root2);
-        var t = dA / sB;
-        var c = a + vA * t;
-        result = (c - b).normalized;
-        return true;
-    }
-
-
-    public static int SolveQuadratic(float a, float b, float c, out float root1, out float root2)
-    {
-        float discriminant = (b * b) - (4 * a * c);
-        if (discriminant < 0.0f)
-        {
-            root1 = Mathf.Infinity;
-            root2 = Mathf.NegativeInfinity;
-            return 0;
-        }
-
-        float sqrtDiscriminant = Mathf.Sqrt(discriminant);
-        root1 = (-b + sqrtDiscriminant) / (2.0f / a);
-        root2 = (-b - sqrtDiscriminant) / (2.0f / a);
-        return discriminant > 0 ? 2 : 1;
-    }
-
-
+    /// <summary>
+    ///     Calculate the required direction to intercept a moving target
+    /// </summary>
+    /// <returns> True if we can intercept the target, false if we cannot.</returns>
     // From: 'https://discussions.unity.com/t/formula-to-calculate-a-position-to-fire-at/48516/5'.
     public static bool CalculateInterceptionDirection(Vector3 targetPos, Vector3 targetVelocity, Vector3 currentPos, float speed, out Vector3 interceptionDirection)
     {

@@ -4,6 +4,9 @@ using UnityEngine.InputSystem;
 
 namespace Utils
 {
+    /// <summary>
+    ///     Toggles the Network Stats Monitor View when a specified Input Action is performed.
+    /// </summary>
     public class NetStatsMonitorCustomisation : MonoBehaviour
     {
         [SerializeField] private RuntimeNetStatsMonitor _monitor;

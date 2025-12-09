@@ -1,6 +1,9 @@
 using UnityEngine;
 using Unity.Netcode;
 
+/// <summary>
+///     A NetworkBehaviour Singleton.
+/// </summary>
 public class NetworkSingleton<T> : NetworkBehaviour where T : Component
 {
     private static T s_instance;
@@ -10,6 +13,13 @@ public class NetworkSingleton<T> : NetworkBehaviour where T : Component
 
 
     protected virtual void Awake() => InitialiseSingleton();
+    public override void OnDestroy()
+    {
+        if (s_instance == this)
+            s_instance = null;
+
+        base.OnDestroy();
+    }
 
     protected virtual void InitialiseSingleton()
     {

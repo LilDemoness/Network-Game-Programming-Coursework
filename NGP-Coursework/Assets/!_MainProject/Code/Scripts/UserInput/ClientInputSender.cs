@@ -54,7 +54,7 @@ namespace UserInput
         [SerializeField] private ServerCharacter _serverCharacter;
 
 
-        [SerializeField] private ServerSlotController _serverWeaponController;
+        [SerializeField] private ServerSlotController _serverSlotController;
 
         
         public override void OnNetworkSpawn()
@@ -94,11 +94,13 @@ namespace UserInput
 
         private void ClientInput_OnMovementInputChanged()
         {
+            // Only notify the server of movement input CHANGES to reduce bandwidth usage while still being pretty reliable and responsive.
+            // Deferred to the next Update so that rapid changes in input only send the relevant one.
             _movementInput = ClientInput.MovementInput;
             _hasMoveRequest = true;
         }
-        private void ClientInput_OnActivateSlotStarted(int slotIndex) => _serverWeaponController.ActivateSlot(slotIndex);//_serverWeaponController.ActivateSlotServerRpc(slotIndex);
-        private void ClientInput_OnActivateSlotCancelled(int slotIndex) => _serverWeaponController.DeactivateSlotServerRpc(slotIndex);
+        private void ClientInput_OnActivateSlotStarted(int slotIndex) => _serverSlotController.ActivateSlot(slotIndex);//_serverWeaponController.ActivateSlotServerRpc(slotIndex);
+        private void ClientInput_OnActivateSlotCancelled(int slotIndex) => _serverSlotController.DeactivateSlotServerRpc(slotIndex);
         
 
 
@@ -106,7 +108,8 @@ namespace UserInput
         {
             // Send Non-client Only Input Requests to the Server.
             // Play All ActionRequests (In FIFO order).
-            for(int i = 0; i < _actionRequestCount; ++i)
+            // Note: Currently unused as the ServerSlotController is handling Slottable Activation and we are sending Movement requests separately.
+            /*for (int i = 0; i < _actionRequestCount; ++i)
             {
                 switch (_actionRequests[i].ActionType)
                 {
@@ -127,13 +130,14 @@ namespace UserInput
                 }
             }
 
-            _actionRequestCount = 0;
+            _actionRequestCount = 0;*/
 
 
             if (_hasMoveRequest)
             {
                 if ((Time.time - _lastSendMoveTime) > MAX_MOVEMENT_RATE_SECONDS)
                 {
+                    // Process our move request.
                     _hasMoveRequest = false;
                     _lastSendMoveTime = Time.time;
 
