@@ -1,0 +1,17 @@
+Credits
+-------
+
+Unity Boss Room Sample ('https://github.com/Unity-Technologies/com.unity.multiplayer.samples.coop/tree/main')
+- Base concepts & code for many components (Lobby, Connections, GameStates, Actions)
+
+WarFX by JMO Assets ('https://assetstore.unity.com/packages/vfx/particles/war-fx-5669')
+- Explosion & Firing Effects
+
+SerializeReferenceExtensions by MackySoft ('https://github.com/mackysoft/Unity-SerializeReferenceExtensions')
+- 'SerializeReference' attribute
+
+SyntyStore Polygon - Mech Pack ('https://syntystore.com/en-gb/products/polygon-mech-pack?_pos=1&_sid=b48dd74b3&_ss=r')
+- Large Mech Model ('SM_Veh_Mech_01') (Minor alterations for non-standard weapons such as the Railgun, Stealth Generator, and Mines)
+
+
+All other credits (Such as for specific functions) are included where they are used
