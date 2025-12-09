@@ -54,7 +54,7 @@ namespace UserInput
         [SerializeField] private ServerCharacter _serverCharacter;
 
 
-        [SerializeField] private ServerWeaponController _serverWeaponController;
+        [SerializeField] private ServerSlotController _serverWeaponController;
 
         
         public override void OnNetworkSpawn()

@@ -7,7 +7,13 @@ using Gameplay.GameplayObjects.Character.Customisation.Sections;
 
 namespace Gameplay.GameplayObjects.Character
 {
-    public class ServerWeaponController : NetworkBehaviour
+    /// <summary>
+    ///     Server-side script to handles the processing of input for the activation of Slottables such as weapons and abilities.
+    /// </summary>
+    /// <remarks>
+    ///     There is one non-server function: 'ActivateSlot'; which can trigger a call client-side for action anticipation.
+    /// </remarks>
+    public class ServerSlotController : NetworkBehaviour
     {
         [SerializeField] private ServerCharacter _serverCharacter;
         [SerializeField] private Player _playerManager;
