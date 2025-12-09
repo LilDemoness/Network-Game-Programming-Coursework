@@ -50,6 +50,12 @@ namespace Gameplay.GameplayObjects.Character.Customisation
         private void PersistentPlayerCollection_Removed(PersistentPlayer persistentPlayer) => RemovePlayerInstance(persistentPlayer.OwnerClientId);
 
 
+        /// <summary>
+        ///     Add a CustomisationDummy instance for the client with the specified clientId.
+        /// </summary>
+        /// <param name="clientIDToAdd"></param>
+        /// <param name="initialBuild"></param>
+        /// <exception cref="System.Exception"></exception>
         private void AddPlayerInstance(ulong clientIDToAdd, BuildData initialBuild)
         {
             // Get our desired spawn position.
@@ -61,7 +67,7 @@ namespace Gameplay.GameplayObjects.Character.Customisation
             }
             else
             {
-                if (!_onlyShowLocalClient)
+                if (_onlyShowLocalClient)
                     return; // We aren't wanting to add non-local clients.
 
                 // We are not adding the local client, so put them in the first available spawn position.
@@ -76,7 +82,10 @@ namespace Gameplay.GameplayObjects.Character.Customisation
                 }
 
                 if (lobbySpawnPosition == null)
-                    throw new System.Exception("More players have tried to join that there are spawn positions");
+                {
+                    Debug.LogWarning($"More players have tried to join that there are spawn positions\nNot Spawning Graphic for Client {clientIDToAdd}");
+                    return;
+                }
             }
 
             // Mark the spawn position as occupied.
@@ -89,6 +98,9 @@ namespace Gameplay.GameplayObjects.Character.Customisation
             clientGFXInstance.Setup(clientIDToAdd, initialBuild);
             _playerDummyInstances.Add(clientIDToAdd, clientGFXInstance);
         }
+        /// <summary>
+        ///     Remove a CustomisationDummy instance corresponding to the clientId to remove.
+        /// </summary>
         private void RemovePlayerInstance(ulong clientIDToRemove)
         {
             // Allow this client's lobby spawn position can be reused.
@@ -109,14 +121,13 @@ namespace Gameplay.GameplayObjects.Character.Customisation
         }
 
 
+        /// <summary>
+        ///     Try to update the CustomisationDummy corresponding to the client with the given id, if one matches.
+        /// </summary>
         public void UpdateCustomisationDummy(ulong clientId, BuildData buildData)
         {
             if (_playerDummyInstances.TryGetValue(clientId, out PlayerCustomisationDisplay playerCustomisationDisplay))
-            {
                 playerCustomisationDisplay.UpdateDummy(buildData);
-            }
-            else
-                Debug.Log("No Player Dummy");
         }
     }
 }

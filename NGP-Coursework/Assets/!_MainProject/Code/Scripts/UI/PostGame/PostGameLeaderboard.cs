@@ -39,6 +39,8 @@ namespace UI.PostGame
                     // Create a new row.
                     LeaderboardRow leaderboardRow = Instantiate<LeaderboardRow>(_leaderboardRowPrefab, _leaderboardValuesContainer);
                     _leaderboardRowInstances.Add(leaderboardRow);
+                    // Note: We don't need to worry about removing instances as the scene is unloaded & reset between matches,
+                    //  and we're not caring about the removal of players who leave during this screen.
                 }
 
                 // Populate the UI Element.

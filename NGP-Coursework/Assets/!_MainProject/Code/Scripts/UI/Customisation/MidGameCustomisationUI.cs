@@ -41,22 +41,32 @@ namespace UI.Customisation
         [ContextMenu("Show")]
         public void Show()
         {
+            // Show.
             this.gameObject.SetActive(true);
+
+            // Toggle the Cursor Lock State.
             _previousLockMode = Cursor.lockState;
             Cursor.lockState = CursorLockMode.None;
 
+            // Notify Listeners.
             OnCustomisationUIOpened?.Invoke();
 
+            // Prevent Non-Relevant Input.
             ClientInput.PreventActions(typeof(MidGameCustomisationUI), ALL_ACTIONS_BUT_UI);
         }
         [ContextMenu("Hide")]
         public void Hide()
         {
+            // Hide.
             this.gameObject.SetActive(false);
+
+            // Revert the Cursor Lock State.
             Cursor.lockState = _previousLockMode;
 
+            // Notify Listeners.
             OnCustomisationUIClosed?.Invoke();
 
+            // Allow Non-Relevant Input.
             ClientInput.RemoveActionPrevention(typeof(MidGameCustomisationUI), ALL_ACTIONS_BUT_UI);
         }
     }
