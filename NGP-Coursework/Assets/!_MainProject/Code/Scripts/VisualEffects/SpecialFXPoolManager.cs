@@ -63,7 +63,6 @@ namespace VisualEffects
         {
             if (s_specialEffectToInstancePool.TryGetValue(prefab, out ObjectPool<SpecialFXGraphic> pool))
             {
-                Debug.Log("Releasing: " + instance.name);
                 pool.Release(instance);
             }
             else

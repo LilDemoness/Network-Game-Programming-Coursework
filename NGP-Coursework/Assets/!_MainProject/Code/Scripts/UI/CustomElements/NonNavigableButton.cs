@@ -72,16 +72,12 @@ namespace UI
         {
             if (_inputAction != null)
             {
-                Debug.Log("Subscribed");
                 _inputAction.action.Enable();
                 _inputAction.action.performed += Action_performed;
             }
-            else
-                Debug.Log("Didn't Subscribe");
         }
         private void OnDisable()
         {
-            Debug.Log("Unsubscribe");
             if (_inputAction != null)
                 _inputAction.action.performed -= Action_performed;
         }

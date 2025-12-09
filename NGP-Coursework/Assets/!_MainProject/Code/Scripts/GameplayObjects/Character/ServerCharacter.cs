@@ -352,12 +352,18 @@ namespace Gameplay.GameplayObjects.Character
         {
             // Death Explosion.
             VisualEffects.SpecialFXGraphic deathExplosion = VisualEffects.SpecialFXPoolManager.GetFromPrefab(_deathExplosionEffectPrefab);
-            deathExplosion.OnShutdownComplete += t => VisualEffects.SpecialFXPoolManager.ReturnFromPrefab(_deathExplosionEffectPrefab, t);
+            deathExplosion.OnShutdownComplete += EffectShutdownComplete;
             deathExplosion.transform.SetPositionAndRotation(transform.position, transform.rotation);
             deathExplosion.Play();
 
             // Hide GFX.
             _gfxRoot.SetActive(false);
+
+            void EffectShutdownComplete(VisualEffects.SpecialFXGraphic instance)
+            {
+                instance.OnShutdownComplete -= EffectShutdownComplete;
+                VisualEffects.SpecialFXPoolManager.ReturnFromPrefab(_deathExplosionEffectPrefab, instance);
+            }
         }
 
         #endregion
