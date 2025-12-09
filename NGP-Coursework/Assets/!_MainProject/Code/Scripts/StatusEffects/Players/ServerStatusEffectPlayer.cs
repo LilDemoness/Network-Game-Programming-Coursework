@@ -152,7 +152,7 @@ namespace Gameplay.StatusEffects
         /// <summary>
         ///     Clear all StatusEffects with the passed definition.
         /// </summary>
-        public void ClearAllStatusEffectsOfType(StatusEffectDefinition typeToClear)
+        public void ClearAllEffectsOfType(StatusEffectDefinition typeToClear)
         {
             for (int i = _activeStatusEffects.Count - 1; i >= 0; --i)
             {
@@ -163,9 +163,57 @@ namespace Gameplay.StatusEffects
             }
         }
         /// <summary>
-        ///     Clear the most recently applied StatusEffect of the given type.
+        ///     Clear the most recently applied StatusEffect with the passed definition.
         /// </summary>
-        public void ClearMostRecentEffectOfType(StatusEffectType typeToCancel) => throw new System.NotImplementedException();
+        public void ClearNewestEffectOfType(StatusEffectDefinition typeToClear)
+        {
+            int newestEffectIndex = -1;
+            float newestStartTime = 0.0f;   // There will be no older effects than when the server was created.
+            for (int i = _activeStatusEffects.Count - 1; i >= 0; --i)
+            {
+                if (!_activeStatusEffects[newestEffectIndex].Definition == typeToClear)
+                    continue;   // Type doesn't match desired.
+
+                if (_activeStatusEffects[i].TimeStarted > newestStartTime)
+                {
+                    // This effect was added after our current newest one.
+                    // Mark it as the newest of this type.
+                    newestEffectIndex = i;
+                    newestStartTime = _activeStatusEffects[newestEffectIndex].TimeStarted;
+                }
+            }
+
+            // If we found an effect, remove it.
+            if (newestEffectIndex >= 0)
+                ClearStatusEffect(newestEffectIndex);
+        }
+        /// <summary>
+        ///     Clear the oldest applied StatusEffect with the passed definition.
+        /// </summary>
+        public void ClearOldestEffectOfType(StatusEffectDefinition typeToClear)
+        {
+            // StatusEffect.TimeStarted is based off of ServerTime, so by taking the current ServerTime we SHOULD have no newer effects which we would otherwise miss processing
+            float oldestEffectStartTime = NetworkManager.Singleton.ServerTime.TimeAsFloat;
+            int oldestEffectIndex = -1;
+
+            for (int i = _activeStatusEffects.Count - 1; i >= 0; --i)
+            {
+                if (!_activeStatusEffects[oldestEffectIndex].Definition == typeToClear)
+                    continue;   // Type doesn't match desired.
+
+                if (_activeStatusEffects[i].TimeStarted < oldestEffectStartTime)
+                {
+                    // This effect was added before our current oldest one.
+                    // Mark it as the oldest effect of this type.
+                    oldestEffectIndex = i;
+                    oldestEffectStartTime = _activeStatusEffects[oldestEffectIndex].TimeStarted;
+                }
+            }
+
+            // If we found an effect, remove it.
+            if (oldestEffectIndex >= 0)
+                ClearStatusEffect(oldestEffectIndex);
+        }
 
         /// <summary>
         ///     Clear the passed status effect.

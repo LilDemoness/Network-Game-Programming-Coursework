@@ -10,14 +10,19 @@ namespace Gameplay.StatusEffects
         public StatusEffectDefinition Definition => _definition;
 
 
-        // Effect Timing.
+# region Effect Timing
+
+        /// <summary> The 'NetworkManager.ServerTime' time when this StatusEffect was started. </summary>
         public float TimeStarted { get; set; }
+        /// <summary> The time (In Seconds) that this StatusEffect has been running. </summary>
         public float TimeRunning => NetworkManager.Singleton.ServerTime.TimeAsFloat - TimeStarted;
+        /// <summary> The time when this StatusEffect should elapse.</summary>
         public float EffectElapsedTime { get; set; }
 
         private float _nextTickTime;
         private bool _hasPerformedFinalTick;
 
+#endregion
 
 
         public StatusEffect(StatusEffectDefinition definition)

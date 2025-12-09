@@ -5,7 +5,7 @@ using Gameplay.StatusEffects.Definitions;
 namespace Gameplay.Actions.Effects
 {
     /// <summary>
-    ///     Applies a <see cref="StatusEffect"/> to hit characters.
+    ///     Applies a <see cref="StatusEffectDefinition"/> to hit <see cref="ServerCharacter"/> instances.
     /// </summary>
     [System.Serializable]
     public class ApplyBuffEffect : ActionEffect
@@ -39,7 +39,7 @@ namespace Gameplay.Actions.Effects
                 return; // Our StatusEffectPlayes will automatically handle the clearing of this StatusEffect on the character.
             
             // Cancel the Effect.
-            owner.StatusEffectPlayer.ClearAllStatusEffectsOfType(_statusEffectDefinition);
+            owner.StatusEffectPlayer.ClearAllEffectsOfType(_statusEffectDefinition);
         }
     }
 }

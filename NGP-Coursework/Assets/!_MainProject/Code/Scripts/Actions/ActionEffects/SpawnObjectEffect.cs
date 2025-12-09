@@ -8,7 +8,7 @@ using VisualEffects;
 namespace Gameplay.Actions.Effects
 {
     /// <summary>
-    ///     Spawns a <see cref="SpawnableObject_Server"/>.
+    ///     Spawns a <see cref="SpawnableObject_Server"/> with object pooling, max count, and lifetimes.
     /// </summary>
     [System.Serializable]
     public class SpawnObjectEffect : ActionEffect
@@ -18,7 +18,7 @@ namespace Gameplay.Actions.Effects
 
         [Space(5)]
         [SerializeField] private SpawnableObject_Server _prefab;
-        [System.NonSerialized] private static Dictionary<(ServerCharacter, SpawnableObject_Server), RecyclingPool<SpawnableObject_Server>> s_characterAndPrefabToObjectPool = new Dictionary<(ServerCharacter, SpawnableObject_Server), RecyclingPool<SpawnableObject_Server>>();
+        [System.NonSerialized] private static Dictionary<(ServerCharacter Owner, SpawnableObject_Server Prefab), RecyclingPool<SpawnableObject_Server>> s_characterAndPrefabToObjectPool = new();
         private static Transform s_defaultObjectParent;
 
         [Space(5)]
@@ -52,7 +52,8 @@ namespace Gameplay.Actions.Effects
         private SpawnableObject_Server SpawnNetworkObject()
         {
             s_defaultObjectParent ??= new GameObject("SpawnObjectEffectPool").transform;
-            SpawnableObject_Server objectInstance = GameObject.Instantiate<SpawnableObject_Server>(_prefab, s_defaultObjectParent);
+
+            SpawnableObject_Server objectInstance = GameObject.Instantiate<SpawnableObject_Server>(_prefab, s_defaultObjectParent); // Note: Initial parent setting doesn't seem to work.
             objectInstance.NetworkObject.Spawn();
             return objectInstance;
         }
@@ -70,6 +71,9 @@ namespace Gameplay.Actions.Effects
         #endregion
 
 
+        /// <summary>
+        ///     Retrieve an Object Pool tied to the passed ServerCharacter, creating one if there isn't one already.
+        /// </summary>
         private RecyclingPool<SpawnableObject_Server> GetPool(ServerCharacter owner)
         {
             if (TryGetPool(owner, out var pool))
@@ -112,7 +116,7 @@ namespace Gameplay.Actions.Effects
 
         private void ReturnToPool(ServerCharacter owner, SpawnableObject_Server instance)
         {
-            //UnsubscribeFromInstanceCallbacks(instance);
+            //UnsubscribeFromInstanceCallbacks(instance); // Unsubscription now performed in the 'ReturnObjectToPool' function.
             instance.ReturnedToPool();
             GetPool(owner).Release(instance);
         }
@@ -121,6 +125,9 @@ namespace Gameplay.Actions.Effects
             instance.OnShouldReturnToPool -= ReturnToPool;
         }
     }
+
+
+#region Object Spawn Type Definitions
 
     public abstract class ObjectSpawnType
     {
@@ -276,4 +283,6 @@ namespace Gameplay.Actions.Effects
         }
 
     }
+
+#endregion
 }

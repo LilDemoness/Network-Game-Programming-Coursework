@@ -291,7 +291,7 @@ namespace Gameplay.GameplayObjects.Character
             else if (newHeat < MaxHeat && previousHeat >= MaxHeat)
             {
                 // Just went under our Heat Cap.
-                StatusEffectPlayer.ClearAllStatusEffectsOfType(_overheatingEffectDefinition);
+                StatusEffectPlayer.ClearAllEffectsOfType(_overheatingEffectDefinition);
             }
         }
 
