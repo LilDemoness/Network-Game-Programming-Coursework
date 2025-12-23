@@ -405,6 +405,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1635035225707149868, guid: 3eea3c2593913594ca13c7248b7af90d, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1635035225707149868, guid: 3eea3c2593913594ca13c7248b7af90d, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1635035225707149868, guid: 3eea3c2593913594ca13c7248b7af90d, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1982306029572550620, guid: 3eea3c2593913594ca13c7248b7af90d, type: 3}
       propertyPath: m_AnchorMax.x
       value: 0
@@ -516,6 +528,10 @@ PrefabInstance:
     - target: {fileID: 8999879357962599902, guid: 3eea3c2593913594ca13c7248b7af90d, type: 3}
       propertyPath: m_Name
       value: LeaderboardUICanvas
+      objectReference: {fileID: 0}
+    - target: {fileID: 8999879357962599902, guid: 3eea3c2593913594ca13c7248b7af90d, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
