@@ -96,7 +96,7 @@ namespace UI
 
 
             // Setup Resolutions.
-            _resolutions = Screen.resolutions.Where(resolution => resolution.refreshRateRatio.value == 60.0f).ToArray();
+            _resolutions = Screen.resolutions.Where(resolution => resolution.refreshRateRatio.value == Screen.currentResolution.refreshRateRatio.value).ToArray();
             _resolutionDropdown.ClearOptions();
             List<string> resolutionOptions = new List<string>();
             for(int i = 0; i < _resolutions.Length; ++i)
@@ -146,7 +146,6 @@ namespace UI
             _fullscreenModeDropdown.RefreshShownValue();
 
             _vsyncToggle.isOn = ClientPrefs.GetVSyncEnabled();
-            Debug.Log($"VSync Save: {ClientPrefs.GetVSyncEnabled()} vs Loaded {_vsyncToggle.isOn}");
 
             // Force set the values so that our loaded values are applied.
             ForceSetValues();
