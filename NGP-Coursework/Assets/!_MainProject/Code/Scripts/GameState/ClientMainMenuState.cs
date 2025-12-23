@@ -11,6 +11,7 @@ using VContainer.Unity;
 using Gameplay.UI.MainMenu;
 using Gameplay.UI.MainMenu.Session;
 using Gameplay.UI.Tooltips;
+using UI;
 
 namespace Gameplay.GameState
 {
@@ -35,6 +36,7 @@ namespace Gameplay.GameState
         [SerializeField] private GameObject _signInSpinner;
         [SerializeField] private UIProfileSelector _uiProfileSelector;
         [SerializeField] private UITooltipDetector _ugsSetupTooltipDetector;
+        [SerializeField] private SettingsMenu _settingsMenu;
 
 
         [Inject]
@@ -156,6 +158,14 @@ namespace Gameplay.GameState
         public void OnChangeProfileClicked()
         {
             _uiProfileSelector.Show();
+        }
+        public void OnOpenSettingsClicked()
+        {
+            _settingsMenu.Show();
+        }
+        public void OnQuitClicked()
+        {
+            Application.Quit();
         }
     }
 }
