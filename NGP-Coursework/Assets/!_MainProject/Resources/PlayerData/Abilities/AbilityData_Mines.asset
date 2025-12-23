@@ -13,6 +13,10 @@ MonoBehaviour:
   m_Name: AbilityData_Mines
   m_EditorClassIdentifier: 
   <Name>k__BackingField: Mines
-  <Sprite>k__BackingField: {fileID: 10901, guid: 0000000000000000f000000000000000, type: 0}
-  <Description>k__BackingField: 
+  <Sprite>k__BackingField: {fileID: 21300000, guid: 4b2b998b321d111499dfa38067275fe8, type: 3}
+  <Description>k__BackingField: '<b>!Not Implemented - Purely Visual!</b>
+
+    A
+    short-range mine launcher, allowing you to leave explosive surprises for enemies
+    that follow after you.'
   <AssociatedAction>k__BackingField: {fileID: 11400000, guid: 649c4f2d3bdd98c408d1fc3533078f8b, type: 2}

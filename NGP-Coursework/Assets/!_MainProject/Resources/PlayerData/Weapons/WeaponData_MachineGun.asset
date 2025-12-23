@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: WeaponData_MachineGun
   m_EditorClassIdentifier: 
   <Name>k__BackingField: Machine Gun
-  <Sprite>k__BackingField: {fileID: 10901, guid: 0000000000000000f000000000000000, type: 0}
-  <Description>k__BackingField: 
+  <Sprite>k__BackingField: {fileID: 21300000, guid: 11f3eb7928f91734aaa2ab51f6d240d3, type: 3}
+  <Description>k__BackingField: A quick shooting Light Machine Gun. Basic but reliable.
   <AssociatedAction>k__BackingField: {fileID: 11400000, guid: 73bcf9cdef3b4c341a4888e24bc924d9, type: 2}

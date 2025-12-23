@@ -6,6 +6,7 @@ namespace Gameplay.GameplayObjects.Character.Customisation.Data
     public class FrameData : ScriptableObject
     {
         [field: SerializeField] public string Name { get; private set; }
+        [field: SerializeField] public Sprite Sprite { get; private set; }
 
 
         public enum SizeCategory { Small, Medium, Large }

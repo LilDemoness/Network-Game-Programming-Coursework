@@ -12,7 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fae5635a396dd094fbc4b68f3f279ba1, type: 3}
   m_Name: FrameData_Large
   m_EditorClassIdentifier: 
-  <Name>k__BackingField: Large Chassis
+  <Name>k__BackingField: Hades-Class
+  <Sprite>k__BackingField: {fileID: 21300000, guid: c596d1a571d27bb4199c0e8211ae6bb8, type: 3}
   <FrameSize>k__BackingField: 2
   <MaxHealth>k__BackingField: 12
   <HeatCapacity>k__BackingField: 10

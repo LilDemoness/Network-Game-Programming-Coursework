@@ -31,7 +31,7 @@ namespace UI.Customisation.FrameSelection
         public void Setup(FrameData frameData)
         {
             this._frameNameText.text = frameData.Name;
-            //this._frameSpriteImage.sprite = frameData.Sprite;
+            this._frameSpriteImage.sprite = frameData.Sprite;
 
             _sizeCategoryText.text = frameData.FrameSize.ToString();
             _healthText.text = frameData.MaxHealth.ToString();

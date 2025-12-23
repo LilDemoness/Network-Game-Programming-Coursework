@@ -13,5 +13,7 @@ MonoBehaviour:
   m_Name: WeaponData_MissileLauncher
   m_EditorClassIdentifier: 
   <Name>k__BackingField: Missile Launcher
-  <Sprite>k__BackingField: {fileID: 10901, guid: 0000000000000000f000000000000000, type: 0}
+  <Sprite>k__BackingField: {fileID: 21300000, guid: 92ed818592a60564da8c5f62542f2a88, type: 3}
+  <Description>k__BackingField: Launces a burst of rocket-propelled missiles that
+    detonate in a small explosion when they hit an enemy or obstruction.
   <AssociatedAction>k__BackingField: {fileID: 11400000, guid: f3d267d6606c18b409b63f9da8f09559, type: 2}

@@ -13,6 +13,10 @@ MonoBehaviour:
   m_Name: AbilityData_Stealth
   m_EditorClassIdentifier: 
   <Name>k__BackingField: Stealth Generator
-  <Sprite>k__BackingField: {fileID: 10901, guid: 0000000000000000f000000000000000, type: 0}
-  <Description>k__BackingField: 
+  <Sprite>k__BackingField: {fileID: 21300000, guid: 9c6c37b90d30f534ea6757171f58d0ff, type: 3}
+  <Description>k__BackingField: 'A miniaturized Stealth Generator haphazardly strapped
+    to your chassis.
+
+    It can cloak you for a short while, at the cost of generating
+    a lot of heat.'
   <AssociatedAction>k__BackingField: {fileID: 11400000, guid: e9561157cb9850545b65ef1e3eb07d97, type: 2}

@@ -13,5 +13,8 @@ MonoBehaviour:
   m_Name: WeaponData_Railgun
   m_EditorClassIdentifier: 
   <Name>k__BackingField: Railgun
-  <Sprite>k__BackingField: {fileID: 10901, guid: 0000000000000000f000000000000000, type: 0}
+  <Sprite>k__BackingField: {fileID: 21300000, guid: 4dfe7ef424518b04bbe3cc1876d235ff, type: 3}
+  <Description>k__BackingField: Launces a sheet of metal at extreme speeds for incredible
+    damage, at the cost of needing to charge up before each shot and generating heat
+    with use.
   <AssociatedAction>k__BackingField: {fileID: 11400000, guid: e39a066565a86c14e8cc32f9e4068494, type: 2}
