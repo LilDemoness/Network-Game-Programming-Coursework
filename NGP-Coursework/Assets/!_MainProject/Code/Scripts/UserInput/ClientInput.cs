@@ -620,5 +620,16 @@ namespace UserInput
         }
 
         #endregion
+
+
+        public static InputAction GetSlotActivationAction(AttachmentSlotIndex slotIndex) => slotIndex switch
+        {
+            AttachmentSlotIndex.Primary => s_inputActions.Combat.ActivateSlot0,
+            AttachmentSlotIndex.Secondary => s_inputActions.Combat.ActivateSlot1,
+            AttachmentSlotIndex.Tertiary => s_inputActions.Combat.ActivateSlot2,
+            AttachmentSlotIndex.Quaternary => s_inputActions.Combat.ActivateSlot3,
+
+            _ => throw new System.NotImplementedException(),
+        };
     }
 }
